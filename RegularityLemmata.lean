@@ -1,3 +1,5 @@
+import RegularityLemmata.Finite.Tuple
+
 /-!
 # RegularityLemmata
 
