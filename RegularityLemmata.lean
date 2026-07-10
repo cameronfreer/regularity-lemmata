@@ -1,4 +1,5 @@
 import RegularityLemmata.Finite.Tuple
+import RegularityLemmata.Finite.Injective
 
 /-!
 # RegularityLemmata
