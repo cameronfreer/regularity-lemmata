@@ -1,0 +1,11 @@
+name = "RegularityLemmata"
+version = "0.1.0"
+defaultTargets = ["RegularityLemmata"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+version = "git#v4.32.0-rc1"
+
+[[lean_lib]]
+name = "RegularityLemmata"
