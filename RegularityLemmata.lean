@@ -1,6 +1,7 @@
 import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Finite.Injective
 import RegularityLemmata.Finite.Density
+import RegularityLemmata.Finite.Edit
 
 /-!
 # RegularityLemmata
