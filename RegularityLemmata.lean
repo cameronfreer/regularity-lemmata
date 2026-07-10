@@ -5,6 +5,7 @@ import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Partition.Basic
+import RegularityLemmata.Partition.Equitable
 
 /-!
 # RegularityLemmata
