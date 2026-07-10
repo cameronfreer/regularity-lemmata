@@ -3,6 +3,7 @@ import RegularityLemmata.Finite.Injective
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Finite.PairDensity
 
 /-!
 # RegularityLemmata
