@@ -9,3 +9,8 @@ version = "git#v4.32.0-rc1"
 
 [[lean_lib]]
 name = "RegularityLemmata"
+
+[[lean_exe]]
+name = "axiom_audit"
+root = "scripts.AxiomAudit"
+supportInterpreter = true
