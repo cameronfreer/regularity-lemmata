@@ -12,6 +12,7 @@ import RegularityLemmata.Partition.AlmostRefines
 import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
+import RegularityLemmata.Graph.BadMass
 
 /-!
 # RegularityLemmata
