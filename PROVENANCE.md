@@ -1,0 +1,51 @@
+# Provenance
+
+Public intellectual dependencies of this library. All Lean source in this repository is
+original work of the copyright holder (see `LICENSE` and the per-file SPDX headers);
+the entries below record the formal developments and publications whose results,
+interfaces, or proof architectures materially inform it. No third-party source text is
+copied into this repository; mathlib and other dependencies are consumed through Lake
+as ordinary imports.
+
+## Formal developments
+
+- **mathlib** (Apache-2.0). Imported throughout. Architectural antecedents beyond
+  ordinary imports, cited in the relevant file docstrings:
+  - `Mathlib.Combinatorics.SimpleGraph.Regularity.*` (Y. Dillies, B. Mehta) — pair
+    uniformity, witness selection, atomisation bounds, and the bounded
+    energy-increment iteration (`Graph/Uniformity.lean`, `Graph/Atomise.lean`,
+    `Graph/Regularity.lean`, `Graph/Bridge.lean`);
+  - `Mathlib.Order.Partition.Finpartition` / `….Equipartition` and `equitabilise` —
+    the partition substrate (`Partition/*.lean`);
+  - `Mathlib.Combinatorics.SimpleGraph.Triangle.*`, `….DegreeSum` — triangle
+    counting/removal and edge-count conversions (`Graph/RemovalBridge.lean`).
+- **Graphons in Lean 4** (C. Freer, Apache-2.0,
+  <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
+  `Graph/FriezeKannan.lean` ports the architecture of
+  `Graphon/Regularity.lean` (`energy_increment_quantitative`: witness rectangle,
+  double split, conditional variance + Cauchy–Schwarz) from measurable partitions to
+  finite ones.
+- **Szemerédi's Regularity Lemma**, Isabelle Archive of Formal Proofs (C. Edmonds,
+  A. Koutsoukou-Argyraki, L. C. Paulson) — an independent machine-checked antecedent
+  of the energy-boost argument (`Graph/Increment.lean`).
+
+## Publications
+
+- E. Szemerédi, *Regular partitions of graphs*, Colloq. Internat. CNRS 260, 1978.
+- A. Frieze, R. Kannan, *Quick approximation to matrices and applications*,
+  Combinatorica 19 (1999).
+- T. Tao, *Szemerédi's regularity lemma revisited*, Contrib. Discrete Math. 1 (2006) —
+  the strong-regularity energy-gap iteration (`Graph/Strong.lean`).
+- Y. Zhao, *Graph Theory and Additive Combinatorics* (MIT notes / CUP 2023) — the
+  energy-increment presentation followed throughout the graph ladder.
+- A. Schrijver, *Szemerédi's regularity lemma*, CWI notes — the mass-weighted local
+  quantity behind `blockEnergy`.
+- N. Alon, A. Shapira, *Testing subgraphs in directed graphs*, JCSS 69 (2004) —
+  directed regularity.
+- Y. Dillies, B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022.
+- W. T. Gowers, *Hypergraph regularity and the multidimensional Szemerédi theorem*,
+  Ann. of Math. 166 (2007); V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa,
+  *The hypergraph regularity method and its applications*, PNAS 102 (2005); T. Tao,
+  *A variant of the hypergraph removal lemma*, JCTA 113 (2006) — the hypergraph
+  phases' mathematical background.
+- L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
