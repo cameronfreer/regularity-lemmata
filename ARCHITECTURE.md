@@ -171,12 +171,15 @@ each unordered edge — permutation closure keeps it well-defined; the construct
 mathematically finite and classically decidable, not kernel-computable (the badness
 predicate is real-valued).
 
-## Phase 8 design freeze (finite relational structures substrate)
+## Phase 8 design freeze (finite relational structures substrate) — COMPLETE
 
 A computable finite relational-structure layer over mathlib's
 `FirstOrder.Language` (`Mathlib.ModelTheory.Basic`), ending at counts, edits,
 transport, and adapters. **No relational regularity or removal theorem belongs to
-this phase**; those follow only after this API passes its falsification gates.
+this phase**; those are deferred to a later phase, to be built only after this API
+passes its falsification gates. All units below are implemented
+(`Relational/{Language,Model,Transport,Counts,Edit,PatternCounts,GraphAdapter,
+HypergraphAdapters}.lean`); the frozen decisions are recorded for reference.
 
 - **Mathlib languages, directly.** No competing first-order syntax. A typeclass
   `RegularityLemmata.FiniteRelational` (kept in the library namespace so the axiom

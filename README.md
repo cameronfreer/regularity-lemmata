@@ -18,8 +18,16 @@ The first release concerns **finite combinatorial regularity**, developed in lay
 4. **Graph regularity ladder** (subsequent releases) — directed pair regularity, bridges
    to mathlib's Szemerédi regularity lemma, finite weak (Frieze–Kannan) regularity,
    and strong regularity with counting.
-5. **Hypergraph vocabulary and local complex counting** (subsequent releases) — uniform
-   and colored hypergraphs, graded faces, polyads, and disc regularity.
+5. **Hypergraph vocabulary and local complex counting** — uniform and colored
+   hypergraphs, polyads and disc regularity, and the weak and edited triadic
+   regularization summits.
+6. **Finite relational structures** — a computable Boolean-valued layer over mathlib's
+   `FirstOrder.Language`: a finite-relational typeclass, finite models with an explicit
+   mathlib-structure bridge, transport (pullback, restriction, relabeling), separated
+   ordered and injective relation counts and densities, a per-symbol-primitive edit
+   calculus with a frozen aggregate weighting, homomorphism and induced-embedding
+   counts, and adapters for simple graphs, uniform hypergraphs, and colored
+   hypergraphs.
 
 ## Conventions
 

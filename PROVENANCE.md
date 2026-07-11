@@ -23,7 +23,17 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   - `Mathlib.Combinatorics.Hypergraph.Basic` (E. Spotte-Smith, B. Mehta) — mathlib's
     set-based hypergraph type, targeted by the `UniformHypergraph.toHypergraph` bridge;
     the finite arity-indexed representation here is deliberately separate
-    (`Hypergraph/Uniform.lean` records the rationale).
+    (`Hypergraph/Uniform.lean` records the rationale);
+  - `Mathlib.ModelTheory.Basic` (A. Anderson and the mathlib community) — first-order
+    languages, structures, homomorphisms, and embeddings, on which the finite
+    relational layer is built (`Relational/Language.lean`, `Relational/Model.lean`,
+    `Relational/PatternCounts.lean`);
+  - `Mathlib.ModelTheory.Graph` (A. Anderson) — the language of graphs and the
+    graph structure, used directly by the simple-graph adapter (no second graph
+    language is introduced; `Relational/GraphAdapter.lean`).
+    The finite `FiniteRelational` typeclass, the Boolean-valued `FiniteRelModel`
+    wrapper, and the relational counts, edits, transports, and adapters
+    (`Relational/*.lean`) are this repository's implementation over that foundation.
 - **Graphons in Lean 4** (C. Freer, Apache-2.0,
   <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
   `Graph/FriezeKannan.lean` ports the architecture of
