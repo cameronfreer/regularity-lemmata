@@ -240,6 +240,30 @@ theorem exists_regular_refinement_and_almostRefining_equipartition_of_bound_le
         positivity
     _ = ε * s.card := by field_simp
 
+/-- Choosing `t = ⌈B/ε⌉` (the coarsest admissible equipartition size) under the
+corresponding host-size assumption. -/
+theorem exists_regular_refinement_and_almostRefining_equipartition_ceil
+    [DecidableEq α] (R : α → α → Prop) [DecidableRel R] (P₀ : Finpartition s)
+    (hε : 0 < ε) (hs : s.Nonempty)
+    (hts : ⌈(regularityBound ⌈1 / ε ^ 5⌉₊ P₀.parts.card : ℝ) / ε⌉₊ ≤ s.card) :
+    ∃ Q E : Finpartition s, Q ≤ P₀ ∧ IsRegularPartition R ε Q ∧
+      Q.parts.card ≤ regularityBound ⌈1 / ε ^ 5⌉₊ P₀.parts.card ∧
+      E.IsEquipartition ∧
+      E.parts.card = ⌈(regularityBound ⌈1 / ε ^ 5⌉₊ P₀.parts.card : ℝ) / ε⌉₊ ∧
+      AlmostRefines E Q ε ∧ AlmostRefines E P₀ ε := by
+  set B := regularityBound ⌈1 / ε ^ 5⌉₊ P₀.parts.card with hB
+  have hpartsne : P₀.parts.Nonempty := P₀.parts_nonempty hs.ne_empty
+  have hB1 : 1 ≤ B := le_trans (Finset.card_pos.mpr hpartsne) (le_regularityBound _ _)
+  have hBpos : (0 : ℝ) < (B : ℝ) / ε := by
+    have : (0 : ℝ) < (B : ℝ) := by exact_mod_cast hB1
+    positivity
+  have ht : 0 < ⌈(B : ℝ) / ε⌉₊ := Nat.ceil_pos.mpr hBpos
+  refine exists_regular_refinement_and_almostRefining_equipartition_of_bound_le
+    R P₀ hε ht hts ?_
+  calc (B : ℝ) = ε * ((B : ℝ) / ε) := by field_simp
+    _ ≤ ε * ⌈(B : ℝ) / ε⌉₊ :=
+        mul_le_mul_of_nonneg_left (Nat.le_ceil _) hε.le
+
 /-! ### Tests and adversarial examples -/
 
 -- The cast equation on a concrete instance, and on an empty side (both sides 0).
@@ -320,5 +344,26 @@ example (P : Finpartition ({0, 1, 2} : Finset (Fin 3))) :
     (by norm_num) (show 3 ≤ ({0, 1, 2} : Finset (Fin 3)).card from by decide)
   refine ⟨E, h1, h2, ?_⟩
   rwa [show ({0, 1, 2} : Finset (Fin 3)).card / 3 = 1 from by decide] at h3
+
+-- A concrete invocation of the combined theorem: host {0,1,2}, ε = 2, starting from
+-- the indiscrete partition (k = 1, so B = regularityBound 1 1 = 4 ≤ ε·t = 6 at t = 3).
+example :
+    ∃ Q E : Finpartition ({0, 1, 2} : Finset (Fin 3)),
+      Q ≤ (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) ∧
+      IsRegularPartition (fun a b : Fin 3 => a < b) 2 Q ∧
+      Q.parts.card ≤ regularityBound ⌈1 / (2 : ℝ) ^ 5⌉₊
+        (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))).parts.card ∧
+      E.IsEquipartition ∧ E.parts.card = 3 ∧
+      AlmostRefines E Q 2 ∧
+      AlmostRefines E (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) 2 := by
+  refine exists_regular_refinement_and_almostRefining_equipartition_of_bound_le
+    (fun a b : Fin 3 => a < b) ⊤ two_pos (t := 3) (by norm_num) (by decide) ?_
+  have hceil : ⌈1 / (2 : ℝ) ^ 5⌉₊ = 1 := by
+    rw [Nat.ceil_eq_iff one_ne_zero]
+    norm_num
+  rw [hceil,
+    show (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))).parts.card = 1 from by decide,
+    show regularityBound 1 1 = 4 from by decide]
+  norm_num
 
 end RegularityLemmata
