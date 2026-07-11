@@ -9,6 +9,7 @@ import RegularityLemmata.Partition.Equitable
 import RegularityLemmata.Partition.BlockEnergy
 import RegularityLemmata.Partition.Energy
 import RegularityLemmata.Partition.AlmostRefines
+import RegularityLemmata.Graph.Uniformity
 
 /-!
 # RegularityLemmata
