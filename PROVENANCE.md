@@ -63,7 +63,8 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   Combin. Probab. Comput. 16 (2007) — the triadic phase builds a **precursor** using
   their index and polyad test surfaces, not a formalization of their full
   regular-partition theorem (Phase 7 design freeze in `ARCHITECTURE.md`;
-  `Hypergraph/Triad.lean`, `Hypergraph/PolyadEnergy.lean`).
+  `Hypergraph/Triad.lean`, `Hypergraph/PolyadEnergy.lean`,
+  `Hypergraph/PolyadWitness.lean`, `Hypergraph/TriadIncrement.lean`).
 - F. R. K. Chung, R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/PolyadRegularity.lean`).

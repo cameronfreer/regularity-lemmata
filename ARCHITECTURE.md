@@ -133,9 +133,10 @@ statements stay prose until their falsification gates pass.
   a single exponential). The bound is frozen only after Unit 4 derives the actual
   increment and cardinality recurrence.
 - **Two summit statements, in order.** First the weak regularization **without
-  editing**: `∃ κ` with boundedly many pair colors such that
-  `badTriadMass H κ δ ≤ δ` (bad keys are `IsBadTriad`, failures of the own-density
-  local predicate; the mass is the frozen ordered normalization). Then the **edited
+  editing** — now PROVED (`exists_goodColoring`): `∃ κ` with at most `triadBound δ`
+  pair colors such that `badTriadMass H κ δ ≤ δ` (bad keys are `IsBadTriad`,
+  failures of the own-density local predicate; the mass is the frozen ordered
+  normalization). Then the **edited
   regular approximation** as a corollary: `∃ κ G` with
   `6 · editCount H G ≤ δ · |V|³` (the frozen ordered edit inequality) and every
   realized key locally disc-regular for `G` — with `G` constructed by deleting or
@@ -152,11 +153,17 @@ permutation closure ✓, witness selection for failed local regularity ✓
 color-count recurrence ✓ (`cutRefine`, `cutBound j K = K·2^{K^{j+1}(j+1)}` proved by
 construction), witness atoms as unions of refined blocks ✓
 (`discAtom_eq_biUnion_cutRefine` over `resolvingKeys`, with cardinality corollaries);
-remaining: a local increment theorem (`δ³·|block| < local refinement variance` at a
-bad key, strict via `DiscWitness.deviates`) AND a simultaneous global increment from
-excessive bad mass (`δ⁴ < polyadEnergy refined − polyadEnergy coarse` when
-`δ < badTriadMass`; a one-key increment is insufficient: a single bad block may have
-arbitrarily small mass); (5) bounded iteration — fuel `≈ ⌈1/δ⁴⌉`, color bound by
-iterating `cutBound 2` from `1`, stopping theorem, then freeze that exact
-recurrence; (6) summits as above, with deletion defined by an existential ordering of
-each unordered edge (permutation closure keeps it well-defined and computable).
+the local increment theorem ✓ (`local_variance_gain`: strict
+`δ³·|block| <` refinement variance at a witnessed key) AND the simultaneous global
+increment ✓ (`polyadEnergy_cutRefine_gain`: `δ⁴ < polyadEnergy refined − polyadEnergy
+coarse` when `δ < badTriadMass`, via the chosen simultaneous witness family);
+(5) bounded iteration ✓ — the frozen recurrence `triadRegularityBound`
+(iterating `cutBound 2`), the existential fuel theorem
+`exists_goodColoring_of_fuel`, fuel `triadFuel δ = ⌈1/δ⁴⌉₊`; (6) the **weak summit
+is proved**: `exists_goodColoring` — every 3-uniform hypergraph admits a pair
+coloring with at most `triadBound δ = triadRegularityBound ⌈1/δ⁴⌉₊ 1` colors and
+bad mass at most `δ` (`Hypergraph/TriadIncrement.lean`). The edited summit remains,
+with deletion defined by an existential ordering of
+each unordered edge — permutation closure keeps it well-defined; the construction is
+mathematically finite and classically decidable, not kernel-computable (the badness
+predicate is real-valued).

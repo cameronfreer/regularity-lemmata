@@ -4,6 +4,9 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Hypergraph.Triad
 import RegularityLemmata.Hypergraph.PolyadWitness
+import Mathlib.Algebra.Order.Floor.Defs
+import Mathlib.Algebra.Order.Floor.Semiring
+import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # The global energy increment
@@ -13,9 +16,9 @@ a pair coloring carry more than a `δ` fraction of the triple mass, one simultan
 cut round strictly gains more than `δ⁴` of normalized energy
 (`polyadEnergy_cutRefine_gain`).
 
-The witness family is canonical (`badWitnessFamily`): an actual `DiscWitness` on
-each bad key (classical choice from `exists_discWitness`), the empty face family on
-good keys — the cut budget of `cutBound 2 K = K·2^(3K³)` safely counts all possible
+The witness family is the **chosen simultaneous witness family**
+(`badWitnessFamily`): an actual `DiscWitness` on each bad key, selected by
+`Classical.choice` from `exists_discWitness`, and the empty face family on good keys — the cut budget of `cutBound 2 K = K·2^(3K³)` safely counts all possible
 tests even though the good keys' cuts are constant. The proof composes the exact
 refinement-variance identity (`polyadEnergyNum_comp_variance`, through the merge
 identity `cutRefineProj_comp`) with the strict local gain
@@ -32,8 +35,8 @@ open UniformHypergraph
 
 variable {α : Type*} [Fintype α] [DecidableEq α] {K : ℕ}
 
-/-- The canonical simultaneous witness family: an actual witness on each bad key,
-the empty face family elsewhere. -/
+/-- The chosen simultaneous witness family: an actual witness on each bad key
+(classical choice), the empty face family elsewhere. -/
 noncomputable def badWitnessFamily (H : UniformHypergraph 3 α)
     (κ : RSet 2 α → Fin K) (δ : ℝ) :
     (Fin 3 → Fin K) → Fin 3 → Finset (RSet 2 α) := by
@@ -42,7 +45,7 @@ noncomputable def badWitnessFamily (H : UniformHypergraph 3 α)
     if h : IsBadTriad H κ δ key then (exists_discWitness h).some.faces
     else fun _ => ∅
 
-/-- On a bad key, the canonical family is an actual witness's face system. -/
+/-- On a bad key, the chosen family is an actual witness's face system. -/
 theorem badWitnessFamily_spec {H : UniformHypergraph 3 α} {κ : RSet 2 α → Fin K}
     {δ : ℝ} {key : Fin 3 → Fin K} (h : IsBadTriad H κ δ key) :
     ∃ w : DiscWitness κ (triadObs H) key δ,
@@ -115,6 +118,75 @@ theorem polyadEnergy_cutRefine_gain {H : UniformHypergraph 3 α}
     _ = polyadEnergy (cutRefine κ W) (triadObs H) - polyadEnergy κ (triadObs H) := by
         rw [polyadEnergy, polyadEnergy, sub_div]
 
+/-! ### Bounded iteration and the weak summit -/
+
+/-- The color budget of `t` rounds of simultaneous cutting starting from `K`
+colors: the exact frozen recurrence, iterating `cutBound 2`. -/
+def triadRegularityBound : ℕ → ℕ → ℕ
+  | 0, K => K
+  | t + 1, K => triadRegularityBound t (cutBound 2 K)
+
+theorem le_triadRegularityBound (t K : ℕ) : K ≤ triadRegularityBound t K := by
+  induction t generalizing K with
+  | zero => exact le_refl K
+  | succ t ih =>
+    refine le_trans ?_ (ih (cutBound 2 K))
+    calc K = K * 1 := (mul_one K).symm
+      _ ≤ K * 2 ^ (K ^ 3 * 3) := Nat.mul_le_mul_left K (Nat.one_le_two_pow)
+
+/-- **The existential fuel theorem**: once the remaining energy budget is below
+`t · δ⁴`, some coloring with at most `triadRegularityBound t K` colors has bad mass
+at most `δ`. Each failing round strictly gains `δ⁴` of energy and multiplies the
+colors by at most one `cutBound 2` step. -/
+theorem exists_goodColoring_of_fuel {H : UniformHypergraph 3 α} {δ : ℝ} (hδ : 0 < δ)
+    (t : ℕ) (K : ℕ) (κ : RSet 2 α → Fin K)
+    (hbudget : 1 - polyadEnergy κ (triadObs H) ≤ (t : ℝ) * δ ^ 4) :
+    ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
+      K' ≤ triadRegularityBound t K ∧ badTriadMass H κ' δ ≤ δ := by
+  induction t generalizing K κ with
+  | zero =>
+    refine ⟨K, κ, le_refl _, ?_⟩
+    by_contra hbad
+    rw [not_le] at hbad
+    have hgain := polyadEnergy_cutRefine_gain hδ hbad
+    have hle := polyadEnergy_le_one
+      (cutRefine κ (badWitnessFamily H κ δ)) (triadObs H)
+    have hδ4 : (0 : ℝ) < δ ^ 4 := by positivity
+    rw [Nat.cast_zero, zero_mul] at hbudget
+    linarith
+  | succ t ih =>
+    by_cases hgood : badTriadMass H κ δ ≤ δ
+    · exact ⟨K, κ, le_triadRegularityBound (t + 1) K, hgood⟩
+    · rw [not_le] at hgood
+      have hgain := polyadEnergy_cutRefine_gain hδ hgood
+      refine ih (cutBound 2 K) (cutRefine κ (badWitnessFamily H κ δ)) ?_
+      rw [Nat.cast_succ] at hbudget
+      linarith
+
+/-- The iteration fuel: `⌈1/δ⁴⌉₊` rounds suffice from any starting energy. -/
+noncomputable def triadFuel (δ : ℝ) : ℕ := ⌈1 / δ ^ 4⌉₊
+
+/-- The host-independent color bound of the weak summit: `triadFuel δ` rounds of
+`cutBound 2`, starting from the trivial `1`-coloring. -/
+noncomputable def triadBound (δ : ℝ) : ℕ := triadRegularityBound (triadFuel δ) 1
+
+/-- **The weak triadic regularization summit**: every 3-uniform hypergraph admits a
+pair coloring with at most `triadBound δ` colors whose bad keys carry at most a `δ`
+fraction of the ordered triple mass. A precursor to, not a formalization of, the
+Rödl–Schacht regular-partition theorem (see the module docstring and the design
+freeze). -/
+theorem exists_goodColoring (H : UniformHypergraph 3 α) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
+      K' ≤ triadBound δ ∧ badTriadMass H κ' δ ≤ δ := by
+  refine exists_goodColoring_of_fuel hδ (triadFuel δ) 1 (fun _ => 0) ?_
+  have hE := polyadEnergy_nonneg (fun _ : RSet 2 α => (0 : Fin 1)) (triadObs H)
+  have hδ4 : (0 : ℝ) < δ ^ 4 := by positivity
+  have hceil : 1 / δ ^ 4 ≤ (triadFuel δ : ℝ) := Nat.le_ceil _
+  calc 1 - polyadEnergy (fun _ : RSet 2 α => (0 : Fin 1)) (triadObs H)
+      ≤ 1 := by linarith
+    _ = (1 / δ ^ 4) * δ ^ 4 := by field_simp
+    _ ≤ (triadFuel δ : ℝ) * δ ^ 4 := mul_le_mul_of_nonneg_right hceil hδ4.le
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -152,6 +224,21 @@ example (δ : ℝ) (hδ : 0 < δ)
     Finset.filter_false_of_mem fun key _ => hgood key, Finset.sum_empty,
     zero_div] at h
   linarith
+
+-- The frozen recurrence, numerically: one round from a single color costs
+-- cutBound 2 1 = 2^3 = 8 colors.
+example : triadRegularityBound 1 1 = 8 := by
+  rw [triadRegularityBound, triadRegularityBound]
+  norm_num
+
+-- The color budget only grows along rounds (instance of the general bound).
+example : (5 : ℕ) ≤ triadRegularityBound 3 5 := le_triadRegularityBound 3 5
+
+-- The weak summit at concrete types, statement level.
+example (H : UniformHypergraph 3 (Fin 6)) (δ : ℝ) (hδ : 0 < δ) :
+    ∃ (K' : ℕ) (κ' : RSet 2 (Fin 6) → Fin K'),
+      K' ≤ triadBound δ ∧ badTriadMass H κ' δ ≤ δ :=
+  exists_goodColoring H hδ
 
 end Tests
 
