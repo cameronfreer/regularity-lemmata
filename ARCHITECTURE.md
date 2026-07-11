@@ -78,9 +78,10 @@ Lean `Prop` placeholders.
   explicit error scales), followed by induced graph counting and finite-family induced
   removal. This is the remaining Phase 4d sub-stage; its statements will be frozen only
   after their falsification gates.
-- **Triadic regular approximation** and **colored arity-three counting/removal**:
-  planned for later releases; statements will be frozen only after their falsification
-  gates. The triadic design choices are frozen below.
+- **Colored arity-three counting/removal**: planned for later releases; statements
+  will be frozen only after their falsification gates. (The triadic regular
+  approximation itself is no longer deferred: both the weak and the edited summits
+  are proved — see the Phase 7 section below.)
 
 ## Phase 7 design freeze (triadic regular approximation)
 

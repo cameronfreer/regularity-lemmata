@@ -123,6 +123,7 @@ theorem polyadKey_eq_of_mem_polyadBlock {κ : RSet j α → Fin K}
     (h : v ∈ polyadBlock κ P) : polyadKey κ hv = P :=
   funext ((mem_polyadBlock_iff_of_injective hv).mp h)
 
+omit [Fintype α] in
 /-- Reordering the tuple permutes its polyad key. -/
 theorem polyadKey_comp_perm (κ : RSet j α → Fin K) {v : Fin (j + 1) → α}
     (hv : Function.Injective v) (σ : Equiv.Perm (Fin (j + 1)))

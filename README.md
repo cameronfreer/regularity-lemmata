@@ -38,6 +38,13 @@ bash scripts/check.sh
 
 Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
 
+The triadic development now includes the weak and edited regularization summits:
+every 3-uniform hypergraph admits a boundedly-colored pair coloring with small bad
+mass (`exists_goodColoring`), and a deletion-only approximation within `δ·|V|³`
+ordered edits that is locally disc-regular at every polyad key
+(`exists_triadic_regular_approximation`) — precursors built on the Rödl–Schacht
+index and polyad test surfaces.
+
 ## References
 
 - E. Szemerédi, *Regular partitions of graphs*, Problèmes combinatoires et théorie des
