@@ -86,6 +86,14 @@ theorem almostRefinesAt_anti_left (hQ' : Q' ≤ Q) (h : AlmostRefinesAt Q P m) :
     AlmostRefinesAt Q' P m := fun t ht =>
   (Finset.card_le_card (uncoveredWithin_anti hQ' t)).trans (h t ht)
 
+theorem exceptionalMass_anti_left (hQ' : Q' ≤ Q) :
+    exceptionalMass Q' P ≤ exceptionalMass Q P :=
+  Finset.sum_le_sum fun t _ => Finset.card_le_card (uncoveredWithin_anti hQ' t)
+
+theorem almostRefines_anti_left (hQ' : Q' ≤ Q) (h : AlmostRefines Q P ε) :
+    AlmostRefines Q' P ε :=
+  le_trans (by exact_mod_cast exceptionalMass_anti_left hQ') h
+
 /-! ### Mass bounds and the normalized form -/
 
 theorem exceptionalMass_le_of_almostRefinesAt (h : AlmostRefinesAt Q P m) :
@@ -106,6 +114,9 @@ theorem almostRefines_of_le (hQ : Q ≤ P) (hε : 0 ≤ ε) : AlmostRefines Q P 
   refine almostRefines_of_almostRefinesAt (almostRefinesAt_of_le hQ) ?_
   simp only [Nat.cast_zero, zero_mul]
   exact mul_nonneg hε (Nat.cast_nonneg _)
+
+theorem almostRefines_refl : AlmostRefines P P 0 :=
+  almostRefines_of_le le_rfl le_rfl
 
 /-! ### The equitabilise bridge -/
 
