@@ -41,6 +41,7 @@ import RegularityLemmata.Relational.Transport
 import RegularityLemmata.Relational.Counts
 import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.PatternCounts
+import RegularityLemmata.Relational.GraphAdapter
 
 /-!
 # RegularityLemmata
