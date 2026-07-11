@@ -37,6 +37,7 @@ import RegularityLemmata.Hypergraph.TriadIncrement
 import RegularityLemmata.Hypergraph.TriadCleanup
 import RegularityLemmata.Relational.Language
 import RegularityLemmata.Relational.Model
+import RegularityLemmata.Relational.Transport
 
 /-!
 # RegularityLemmata
