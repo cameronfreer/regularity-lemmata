@@ -30,6 +30,7 @@ namespace RegularityLemmata
 
 variable {α : Type*} [Fintype α] [DecidableEq α] {ε : ℝ}
 
+omit [DecidableEq α] in
 /-- Ordered adjacent pairs over the full box are twice the edges. -/
 theorem pairCount_adj_eq_two_mul_card_edgeFinset (G : SimpleGraph α)
     [DecidableRel G.Adj] :

@@ -15,9 +15,16 @@ test sets* `A, B ⊆ s`, by at most `2ε·|s|² + Σ_C |C|²` — the diagonal t
 explicitly, per the library's convention of postponing diagonal control to the
 equitable bridge (for an equipartition with `k` parts it is `O(|s|²/k)`).
 
-Combining with the partition regularity theorem yields the finite **Frieze–Kannan lemma**
-(`frieze_kannan`): every relation admits a partition of host-independently bounded size
-whose stepped approximation is cut-close to it.
+**The diagonal term is NOT controlled by this file's existential corollary**
+(`exists_regular_partition_cut_deviation`): for `P = ⊤` it equals `|s|²` and the
+conclusion is vacuous. The genuine finite Frieze–Kannan theorem — uniform `ε·|s|²`
+cut approximation with a single-exponential part bound — is proved directly in
+`Graph/FriezeKannan.lean`; the estimate here records how ordinary partition regularity
+yields a cut bound once the diagonal mass `Σ|C|²` is separately controlled (e.g. by a
+fine equipartition, where it is `O(|s|²/k)`).
+
+`cutDiscrepancy` packages the maximum rectangle deviation as a finite supremum, with
+the quantifier form as an elimination API (`cutDiscrepancy_le_iff`).
 
 Everything here is finite: graphon (measure-theoretic) machinery is deliberately out of
 scope. The analytic analogues — cut norm, step-function approximation — are formalized
@@ -222,10 +229,10 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P)
   rw [hmass]
   linarith
 
-/-- **Finite Frieze–Kannan weak regularity.** Every relation admits a partition of
-host-independently bounded size whose stepped approximation is cut-close to it,
-uniformly over all test rectangles. -/
-theorem frieze_kannan (hε : 0 < ε) :
+/-- Cut deviation of a regular partition, **with an uncontrolled diagonal term**: this
+is NOT a Frieze–Kannan approximation (take `P = ⊤`); see `Graph/FriezeKannan.lean` for
+the genuine theorem. -/
+theorem exists_regular_partition_cut_deviation (hε : 0 < ε) :
     ∃ P : Finpartition s, P.parts.card ≤ regularityBound ⌈1 / ε ^ 5⌉₊ 1 ∧
       ∀ A ⊆ s, ∀ B ⊆ s,
         |(pairCount R A B : ℝ) - steppedCount R P A B|
@@ -234,6 +241,30 @@ theorem frieze_kannan (hε : 0 < ε) :
   refine ⟨P, le_trans hcard (regularityBound_mono _ parts_top_card_le_one), ?_⟩
   intro A hA B hB
   exact cut_deviation_le R hreg hε.le hA hB
+
+/-! ### Cut discrepancy as a finite supremum -/
+
+/-- The cut discrepancy of `R` against the `P`-stepped approximation: the maximum
+rectangle deviation over all test sets `A, B ⊆ s`. -/
+noncomputable def cutDiscrepancy (P : Finpartition s) : ℝ :=
+  (s.powerset ×ˢ s.powerset).sup'
+    (Finset.Nonempty.product ⟨∅, Finset.empty_mem_powerset s⟩
+      ⟨∅, Finset.empty_mem_powerset s⟩)
+    fun p => |(pairCount R p.1 p.2 : ℝ) - steppedCount R P p.1 p.2|
+
+/-- Elimination API: bounding the cut discrepancy is exactly the quantified rectangle
+bound. -/
+theorem cutDiscrepancy_le_iff {P : Finpartition s} {c : ℝ} :
+    cutDiscrepancy R P ≤ c ↔ ∀ A ⊆ s, ∀ B ⊆ s,
+      |(pairCount R A B : ℝ) - steppedCount R P A B| ≤ c := by
+  rw [cutDiscrepancy, Finset.sup'_le_iff]
+  constructor
+  · intro h A hA B hB
+    exact h (A, B) (Finset.mem_product.mpr
+      ⟨Finset.mem_powerset.mpr hA, Finset.mem_powerset.mpr hB⟩)
+  · rintro h ⟨A, B⟩ hp
+    rw [Finset.mem_product, Finset.mem_powerset, Finset.mem_powerset] at hp
+    exact h A hp.1 B hp.2
 
 /-! ### Tests and adversarial examples -/
 
@@ -256,5 +287,23 @@ example :
     show pairCount (fun a b : Fin 2 => a < b) {1} {1} = 0 from by decide,
     show (Finset.univ ∩ ({0} : Finset (Fin 2))).card = 1 from by decide,
     show (Finset.univ ∩ ({1} : Finset (Fin 2))).card = 1 from by decide]
+
+-- NONTRIVIAL: against ⊤ the stepped approximation has POSITIVE discrepancy — for
+-- `R a b ↔ a = 0 ∧ b = 0` on `Fin 2`, the rectangle ({0}, {0}) has count 1 but
+-- predicted mass 1/4 (whole-box density 1/4 times trace masses 1·1).
+example :
+    |(pairCount (fun a b : Fin 2 => a = 0 ∧ b = 0) {0} {0} : ℝ)
+      - steppedCount (fun a b : Fin 2 => a = 0 ∧ b = 0)
+          (⊤ : Finpartition (Finset.univ : Finset (Fin 2))) {0} {0}| = 3 / 4 := by
+  rw [steppedCount,
+    show (⊤ : Finpartition (Finset.univ : Finset (Fin 2))).parts = {Finset.univ} from by
+      decide,
+    Finset.singleton_product_singleton, Finset.sum_singleton, pairDensity_eq_count_div,
+    show pairCount (fun a b : Fin 2 => a = 0 ∧ b = 0) {0} {0} = 1 from by decide,
+    show pairCount (fun a b : Fin 2 => a = 0 ∧ b = 0) Finset.univ Finset.univ = 1 from by
+      decide,
+    show (Finset.univ : Finset (Fin 2)).card = 2 from by decide,
+    show (({0} : Finset (Fin 2)) ∩ Finset.univ).card = 1 from by decide]
+  norm_num
 
 end RegularityLemmata
