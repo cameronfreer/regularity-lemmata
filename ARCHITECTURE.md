@@ -147,8 +147,16 @@ Planned units, in order: (1) realized triads and mass identities ✓; (2) block
 density/edit calculus ✓; (3) refinement energy for pair colorings (mass-weighted,
 diagonal included, refinement-monotone, with the exact variance identity
 `polyadEnergyNum_comp_variance`) ✓; (4) one-step repair — bad-key mass and
-permutation closure ✓, then witness selection for failed local regularity,
-simultaneous witness atomisation with its color-count recurrence, witness atoms as
-unions of refined blocks, a local increment theorem AND a simultaneous global
-increment from excessive bad mass (a one-key increment is insufficient: a single bad
-block may have arbitrarily small mass); (5) bounded iteration; (6) summits as above.
+permutation closure ✓, witness selection for failed local regularity ✓
+(`DiscWitness`, `exists_discWitness`), simultaneous witness atomisation with its
+color-count recurrence ✓ (`cutRefine`, `cutBound j K = K·2^{K^{j+1}(j+1)}` proved by
+construction), witness atoms as unions of refined blocks ✓
+(`discAtom_eq_biUnion_cutRefine` over `resolvingKeys`, with cardinality corollaries);
+remaining: a local increment theorem (`δ³·|block| < local refinement variance` at a
+bad key, strict via `DiscWitness.deviates`) AND a simultaneous global increment from
+excessive bad mass (`δ⁴ < polyadEnergy refined − polyadEnergy coarse` when
+`δ < badTriadMass`; a one-key increment is insufficient: a single bad block may have
+arbitrarily small mass); (5) bounded iteration — fuel `≈ ⌈1/δ⁴⌉`, color bound by
+iterating `cutBound 2` from `1`, stopping theorem, then freeze that exact
+recurrence; (6) summits as above, with deletion defined by an existential ordering of
+each unordered edge (permutation closure keeps it well-defined and computable).

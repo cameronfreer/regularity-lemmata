@@ -138,17 +138,38 @@ theorem polyadBlock_cutRefine_subset (κ : RSet j α → Fin K)
   have hproj := congrFun (cutRefineProj_comp κ W) (lowerFaceRSet hinj i)
   rw [← hproj, hface i]
 
+-- The `κ`/`W` parameters tie the definition to its atom (`discAtom κ key (W key)`)
+-- even though the resolving condition reads only `key` off the refined colors.
+set_option linter.unusedVariables false in
+/-- The refined keys that resolve the witness atom at `key`: keys projecting to
+`key` whose cut bits at `(key, ·)` are all set. -/
+def resolvingKeys (κ : RSet j α → Fin K)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
+    (key : Fin (j + 1) → Fin K) : Finset (Fin (j + 1) → Fin (cutBound j K)) :=
+  Finset.univ.filter fun Q =>
+    (∀ i, cutRefineProj (Q i) = key i) ∧ ∀ i, cutRefineBit (Q i) key i = 1
+
+omit [Fintype α] [DecidableEq α] in
+/-- Resolving keys lie in the projection fiber of `key`. -/
+theorem resolvingKeys_subset_fiber (κ : RSet j α → Fin K)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
+    (key : Fin (j + 1) → Fin K) :
+    resolvingKeys κ W key
+      ⊆ Finset.univ.filter fun Q : Fin (j + 1) → Fin (cutBound j K) =>
+          (fun i => cutRefineProj (Q i)) = key := by
+  intro Q hQ
+  rw [resolvingKeys, Finset.mem_filter] at hQ
+  rw [Finset.mem_filter]
+  exact ⟨Finset.mem_univ _, funext hQ.2.1⟩
+
 /-- **Witness atoms are unions of refined blocks**: the disc atom of `W key` at
-`key` is exactly the union of the refined blocks whose keys project to `key` and
-whose cut bits at `(key, ·)` are all set. -/
+`key` is exactly the union of the refined blocks over its resolving keys. -/
 theorem discAtom_eq_biUnion_cutRefine (κ : RSet j α → Fin K)
     (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
     (key : Fin (j + 1) → Fin K) :
     discAtom κ key (W key)
-      = (Finset.univ.filter fun Q : Fin (j + 1) → Fin (cutBound j K) =>
-          (∀ i, cutRefineProj (Q i) = key i)
-            ∧ ∀ i, cutRefineBit (Q i) key i = 1).biUnion
-          (polyadBlock (cutRefine κ W)) := by
+      = (resolvingKeys κ W key).biUnion (polyadBlock (cutRefine κ W)) := by
+  rw [resolvingKeys]
   ext v
   rw [Finset.mem_biUnion]
   constructor
@@ -183,6 +204,27 @@ theorem discAtom_eq_biUnion_cutRefine (κ : RSet j α → Fin K)
       rw [if_neg hmem] at hb
       exact absurd hb (by decide)
 
+/-- Cardinality of a witness atom: the sum over its resolving keys (the refined
+blocks are pairwise disjoint). -/
+theorem card_discAtom_eq_sum_cutRefine (κ : RSet j α → Fin K)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
+    (key : Fin (j + 1) → Fin K) :
+    (discAtom κ key (W key)).card
+      = ∑ Q ∈ resolvingKeys κ W key, (polyadBlock (cutRefine κ W) Q).card := by
+  rw [discAtom_eq_biUnion_cutRefine κ W key]
+  exact Finset.card_biUnion fun Q _ Q' _ h => polyadBlock_disjoint h
+
+/-- Filtered cardinality of a witness atom: the sum over its resolving keys. -/
+theorem card_filter_discAtom_eq_sum_cutRefine (κ : RSet j α → Fin K)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
+    (key : Fin (j + 1) → Fin K) (obs : (Fin (j + 1) → α) → Prop) [DecidablePred obs] :
+    ((discAtom κ key (W key)).filter obs).card
+      = ∑ Q ∈ resolvingKeys κ W key,
+          ((polyadBlock (cutRefine κ W) Q).filter obs).card := by
+  rw [discAtom_eq_biUnion_cutRefine κ W key, Finset.filter_biUnion]
+  exact Finset.card_biUnion fun Q _ Q' _ h =>
+    (polyadBlock_disjoint h).mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -204,6 +246,24 @@ example :
 -- The recurrence, by construction, at triadic parameters: K = 2 pair colors refine
 -- into at most 2 · 2^24 colors in one simultaneous round.
 example : cutBound 2 2 = 2 * 2 ^ 24 := by norm_num
+
+-- The structural theorem, numerically, on the smallest host: at j = 0, K = 1 the
+-- atom of the all-in family is the whole (one-tuple) block, and its cardinality is
+-- recovered as the sum over resolving keys.
+example :
+    (discAtom (fun _ : RSet 0 (Fin 1) => (0 : Fin 1)) (fun _ => 0)
+        ((fun _ _ => {⟨∅, rfl⟩}) (fun _ : Fin 1 => (0 : Fin 1)))).card
+      = ∑ Q ∈ resolvingKeys (fun _ : RSet 0 (Fin 1) => (0 : Fin 1))
+          (fun _ _ => {⟨∅, rfl⟩}) (fun _ => 0),
+          (polyadBlock (cutRefine (fun _ : RSet 0 (Fin 1) => (0 : Fin 1))
+            (fun _ _ => {⟨∅, rfl⟩})) Q).card := by decide
+
+-- Statement-level instance of the union theorem at triadic types.
+example (κ : RSet 2 (Fin 4) → Fin 2)
+    (W : (Fin 3 → Fin 2) → Fin 3 → Finset (RSet 2 (Fin 4))) (key : Fin 3 → Fin 2) :
+    discAtom κ key (W key)
+      = (resolvingKeys κ W key).biUnion (polyadBlock (cutRefine κ W)) :=
+  discAtom_eq_biUnion_cutRefine κ W key
 
 -- Statement-level: energy never decreases under a simultaneous cut refinement.
 example (κ : RSet 2 (Fin 4) → Fin 2)
