@@ -53,6 +53,13 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   *The hypergraph regularity method and its applications*, PNAS 102 (2005); T. Tao,
   *A variant of the hypergraph removal lemma*, JCTA 113 (2006) — the hypergraph
   phases' mathematical background.
+- V. Rödl, J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random Structures
+  Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma for regular
+  k-uniform hypergraphs*, Random Structures Algorithms 28 (2006) — the `(δ, d, r)`
+  union-of-polyads regularity form (`Hypergraph/Polyad.lean`).
+- F. R. K. Chung, R. L. Graham, *Quasi-random hypergraphs*, Random Structures
+  Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
+  disc regularity (`Hypergraph/Polyad.lean`).
 - M. Malliaris, S. Shelah, *Regularity lemmas for stable graphs*, Trans. AMS 366
   (2014) — type-space partitions; the finite fiber-type skeleton
   (`Partition/Fiber.lean`).

@@ -28,6 +28,7 @@ import RegularityLemmata.Graph.Strong
 import RegularityLemmata.Hypergraph.Uniform
 import RegularityLemmata.Hypergraph.Colored
 import RegularityLemmata.Hypergraph.Copies
+import RegularityLemmata.Hypergraph.Polyad
 
 /-!
 # RegularityLemmata

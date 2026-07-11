@@ -49,6 +49,12 @@ Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
 - V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa, *The hypergraph regularity
   method and its applications*, Proc. Natl. Acad. Sci. USA 102 (2005).
 - T. Tao, *A variant of the hypergraph removal lemma*, J. Combin. Theory Ser. A 113 (2006).
+- V. Rödl and J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random
+  Structures Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma
+  for regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006)
+  (the `(δ, d, r)` polyad regularity form).
+- F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
+  Algorithms 1 (1990) (discrepancy quasirandomness).
 - M. Malliaris and S. Shelah, *Regularity lemmas for stable graphs*, Trans. Amer.
   Math. Soc. 366 (2014) (type-space partitions behind the fiber-partition layer).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
