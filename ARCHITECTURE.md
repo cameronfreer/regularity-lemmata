@@ -84,11 +84,16 @@ Lean `Prop` placeholders.
 
 ## Phase 7 design freeze (triadic regular approximation)
 
-Public target: V. Rödl, M. Schacht, *Regular partitions of hypergraphs: Regularity
-lemmas*, Combin. Probab. Comput. 16 (2007), specialized to 3-uniform hypergraphs; test
-surfaces are Phase 6's parent-relative `IsDiscRegular`/`IsPolyadRegular`. The
-following choices are frozen in prose first; the summit statement itself stays prose
-until its falsification gate passes.
+Target: a **weak pair-coloring regularization theorem** using the Rödl–Schacht index
+and polyad test surfaces — a *precursor to, not a formalization of*, the full
+regular-partition theorem of V. Rödl, M. Schacht, *Regular partitions of
+hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16 (2007) (their result
+concerns families of compatible hypergraph partitions with equitable vertex
+partitions, which are deliberately deferred here). Test surfaces are the local
+parent-relative predicates `IsDiscRegularAt`/`IsPolyadRegularAt`
+(`Hypergraph/PolyadRegularity.lean`), with the canonical own-density form
+`IsLocalDiscRegular`. The following choices are frozen in prose first; the summit
+statements stay prose until their falsification gates pass.
 
 - **Unordered triads, ordered counting.** The objects are unordered
   `UniformHypergraph 3 V`; every counting and testing surface is ordered injective
@@ -120,12 +125,30 @@ until its falsification gate passes.
 - **Quantifier order (error schedule and bounds).** `∀ δ > 0, ∃ K₀ = bound(δ)`
   host-independent; `∀ H` on a finite `V`, `∃ K ≤ K₀` and a pair coloring `κ` with
   `K` cells satisfying the goodness conclusion. Iteration schedules follow the graph
-  ladder's `ErrorSchedule` pattern (`Graph/Strong.lean`); the first-release bound has
-  Frieze–Kannan shape (`4^{O(1/δ²)}`-type, from an energy increment at the pair
-  level), not the full Rödl–Schacht tower.
+  ladder's `ErrorSchedule` pattern (`Graph/Strong.lean`). **No quantitative bound is
+  frozen yet**: a failing local disc test yields roughly a `δ³` energy gain on its
+  block and hence roughly `δ⁴` globally when bad keys carry mass `> δ`, but
+  simultaneously resolving witnesses across up to `K³` keys can multiply the pair
+  colors by roughly `2^{O(K³)}` per round (a recurrence like `K ↦ K · 2^{3K³}`, not
+  a single exponential). The bound is frozen only after Unit 4 derives the actual
+  increment and cardinality recurrence.
+- **Two summit statements, in order.** First the weak regularization **without
+  editing**: `∃ κ` with boundedly many pair colors such that
+  `badTriadMass H κ δ ≤ δ` (bad keys are `IsBadTriad`, failures of the own-density
+  local predicate; the mass is the frozen ordered normalization). Then the **edited
+  regular approximation** as a corollary: `∃ κ G` with
+  `6 · editCount H G ≤ δ · |V|³` (the frozen ordered edit inequality) and every
+  realized key locally disc-regular for `G` — with `G` constructed by deleting or
+  otherwise homogenizing the exceptional blocks, which requires the permutation
+  closure of bad keys (`isBadTriad_comp_perm_iff`) so that all six ordered
+  presentations of an unordered triple receive the same edit decision.
 
-Planned units, in order: (1) realized triads and mass identities; (2) block
-density/edit calculus; (3) refinement energy for pair colorings (mass-weighted,
-diagonal included, refinement-monotone); (4) one-step repair (energy increment from a
-failing block); (5) bounded iteration; (6) summit — weak triadic regular
-approximation.
+Planned units, in order: (1) realized triads and mass identities ✓; (2) block
+density/edit calculus ✓; (3) refinement energy for pair colorings (mass-weighted,
+diagonal included, refinement-monotone, with the exact variance identity
+`polyadEnergyNum_comp_variance`) ✓; (4) one-step repair — bad-key mass and
+permutation closure ✓, then witness selection for failed local regularity,
+simultaneous witness atomisation with its color-count recurrence, witness atoms as
+unions of refined blocks, a local increment theorem AND a simultaneous global
+increment from excessive bad mass (a one-key increment is insufficient: a single bad
+block may have arbitrarily small mass); (5) bounded iteration; (6) summits as above.

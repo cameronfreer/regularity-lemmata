@@ -29,6 +29,7 @@ import RegularityLemmata.Hypergraph.Uniform
 import RegularityLemmata.Hypergraph.Colored
 import RegularityLemmata.Hypergraph.Copies
 import RegularityLemmata.Hypergraph.Polyad
+import RegularityLemmata.Hypergraph.PolyadRegularity
 import RegularityLemmata.Hypergraph.Triad
 import RegularityLemmata.Hypergraph.PolyadEnergy
 

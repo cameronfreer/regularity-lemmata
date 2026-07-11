@@ -114,6 +114,15 @@ theorem abs_densityOn_sub_densityOn_le :
   rw [← hcongr]
   exact key q p
 
+/-- Count extraction: `d · |S| = #filter`, valid for all `S` (both sides `0` on
+`∅`). -/
+theorem densityOn_mul_card (S : Finset β) (p : β → Prop) [DecidablePred p] :
+    densityOn S p * (S.card : ℝ) = ((S.filter p).card : ℝ) := by
+  rcases S.eq_empty_or_nonempty with rfl | hS
+  · simp
+  · rw [densityOn, div_mul_cancel₀]
+    exact_mod_cast (S.card_pos.mpr hS).ne'
+
 /-- Energy-form conversion: `d² · |S| = (#filter)² / |S|`, valid for all `S` (both
 sides `0` on `∅`). -/
 theorem sq_densityOn_mul_card (S : Finset β) (p : β → Prop) [DecidablePred p] :

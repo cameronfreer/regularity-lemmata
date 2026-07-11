@@ -17,32 +17,13 @@ lies in the cell prescribed by `P`; blocks partition the injective tuples
 (`sum_card_polyadBlock`). A **disc atom** further restricts every lower face to a
 prescribed set of `j`-sets.
 
-Two regularity predicates are stated over these test surfaces, with densities the
-guard-free `densityOn` and observables `Prop`-valued per house convention:
-
-* `IsPolyadRegular` — the `(δ, d, r)` condition of V. Rödl, J. Skokan, *Regularity
-  lemma for k-uniform hypergraphs*, Random Structures Algorithms 25 (2004), and
-  B. Nagle, V. Rödl, M. Schacht, *The counting lemma for regular k-uniform
-  hypergraphs*, Random Structures Algorithms 28 (2006): all tests stay inside ONE
-  polyad block, quantify over at most `r` face-set families, and use a
-  parent-relative threshold — the union of the corresponding disc atoms must hold at
-  least a `δ` fraction of the parent block.
-* `IsDiscRegular` — the single-family (`r = 1`) surface, exactly
-  (`isPolyadRegular_one_iff`); a discrepancy condition in the tradition of
-  quasirandomness via discrepancy (F. R. K. Chung, R. L. Graham, *Quasi-random
-  hypergraphs*, Random Structures Algorithms 1 (1990)) and the relative/sub-cylinder
-  test surfaces of W. T. Gowers, *Hypergraph regularity and the multidimensional
-  Szemerédi theorem*, Ann. of Math. 166 (2007), and T. Tao, *A variant of the
-  hypergraph removal lemma*, JCTA 113 (2006).
-* `IsBlockUnionRegular` — a **repository-specific coarse test**, NOT the published
-  `(δ, d, r)` condition: it unions whole blocks across different keys and its
-  threshold `thr` bounds the TOTAL size of the union absolutely (not per selected
-  block, and not relative to a parent).
-
-Degeneracies are stated, not hidden: an unrealized key gives an empty parent block,
-where the parent-relative threshold `δ·0 ≤ 0` is vacuous and disc regularity forces
-`|d| ≤ δ`; likewise `thr = 0` admits the empty union in the block-union test. Both
-are exercised adversarially in the test section.
+The regularity predicates over these test surfaces (the local per-parent
+`IsDiscRegularAt`/`IsPolyadRegularAt`, their common-density globalizations, and the
+repository-specific coarse `IsBlockUnionRegular`) live in
+`Hypergraph/PolyadRegularity.lean`; this file provides the set-level combinatorics
+they consume, including the permutation transport of blocks and atoms
+(`comp_perm_mem_polyadBlock`, `comp_perm_mem_discAtom`, and the cardinality/density
+invariances).
 -/
 
 namespace RegularityLemmata
@@ -238,123 +219,115 @@ theorem discAtom_mono {κ : RSet j α → Fin K} {key : Fin (j + 1) → Fin K}
   rw [mem_discAtom] at hv ⊢
   exact ⟨hv.1, fun i hi => h i (hv.2 i hi)⟩
 
-/-! ### Polyad regularity: the `(δ, d, r)` form -/
+/-- Restricting every face to the empty family empties the atom. -/
+theorem discAtom_empty_family (κ : RSet j α → Fin K) (key : Fin (j + 1) → Fin K) :
+    discAtom κ key (fun _ => (∅ : Finset (RSet j α))) = ∅ := by
+  ext v
+  simp only [Finset.notMem_empty, iff_false]
+  intro hv
+  rw [mem_discAtom] at hv
+  have hinj := injective_of_mem_polyadBlock hv.1
+  exact absurd (hv.2 0 (card_lowerFaceSet hinj 0)) (Finset.notMem_empty _)
 
-/-- **`(δ, d, r)` polyad regularity** (Rödl–Skokan; Nagle–Rödl–Schacht): for every
-polyad key and every system of at most `r` face-set families within that key, if the
-union of the corresponding disc atoms holds at least a `δ` fraction of the parent
-block, then the `obs`-density on that union is within `δ` of `d`. All tests stay
-inside one polyad and the threshold is parent-relative. For an unrealized key the
-parent block is empty and the threshold is vacuous, so the predicate forces
-`|d| ≤ δ` there (adversarial test below). -/
-def IsPolyadRegular (κ : RSet j α → Fin K) (obs : (Fin (j + 1) → α) → Prop)
-    [DecidablePred obs] (d δ : ℝ) (r : ℕ) : Prop :=
-  ∀ (key : Fin (j + 1) → Fin K) (F : Fin r → Fin (j + 1) → Finset (RSet j α)),
-    δ * ((polyadBlock κ key).card : ℝ)
-        ≤ (((Finset.univ : Finset (Fin r)).biUnion
-              fun t => discAtom κ key (F t)).card : ℝ) →
-    |densityOn ((Finset.univ : Finset (Fin r)).biUnion
-        fun t => discAtom κ key (F t)) obs - d| ≤ δ
+/-! ### Permutation transport of atoms -/
 
-/-- **Disc regularity**: the single-family surface — within every polyad block, on
-every face-set family whose disc atom holds at least a `δ` fraction of the parent,
-the `obs`-density is within `δ` of `d`. Exactly the `r = 1` polyad regularity
-(`isPolyadRegular_one_iff`). -/
-def IsDiscRegular (κ : RSet j α → Fin K) (obs : (Fin (j + 1) → α) → Prop)
-    [DecidablePred obs] (d δ : ℝ) : Prop :=
-  ∀ (key : Fin (j + 1) → Fin K) (P : Fin (j + 1) → Finset (RSet j α)),
-    δ * ((polyadBlock κ key).card : ℝ) ≤ ((discAtom κ key P).card : ℝ) →
-    |densityOn (discAtom κ key P) obs - d| ≤ δ
-
-/-- **The exact `r = 1` bridge.** -/
-theorem isPolyadRegular_one_iff {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ : ℝ} :
-    IsPolyadRegular κ obs d δ 1 ↔ IsDiscRegular κ obs d δ := by
+/-- Permutation transport: reordering the tuple permutes the key and the face
+families together. -/
+theorem comp_perm_mem_discAtom {κ : RSet j α → Fin K} {key : Fin (j + 1) → Fin K}
+    {P : Fin (j + 1) → Finset (RSet j α)} {v : Fin (j + 1) → α}
+    (σ : Equiv.Perm (Fin (j + 1))) :
+    v ∘ ⇑σ ∈ discAtom κ key P
+      ↔ v ∈ discAtom κ (key ∘ ⇑σ⁻¹) (fun i => P (σ⁻¹ i)) := by
   constructor
-  · intro h key P
-    have h1 := h key fun _ => P
-    rwa [Finset.univ_unique, Finset.singleton_biUnion] at h1
-  · intro h key F
-    have h1 := h key (F default)
-    rwa [Finset.univ_unique, Finset.singleton_biUnion]
+  · intro h
+    have hblock := (mem_discAtom.mp h).1
+    have hvσ := injective_of_mem_polyadBlock hblock
+    rw [mem_discAtom]
+    refine ⟨(comp_perm_mem_polyadBlock σ).mp hblock, ?_⟩
+    intro i hcard
+    have hface := (mem_discAtom.mp h).2 (σ⁻¹ i) (card_lowerFaceSet hvσ (σ⁻¹ i))
+    have hset : lowerFaceSet (v ∘ ⇑σ) (σ⁻¹ i) = lowerFaceSet v i := by
+      rw [lowerFaceSet_comp_perm]
+      exact congrArg (lowerFaceSet v) (σ.apply_symm_apply i)
+    have hsub : (⟨lowerFaceSet (v ∘ ⇑σ) (σ⁻¹ i),
+        card_lowerFaceSet hvσ (σ⁻¹ i)⟩ : RSet j α) = ⟨lowerFaceSet v i, hcard⟩ :=
+      Subtype.ext hset
+    exact hsub ▸ hface
+  · intro h
+    have hblock := (mem_discAtom.mp h).1
+    have hv := injective_of_mem_polyadBlock hblock
+    rw [mem_discAtom]
+    refine ⟨(comp_perm_mem_polyadBlock σ).mpr hblock, ?_⟩
+    intro i hcard
+    have hface := (mem_discAtom.mp h).2 (σ i) (card_lowerFaceSet hv (σ i))
+    have hset : lowerFaceSet (v ∘ ⇑σ) i = lowerFaceSet v (σ i) :=
+      lowerFaceSet_comp_perm v σ i
+    have hsub : (⟨lowerFaceSet v (σ i), card_lowerFaceSet hv (σ i)⟩ : RSet j α)
+        = ⟨lowerFaceSet (v ∘ ⇑σ) i, hcard⟩ := Subtype.ext hset.symm
+    have hP : P (σ⁻¹ (σ i)) = P i := congrArg P (σ.symm_apply_apply i)
+    rw [hsub, hP] at hface
+    exact hface
 
-/-- Weakening the tolerance preserves polyad regularity: the premise threshold rises
-and the conclusion loosens together. -/
-theorem IsPolyadRegular.mono_delta {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ δ' : ℝ} {r : ℕ}
-    (h : IsPolyadRegular κ obs d δ r) (hδ : δ ≤ δ') :
-    IsPolyadRegular κ obs d δ' r := by
-  intro key F hcard
-  refine le_trans (h key F ?_) hδ
-  exact le_trans (mul_le_mul_of_nonneg_right hδ (Nat.cast_nonneg _)) hcard
+/-- Composing with `σ` on the right is a bijection between the transported atom and
+the original one; cardinalities agree. -/
+theorem card_discAtom_comp_perm (κ : RSet j α → Fin K) (key : Fin (j + 1) → Fin K)
+    (P : Fin (j + 1) → Finset (RSet j α)) (σ : Equiv.Perm (Fin (j + 1))) :
+    (discAtom κ (key ∘ ⇑σ⁻¹) (fun i => P (σ⁻¹ i))).card = (discAtom κ key P).card := by
+  refine Finset.card_bij' (fun v _ => v ∘ ⇑σ) (fun w _ => w ∘ ⇑σ⁻¹)
+    (fun v hv => (comp_perm_mem_discAtom σ).mpr hv) (fun w hw => ?_)
+    (fun v _ => funext fun x => congrArg v (σ.apply_symm_apply x))
+    (fun w _ => funext fun x => congrArg w (σ.symm_apply_apply x))
+  refine (comp_perm_mem_discAtom σ).mp ?_
+  have hcomp : (w ∘ ⇑σ⁻¹) ∘ ⇑σ = w := funext fun x => congrArg w (σ.symm_apply_apply x)
+  rwa [hcomp]
 
-/-- Weakening the tolerance preserves disc regularity. -/
-theorem IsDiscRegular.mono_delta {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ δ' : ℝ}
-    (h : IsDiscRegular κ obs d δ) (hδ : δ ≤ δ') : IsDiscRegular κ obs d δ' := by
-  intro key P hcard
-  refine le_trans (h key P ?_) hδ
-  exact le_trans (mul_le_mul_of_nonneg_right hδ (Nat.cast_nonneg _)) hcard
+/-- Filtered-cardinality version, for observables invariant under `σ`. -/
+theorem card_filter_discAtom_comp_perm (κ : RSet j α → Fin K)
+    (key : Fin (j + 1) → Fin K) (P : Fin (j + 1) → Finset (RSet j α))
+    (obs : (Fin (j + 1) → α) → Prop) [DecidablePred obs]
+    (σ : Equiv.Perm (Fin (j + 1))) (hobs : ∀ w : Fin (j + 1) → α, obs (w ∘ ⇑σ) ↔ obs w) :
+    ((discAtom κ (key ∘ ⇑σ⁻¹) (fun i => P (σ⁻¹ i))).filter obs).card
+      = ((discAtom κ key P).filter obs).card := by
+  refine Finset.card_bij' (fun v _ => v ∘ ⇑σ) (fun w _ => w ∘ ⇑σ⁻¹) (fun v hv => ?_)
+    (fun w hw => ?_)
+    (fun v _ => funext fun x => congrArg v (σ.apply_symm_apply x))
+    (fun w _ => funext fun x => congrArg w (σ.symm_apply_apply x))
+  · rw [Finset.mem_filter] at hv ⊢
+    exact ⟨(comp_perm_mem_discAtom σ).mpr hv.1, (hobs v).mpr hv.2⟩
+  · rw [Finset.mem_filter] at hw ⊢
+    have hcomp : (w ∘ ⇑σ⁻¹) ∘ ⇑σ = w := funext fun x => congrArg w (σ.symm_apply_apply x)
+    constructor
+    · refine (comp_perm_mem_discAtom σ).mp ?_
+      rw [hcomp]
+      exact hw.1
+    · have := hobs (w ∘ ⇑σ⁻¹)
+      rw [hcomp] at this
+      exact this.mp hw.2
 
-/-- Disc regularity controls every whole block (unrestricted faces pass the
-parent-relative threshold once `δ ≤ 1`). -/
-theorem IsDiscRegular.polyadBlock_density {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ : ℝ}
-    (h : IsDiscRegular κ obs d δ) (hδ : δ ≤ 1) (key : Fin (j + 1) → Fin K) :
-    |densityOn (polyadBlock κ key) obs - d| ≤ δ := by
-  have hd := h key (fun _ => Finset.univ) ?_
-  · rwa [discAtom_univ] at hd
-  · rw [discAtom_univ]
-    exact mul_le_of_le_one_left (Nat.cast_nonneg _) hδ
+/-- Density of a transported atom, for observables invariant under `σ`. -/
+theorem densityOn_discAtom_comp_perm (κ : RSet j α → Fin K)
+    (key : Fin (j + 1) → Fin K) (P : Fin (j + 1) → Finset (RSet j α))
+    (obs : (Fin (j + 1) → α) → Prop) [DecidablePred obs]
+    (σ : Equiv.Perm (Fin (j + 1))) (hobs : ∀ w : Fin (j + 1) → α, obs (w ∘ ⇑σ) ↔ obs w) :
+    densityOn (discAtom κ (key ∘ ⇑σ⁻¹) (fun i => P (σ⁻¹ i))) obs
+      = densityOn (discAtom κ key P) obs := by
+  rw [densityOn, densityOn, card_filter_discAtom_comp_perm κ key P obs σ hobs,
+    card_discAtom_comp_perm κ key P σ]
 
-/-! ### Block-union regularity: a repository-specific coarse test -/
+/-- Cardinality of a transported block. -/
+theorem card_polyadBlock_comp_perm (κ : RSet j α → Fin K)
+    (key : Fin (j + 1) → Fin K) (σ : Equiv.Perm (Fin (j + 1))) :
+    (polyadBlock κ (key ∘ ⇑σ⁻¹)).card = (polyadBlock κ key).card := by
+  rw [← discAtom_univ κ key, ← discAtom_univ κ (key ∘ ⇑σ⁻¹)]
+  exact card_discAtom_comp_perm κ key (fun _ => Finset.univ) σ
 
-/-- **Block-union regularity** — a repository-specific coarse test, and NOT the
-published `(δ, d, r)` polyad condition (that is `IsPolyadRegular`): here the union
-ranges over whole blocks with possibly DIFFERENT keys, and the threshold `thr` is an
-absolute bound on the TOTAL size of the union — not a per-block bound, and not
-relative to a parent block. `thr = 0` admits the empty union, which forces `|d| ≤ δ`
-(adversarial test below); callers should keep `thr` positive. -/
-def IsBlockUnionRegular (κ : RSet j α → Fin K) (obs : (Fin (j + 1) → α) → Prop)
-    [DecidablePred obs] (d δ : ℝ) (r thr : ℕ) : Prop :=
-  ∀ Q : Finset (Fin (j + 1) → Fin K), Q.card ≤ r →
-    thr ≤ (Q.biUnion (polyadBlock κ)).card →
-    |densityOn (Q.biUnion (polyadBlock κ)) obs - d| ≤ δ
-
-/-- Weakening the tolerance preserves block-union regularity. -/
-theorem IsBlockUnionRegular.mono_delta {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ δ' : ℝ} {r thr : ℕ}
-    (h : IsBlockUnionRegular κ obs d δ r thr) (hδ : δ ≤ δ') :
-    IsBlockUnionRegular κ obs d δ' r thr :=
-  fun Q hr hthr => le_trans (h Q hr hthr) hδ
-
-/-- Shrinking the union budget preserves block-union regularity (fewer tests). -/
-theorem IsBlockUnionRegular.anti_r {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ : ℝ} {r r' thr : ℕ}
-    (h : IsBlockUnionRegular κ obs d δ r thr) (hr : r' ≤ r) :
-    IsBlockUnionRegular κ obs d δ r' thr :=
-  fun Q hQ hthr => h Q (hQ.trans hr) hthr
-
-/-- Raising the negligibility threshold preserves block-union regularity. -/
-theorem IsBlockUnionRegular.mono_thr {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ : ℝ} {r thr thr' : ℕ}
-    (h : IsBlockUnionRegular κ obs d δ r thr) (hthr : thr ≤ thr') :
-    IsBlockUnionRegular κ obs d δ r thr' :=
-  fun Q hQ hcard => h Q hQ (hthr.trans hcard)
-
-/-- Disc regularity implies the `r = 1` block-union test at any positive absolute
-threshold, provided `δ ≤ 1` (single whole blocks are the only nonempty unions). -/
-theorem IsDiscRegular.isBlockUnionRegular_one {κ : RSet j α → Fin K}
-    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs] {d δ : ℝ} {thr : ℕ}
-    (h : IsDiscRegular κ obs d δ) (hδ : δ ≤ 1) (hthr : 0 < thr) :
-    IsBlockUnionRegular κ obs d δ 1 thr := by
-  intro Q hQ hcard
-  rcases Finset.eq_empty_or_nonempty Q with rfl | hne
-  · rw [Finset.biUnion_empty, Finset.card_empty] at hcard
-    omega
-  · obtain ⟨key, rfl⟩ := Finset.card_eq_one.mp (le_antisymm hQ hne.card_pos)
-    rw [Finset.singleton_biUnion] at hcard ⊢
-    exact h.polyadBlock_density hδ key
+/-- Density of a transported block, for observables invariant under `σ`. -/
+theorem densityOn_polyadBlock_comp_perm (κ : RSet j α → Fin K)
+    (key : Fin (j + 1) → Fin K) (obs : (Fin (j + 1) → α) → Prop) [DecidablePred obs]
+    (σ : Equiv.Perm (Fin (j + 1))) (hobs : ∀ w : Fin (j + 1) → α, obs (w ∘ ⇑σ) ↔ obs w) :
+    densityOn (polyadBlock κ (key ∘ ⇑σ⁻¹)) obs = densityOn (polyadBlock κ key) obs := by
+  rw [← discAtom_univ κ key, ← discAtom_univ κ (key ∘ ⇑σ⁻¹)]
+  exact densityOn_discAtom_comp_perm κ key (fun _ => Finset.univ) obs σ hobs
 
 /-! ### Tests and adversarial examples -/
 
@@ -405,37 +378,6 @@ example :
 example :
     (discAtom (fun e : RSet 1 (Fin 3) => if (2 : Fin 3) ∈ e.1 then (1 : Fin 2) else 0) ![0, 0]
       ![{⟨{0}, rfl⟩}, Finset.univ]).card = 1 := by decide
-
--- The r = 1 bridge, as a statement-level test.
-example (κ : RSet 1 (Fin 3) → Fin 2) (obs : (Fin 2 → Fin 3) → Prop)
-    [DecidablePred obs] (d δ : ℝ) :
-    IsPolyadRegular κ obs d δ 1 ↔ IsDiscRegular κ obs d δ :=
-  isPolyadRegular_one_iff
-
--- Adversarial: an unrealized key has an empty parent block, where the
--- parent-relative threshold is vacuous — so disc regularity around d = 1 fails for
--- every observable.
-example :
-    ¬ IsDiscRegular (fun _ : RSet 1 (Fin 2) => (0 : Fin 2)) (fun _ => True)
-      1 (1 / 2) := by
-  intro h
-  have hempty : polyadBlock (fun _ : RSet 1 (Fin 2) => (0 : Fin 2)) ![1, 1] = ∅ := by
-    decide
-  have h0 := h ![1, 1] (fun _ => Finset.univ) ?_
-  · rw [discAtom_univ, hempty, densityOn_empty, abs_le] at h0
-    linarith [h0.2]
-  · rw [discAtom_univ, hempty]
-    simp
-
--- Adversarial: with thr = 0 the empty union is a legal test of block-union
--- regularity, so no observable is block-union regular around d = 1.
-example :
-    ¬ IsBlockUnionRegular (fun _ : RSet 1 (Fin 3) => (0 : Fin 1)) (fun _ => True)
-      1 (1 / 2) 1 0 := by
-  intro h
-  have h0 := h ∅ (by simp) (by simp)
-  rw [Finset.biUnion_empty, densityOn_empty, abs_le] at h0
-  linarith [h0.2]
 
 end Tests
 
