@@ -59,6 +59,9 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   polyad regularity condition (`IsPolyadRegular` in `Hypergraph/Polyad.lean`; the
   coarser `IsBlockUnionRegular` there is repository-specific and NOT the published
   condition).
+- V. Rödl, M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
+  Combin. Probab. Comput. 16 (2007) — the public target of the triadic phase
+  (Phase 7 design freeze in `ARCHITECTURE.md`; `Hypergraph/Triad.lean`).
 - F. R. K. Chung, R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/Polyad.lean`).

@@ -8,6 +8,7 @@ import Mathlib.Tactic.Positivity
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Ring
 
 /-!
 # Density on finite supports
@@ -73,6 +74,56 @@ theorem densityOn_mono_pred (h : ∀ x ∈ S, p x → q x) : densityOn S p ≤ d
     have hcard : (0 : ℝ) < S.card := by exact_mod_cast S.card_pos.mpr hS
     exact div_le_div_of_nonneg_right
       (by exact_mod_cast Finset.card_le_card hsub) hcard.le
+
+/-- **Density-difference bound**: two densities on the same support differ by at
+most the density of their disagreement set. -/
+theorem abs_densityOn_sub_densityOn_le :
+    |densityOn S p - densityOn S q| ≤ densityOn S fun x => ¬(p x ↔ q x) := by
+  classical
+  have key : ∀ (p' q' : β → Prop) [DecidablePred p'] [DecidablePred q'],
+      densityOn S p' - densityOn S q' ≤ densityOn S fun x => ¬(p' x ↔ q' x) := by
+    intro p' q' _ _
+    rcases S.eq_empty_or_nonempty with rfl | hS
+    · simp
+    · have hsub : S.filter p'
+          ⊆ (S.filter q') ∪ (S.filter fun x => ¬(p' x ↔ q' x)) := by
+        intro x hx
+        rw [Finset.mem_filter] at hx
+        rw [Finset.mem_union, Finset.mem_filter, Finset.mem_filter]
+        by_cases hq : q' x
+        · exact Or.inl ⟨hx.1, hq⟩
+        · exact Or.inr ⟨hx.1, fun hiff => hq (hiff.mp hx.2)⟩
+      have hcardle : ((S.filter p').card : ℝ) ≤ ((S.filter q').card : ℝ)
+          + ((S.filter fun x => ¬(p' x ↔ q' x)).card : ℝ) := by
+        have := le_trans (Finset.card_le_card hsub) (Finset.card_union_le _ _)
+        exact_mod_cast this
+      have hcard : (0 : ℝ) < S.card := by exact_mod_cast S.card_pos.mpr hS
+      have hle : densityOn S p'
+          ≤ densityOn S q' + densityOn S fun x => ¬(p' x ↔ q' x) := by
+        rw [densityOn, densityOn, densityOn, ← add_div]
+        exact div_le_div_of_nonneg_right hcardle hcard.le
+      linarith
+  rw [abs_sub_le_iff]
+  refine ⟨key p q, ?_⟩
+  have hfilter : (S.filter fun x => ¬(q x ↔ p x))
+      = (S.filter fun x => ¬(p x ↔ q x)) :=
+    Finset.filter_congr fun x _ => by tauto
+  have hcongr : (densityOn S fun x => ¬(q x ↔ p x))
+      = densityOn S fun x => ¬(p x ↔ q x) := by
+    rw [densityOn, densityOn, hfilter]
+  rw [← hcongr]
+  exact key q p
+
+/-- Energy-form conversion: `d² · |S| = (#filter)² / |S|`, valid for all `S` (both
+sides `0` on `∅`). -/
+theorem sq_densityOn_mul_card (S : Finset β) (p : β → Prop) [DecidablePred p] :
+    densityOn S p ^ 2 * (S.card : ℝ) = ((S.filter p).card : ℝ) ^ 2 / (S.card : ℝ) := by
+  rcases S.eq_empty_or_nonempty with rfl | hS
+  · simp
+  · have hc : ((S.card : ℝ)) ≠ 0 := by
+      exact_mod_cast (S.card_pos.mpr hS).ne'
+    rw [densityOn, div_pow]
+    field_simp
 
 /-- Count monotonicity under support inclusion (the honest form of "restriction"). -/
 theorem card_filter_mono_subset (p : β → Prop) [DecidablePred p] (h : S ⊆ T) :

@@ -49,6 +49,21 @@ def complete (r : ℕ) (V : Type*) [Fintype V] [DecidableEq V] : UniformHypergra
 def empty (r : ℕ) (V : Type*) : UniformHypergraph r V :=
   ⟨∅, fun _ he => absurd he (Finset.notMem_empty _)⟩
 
+/-- The symmetric difference: edges on which two hypergraphs disagree. -/
+def symmDiff [DecidableEq V] (H G : UniformHypergraph r V) : UniformHypergraph r V :=
+  ⟨(H.edges \ G.edges) ∪ (G.edges \ H.edges), fun e he => by
+    rw [Finset.mem_union, Finset.mem_sdiff, Finset.mem_sdiff] at he
+    rcases he with ⟨he, -⟩ | ⟨he, -⟩
+    · exact H.card_eq e he
+    · exact G.card_eq e he⟩
+
+/-- Membership in the symmetric difference, in the house `¬(↔)` form. -/
+theorem mem_symmDiff [DecidableEq V] {H G : UniformHypergraph r V} {e : Finset V} :
+    e ∈ (H.symmDiff G).edges ↔ ¬(e ∈ H.edges ↔ e ∈ G.edges) := by
+  rw [symmDiff]
+  simp only [Finset.mem_union, Finset.mem_sdiff]
+  tauto
+
 /-- Every edge set is contained in the complete one. -/
 theorem edges_subset_powersetCard [Fintype V] [DecidableEq V] (H : UniformHypergraph r V) :
     H.edges ⊆ Finset.univ.powersetCard r := fun e he =>

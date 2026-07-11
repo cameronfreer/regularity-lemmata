@@ -53,6 +53,8 @@ Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
   Structures Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma
   for regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006)
   (the `(δ, d, r)` polyad regularity form).
+- V. Rödl and M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
+  Combin. Probab. Comput. 16 (2007) (the triadic phase's public target).
 - F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) (discrepancy quasirandomness).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022

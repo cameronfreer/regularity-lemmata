@@ -80,4 +80,52 @@ Lean `Prop` placeholders.
   after their falsification gates.
 - **Triadic regular approximation** and **colored arity-three counting/removal**:
   planned for later releases; statements will be frozen only after their falsification
-  gates.
+  gates. The triadic design choices are frozen below.
+
+## Phase 7 design freeze (triadic regular approximation)
+
+Public target: V. Rödl, M. Schacht, *Regular partitions of hypergraphs: Regularity
+lemmas*, Combin. Probab. Comput. 16 (2007), specialized to 3-uniform hypergraphs; test
+surfaces are Phase 6's parent-relative `IsDiscRegular`/`IsPolyadRegular`. The
+following choices are frozen in prose first; the summit statement itself stays prose
+until its falsification gate passes.
+
+- **Unordered triads, ordered counting.** The objects are unordered
+  `UniformHypergraph 3 V`; every counting and testing surface is ordered injective
+  triples, mediated by the realization identity `orderedCount = 3! · #edges`
+  (`orderedCount_eq`). Observables on triples are set-level
+  (`triadObs H v = tupleRange v ∈ H.edges`), hence permutation-invariant by
+  construction. Ordered face/triad structures, if ever wanted, are exposed
+  separately, never as this API.
+- **Input and edited hypergraphs** are both `UniformHypergraph 3 V`; the edit
+  primitive is the unordered symmetric difference of edge sets
+  (`UniformHypergraph.symmDiff`).
+- **Edit normalization and the factor 6.** The primitive edit count is unordered
+  (`editCount H G = #(H ∆ G)`); the ordered edit mass over injective triples equals
+  `6 · editCount` — proved (the realization identity applied to `symmDiff`), never
+  assumed. Relative quantities divide by `|V|³` under the guard-free `x / 0 = 0`
+  convention, not by the injective-tuple count; the injective/total gap is controlled
+  by the Phase 1 collision bounds where needed.
+- **Regularity thresholds are parent-relative** — a `δ` fraction of the parent polyad
+  block, never an absolute count. No absolute thresholds appear in Phase 7
+  statements (`IsBlockUnionRegular` is not used by Phase 7).
+- **Exceptional triad mass** is ordered and diagonal-free: for a set `E` of keys, the
+  mass is `Σ_{key ∈ E} |polyadBlock κ key| / |V|³`. A pair coloring is `δ`-good for
+  `H` when the keys on which the required block control fails carry mass at most `δ`.
+- **Partition data.** The first release quantifies over pair colorings
+  `κ : RSet 2 V → Fin K` only. Compatibility with an equitable vertex partition (and
+  equitability of pair cells over vertex-cell triples) is required for the full
+  Rödl–Schacht statement but not for the weak (energy-increment) approximation; it is
+  a deferred strengthening, to be built on `Partition/Equitable.lean`.
+- **Quantifier order (error schedule and bounds).** `∀ δ > 0, ∃ K₀ = bound(δ)`
+  host-independent; `∀ H` on a finite `V`, `∃ K ≤ K₀` and a pair coloring `κ` with
+  `K` cells satisfying the goodness conclusion. Iteration schedules follow the graph
+  ladder's `ErrorSchedule` pattern (`Graph/Strong.lean`); the first-release bound has
+  Frieze–Kannan shape (`4^{O(1/δ²)}`-type, from an energy increment at the pair
+  level), not the full Rödl–Schacht tower.
+
+Planned units, in order: (1) realized triads and mass identities; (2) block
+density/edit calculus; (3) refinement energy for pair colorings (mass-weighted,
+diagonal included, refinement-monotone); (4) one-step repair (energy increment from a
+failing block); (5) bounded iteration; (6) summit — weak triadic regular
+approximation.
