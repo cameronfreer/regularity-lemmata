@@ -249,6 +249,28 @@ theorem badTriadMass_le_one (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin
     refine le_trans (badTriadMassNum_le_count H κ δ) ?_
     exact_mod_cast injectiveTupleCount_le_pow (α := α) 3
 
+open Classical in
+/-- The exceptional tuple set: all ordered triples living in a bad block. -/
+noncomputable def badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
+    (δ : ℝ) : Finset (Fin 3 → α) :=
+  (Finset.univ.filter fun key => IsBadTriad H κ δ key).biUnion (polyadBlock κ)
+
+open Classical in
+theorem card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
+    (δ : ℝ) :
+    (badTriadTuples H κ δ).card
+      = ∑ key ∈ Finset.univ.filter (fun key => IsBadTriad H κ δ key),
+          (polyadBlock κ key).card := by
+  classical
+  rw [badTriadTuples]
+  exact Finset.card_biUnion fun key _ key' _ h => polyadBlock_disjoint h
+
+theorem cast_card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
+    (δ : ℝ) :
+    ((badTriadTuples H κ δ).card : ℝ) = badTriadMassNum H κ δ := by
+  classical
+  rw [card_badTriadTuples, badTriadMassNum, Nat.cast_sum]
+
 /-! ### Tests and adversarial examples -/
 
 section Tests

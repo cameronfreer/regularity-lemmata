@@ -107,6 +107,30 @@ theorem mem_polyadBlock_iff_of_injective {κ : RSet j α → Fin K}
   · intro h
     exact ⟨hv, fun i _ => h i⟩
 
+/-- The polyad key of an injective tuple: the tuple of its lower-face colors. -/
+def polyadKey (κ : RSet j α → Fin K) {v : Fin (j + 1) → α}
+    (hv : Function.Injective v) : Fin (j + 1) → Fin K :=
+  fun i => κ (lowerFaceRSet hv i)
+
+theorem mem_polyadBlock_polyadKey (κ : RSet j α → Fin K) {v : Fin (j + 1) → α}
+    (hv : Function.Injective v) : v ∈ polyadBlock κ (polyadKey κ hv) := by
+  rw [mem_polyadBlock_iff_of_injective hv]
+  intro i
+  rfl
+
+theorem polyadKey_eq_of_mem_polyadBlock {κ : RSet j α → Fin K}
+    {P : Fin (j + 1) → Fin K} {v : Fin (j + 1) → α} (hv : Function.Injective v)
+    (h : v ∈ polyadBlock κ P) : polyadKey κ hv = P :=
+  funext ((mem_polyadBlock_iff_of_injective hv).mp h)
+
+/-- Reordering the tuple permutes its polyad key. -/
+theorem polyadKey_comp_perm (κ : RSet j α → Fin K) {v : Fin (j + 1) → α}
+    (hv : Function.Injective v) (σ : Equiv.Perm (Fin (j + 1)))
+    (hvσ : Function.Injective (v ∘ ⇑σ)) :
+    polyadKey κ hvσ = polyadKey κ hv ∘ ⇑σ := by
+  funext i
+  exact congrArg κ (Subtype.ext (lowerFaceSet_comp_perm v σ i))
+
 theorem polyadBlock_disjoint {κ : RSet j α → Fin K} {P P' : Fin (j + 1) → Fin K}
     (h : P ≠ P') : Disjoint (polyadBlock κ P) (polyadBlock κ P') := by
   rw [Finset.disjoint_left]

@@ -75,6 +75,30 @@ theorem card_tupleRange_of_injective [DecidableEq α] {n : ℕ} {v : Fin n → �
     (hv : Function.Injective v) : (tupleRange v).card = n := by
   rw [tupleRange, Finset.card_image_of_injective _ hv, Finset.card_univ, Fintype.card_fin]
 
+-- `hv` is kept for API symmetry; it is derivable (equal ranges force equal
+-- cardinalities of images), and only `hw` does real work.
+set_option linter.unusedVariables false in
+/-- **Enumeration of orderings**: two injective tuples with the same underlying set
+differ by a permutation of the index type. -/
+theorem exists_comp_perm_of_tupleRange_eq [DecidableEq α] {n : ℕ} {v w : Fin n → α}
+    (hv : Function.Injective v) (hw : Function.Injective w)
+    (h : tupleRange v = tupleRange w) : ∃ σ : Equiv.Perm (Fin n), w = v ∘ ⇑σ := by
+  classical
+  have hmem : ∀ i, w i ∈ tupleRange v := by
+    intro i
+    rw [h, tupleRange]
+    exact Finset.mem_image_of_mem w (Finset.mem_univ i)
+  choose f hf using fun i => Finset.mem_image.mp (hmem i)
+  have hfv : ∀ i, v (f i) = w i := fun i => (hf i).2
+  have hfinj : Function.Injective f := by
+    intro i i' hii
+    apply hw
+    rw [← hfv i, ← hfv i', hii]
+  have hfbij : Function.Bijective f := Finite.injective_iff_bijective.mp hfinj
+  refine ⟨Equiv.ofBijective f hfbij, ?_⟩
+  funext i
+  exact (hfv i).symm
+
 /-! ### Non-injective (collision) maps -/
 
 /-- The finset of non-injective maps `ι → β`. -/

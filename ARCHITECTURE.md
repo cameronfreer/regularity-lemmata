@@ -137,12 +137,12 @@ statements stay prose until their falsification gates pass.
   pair colors such that `badTriadMass H κ δ ≤ δ` (bad keys are `IsBadTriad`,
   failures of the own-density local predicate; the mass is the frozen ordered
   normalization). Then the **edited
-  regular approximation** as a corollary: `∃ κ G` with
-  `6 · editCount H G ≤ δ · |V|³` (the frozen ordered edit inequality) and every
-  realized key locally disc-regular for `G` — with `G` constructed by deleting or
-  otherwise homogenizing the exceptional blocks, which requires the permutation
-  closure of bad keys (`isBadTriad_comp_perm_iff`) so that all six ordered
-  presentations of an unordered triple receive the same edit decision.
+  regular approximation** — now PROVED (`exists_cleaned_regular`): `∃ κ G` with
+  `G.edges ⊆ H.edges`, `6 · editCount H G ≤ δ · |V|³` (the frozen ordered edit
+  inequality) and EVERY key locally disc-regular for `G` — with `G` constructed by
+  deleting the bad-keyed edges, well-defined via the permutation closure of bad keys
+  (`isBadTriad_comp_perm_iff`) so that all six ordered presentations of an unordered
+  triple receive the same edit decision.
 
 Planned units, in order: (1) realized triads and mass identities ✓; (2) block
 density/edit calculus ✓; (3) refinement energy for pair colorings (mass-weighted,
@@ -162,8 +162,10 @@ coarse` when `δ < badTriadMass`, via the chosen simultaneous witness family);
 `exists_goodColoring_of_fuel`, fuel `triadFuel δ = ⌈1/δ⁴⌉₊`; (6) the **weak summit
 is proved**: `exists_goodColoring` — every 3-uniform hypergraph admits a pair
 coloring with at most `triadBound δ = triadRegularityBound ⌈1/δ⁴⌉₊ 1` colors and
-bad mass at most `δ` (`Hypergraph/TriadIncrement.lean`). The edited summit remains,
-with deletion defined by an existential ordering of
+bad mass at most `δ` (`Hypergraph/TriadIncrement.lean`). The **edited summit is
+also proved**: `exists_cleaned_regular` (`Hypergraph/TriadCleanup.lean`) — a
+deletion-only subgraph within `δ·|V|³` ordered edits under which EVERY key is
+locally disc-regular, with deletion defined by an existential ordering of
 each unordered edge — permutation closure keeps it well-defined; the construction is
 mathematically finite and classically decidable, not kernel-computable (the badness
 predicate is real-valued).
