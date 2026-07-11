@@ -7,9 +7,10 @@ import RegularityLemmata.Hypergraph.PolyadRegularity
 /-!
 # Realized triads: mass identities and the block density/edit calculus
 
-Phase 7 units 1–2 of the triadic development (design freeze in `ARCHITECTURE.md`;
-public target V. Rödl, M. Schacht, *Regular partitions of hypergraphs: Regularity
-lemmas*, Combin. Probab. Comput. 16 (2007), specialized to 3-uniform hypergraphs).
+Phase 7 units 1–2 of the triadic development (design freeze in `ARCHITECTURE.md`):
+a precursor built from the index and polyad test surfaces of V. Rödl, M. Schacht,
+*Regular partitions of hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16
+(2007) — not a formalization of their full regular-partition theorem.
 
 The frozen conventions in action: the objects are unordered `UniformHypergraph 3 α`;
 all counting surfaces are ordered injective triples; the observable
@@ -286,6 +287,35 @@ example :
       = 6 := by
   rw [card_editTriples]
   decide
+
+-- A trivial coloring with zero bad mass: the empty hypergraph has all densities 0,
+-- so every key is locally regular and no key is bad.
+example :
+    badTriadMass (empty 3 (Fin 3)) (fun _ : RSet 2 (Fin 3) => (0 : Fin 1))
+      (1 / 2) = 0 := by
+  classical
+  have hobs : ∀ S : Finset (Fin 3 → Fin 3),
+      densityOn S (triadObs (empty 3 (Fin 3))) = 0 := by
+    intro S
+    rw [densityOn, Finset.filter_false_of_mem, Finset.card_empty]
+    · norm_num
+    · intro v _
+      exact Finset.notMem_empty _
+  have hgood : ∀ key : Fin 3 → Fin 1,
+      ¬ IsBadTriad (empty 3 (Fin 3)) (fun _ => (0 : Fin 1)) (1 / 2) key := by
+    intro key
+    rw [IsBadTriad, not_not]
+    intro P _
+    rw [hobs, hobs, sub_zero, abs_zero]
+    norm_num
+  rw [badTriadMass, badTriadMassNum,
+    Finset.filter_false_of_mem fun key _ => hgood key, Finset.sum_empty, zero_div]
+
+-- Permutation closure of bad keys, as a statement-level test.
+example (H : UniformHypergraph 3 (Fin 4)) (κ : RSet 2 (Fin 4) → Fin 3) (δ : ℝ)
+    (key : Fin 3 → Fin 3) (σ : Equiv.Perm (Fin 3)) :
+    IsBadTriad H κ δ (key ∘ ⇑σ⁻¹) ↔ IsBadTriad H κ δ key :=
+  isBadTriad_comp_perm_iff H κ δ key σ
 
 -- Permutation invariance of the observable, concretely.
 example (v : Fin 3 → Fin 4) (σ : Equiv.Perm (Fin 3)) :

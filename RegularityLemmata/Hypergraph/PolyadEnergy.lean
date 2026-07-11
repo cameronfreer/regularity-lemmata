@@ -290,6 +290,74 @@ example (κ' : RSet 2 (Fin 4) → Fin 2) (obs : (Fin 3 → Fin 4) → Prop)
   have h := polyadEnergyNum_comp_le (fun _ : Fin 2 => (0 : Fin 1)) κ' obs
   exact h
 
+-- Empty host: the normalized energy is 0 by the guard-free convention.
+example (κ : RSet 2 (Fin 0) → Fin 2) (obs : (Fin 3 → Fin 0) → Prop)
+    [DecidablePred obs] : polyadEnergy κ obs = 0 := by
+  rw [polyadEnergy]
+  norm_num
+
+-- A genuinely nonzero refinement variance: singleton cells over Fin 2 against the
+-- observable "starts at 0". The fine coloring separates the two injective pairs
+-- perfectly (energy 1); merging to one cell mixes them (energy 1/2); the gap is 1/2.
+example :
+    polyadEnergyNum
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        (fun v : Fin 2 → Fin 2 => v 0 = 0)
+      - polyadEnergyNum (fun _ : RSet 1 (Fin 2) => (0 : Fin 1))
+          (fun v : Fin 2 → Fin 2 => v 0 = 0) = 1 / 2 := by
+  have hfine : polyadEnergyNum
+      (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+      (fun v : Fin 2 → Fin 2 => v 0 = 0) = 1 := by
+    rw [polyadEnergyNum,
+      show (Finset.univ : Finset (Fin 2 → Fin 2))
+        = {![0, 0], ![0, 1], ![1, 0], ![1, 1]} from by decide,
+      Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+      Finset.sum_insert (by decide), Finset.sum_singleton,
+      densityOn, densityOn, densityOn, densityOn,
+      show (polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![0, 0]).card = 0 from by decide,
+      show (polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![0, 1]).card = 1 from by decide,
+      show (polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![1, 0]).card = 1 from by decide,
+      show (polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![1, 1]).card = 0 from by decide,
+      show ((polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![0, 1]).filter fun v : Fin 2 → Fin 2 => v 0 = 0).card = 0 from by decide,
+      show ((polyadBlock
+        (fun e : RSet 1 (Fin 2) => if (0 : Fin 2) ∈ e.1 then (0 : Fin 2) else 1)
+        ![1, 0]).filter fun v : Fin 2 → Fin 2 => v 0 = 0).card = 1 from by decide]
+    norm_num
+  have hcoarse : polyadEnergyNum (fun _ : RSet 1 (Fin 2) => (0 : Fin 1))
+      (fun v : Fin 2 → Fin 2 => v 0 = 0) = 1 / 2 := by
+    rw [polyadEnergyNum,
+      show (Finset.univ : Finset (Fin 2 → Fin 1)) = {![0, 0]} from by decide,
+      Finset.sum_singleton, densityOn,
+      show (polyadBlock (fun _ : RSet 1 (Fin 2) => (0 : Fin 1)) ![0, 0]).card = 2
+        from by decide,
+      show ((polyadBlock (fun _ : RSet 1 (Fin 2) => (0 : Fin 1)) ![0, 0]).filter
+        fun v : Fin 2 → Fin 2 => v 0 = 0).card = 1 from by decide]
+    norm_num
+  rw [hfine, hcoarse]
+  norm_num
+
+-- A direct instance of the exact refinement-variance identity at concrete types.
+example (f : Fin 2 → Fin 1) (κ' : RSet 1 (Fin 2) → Fin 2)
+    (obs : (Fin 2 → Fin 2) → Prop) [DecidablePred obs] :
+    polyadEnergyNum κ' obs - polyadEnergyNum (fun e => f (κ' e)) obs
+      = ∑ P : Fin 2 → Fin 1,
+          ∑ P' ∈ Finset.univ.filter fun P' : Fin 2 → Fin 2 =>
+            (fun i => f (P' i)) = P,
+            ((polyadBlock κ' P').card : ℝ)
+              * (densityOn (polyadBlock κ' P') obs
+                  - densityOn (polyadBlock (fun e => f (κ' e)) P) obs) ^ 2 :=
+  polyadEnergyNum_comp_variance f κ' obs
+
 end Tests
 
 end RegularityLemmata

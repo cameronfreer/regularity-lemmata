@@ -56,13 +56,15 @@ definition or proof is cited publicly, in the relevant file docstring and here.
 - V. Rödl, J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random Structures
   Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma for regular
   k-uniform hypergraphs*, Random Structures Algorithms 28 (2006) — the `(δ, d, r)`
-  polyad regularity condition (`IsPolyadRegular` in `Hypergraph/Polyad.lean`; the
-  coarser `IsBlockUnionRegular` there is repository-specific and NOT the published
-  condition).
+  polyad regularity condition (`IsPolyadRegularAt` in
+  `Hypergraph/PolyadRegularity.lean`; the coarser `IsBlockUnionRegular` there is
+  repository-specific and NOT the published condition).
 - V. Rödl, M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
-  Combin. Probab. Comput. 16 (2007) — the public target of the triadic phase
-  (Phase 7 design freeze in `ARCHITECTURE.md`; `Hypergraph/Triad.lean`).
+  Combin. Probab. Comput. 16 (2007) — the triadic phase builds a **precursor** using
+  their index and polyad test surfaces, not a formalization of their full
+  regular-partition theorem (Phase 7 design freeze in `ARCHITECTURE.md`;
+  `Hypergraph/Triad.lean`, `Hypergraph/PolyadEnergy.lean`).
 - F. R. K. Chung, R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
-  disc regularity (`Hypergraph/Polyad.lean`).
+  disc regularity (`Hypergraph/PolyadRegularity.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
