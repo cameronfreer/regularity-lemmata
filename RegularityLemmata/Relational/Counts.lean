@@ -280,6 +280,24 @@ example :
       FiniteRelModel (singleRelLang 0) Empty) (singleRelSymbol 0) = 0 := by
   decide
 
+-- The true nullary relation on the empty carrier has BOTH densities equal to 1
+-- (denominators |V|^0 = 1 and (|V|)_0 = 1), not merely both counts.
+example :
+    relationDensity (⟨fun {_} _ _ => true⟩ :
+      FiniteRelModel (singleRelLang 0) Empty) (singleRelSymbol 0) = 1 := by
+  rw [relationDensity,
+    show relationCount (⟨fun {_} _ _ => true⟩ :
+      FiniteRelModel (singleRelLang 0) Empty) (singleRelSymbol 0) = 1 from by decide]
+  norm_num
+
+example :
+    injectiveRelationDensity (⟨fun {_} _ _ => true⟩ :
+      FiniteRelModel (singleRelLang 0) Empty) (singleRelSymbol 0) = 1 := by
+  rw [injectiveRelationDensity,
+    show injectiveRelationCount (⟨fun {_} _ _ => true⟩ :
+      FiniteRelModel (singleRelLang 0) Empty) (singleRelSymbol 0) = 1 from by decide]
+  norm_num
+
 -- Above the arity bound there is no symbol to count.
 example : IsEmpty ((singleRelLang 2).Relations 5) :=
   isEmpty_relations_of_lt _ (by decide : arityBound (singleRelLang 2) < 5)

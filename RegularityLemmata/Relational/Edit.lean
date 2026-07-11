@@ -99,6 +99,50 @@ theorem injectiveRelationEditCount_le_descFactorial (M N : FiniteRelModel L V)
     injectiveRelationEditCount, injectiveRelationEditSet]
   exact Finset.card_le_card (Finset.filter_subset _ _)
 
+theorem injectiveRelationEditCount_comm (M N : FiniteRelModel L V) {n : ℕ}
+    (R : L.Relations n) :
+    injectiveRelationEditCount M N R = injectiveRelationEditCount N M R := by
+  rw [injectiveRelationEditCount, injectiveRelationEditCount,
+    injectiveRelationEditSet, injectiveRelationEditSet]
+  refine congrArg Finset.card (Finset.filter_congr fun x _ => ?_)
+  constructor
+  · exact fun h hiff => h hiff.symm
+  · exact fun h hiff => h hiff.symm
+
+@[simp] theorem injectiveRelationEditCount_self (M : FiniteRelModel L V) {n : ℕ}
+    (R : L.Relations n) : injectiveRelationEditCount M M R = 0 := by
+  rw [injectiveRelationEditCount, injectiveRelationEditSet, Finset.card_eq_zero,
+    Finset.filter_eq_empty_iff]
+  exact fun _ _ h => h Iff.rfl
+
+theorem injectiveRelationEditCount_triangle (M N P : FiniteRelModel L V) {n : ℕ}
+    (R : L.Relations n) :
+    injectiveRelationEditCount M P R
+      ≤ injectiveRelationEditCount M N R + injectiveRelationEditCount N P R := by
+  classical
+  refine le_trans (Finset.card_le_card ?_) (Finset.card_union_le _ _)
+  intro x hx
+  rw [injectiveRelationEditSet, Finset.mem_filter] at hx
+  rw [Finset.mem_union, injectiveRelationEditSet, injectiveRelationEditSet,
+    Finset.mem_filter, Finset.mem_filter]
+  by_cases h12 : M.Holds R x ↔ N.Holds R x
+  · exact Or.inr ⟨hx.1, fun h23 => hx.2 (h12.trans h23)⟩
+  · exact Or.inl ⟨hx.1, h12⟩
+
+theorem relativeInjectiveRelationEdit_nonneg (M N : FiniteRelModel L V) {n : ℕ}
+    (R : L.Relations n) : 0 ≤ relativeInjectiveRelationEdit M N R := by
+  rw [relativeInjectiveRelationEdit]
+  positivity
+
+theorem relativeInjectiveRelationEdit_le_one (M N : FiniteRelModel L V) {n : ℕ}
+    (R : L.Relations n) : relativeInjectiveRelationEdit M N R ≤ 1 := by
+  rw [relativeInjectiveRelationEdit]
+  rcases Nat.eq_zero_or_pos ((Fintype.card V).descFactorial n) with h0 | hpos
+  · rw [h0]
+    norm_num
+  · rw [div_le_one (by exact_mod_cast hpos)]
+    exact_mod_cast injectiveRelationEditCount_le_descFactorial M N R
+
 /-- Exact split of the per-symbol edit count by injectivity. -/
 theorem relationEditCount_eq_injective_add_nonInjective
     (M N : FiniteRelModel L V) {n : ℕ} (R : L.Relations n) :
