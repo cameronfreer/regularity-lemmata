@@ -131,6 +131,41 @@ theorem equitabilise_almostRefinesAt {a b : ℕ} (P : Finpartition s)
     AlmostRefinesAt (P.equitabilise h) P m := fun _ ht =>
   equitabilise_uncovered_card_le ht
 
+/-- Equipartitions of any admissible part count almost-refine any partition: for
+`0 < t ≤ |s|` there is an equipartition with exactly `t` parts whose per-parent
+remainder against `P` is at most `⌊|s| / t⌋`. -/
+theorem exists_equipartition_almostRefinesAt (P : Finpartition s) {t : ℕ}
+    (ht : 0 < t) (hts : t ≤ s.card) :
+    ∃ E : Finpartition s, E.IsEquipartition ∧ E.parts.card = t ∧
+      AlmostRefinesAt E P (s.card / t) := by
+  have hrt : s.card % t < t := Nat.mod_lt _ ht
+  have hmpos : 0 < s.card / t := (Nat.one_le_div_iff ht).mpr hts
+  have h : (t - s.card % t) * (s.card / t) + (s.card % t) * (s.card / t + 1) = s.card := by
+    have hdm : t * (s.card / t) + s.card % t = s.card := Nat.div_add_mod s.card t
+    have hsub : (t - s.card % t) * (s.card / t) = t * (s.card / t) - s.card % t * (s.card / t) :=
+      Nat.sub_mul t (s.card % t) (s.card / t)
+    have hrm : s.card % t * (s.card / t) ≤ t * (s.card / t) :=
+      Nat.mul_le_mul_right _ hrt.le
+    calc (t - s.card % t) * (s.card / t) + (s.card % t) * (s.card / t + 1)
+        = (t * (s.card / t) - s.card % t * (s.card / t))
+          + (s.card % t * (s.card / t) + s.card % t) := by rw [hsub, Nat.mul_add, Nat.mul_one]
+      _ = t * (s.card / t) + s.card % t := by omega
+      _ = s.card := hdm
+  refine ⟨P.equitabilise h, Finpartition.equitabilise_isEquipartition, ?_,
+    equitabilise_almostRefinesAt P h⟩
+  rw [P.card_parts_equitabilise (h := h) hmpos.ne']
+  omega
+
+/-- The `ε`-form: an equipartition with `t` parts almost-refines `P` at tolerance `ε`
+once `⌊|s|/t⌋ · #P.parts ≤ ε · |s|`. -/
+theorem exists_equipartition_almostRefines (P : Finpartition s) {t : ℕ}
+    (ht : 0 < t) (hts : t ≤ s.card)
+    (hbound : ((s.card / t : ℕ) : ℝ) * P.parts.card ≤ ε * s.card) :
+    ∃ E : Finpartition s, E.IsEquipartition ∧ E.parts.card = t ∧ AlmostRefines E P ε := by
+  obtain ⟨E, h1, h2, h3⟩ := exists_equipartition_almostRefinesAt P ht hts
+  refine ⟨E, h1, h2, almostRefines_of_almostRefinesAt h3 ?_⟩
+  exact_mod_cast hbound
+
 /-! ### Composition -/
 
 /-- Set-level composition bound: what `R` leaves uncovered in a `P`-part is covered by

@@ -19,6 +19,7 @@ import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.Weak
+import RegularityLemmata.Graph.Bridge
 
 /-!
 # RegularityLemmata
