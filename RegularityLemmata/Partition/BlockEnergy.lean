@@ -1,3 +1,7 @@
+/-
+Copyright (c) 2026 Cameron Freer. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+-/
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Partition.Basic

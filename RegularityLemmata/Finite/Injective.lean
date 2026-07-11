@@ -1,3 +1,7 @@
+/-
+Copyright (c) 2026 Cameron Freer. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+-/
 import RegularityLemmata.Finite.Tuple
 import Mathlib.Data.Fintype.CardEmbedding
 import Mathlib.Data.Fintype.Perm

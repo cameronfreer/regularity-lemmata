@@ -1,3 +1,7 @@
+/-
+Copyright (c) 2026 Cameron Freer. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+-/
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin

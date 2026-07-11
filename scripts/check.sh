@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Cameron Freer. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 cd "$(dirname "$0")/.."
 LOG="$(mktemp)"; trap 'rm -f "$LOG"' EXIT
