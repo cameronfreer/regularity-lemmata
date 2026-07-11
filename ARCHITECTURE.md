@@ -138,7 +138,7 @@ statements stay prose until their falsification gates pass.
   pair colors such that `badTriadMass H κ δ ≤ δ` (bad keys are `IsBadTriad`,
   failures of the own-density local predicate; the mass is the frozen ordered
   normalization). Then the **edited
-  regular approximation** — now PROVED (`exists_cleaned_regular`): `∃ κ G` with
+  regular approximation** — now PROVED (`exists_triadic_regular_approximation`): `∃ κ G` with
   `G.edges ⊆ H.edges`, `6 · editCount H G ≤ δ · |V|³` (the frozen ordered edit
   inequality) and EVERY key locally disc-regular for `G` — with `G` constructed by
   deleting the bad-keyed edges, well-defined via the permutation closure of bad keys
@@ -164,9 +164,66 @@ coarse` when `δ < badTriadMass`, via the chosen simultaneous witness family);
 is proved**: `exists_goodColoring` — every 3-uniform hypergraph admits a pair
 coloring with at most `triadBound δ = triadRegularityBound ⌈1/δ⁴⌉₊ 1` colors and
 bad mass at most `δ` (`Hypergraph/TriadIncrement.lean`). The **edited summit is
-also proved**: `exists_cleaned_regular` (`Hypergraph/TriadCleanup.lean`) — a
+also proved**: `exists_triadic_regular_approximation` (`Hypergraph/TriadCleanup.lean`) — a
 deletion-only subgraph within `δ·|V|³` ordered edits under which EVERY key is
 locally disc-regular, with deletion defined by an existential ordering of
 each unordered edge — permutation closure keeps it well-defined; the construction is
 mathematically finite and classically decidable, not kernel-computable (the badness
 predicate is real-valued).
+
+## Phase 8 design freeze (finite relational structures substrate)
+
+A computable finite relational-structure layer over mathlib's
+`FirstOrder.Language` (`Mathlib.ModelTheory.Basic`), ending at counts, edits,
+transport, and adapters. **No relational regularity or removal theorem belongs to
+this phase**; those follow only after this API passes its falsification gates.
+
+- **Mathlib languages, directly.** No competing first-order syntax. A typeclass
+  `FirstOrder.Language.FiniteRelational` supplies `arityBound : ℕ` (an upper bound,
+  not necessarily attained), relationality, per-arity `Fintype`/`DecidableEq`, and
+  emptiness above the bound (consumed through a theorem, not an aggressive
+  instance). The bounded symbol type `RelSymbol L = Σ n : Fin (arityBound + 1),
+  L.Relations n` bridges arbitrary mathlib symbols to bounded computation. **Arity
+  zero is supported and permanently tested**: a nullary relation has one tuple even
+  on an empty carrier.
+- **Boolean model data, explicit mathlib adapter.** `FiniteRelModel L V` stores
+  `rel : ∀ {n}, L.Relations n → (Fin n → V) → Bool` (no `Fintype`/`DecidableEq`
+  requirements in the structure itself); `Holds` is the `Prop` reading.
+  `toStructure : L.Structure V` is an **explicit definition, never a global
+  instance** — multiple models on one carrier are routine; consumers write
+  `letI := M.toStructure`. The `RelMap ↔ Holds` bridge is exact.
+- **Transport before counting**: `pullback` (frozen direction:
+  `(pullback M f).Holds R x ↔ M.Holds R (f ∘ x)`), `restrict` (pullback along the
+  subtype inclusion), `relabel` (pullback along `e.symm`), with identity/
+  composition laws and mathlib `Equiv.inducedStructure` compatibility. Pullback
+  along a noninjective map is allowed; no theorem claims it preserves injective
+  counts.
+- **Ordered and injective relation counts are separate APIs.** `relationCount`
+  (all tuples `Fin n → V`, diagonals included — the canonical first-order count)
+  vs `injectiveRelationCount` (filtered through `injectiveTuples`). Densities:
+  `relationDensity` normalized by `|V|^n`; `injectiveRelationDensity` by the
+  falling factorial — never the injective count by `|V|^n`. No unqualified "copy
+  count" names.
+- **Per-symbol edits are primitive**; the aggregate is defined afterward with the
+  cross-arity weighting frozen: `aggregateEditCount = Σ_{s : RelSymbol}
+  relationEditCount`, `aggregateTupleBudget = Σ_s |V|^{arity s}`, relative =
+  count/budget — every symbol–tuple incidence has weight one. Not normalized by
+  `|V|^arityBound`; per-symbol relative edits are not averaged. Nullary symbols
+  contribute budget `1` even on an empty carrier. House `¬(P ↔ Q)` form.
+- **Pattern maps**: `Preserves`/`PreservesAndReflects` quantify computationally
+  over `RelSymbol` (equivalence with the unbounded form via emptiness above the
+  bound); counts `homCount`/`injectiveHomCount`/`inducedEmbeddingCount` (never
+  "copyCount" — relational inducedness is diagonal-sensitive and includes nullary
+  symbols), with conversions to mathlib `Language.Hom` (preserves) and
+  `Language.Embedding` (preserves and reflects) and their converses. Host
+  monotonicity holds for homomorphism counts only.
+- **Adapters live in their own file** (the core imports only `ModelTheory/Basic`):
+  mathlib's `FirstOrder.Language.graph` for simple graphs (no second graph
+  language); a one-symbol arity-`r` language for uniform hypergraphs (noninjective
+  tuples false; injective relation count `= orderedCount = r!·#edges`); a
+  one-symbol-per-color language for colored hypergraphs. The relational core stays
+  ordered; the adapters are exactly where ordered tuples meet unordered edges.
+- **Discipline**: each module lands in the same commit as its root import
+  (staging `RegularityLemmata.lean` explicitly, verified via
+  `git diff --cached --name-only`) so the axiom audit sees it; small examples close
+  by kernel `decide`; no wholesale palette/local-type port.
