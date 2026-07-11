@@ -21,8 +21,10 @@ def main : IO UInt32 := do
   try
     initSearchPath (← findSysroot)
     let env ← importModules #[{ module := auditRoot }] {} (trustLevel := 1024)
+    -- Normalize private names (`_private.RegularityLemmata.….0.RegularityLemmata.foo`)
+    -- back to their user names so private project declarations are audited too.
     let targets := env.constants.fold (init := #[]) fun acc n _ =>
-      if auditRoot.isPrefixOf n then acc.push n else acc
+      if auditRoot.isPrefixOf (privateToUserName n) then acc.push n else acc
     let coreCtx : Core.Context := { fileName := "<axiom_audit>", fileMap := default }
     let mut audited := 0
     let mut offenders : Array (Name × Name) := #[]
