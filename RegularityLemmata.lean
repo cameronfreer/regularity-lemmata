@@ -22,6 +22,7 @@ import RegularityLemmata.Graph.Regularity
 import RegularityLemmata.Graph.Bridge
 import RegularityLemmata.Graph.RemovalBridge
 import RegularityLemmata.Graph.CutNorm
+import RegularityLemmata.Graph.FriezeKannan
 import RegularityLemmata.Graph.Strong
 
 /-!
