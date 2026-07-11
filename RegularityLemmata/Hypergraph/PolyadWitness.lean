@@ -225,6 +225,158 @@ theorem card_filter_discAtom_eq_sum_cutRefine (κ : RSet j α → Fin K)
   exact Finset.card_biUnion fun Q _ Q' _ h =>
     (polyadBlock_disjoint h).mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)
 
+/-! ### The local increment -/
+
+/-- **Local increment**: at a key carrying an actual witness in the family, the
+refinement variance strictly exceeds `δ³ · |parent block|`. The strictness comes
+from `DiscWitness.deviates`; the route is the restricted Engel-form Cauchy–Schwarz
+over the atom's resolving keys. -/
+theorem local_variance_gain {κ : RSet j α → Fin K}
+    {obs : (Fin (j + 1) → α) → Prop} [DecidablePred obs]
+    {key : Fin (j + 1) → Fin K} {δ : ℝ} (hδ : 0 < δ)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α))
+    (w : DiscWitness κ obs key δ) (hW : W key = w.faces) :
+    δ ^ 3 * ((polyadBlock κ key).card : ℝ)
+      < ∑ Q ∈ Finset.univ.filter fun Q : Fin (j + 1) → Fin (cutBound j K) =>
+          (fun i => cutRefineProj (Q i)) = key,
+          ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+            * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+                - densityOn (polyadBlock κ key) obs) ^ 2 := by
+  classical
+  have hdev : δ < |densityOn (discAtom κ key (W key)) obs
+      - densityOn (polyadBlock κ key) obs| := by
+    rw [hW]
+    exact w.deviates
+  have hlarge : δ * ((polyadBlock κ key).card : ℝ)
+      ≤ ((discAtom κ key (W key)).card : ℝ) := by
+    rw [hW]
+    exact w.large
+  -- The parent block is realized: an empty block would force `δ < 0`.
+  have hBpos : 0 < ((polyadBlock κ key).card : ℝ) := by
+    rcases Finset.eq_empty_or_nonempty (polyadBlock κ key) with hBe | hne
+    · exfalso
+      have hAe : discAtom κ key (W key) = ∅ :=
+        Finset.subset_empty.mp (hBe ▸ discAtom_subset_polyadBlock κ key (W key))
+      rw [hAe, hBe, densityOn_empty, sub_zero, abs_zero] at hdev
+      linarith
+    · exact_mod_cast Finset.card_pos.mpr hne
+  have hApos : 0 < ((discAtom κ key (W key)).card : ℝ) :=
+    lt_of_lt_of_le (by positivity) hlarge
+  -- Cardinality decompositions over the resolving keys.
+  have hcard : ((discAtom κ key (W key)).card : ℝ)
+      = ∑ Q ∈ resolvingKeys κ W key,
+          ((polyadBlock (cutRefine κ W) Q).card : ℝ) := by
+    rw [← Nat.cast_sum]
+    exact_mod_cast card_discAtom_eq_sum_cutRefine κ W key
+  have hfilter : (((discAtom κ key (W key)).filter obs).card : ℝ)
+      = ∑ Q ∈ resolvingKeys κ W key,
+          (((polyadBlock (cutRefine κ W) Q).filter obs).card : ℝ) := by
+    rw [← Nat.cast_sum]
+    exact_mod_cast card_filter_discAtom_eq_sum_cutRefine κ W key obs
+  -- The signed mass over resolving keys is the atom's total deviation.
+  have hnum : ∑ Q ∈ resolvingKeys κ W key,
+      ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+        * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+            - densityOn (polyadBlock κ key) obs)
+      = ((discAtom κ key (W key)).card : ℝ)
+        * (densityOn (discAtom κ key (W key)) obs
+            - densityOn (polyadBlock κ key) obs) := by
+    have hterm : ∀ Q, ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+        * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+            - densityOn (polyadBlock κ key) obs)
+        = (((polyadBlock (cutRefine κ W) Q).filter obs).card : ℝ)
+          - densityOn (polyadBlock κ key) obs
+            * ((polyadBlock (cutRefine κ W) Q).card : ℝ) := by
+      intro Q
+      rw [← densityOn_mul_card (polyadBlock (cutRefine κ W) Q) obs]
+      ring
+    rw [Finset.sum_congr rfl fun Q _ => hterm Q, Finset.sum_sub_distrib,
+      ← Finset.mul_sum, ← hfilter, ← hcard,
+      ← densityOn_mul_card (discAtom κ key (W key)) obs]
+    ring
+  -- Restricted Engel-form Cauchy–Schwarz over the resolving keys.
+  have hCS : ((discAtom κ key (W key)).card : ℝ)
+      * (densityOn (discAtom κ key (W key)) obs
+          - densityOn (polyadBlock κ key) obs) ^ 2
+      ≤ ∑ Q ∈ resolvingKeys κ W key,
+          ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+            * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+                - densityOn (polyadBlock κ key) obs) ^ 2 := by
+    have htitu := titu_finset
+      (fun Q => ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+        * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+            - densityOn (polyadBlock κ key) obs))
+      (fun Q => ((polyadBlock (cutRefine κ W) Q).card : ℝ))
+      (resolvingKeys κ W key)
+      (fun Q _ => Nat.cast_nonneg _)
+      (fun Q _ h0 => by rw [h0, zero_mul])
+    rw [hnum, ← hcard] at htitu
+    have hleft : (((discAtom κ key (W key)).card : ℝ)
+        * (densityOn (discAtom κ key (W key)) obs
+            - densityOn (polyadBlock κ key) obs)) ^ 2
+          / ((discAtom κ key (W key)).card : ℝ)
+        = ((discAtom κ key (W key)).card : ℝ)
+          * (densityOn (discAtom κ key (W key)) obs
+              - densityOn (polyadBlock κ key) obs) ^ 2 := by
+      field_simp
+    have hright : ∀ Q ∈ resolvingKeys κ W key,
+        (((polyadBlock (cutRefine κ W) Q).card : ℝ)
+          * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+              - densityOn (polyadBlock κ key) obs)) ^ 2
+          / ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+        = ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+          * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+              - densityOn (polyadBlock κ key) obs) ^ 2 := by
+      intro Q _
+      rcases eq_or_ne (((polyadBlock (cutRefine κ W) Q).card : ℝ)) 0 with hb | hb
+      · rw [hb, zero_mul]
+        norm_num
+      · field_simp
+    rw [hleft] at htitu
+    exact le_trans htitu (le_of_eq (Finset.sum_congr rfl hright))
+  -- Strict middle: `δ² < (deviation)²`.
+  have hsq : δ ^ 2 < (densityOn (discAtom κ key (W key)) obs
+      - densityOn (polyadBlock κ key) obs) ^ 2 := by
+    have h1 := mul_self_lt_mul_self hδ.le hdev
+    rw [abs_mul_abs_self] at h1
+    calc δ ^ 2 = δ * δ := sq δ
+      _ < _ := h1
+      _ = _ ^ 2 := (sq _).symm
+  -- Chain the estimates, extending the sum to the whole fiber at the end.
+  have hchain1 : δ ^ 3 * ((polyadBlock κ key).card : ℝ)
+      ≤ δ ^ 2 * ((discAtom κ key (W key)).card : ℝ) := by
+    have h := mul_le_mul_of_nonneg_left hlarge
+      (le_of_lt (by positivity : (0 : ℝ) < δ ^ 2))
+    calc δ ^ 3 * ((polyadBlock κ key).card : ℝ)
+        = δ ^ 2 * (δ * ((polyadBlock κ key).card : ℝ)) := by ring
+      _ ≤ δ ^ 2 * ((discAtom κ key (W key)).card : ℝ) := h
+  have hchain2 : δ ^ 2 * ((discAtom κ key (W key)).card : ℝ)
+      < ((discAtom κ key (W key)).card : ℝ)
+        * (densityOn (discAtom κ key (W key)) obs
+            - densityOn (polyadBlock κ key) obs) ^ 2 := by
+    have h := mul_lt_mul_of_pos_left hsq hApos
+    calc δ ^ 2 * ((discAtom κ key (W key)).card : ℝ)
+        = ((discAtom κ key (W key)).card : ℝ) * δ ^ 2 := by ring
+      _ < _ := h
+  have hmono : ∑ Q ∈ resolvingKeys κ W key,
+      ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+        * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+            - densityOn (polyadBlock κ key) obs) ^ 2
+      ≤ ∑ Q ∈ Finset.univ.filter fun Q : Fin (j + 1) → Fin (cutBound j K) =>
+          (fun i => cutRefineProj (Q i)) = key,
+          ((polyadBlock (cutRefine κ W) Q).card : ℝ)
+            * (densityOn (polyadBlock (cutRefine κ W) Q) obs
+                - densityOn (polyadBlock κ key) obs) ^ 2 :=
+    Finset.sum_le_sum_of_subset_of_nonneg (resolvingKeys_subset_fiber κ W key)
+      fun Q _ _ => mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _)
+  calc δ ^ 3 * ((polyadBlock κ key).card : ℝ)
+      ≤ δ ^ 2 * ((discAtom κ key (W key)).card : ℝ) := hchain1
+    _ < ((discAtom κ key (W key)).card : ℝ)
+        * (densityOn (discAtom κ key (W key)) obs
+            - densityOn (polyadBlock κ key) obs) ^ 2 := hchain2
+    _ ≤ ∑ Q ∈ resolvingKeys κ W key, _ := hCS
+    _ ≤ _ := hmono
+
 /-! ### Tests and adversarial examples -/
 
 section Tests

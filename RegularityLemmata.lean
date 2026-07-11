@@ -33,6 +33,7 @@ import RegularityLemmata.Hypergraph.PolyadRegularity
 import RegularityLemmata.Hypergraph.Triad
 import RegularityLemmata.Hypergraph.PolyadEnergy
 import RegularityLemmata.Hypergraph.PolyadWitness
+import RegularityLemmata.Hypergraph.TriadIncrement
 
 /-!
 # RegularityLemmata
