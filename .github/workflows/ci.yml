@@ -9,19 +9,22 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # actions/checkout v4.2.2, pinned to an immutable revision
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Install ripgrep
         run: sudo apt-get update && sudo apt-get install -y ripgrep
 
       - name: Install elan
+        # elan v4.2.3 installer, pinned to an immutable revision
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf \
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/b6cec7e10fe4965a605aaf60d1cb4a5837f0462b/elan-init.sh \
             | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Cache .lake
-        uses: actions/cache@v4
+        # actions/cache v4.2.3, pinned to an immutable revision
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: .lake
           key: lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml') }}
