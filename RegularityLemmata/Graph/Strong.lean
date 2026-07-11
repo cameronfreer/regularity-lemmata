@@ -194,4 +194,124 @@ example (P₀ : Finpartition ({0, 1, 2} : Finset (Fin 3))) :
             P₀.parts.card :=
   (exists_strongWitness _ _ (by norm_num) P₀).imp fun _ h => h.1
 
+/-! ### The operational meaning of the energy gap -/
+
+/-- The (un-normalized) refinement variance: the mass-weighted squared density shifts
+of refined sub-blocks against their coarse parents. -/
+noncomputable def refinementVarianceNum (Q P : Finpartition s) : ℝ :=
+  ∑ pd ∈ P.parts ×ˢ P.parts,
+    ∑ p ∈ (Q.parts.filter (· ⊆ pd.1)) ×ˢ (Q.parts.filter (· ⊆ pd.2)),
+      ((p.1.card : ℝ) * p.2.card)
+        * (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2
+
+theorem refinementVarianceNum_nonneg {Q P : Finpartition s} :
+    0 ≤ refinementVarianceNum R Q P :=
+  Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => by positivity
+
+/-- The parallel-axis identity, summed: the refinement variance is exactly the
+un-normalized energy gain. -/
+theorem refinementVarianceNum_eq {Q P : Finpartition s} (hQP : Q ≤ P) :
+    refinementVarianceNum R Q P = energyNum R Q - energyNum R P := by
+  classical
+  have hpd : ∀ S : Finset α,
+      (↑(Q.parts.filter (· ⊆ S)) : Set (Finset α)).PairwiseDisjoint id := fun S =>
+    Q.supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact Finset.filter_subset _ _)
+  have hper : ∀ pd ∈ P.parts ×ˢ P.parts,
+      (∑ p ∈ (Q.parts.filter (· ⊆ pd.1)) ×ˢ (Q.parts.filter (· ⊆ pd.2)),
+        ((p.1.card : ℝ) * p.2.card)
+          * (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2)
+      = (∑ p ∈ (Q.parts.filter (· ⊆ pd.1)) ×ˢ (Q.parts.filter (· ⊆ pd.2)),
+          blockEnergy R p.1 p.2) - blockEnergy R pd.1 pd.2 := by
+    rintro ⟨C, D⟩ hpd'
+    rw [Finset.mem_product] at hpd'
+    exact variance_eq_sum_blockEnergy_sub R _ _ (hpd C)
+      (biUnion_filter_subset_eq hQP hpd'.1) (hpd D)
+      (biUnion_filter_subset_eq hQP hpd'.2)
+  rw [refinementVarianceNum, Finset.sum_congr rfl hper, Finset.sum_sub_distrib]
+  congr 1
+  rw [← energyNum_eq_sum_refined R hQP, Finset.sum_product]
+  refine Finset.sum_congr rfl fun C _ => Finset.sum_congr rfl fun D _ => ?_
+  rw [Finset.sum_product]
+
+/-- **L² density-shift bound.** The strong witness's energy gap bounds the refinement
+variance of the fine partition against the coarse one by `δ·|s|²`. -/
+theorem StrongWitness.refinementVarianceNum_le {E : ErrorSchedule} {δ : ℝ}
+    {P₀ : Finpartition s} (w : StrongWitness R E δ P₀) :
+    refinementVarianceNum R w.fine w.coarse ≤ δ * (s.card : ℝ) ^ 2 := by
+  rw [refinementVarianceNum_eq R w.fine_le]
+  have hgap := w.energy_gap
+  rcases Nat.eq_zero_or_pos s.card with h0 | hpos
+  · have hz : ∀ P : Finpartition s, energyNum R P = 0 := by
+      intro P
+      have hparts : P.parts = ∅ := by
+        rw [← Finset.subset_empty]
+        intro C hC
+        exfalso
+        obtain ⟨x, hx⟩ := P.nonempty_of_mem_parts hC
+        have := P.le hC hx
+        rw [Finset.card_eq_zero.mp h0] at this
+        exact absurd this (Finset.notMem_empty x)
+      rw [energyNum, hparts]
+      simp
+    rw [hz, hz, h0]
+    norm_num
+  · have hs2 : (0 : ℝ) < (s.card : ℝ) ^ 2 := by
+      have : (0 : ℝ) < (s.card : ℝ) := by exact_mod_cast hpos
+      positivity
+    have h1 : energyNum R w.fine = energy R w.fine * (s.card : ℝ) ^ 2 := by
+      rw [energy, div_mul_cancel₀]
+      exact hs2.ne'
+    have h2 : energyNum R w.coarse = energy R w.coarse * (s.card : ℝ) ^ 2 := by
+      rw [energy, div_mul_cancel₀]
+      exact hs2.ne'
+    rw [h1, h2]
+    nlinarith [hgap, hs2]
+
+/-- **Exceptional-mass (Markov) consequence.** The mass of refined rectangles whose
+density shifts from their coarse parent by more than `η` is at most `(δ/η²)·|s|²` —
+the bridge a strong-witness counting theorem consumes. -/
+theorem StrongWitness.deviant_mass_le {E : ErrorSchedule} {δ : ℝ}
+    {P₀ : Finpartition s} (w : StrongWitness R E δ P₀) {η : ℝ} (hη : 0 < η) :
+    ∑ pd ∈ w.coarse.parts ×ˢ w.coarse.parts,
+      ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+          (fun p => η < |pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2|),
+        ((p.1.card : ℝ) * p.2.card)
+      ≤ δ / η ^ 2 * (s.card : ℝ) ^ 2 := by
+  classical
+  have hη2 : (0 : ℝ) < η ^ 2 := by positivity
+  have key : (∑ pd ∈ w.coarse.parts ×ˢ w.coarse.parts,
+      ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+          (fun p => η < |pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2|),
+        ((p.1.card : ℝ) * p.2.card)) * η ^ 2
+      ≤ refinementVarianceNum R w.fine w.coarse := by
+    rw [Finset.sum_mul, refinementVarianceNum]
+    refine Finset.sum_le_sum fun pd _ => ?_
+    rw [Finset.sum_mul]
+    calc ∑ p ∈ (((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+            (fun p => η < |pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2|)),
+          ((p.1.card : ℝ) * p.2.card) * η ^ 2
+        ≤ ∑ p ∈ (((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+            (fun p => η < |pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2|)),
+            ((p.1.card : ℝ) * p.2.card)
+              * (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2 := by
+          refine Finset.sum_le_sum fun p hp => ?_
+          rw [Finset.mem_filter] at hp
+          have hdev := hp.2
+          have hsq : η ^ 2 ≤ (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2 := by
+            nlinarith [sq_abs (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2),
+              abs_nonneg (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2)]
+          have hm : (0 : ℝ) ≤ (p.1.card : ℝ) * p.2.card := by positivity
+          exact mul_le_mul_of_nonneg_left hsq hm
+      _ ≤ ∑ p ∈ (w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2)),
+            ((p.1.card : ℝ) * p.2.card)
+              * (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2 := by
+          refine Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+            fun p _ _ => by positivity
+  have hvar := w.refinementVarianceNum_le (R := R)
+  rw [← le_div_iff₀ hη2] at key
+  calc _ ≤ refinementVarianceNum R w.fine w.coarse / η ^ 2 := key
+    _ ≤ δ * (s.card : ℝ) ^ 2 / η ^ 2 := (div_le_div_iff_of_pos_right hη2).mpr hvar
+    _ = δ / η ^ 2 * (s.card : ℝ) ^ 2 := by ring
+
 end RegularityLemmata
