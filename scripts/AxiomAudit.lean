@@ -1,4 +1,5 @@
 import Lean
+import RegularityLemmata
 
 /-!
 # Axiom audit
