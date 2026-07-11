@@ -224,6 +224,43 @@ theorem predicatePartition_parts_card_le (p : α → Prop) [DecidablePred p] (s 
   simpa [predicatePartition] using
     Finpartition.card_atomise_le (s := s) (F := {s.filter p})
 
+/-- Exact membership: the cells are the nonempty sets among `s.filter p` and
+`s.filter (¬ p ·)`. -/
+theorem mem_predicatePartition {p : α → Prop} [DecidablePred p] {C : Finset α} :
+    C ∈ (predicatePartition p s).parts ↔
+      C.Nonempty ∧ (C = s.filter p ∨ C = s.filter fun a => ¬ p a) := by
+  rw [predicatePartition, Finpartition.mem_atomise]
+  constructor
+  · rintro ⟨hne, Q, hQ, rfl⟩
+    refine ⟨hne, ?_⟩
+    rcases Finset.subset_singleton_iff.mp hQ with rfl | rfl
+    · right
+      ext a
+      simp only [Finset.mem_filter, Finset.mem_singleton, Finset.notMem_empty, false_iff,
+        forall_eq]
+      tauto
+    · left
+      ext a
+      simp [Finset.mem_filter]
+  · rintro ⟨hne, rfl | rfl⟩
+    · refine ⟨hne, {s.filter p}, subset_rfl, ?_⟩
+      ext a
+      simp [Finset.mem_filter]
+    · refine ⟨hne, ∅, Finset.empty_subset _, ?_⟩
+      ext a
+      simp only [Finset.mem_filter, Finset.mem_singleton, Finset.notMem_empty, false_iff,
+        forall_eq]
+      tauto
+
+/-- Exact parts formula for the predicate partition. -/
+theorem predicatePartition_parts (p : α → Prop) [DecidablePred p] (s : Finset α) :
+    (predicatePartition p s).parts
+      = ({s.filter p, s.filter fun a => ¬ p a} : Finset (Finset α)).filter
+          Finset.Nonempty := by
+  ext C
+  rw [mem_predicatePartition, Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton]
+  tauto
+
 /-! ### Tests and adversarial examples -/
 
 -- Tiny concrete partitions of {0,1,2}: singletons (⊥) and the indiscrete partition (⊤).

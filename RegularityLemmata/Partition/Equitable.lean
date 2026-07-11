@@ -93,6 +93,69 @@ theorem refineBySplit_parts_card_le (P : Finpartition s) (C : Finset α) (hC : C
     (refineBySplit P C hC A hA hAne hBne).parts.card ≤ P.parts.card + 1 :=
   (refineBySplit_parts_card_eq P C hC A hA hAne hBne).le
 
+/-! ### Exact characterizations of the split -/
+
+/-- The two-part partition consists of exactly `A` and `C \ A`. -/
+theorem twoPartition_parts {C A : Finset α} {hA : A ⊆ C} {hAne : A.Nonempty}
+    {hBne : (C \ A).Nonempty} :
+    (twoPartition C A hA hAne hBne).parts = {A, C \ A} := by
+  rw [twoPartition, Finpartition.extend_parts, Finpartition.indiscrete_parts,
+    Finset.pair_comm]
+
+/-- Exact parts formula for the one-cell split. -/
+theorem refineBySplit_parts (P : Finpartition s) (C : Finset α) (hC : C ∈ P.parts)
+    (A : Finset α) (hA : A ⊆ C) (hAne : A.Nonempty) (hBne : (C \ A).Nonempty) :
+    (refineBySplit P C hC A hA hAne hBne).parts = (P.parts.erase C) ∪ {A, C \ A} := by
+  ext b
+  simp only [refineBySplit, Finpartition.mem_bind, Finset.mem_union, Finset.mem_erase,
+    Finset.mem_insert, Finset.mem_singleton]
+  constructor
+  · rintro ⟨D, hD, hb⟩
+    by_cases h : D = C
+    · subst h
+      rw [dif_pos rfl] at hb
+      have hb' : b ∈ (twoPartition D A hA hAne hBne).parts := hb
+      rw [twoPartition_parts, Finset.mem_insert, Finset.mem_singleton] at hb'
+      exact Or.inr hb'
+    · rw [dif_neg h, Finpartition.indiscrete_parts, Finset.mem_singleton] at hb
+      subst hb
+      exact Or.inl ⟨h, hD⟩
+  · rintro (⟨hbC, hbP⟩ | hb)
+    · refine ⟨b, hbP, ?_⟩
+      rw [dif_neg hbC, Finpartition.indiscrete_parts, Finset.mem_singleton]
+    · refine ⟨C, hC, ?_⟩
+      rw [dif_pos rfl]
+      show b ∈ (twoPartition C A hA hAne hBne).parts
+      rw [twoPartition_parts, Finset.mem_insert, Finset.mem_singleton]
+      exact hb
+
+/-- Membership in the split partition. -/
+theorem mem_refineBySplit {P : Finpartition s} {C : Finset α} {hC : C ∈ P.parts}
+    {A : Finset α} {hA : A ⊆ C} {hAne : A.Nonempty} {hBne : (C \ A).Nonempty}
+    {b : Finset α} :
+    b ∈ (refineBySplit P C hC A hA hAne hBne).parts ↔
+      (b ∈ P.parts ∧ b ≠ C) ∨ b = A ∨ b = C \ A := by
+  rw [refineBySplit_parts, Finset.mem_union, Finset.mem_erase, Finset.mem_insert,
+    Finset.mem_singleton, and_comm]
+
+/-- The split pieces are parts of the split partition. -/
+theorem left_mem_refineBySplit {P : Finpartition s} {C : Finset α} (hC : C ∈ P.parts)
+    {A : Finset α} (hA : A ⊆ C) (hAne : A.Nonempty) (hBne : (C \ A).Nonempty) :
+    A ∈ (refineBySplit P C hC A hA hAne hBne).parts :=
+  mem_refineBySplit.mpr (Or.inr (Or.inl rfl))
+
+theorem sdiff_mem_refineBySplit {P : Finpartition s} {C : Finset α} (hC : C ∈ P.parts)
+    {A : Finset α} (hA : A ⊆ C) (hAne : A.Nonempty) (hBne : (C \ A).Nonempty) :
+    C \ A ∈ (refineBySplit P C hC A hA hAne hBne).parts :=
+  mem_refineBySplit.mpr (Or.inr (Or.inr rfl))
+
+/-- Every part other than the split one survives untouched. -/
+theorem mem_refineBySplit_of_ne {P : Finpartition s} {C : Finset α} (hC : C ∈ P.parts)
+    {A : Finset α} (hA : A ⊆ C) (hAne : A.Nonempty) (hBne : (C \ A).Nonempty)
+    {D : Finset α} (hD : D ∈ P.parts) (hne : D ≠ C) :
+    D ∈ (refineBySplit P C hC A hA hAne hBne).parts :=
+  mem_refineBySplit.mpr (Or.inl ⟨hD, hne⟩)
+
 /-! ### Equitabilise re-exports
 
 The consumers below are `Partition/AlmostRefines.lean` and the graph ladder. -/
