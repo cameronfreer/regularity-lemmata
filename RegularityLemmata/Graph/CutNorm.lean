@@ -2,20 +2,20 @@
 Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
-import RegularityLemmata.Graph.Weak
+import RegularityLemmata.Graph.Regularity
 
 /-!
 # Finite cut-norm approximation and Frieze–Kannan weak regularity
 
 `steppedCount R P A B` is the count predicted by the partition-stepped relation:
 each cell pair contributes its density times the trace masses `|A ∩ C| · |B ∩ D|`.
-The **cut-deviation estimate** (`cut_deviation_le`): against a weakly `ε`-regular
+The **cut-deviation estimate** (`cut_deviation_le`): against an `ε`-regular
 partition, the true count deviates from the stepped prediction, *uniformly over all
 test sets* `A, B ⊆ s`, by at most `2ε·|s|² + Σ_C |C|²` — the diagonal term charged
 explicitly, per the library's convention of postponing diagonal control to the
 equitable bridge (for an equipartition with `k` parts it is `O(|s|²/k)`).
 
-Combining with the weak regularity theorem yields the finite **Frieze–Kannan lemma**
+Combining with the partition regularity theorem yields the finite **Frieze–Kannan lemma**
 (`frieze_kannan`): every relation admits a partition of host-independently bounded size
 whose stepped approximation is cut-close to it.
 
@@ -70,11 +70,11 @@ theorem pairCount_eq_sum_inter (P : Finpartition s) (hA : A ⊆ s) (hB : B ⊆ s
   rw [pairCount, hset, Finset.card_biUnion hdisj]
   rfl
 
-/-- **Cut-deviation estimate (Frieze–Kannan form).** Against a weakly `ε`-regular
+/-- **Cut-deviation estimate (Frieze–Kannan form).** Against an `ε`-regular
 partition, the stepped prediction is uniformly cut-close to the true count: for all
 test sets `A, B ⊆ s`,
 `|count − predicted| ≤ 2ε·|s|² + Σ_C |C|²` (diagonal blocks charged explicitly). -/
-theorem cut_deviation_le {P : Finpartition s} (hreg : IsWeakRegular R ε P) (hε : 0 ≤ ε)
+theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P) (hε : 0 ≤ ε)
     (hA : A ⊆ s) (hB : B ⊆ s) :
     |(pairCount R A B : ℝ) - steppedCount R P A B|
       ≤ 2 * ε * (s.card : ℝ) ^ 2 + ∑ C ∈ P.parts, (C.card : ℝ) ^ 2 := by
@@ -217,7 +217,7 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsWeakRegular R ε P) (hε
         have : (0 : ℝ) < (s.card : ℝ) := lt_of_le_of_ne (Nat.cast_nonneg _) (Ne.symm h0)
         positivity
       have := hreg
-      rw [IsWeakRegular, badMass, div_le_iff₀ hpos] at this
+      rw [IsRegularPartition, badMass, div_le_iff₀ hpos] at this
       linarith [this]
   rw [hmass]
   linarith
@@ -226,12 +226,12 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsWeakRegular R ε P) (hε
 host-independently bounded size whose stepped approximation is cut-close to it,
 uniformly over all test rectangles. -/
 theorem frieze_kannan (hε : 0 < ε) :
-    ∃ P : Finpartition s, P.parts.card ≤ weakBound ⌈1 / ε ^ 5⌉₊ 1 ∧
+    ∃ P : Finpartition s, P.parts.card ≤ regularityBound ⌈1 / ε ^ 5⌉₊ 1 ∧
       ∀ A ⊆ s, ∀ B ⊆ s,
         |(pairCount R A B : ℝ) - steppedCount R P A B|
           ≤ 2 * ε * (s.card : ℝ) ^ 2 + ∑ C ∈ P.parts, (C.card : ℝ) ^ 2 := by
-  obtain ⟨P, _, hreg, hcard⟩ := exists_weak_regular_refinement R ⊤ hε
-  refine ⟨P, le_trans hcard (weakBound_mono _ parts_top_card_le_one), ?_⟩
+  obtain ⟨P, _, hreg, hcard⟩ := exists_regular_refinement R ⊤ hε
+  refine ⟨P, le_trans hcard (regularityBound_mono _ parts_top_card_le_one), ?_⟩
   intro A hA B hB
   exact cut_deviation_le R hreg hε.le hA hB
 

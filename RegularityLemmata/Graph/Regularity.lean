@@ -9,7 +9,7 @@ import Mathlib.Algebra.Order.Floor.Semiring
 import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
-# The global energy increment and weak regularity
+# The global energy increment and partition regularity
 
 Summing the per-pair witness bridge over the bad pairs (and plain refinement
 monotonicity over the good ones): a refinement resolving every bad pair's witness gains
@@ -18,7 +18,7 @@ the witness atomisation therefore raises the normalized energy by at least `ε�
 the part count multiplying by at most `2^(2k)`.
 
 Since the energy lives in `[0, 1]`, at most `⌈1/ε⁵⌉` rounds reach a weakly `ε`-regular
-refinement, with the explicit part-count bound `weakBound`.
+refinement, with the explicit part-count bound `regularityBound`.
 
 The bounded-iteration architecture follows mathlib's proof of Szemerédi's regularity
 lemma (`Mathlib.Combinatorics.SimpleGraph.Regularity.Lemma` and `….Increment`; see
@@ -114,37 +114,37 @@ theorem exists_refinement_energy_increment (P : Finpartition s) (hε : 0 < ε)
 /-! ### Bounded iteration -/
 
 /-- Part-count bound after `t` weak steps from `m` parts. -/
-def weakBound : ℕ → ℕ → ℕ
+def regularityBound : ℕ → ℕ → ℕ
   | 0, m => m
-  | t + 1, m => weakBound t (m * 2 ^ (2 * m))
+  | t + 1, m => regularityBound t (m * 2 ^ (2 * m))
 
-theorem le_weakBound (t m : ℕ) : m ≤ weakBound t m := by
+theorem le_regularityBound (t m : ℕ) : m ≤ regularityBound t m := by
   induction t generalizing m with
-  | zero => simp [weakBound]
+  | zero => simp [regularityBound]
   | succ t IH =>
-    rw [weakBound]
+    rw [regularityBound]
     exact le_trans (Nat.le_mul_of_pos_right m (Nat.pow_pos (by norm_num))) (IH _)
 
-theorem weakBound_mono (t : ℕ) {m m' : ℕ} (h : m ≤ m') : weakBound t m ≤ weakBound t m' := by
+theorem regularityBound_mono (t : ℕ) {m m' : ℕ} (h : m ≤ m') : regularityBound t m ≤ regularityBound t m' := by
   induction t generalizing m m' with
-  | zero => simpa [weakBound] using h
+  | zero => simpa [regularityBound] using h
   | succ t IH =>
-    rw [weakBound, weakBound]
+    rw [regularityBound, regularityBound]
     exact IH (Nat.mul_le_mul h (Nat.pow_le_pow_right (by norm_num) (by omega)))
 
 /-- **Fuel-parametrized iteration.** From energy within `t · ε⁵` of the ceiling `1`,
-`t` weak steps reach a weakly `ε`-regular refinement. -/
-theorem weak_regularity_iterate (hε : 0 < ε) :
+`t` weak steps reach an `ε`-regular refinement. -/
+theorem regularity_iterate (hε : 0 < ε) :
     ∀ (t : ℕ) (P : Finpartition s), 1 - (t : ℝ) * ε ^ 5 ≤ energy R P →
-      ∃ Q : Finpartition s, Q ≤ P ∧ IsWeakRegular R ε Q ∧
-        Q.parts.card ≤ weakBound t P.parts.card := by
+      ∃ Q : Finpartition s, Q ≤ P ∧ IsRegularPartition R ε Q ∧
+        Q.parts.card ≤ regularityBound t P.parts.card := by
   intro t
   induction t with
   | zero =>
     intro P hbudget
-    refine ⟨P, le_rfl, ?_, le_weakBound 0 _⟩
+    refine ⟨P, le_rfl, ?_, le_regularityBound 0 _⟩
     by_contra hcon
-    rw [IsWeakRegular, not_le] at hcon
+    rw [IsRegularPartition, not_le] at hcon
     obtain ⟨Q, _, hinc, _⟩ := exists_refinement_energy_increment R P hε hcon
     have h1 : energy R Q ≤ 1 := energy_le_one R
     have h2 : (1 : ℝ) ≤ energy R P := by simpa using hbudget
@@ -152,9 +152,9 @@ theorem weak_regularity_iterate (hε : 0 < ε) :
     linarith
   | succ t IH =>
     intro P hbudget
-    by_cases hreg : IsWeakRegular R ε P
-    · exact ⟨P, le_rfl, hreg, le_weakBound _ _⟩
-    · rw [IsWeakRegular, not_le] at hreg
+    by_cases hreg : IsRegularPartition R ε P
+    · exact ⟨P, le_rfl, hreg, le_regularityBound _ _⟩
+    · rw [IsRegularPartition, not_le] at hreg
       obtain ⟨P', hP'P, hinc, hcard'⟩ := exists_refinement_energy_increment R P hε hreg
       have hbudget' : 1 - (t : ℝ) * ε ^ 5 ≤ energy R P' := by
         have hexp : ((t : ℝ) + 1) * ε ^ 5 = (t : ℝ) * ε ^ 5 + ε ^ 5 := by ring
@@ -163,16 +163,16 @@ theorem weak_regularity_iterate (hε : 0 < ε) :
         linarith
       obtain ⟨Q, hQP', hQreg, hQcard⟩ := IH P' hbudget'
       refine ⟨Q, hQP'.trans hP'P, hQreg, ?_⟩
-      calc Q.parts.card ≤ weakBound t P'.parts.card := hQcard
-        _ ≤ weakBound t (P.parts.card * 2 ^ (2 * P.parts.card)) := weakBound_mono t hcard'
-        _ = weakBound (t + 1) P.parts.card := by simp only [weakBound]
+      calc Q.parts.card ≤ regularityBound t P'.parts.card := hQcard
+        _ ≤ regularityBound t (P.parts.card * 2 ^ (2 * P.parts.card)) := regularityBound_mono t hcard'
+        _ = regularityBound (t + 1) P.parts.card := by simp only [regularityBound]
 
-/-- **Weak regularity.** Every partition has a weakly `ε`-regular refinement with the
-explicit host-independent part-count bound `weakBound ⌈1/ε⁵⌉ k`. -/
-theorem exists_weak_regular_refinement (P : Finpartition s) (hε : 0 < ε) :
-    ∃ Q : Finpartition s, Q ≤ P ∧ IsWeakRegular R ε Q ∧
-      Q.parts.card ≤ weakBound ⌈1 / ε ^ 5⌉₊ P.parts.card := by
-  refine weak_regularity_iterate R hε _ P ?_
+/-- **Partition regularity.** Every partition has an `ε`-regular refinement with the
+explicit host-independent part-count bound `regularityBound ⌈1/ε⁵⌉ k`. -/
+theorem exists_regular_refinement (P : Finpartition s) (hε : 0 < ε) :
+    ∃ Q : Finpartition s, Q ≤ P ∧ IsRegularPartition R ε Q ∧
+      Q.parts.card ≤ regularityBound ⌈1 / ε ^ 5⌉₊ P.parts.card := by
+  refine regularity_iterate R hε _ P ?_
   have h0 : (0 : ℝ) ≤ energy R P := energy_nonneg R
   have hε5 : (0 : ℝ) < ε ^ 5 := by positivity
   have ht : (1 : ℝ) ≤ (⌈1 / ε ^ 5⌉₊ : ℝ) * ε ^ 5 := by
@@ -182,16 +182,16 @@ theorem exists_weak_regular_refinement (P : Finpartition s) (hε : 0 < ε) :
 
 /-! ### Tests and adversarial examples -/
 
--- weakBound computed: one step from 2 parts allows at most 2·2⁴ = 32.
-example : weakBound 1 2 = 32 := by decide
+-- regularityBound computed: one step from 2 parts allows at most 2·2⁴ = 32.
+example : regularityBound 1 2 = 32 := by decide
 
-example : weakBound 0 5 = 5 := by decide
+example : regularityBound 0 5 = 5 := by decide
 
 -- The bound is host-independent: it mentions only ε and the initial part count.
 example (P : Finpartition ({0, 1, 2} : Finset (Fin 3))) :
     ∃ Q : Finpartition ({0, 1, 2} : Finset (Fin 3)), Q ≤ P ∧
-      IsWeakRegular (fun a b : Fin 3 => a < b) (1 / 2) Q ∧
-      Q.parts.card ≤ weakBound ⌈1 / (1 / 2 : ℝ) ^ 5⌉₊ P.parts.card :=
-  exists_weak_regular_refinement _ P (by norm_num)
+      IsRegularPartition (fun a b : Fin 3 => a < b) (1 / 2) Q ∧
+      Q.parts.card ≤ regularityBound ⌈1 / (1 / 2 : ℝ) ^ 5⌉₊ P.parts.card :=
+  exists_regular_refinement _ P (by norm_num)
 
 end RegularityLemmata

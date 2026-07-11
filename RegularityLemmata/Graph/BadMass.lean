@@ -14,7 +14,9 @@ bridge, matching the energy convention of including them in `energy`).
 
 `badMassNum` is the raw mass `Σ |C||D|` over bad ordered pairs; `badMass` its
 normalization by `|s|²` under the library's zero-denominator convention. A partition is
-**weakly `ε`-regular** when its normalized bad mass is at most `ε`.
+**`ε`-regular** (`IsRegularPartition`, Szemerédi-style partition regularity — "weak
+regularity" is reserved for the Frieze–Kannan cut-norm notion in `Graph/CutNorm.lean`)
+when its normalized bad mass is at most `ε`.
 
 Ordered off-diagonal pairs follow mathlib's `Finpartition.nonUniforms`
 (`Mathlib.Combinatorics.SimpleGraph.Regularity.Uniform`). Mathlib *counts* bad pairs
@@ -42,8 +44,8 @@ noncomputable def badMassNum (P : Finpartition s) : ℝ :=
 noncomputable def badMass (P : Finpartition s) : ℝ :=
   badMassNum R ε P / (s.card : ℝ) ^ 2
 
-/-- Weak `ε`-regularity: the normalized bad mass is at most `ε`. -/
-def IsWeakRegular (P : Finpartition s) : Prop :=
+/-- `ε`-regularity of a partition: the normalized bad mass is at most `ε`. -/
+def IsRegularPartition (P : Finpartition s) : Prop :=
   badMass R ε P ≤ ε
 
 variable {P : Finpartition s}
@@ -87,8 +89,13 @@ theorem badMassNum_anti {ε ε' : ℝ} (hεε : ε ≤ ε') :
 theorem badMass_anti {ε ε' : ℝ} (hεε : ε ≤ ε') : badMass R ε' P ≤ badMass R ε P :=
   div_le_div_of_nonneg_right (badMassNum_anti R hεε) (by positivity) |>.trans_eq rfl
 
-/-- Everything is weakly `1`-regular. -/
-theorem isWeakRegular_one : IsWeakRegular R 1 P := badMass_le_one R 1
+/-- Regularity is monotone in the tolerance. -/
+theorem IsRegularPartition.mono {ε ε' : ℝ} (hεε : ε ≤ ε')
+    (h : IsRegularPartition R ε P) : IsRegularPartition R ε' P :=
+  le_trans (badMass_anti R hεε) (le_trans h hεε)
+
+/-- Everything is `1`-regular. -/
+theorem isRegularPartition_one : IsRegularPartition R 1 P := badMass_le_one R 1
 
 /-! ### Tests and adversarial examples -/
 
@@ -113,14 +120,14 @@ example : IsBadPair (fun a _ : Fin 4 => a = 0) (1 / 4) {0, 1} {2, 3} := by
 example : ¬ IsBadPair (fun a _ : Fin 4 => a = 0) (1 / 4) {0, 1} {0, 1} := fun h =>
   h.1 rfl
 
--- On the empty ground set the bad mass is 0 and every partition is weakly regular
+-- On the empty ground set the bad mass is 0 and every partition is regular
 -- at every nonnegative tolerance.
 example (P : Finpartition (∅ : Finset (Fin 3))) {ε : ℝ} (hε : 0 ≤ ε) :
-    IsWeakRegular (fun a b : Fin 3 => a < b) ε P := by
+    IsRegularPartition (fun a b : Fin 3 => a < b) ε P := by
   have h0 : badMass (fun a b : Fin 3 => a < b) ε P = 0 := by
     rw [badMass]
     simp
-  rw [IsWeakRegular, h0]
+  rw [IsRegularPartition, h0]
   exact hε
 
 end RegularityLemmata

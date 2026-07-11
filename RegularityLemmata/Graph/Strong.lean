@@ -2,22 +2,22 @@
 Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
-import RegularityLemmata.Graph.Weak
+import RegularityLemmata.Graph.Regularity
 
 /-!
 # Strong regularity via energy-gap stopping
 
 A **strong witness** for a relation `R`, an error schedule `E`, and a gap `δ` consists
-of a coarse partition and a fine refinement that is weakly `E(#coarse)`-regular while
+of a coarse partition and a fine refinement that is `E(#coarse)`-regular while
 gaining at most `δ` of energy over the coarse partition — so the fine partition is
 regular *at a tolerance chosen against the coarse complexity*, and the coarse partition
 already captures the energy. Error schedules are bundled with their positivity
 (`ErrorSchedule`); no monotonicity is required for existence.
 
-Existence (`exists_strongWitness`) iterates the weak regularity theorem: if the fine
+Existence (`exists_strongWitness`) iterates the partition regularity theorem: if the fine
 refinement gains more than `δ`, restart from it; energy lives in `[0, 1]`, so at most
 `⌈1/δ⌉` restarts occur. Part counts are bounded by iterating `monoStepBound`, a
-monotone majorant of the one-round bound `weakBound ⌈1/E(k)⁵⌉ k` (monotonicity is what
+monotone majorant of the one-round bound `regularityBound ⌈1/E(k)⁵⌉ k` (monotonicity is what
 lets early stopping compose with the closed-form bound). The bound is host-independent:
 it depends only on `E`, `δ`, and the initial part count.
 
@@ -42,7 +42,7 @@ instance : CoeFun ErrorSchedule (fun _ => ℕ → ℝ) := ⟨ErrorSchedule.toFun
 variable (R : α → α → Prop) [DecidableRel R]
 
 /-- A strong regularity witness against a starting partition `P₀`: a coarse refinement
-of `P₀` and a fine refinement of it, weakly regular at the schedule's tolerance for the
+of `P₀` and a fine refinement of it, regular at the schedule's tolerance for the
 coarse complexity, with an energy gap of at most `δ`. -/
 structure StrongWitness (E : ErrorSchedule) (δ : ℝ) (P₀ : Finpartition s) where
   /-- The coarse partition. -/
@@ -51,27 +51,27 @@ structure StrongWitness (E : ErrorSchedule) (δ : ℝ) (P₀ : Finpartition s) w
   fine : Finpartition s
   coarse_le : coarse ≤ P₀
   fine_le : fine ≤ coarse
-  /-- The fine partition is weakly regular at the tolerance chosen against the
+  /-- The fine partition is regular at the tolerance chosen against the
   coarse complexity. -/
-  fine_regular : IsWeakRegular R (E coarse.parts.card) fine
+  fine_regular : IsRegularPartition R (E coarse.parts.card) fine
   /-- The fine refinement gains at most `δ` of energy. -/
   energy_gap : energy R fine ≤ energy R coarse + δ
 
 /-! ### The monotone step bound -/
 
 /-- Monotone majorant of the one-round part-count bound
-`k ↦ weakBound ⌈1/E(k)⁵⌉ k`. -/
+`k ↦ regularityBound ⌈1/E(k)⁵⌉ k`. -/
 noncomputable def monoStepBound (E : ErrorSchedule) (m : ℕ) : ℕ :=
-  (Finset.range (m + 1)).sup fun j => weakBound ⌈1 / (E j) ^ 5⌉₊ j
+  (Finset.range (m + 1)).sup fun j => regularityBound ⌈1 / (E j) ^ 5⌉₊ j
 
 theorem stepBound_le_monoStepBound (E : ErrorSchedule) (m : ℕ) :
-    weakBound ⌈1 / (E m) ^ 5⌉₊ m ≤ monoStepBound E m := by
+    regularityBound ⌈1 / (E m) ^ 5⌉₊ m ≤ monoStepBound E m := by
   unfold monoStepBound
-  exact Finset.le_sup (f := fun j => weakBound ⌈1 / (E j) ^ 5⌉₊ j)
+  exact Finset.le_sup (f := fun j => regularityBound ⌈1 / (E j) ^ 5⌉₊ j)
     (Finset.self_mem_range_succ m)
 
 theorem le_monoStepBound (E : ErrorSchedule) (m : ℕ) : m ≤ monoStepBound E m :=
-  le_trans (le_weakBound _ _) (stepBound_le_monoStepBound E m)
+  le_trans (le_regularityBound _ _) (stepBound_le_monoStepBound E m)
 
 theorem monoStepBound_mono (E : ErrorSchedule) {m m' : ℕ} (h : m ≤ m') :
     monoStepBound E m ≤ monoStepBound E m' := by
@@ -122,19 +122,19 @@ theorem strong_iterate (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ) :
   | zero =>
     intro P hbudget
     obtain ⟨Q, hQP, hQreg, hQcard⟩ :=
-      exists_weak_regular_refinement R P (E.pos P.parts.card)
+      exists_regular_refinement R P (E.pos P.parts.card)
     have hgap : energy R Q ≤ energy R P + δ := by
       have h1 : energy R Q ≤ 1 := energy_le_one R
       have h2 : (1 : ℝ) ≤ energy R P := by simpa using hbudget
       linarith
     refine ⟨⟨P, Q, le_rfl, hQP, hQreg, hgap⟩, by simp, ?_⟩
-    calc Q.parts.card ≤ weakBound ⌈1 / (E P.parts.card) ^ 5⌉₊ P.parts.card := hQcard
+    calc Q.parts.card ≤ regularityBound ⌈1 / (E P.parts.card) ^ 5⌉₊ P.parts.card := hQcard
       _ ≤ monoStepBound E P.parts.card := stepBound_le_monoStepBound E _
       _ = (monoStepBound E)^[0 + 1] P.parts.card := by simp
   | succ t IH =>
     intro P hbudget
     obtain ⟨Q, hQP, hQreg, hQcard⟩ :=
-      exists_weak_regular_refinement R P (E.pos P.parts.card)
+      exists_regular_refinement R P (E.pos P.parts.card)
     have hQmono : Q.parts.card ≤ monoStepBound E P.parts.card :=
       le_trans hQcard (stepBound_le_monoStepBound E _)
     by_cases hgap : energy R Q ≤ energy R P + δ
