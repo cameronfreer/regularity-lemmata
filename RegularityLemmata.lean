@@ -21,6 +21,7 @@ import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.Weak
 import RegularityLemmata.Graph.Bridge
 import RegularityLemmata.Graph.CutNorm
+import RegularityLemmata.Graph.Strong
 
 /-!
 # RegularityLemmata

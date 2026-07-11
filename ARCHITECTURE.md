@@ -67,10 +67,17 @@ These conventions are frozen. Changes require an explicit owner decision recorde
 Intended results whose proofs are not yet complete are recorded here as prose — never as
 Lean `Prop` placeholders.
 
-- **Almost-refining regular equipartition** (graph ladder): an honestly stated theorem
-  producing an equitable regular partition almost-refining a given partition, consuming
-  the quantitative `AlmostRefines` bridge.
-- **Strong graph regularity with counting**, **finite Frieze–Kannan weak regularity**,
-  **triadic regular approximation**, and **colored arity-three counting/removal**:
+- **Self-regular almost-refining equipartition**: the proved
+  `exists_weakRegular_and_almostRefining_equipartition` produces a weakly regular exact
+  refinement `Q ≤ P₀` plus an equipartition `E` almost-refining both. The stronger
+  version in which `E` is *itself* weakly regular requires running equitabilisation
+  inside the energy-increment loop (transporting the energy across the exceptional
+  mass) and is deferred.
+- **Strong-witness counting**: a counting theorem that genuinely consumes a
+  `StrongWitness` (edge, triangle, path, and induced three-vertex pattern counts with
+  explicit error scales), followed by induced graph counting and finite-family induced
+  removal. This is the remaining Phase 4d sub-stage; its statements will be frozen only
+  after their falsification gates.
+- **Triadic regular approximation** and **colored arity-three counting/removal**:
   planned for later releases; statements will be frozen only after their falsification
   gates.
