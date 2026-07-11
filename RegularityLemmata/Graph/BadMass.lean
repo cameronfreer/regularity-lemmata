@@ -11,6 +11,12 @@ bridge, matching the energy convention of including them in `energy`).
 `badMassNum` is the raw mass `Σ |C||D|` over bad ordered pairs; `badMass` its
 normalization by `|s|²` under the library's zero-denominator convention. A partition is
 **weakly `ε`-regular** when its normalized bad mass is at most `ε`.
+
+Ordered off-diagonal pairs follow mathlib's `Finpartition.nonUniforms`
+(`Mathlib.Combinatorics.SimpleGraph.Regularity.Uniform`). Mathlib *counts* bad pairs
+because its argument runs on equipartitions, where all cell pairs carry comparable
+mass; weighting by `|C||D|` is this library's generalization to arbitrary partitions
+(a recorded design decision), consistent with the mass-weighted `energy`.
 -/
 
 namespace RegularityLemmata

@@ -50,7 +50,16 @@ Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
   method and its applications*, Proc. Natl. Acad. Sci. USA 102 (2005).
 - T. Tao, *A variant of the hypergraph removal lemma*, J. Combin. Theory Ser. A 113 (2006).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
-  (the mathlib development this library builds on).
+  (the mathlib development this library builds on — see
+  `Mathlib.Combinatorics.SimpleGraph.Regularity.*`).
+- C. Edmonds, A. Koutsoukou-Argyraki, L. C. Paulson, *Szemerédi's Regularity Lemma*,
+  Archive of Formal Proofs (an independent machine-checked energy-boost proof).
+- N. Alon and A. Shapira, *Testing subgraphs in directed graphs*, J. Comput. System
+  Sci. 69 (2004) (directed regularity).
+- Y. Zhao, *Graph Theory and Additive Combinatorics*, MIT lecture notes / CUP 2023
+  (the energy-increment presentation followed by the directed development here).
+- A. Schrijver, *Szemerédi's regularity lemma*, CWI notes (the mass-weighted local
+  quantity `e(A,B)²/(|A||B|)` behind `blockEnergy`).
 
 ## License
 

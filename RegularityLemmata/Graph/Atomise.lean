@@ -11,6 +11,11 @@ cuts** (`Finpartition.bind` of per-cell `Finpartition.atomise`) yields a refinem
 which every chosen witness side is a part union, with the part count multiplying by at
 most `2^(2k)` — total bound `k · 2^(2k)` (`witnessRefinement_parts_card_le`), far
 sharper than a global atomisation's `2^(k + 2k²)`.
+
+`k · 2^(2k) = k · 4^k` is exactly mathlib's one-step growth `stepBound`
+(`Mathlib.Combinatorics.SimpleGraph.Regularity.Bound`); the gluing of per-cell witness
+refinements follows the architecture of
+`Mathlib.Combinatorics.SimpleGraph.Regularity.Increment`.
 -/
 
 namespace RegularityLemmata

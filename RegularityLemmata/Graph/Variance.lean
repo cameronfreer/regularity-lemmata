@@ -16,6 +16,11 @@ The file's test section also formalizes the design fact recorded in
 `Partition/Energy.lean`: the **uniform** (count-weighted) block-mean of `d²` can
 strictly decrease under refinement — which is why the library's energy is
 mass-weighted.
+
+The mass-weighted local quantity `blockEnergy(A,B) = d(A,B)² · |A| · |B|` equals
+`e(A,B)² / (|A||B|)`, the form used in A. Schrijver's CWI notes on Szemerédi's
+regularity lemma; the variance/energy-boost route is presented in Y. Zhao, *Graph
+Theory and Additive Combinatorics*, ch. 2.
 -/
 
 namespace RegularityLemmata

@@ -9,6 +9,16 @@ pair density within `ε` of the whole block's. Thresholds and deviations are rea
 `0 < ε` assumed where substantive; regularity uses `≤ ε`, so failing it yields a
 **strict** witness: a `NonuniformWitness` records the deviating sub-rectangle as data
 (the refinement step needs the subsets definitionally, not just existentially).
+
+The predicate/negation/witness architecture follows mathlib's
+`SimpleGraph.IsUniform` / `not_isUniform_iff` and its chosen-witness API
+(`Mathlib.Combinatorics.SimpleGraph.Regularity.Uniform`), adapted to an arbitrary
+directed relation. **Deliberate divergence from mathlib:** mathlib defines uniformity
+with strict deviation `< ε` (failure gives `ε ≤` witnesses); this library uses `≤ ε`
+so that failure gives strict `ε <` witnesses — a repository API decision. Directed
+regularity in the literature: N. Alon and A. Shapira, *Testing Subgraphs in Directed
+Graphs*, JCSS 69 (2004), §3 (their multi-density digraph setting is stronger than the
+single arbitrary relation treated here).
 -/
 
 namespace RegularityLemmata

@@ -14,6 +14,12 @@ the per-pair bridge consumed by the global bad-mass increment.
 The algebra is isolated in `energy_increment_abstract`: four cells refining a parent,
 with the distinguished (witness) cell's variance against the parent mean as the gain
 (an `engel_defect_lower` + `titu_three` consequence).
+
+This is the "energy boost for an irregular pair" (Y. Zhao, *Graph Theory and Additive
+Combinatorics*, ch. 2). Machine-checked antecedents: mathlib's
+`Mathlib.Combinatorics.SimpleGraph.Regularity.Increment` (symmetric, equipartition
+setting) and the Isabelle AFP entry *Szemerédi's Regularity Lemma* by C. Edmonds,
+A. Koutsoukou-Argyraki, and L. C. Paulson.
 -/
 
 namespace RegularityLemmata
