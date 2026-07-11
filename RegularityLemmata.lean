@@ -40,6 +40,7 @@ import RegularityLemmata.Relational.Model
 import RegularityLemmata.Relational.Transport
 import RegularityLemmata.Relational.Counts
 import RegularityLemmata.Relational.Edit
+import RegularityLemmata.Relational.PatternCounts
 
 /-!
 # RegularityLemmata

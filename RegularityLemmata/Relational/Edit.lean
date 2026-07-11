@@ -216,14 +216,6 @@ theorem relativeAggregateEdit_le_one (M N : FiniteRelModel L V) :
 
 end FiniteRelModel
 
-/-- The empty language is finite relational (zero symbols, bound `0`). -/
-instance : FiniteRelational FirstOrder.Language.empty where
-  arityBound := 0
-  functionsEmpty := fun _ => inferInstanceAs (IsEmpty Empty)
-  relationsFintype := fun _ => inferInstanceAs (Fintype Empty)
-  relationsDecidableEq := fun _ => inferInstanceAs (DecidableEq Empty)
-  relationsEmptyAbove := fun _ _ => inferInstanceAs (IsEmpty Empty)
-
 /-! ### Tests and adversarial examples -/
 
 section Tests
