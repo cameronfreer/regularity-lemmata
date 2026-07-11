@@ -20,6 +20,7 @@ import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.Weak
 import RegularityLemmata.Graph.Bridge
+import RegularityLemmata.Graph.CutNorm
 
 /-!
 # RegularityLemmata
