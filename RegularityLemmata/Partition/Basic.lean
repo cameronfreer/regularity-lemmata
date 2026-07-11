@@ -56,6 +56,25 @@ theorem card_parts_inf_le (P Q : Finpartition s) :
     _ ≤ (P.parts ×ˢ Q.parts).card := Finset.card_image_le
     _ = P.parts.card * Q.parts.card := Finset.card_product _ _
 
+/-- Common refinement of a nonempty finite family: at most the product of the part
+counts. -/
+theorem card_parts_inf'_le {ι : Type*} {t : Finset ι} (ht : t.Nonempty)
+    (f : ι → Finpartition s) :
+    (t.inf' ht f).parts.card ≤ ∏ i ∈ t, (f i).parts.card := by
+  classical
+  induction t using Finset.cons_induction with
+  | empty => exact absurd ht (by simp)
+  | cons j t' hj ih =>
+    by_cases ht' : t'.Nonempty
+    · rw [Finset.inf'_cons (H := ht'), Finset.prod_cons]
+      calc (f j ⊓ t'.inf' ht' f).parts.card
+          ≤ (f j).parts.card * (t'.inf' ht' f).parts.card := card_parts_inf_le _ _
+        _ ≤ (f j).parts.card * ∏ i ∈ t', (f i).parts.card :=
+            Nat.mul_le_mul_left _ (ih ht')
+    · rw [Finset.not_nonempty_iff_eq_empty] at ht'
+      subst ht'
+      simp
+
 /-! ### Part unions -/
 
 /-- `S` is a union of parts of `P`. -/

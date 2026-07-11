@@ -49,6 +49,8 @@ Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
 - V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa, *The hypergraph regularity
   method and its applications*, Proc. Natl. Acad. Sci. USA 102 (2005).
 - T. Tao, *A variant of the hypergraph removal lemma*, J. Combin. Theory Ser. A 113 (2006).
+- M. Malliaris and S. Shelah, *Regularity lemmas for stable graphs*, Trans. Amer.
+  Math. Soc. 366 (2014) (type-space partitions behind the fiber-partition layer).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
   (the mathlib development this library builds on — see
   `Mathlib.Combinatorics.SimpleGraph.Regularity.*`).

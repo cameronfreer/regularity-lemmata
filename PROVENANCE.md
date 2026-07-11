@@ -53,4 +53,7 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   *The hypergraph regularity method and its applications*, PNAS 102 (2005); T. Tao,
   *A variant of the hypergraph removal lemma*, JCTA 113 (2006) — the hypergraph
   phases' mathematical background.
+- M. Malliaris, S. Shelah, *Regularity lemmas for stable graphs*, Trans. AMS 366
+  (2014) — type-space partitions; the finite fiber-type skeleton
+  (`Partition/Fiber.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.

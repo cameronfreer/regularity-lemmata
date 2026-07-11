@@ -13,6 +13,7 @@ import RegularityLemmata.Partition.Equitable
 import RegularityLemmata.Partition.BlockEnergy
 import RegularityLemmata.Partition.Energy
 import RegularityLemmata.Partition.AlmostRefines
+import RegularityLemmata.Partition.Fiber
 import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
