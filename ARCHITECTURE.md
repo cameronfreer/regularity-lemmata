@@ -179,7 +179,8 @@ transport, and adapters. **No relational regularity or removal theorem belongs t
 this phase**; those follow only after this API passes its falsification gates.
 
 - **Mathlib languages, directly.** No competing first-order syntax. A typeclass
-  `FirstOrder.Language.FiniteRelational` supplies `arityBound : ℕ` (an upper bound,
+  `RegularityLemmata.FiniteRelational` (kept in the library namespace so the axiom
+  audit walks it) supplies `arityBound : ℕ` (an upper bound,
   not necessarily attained), relationality, per-arity `Fintype`/`DecidableEq`, and
   emptiness above the bound (consumed through a theorem, not an aggressive
   instance). The bounded symbol type `RelSymbol L = Σ n : Fin (arityBound + 1),
