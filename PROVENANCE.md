@@ -56,11 +56,10 @@ definition or proof is cited publicly, in the relevant file docstring and here.
 - V. Rödl, J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random Structures
   Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma for regular
   k-uniform hypergraphs*, Random Structures Algorithms 28 (2006) — the `(δ, d, r)`
-  union-of-polyads regularity form (`Hypergraph/Polyad.lean`).
+  polyad regularity condition (`IsPolyadRegular` in `Hypergraph/Polyad.lean`; the
+  coarser `IsBlockUnionRegular` there is repository-specific and NOT the published
+  condition).
 - F. R. K. Chung, R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/Polyad.lean`).
-- M. Malliaris, S. Shelah, *Regularity lemmas for stable graphs*, Trans. AMS 366
-  (2014) — type-space partitions; the finite fiber-type skeleton
-  (`Partition/Fiber.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.

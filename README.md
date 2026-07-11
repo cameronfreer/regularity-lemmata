@@ -55,8 +55,6 @@ Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
   (the `(δ, d, r)` polyad regularity form).
 - F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) (discrepancy quasirandomness).
-- M. Malliaris and S. Shelah, *Regularity lemmas for stable graphs*, Trans. Amer.
-  Math. Soc. 366 (2014) (type-space partitions behind the fiber-partition layer).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
   (the mathlib development this library builds on — see
   `Mathlib.Combinatorics.SimpleGraph.Regularity.*`).
