@@ -10,6 +10,7 @@ import RegularityLemmata.Partition.BlockEnergy
 import RegularityLemmata.Partition.Energy
 import RegularityLemmata.Partition.AlmostRefines
 import RegularityLemmata.Graph.Uniformity
+import RegularityLemmata.Graph.Variance
 
 /-!
 # RegularityLemmata
