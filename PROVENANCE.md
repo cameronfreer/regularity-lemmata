@@ -1,11 +1,12 @@
 # Provenance
 
-Public intellectual dependencies of this library. All Lean source in this repository is
-original work of the copyright holder (see `LICENSE` and the per-file SPDX headers);
-the entries below record the formal developments and publications whose results,
-interfaces, or proof architectures materially inform it. No third-party source text is
-copied into this repository; mathlib and other dependencies are consumed through Lake
-as ordinary imports.
+Public intellectual dependencies of this library. All Lean source was authored by the
+copyright holder; no third-party source text is copied into this repository (see
+`LICENSE` and the per-file SPDX headers). The entries below record the formal
+developments and publications whose results, interfaces, or proof architectures
+materially inform it; mathlib and other dependencies are consumed through Lake as
+ordinary imports. Every public mathematical antecedent materially informing a
+definition or proof is cited publicly, in the relevant file docstring and here.
 
 ## Formal developments
 
@@ -18,7 +19,11 @@ as ordinary imports.
   - `Mathlib.Order.Partition.Finpartition` / `….Equipartition` and `equitabilise` —
     the partition substrate (`Partition/*.lean`);
   - `Mathlib.Combinatorics.SimpleGraph.Triangle.*`, `….DegreeSum` — triangle
-    counting/removal and edge-count conversions (`Graph/RemovalBridge.lean`).
+    counting/removal and edge-count conversions (`Graph/RemovalBridge.lean`);
+  - `Mathlib.Combinatorics.Hypergraph.Basic` (E. Spotte-Smith, B. Mehta) — mathlib's
+    set-based hypergraph type, targeted by the `UniformHypergraph.toHypergraph` bridge;
+    the finite arity-indexed representation here is deliberately separate
+    (`Hypergraph/Uniform.lean` records the rationale).
 - **Graphons in Lean 4** (C. Freer, Apache-2.0,
   <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
   `Graph/FriezeKannan.lean` ports the architecture of

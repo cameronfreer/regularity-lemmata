@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Injective
 import Mathlib.Combinatorics.SimpleGraph.Clique
+import Mathlib.Combinatorics.Hypergraph.Basic
 
 /-!
 # Uniform hypergraphs
@@ -18,6 +19,13 @@ injective-tuple realization** with its exact count
 
 and the `r = 2` / `r = 3` adapters to `SimpleGraph` — including the ordered-triangle
 conversion `= 6 · #cliqueFinset 3` deferred from the graph removal bridge.
+
+Mathlib's `Hypergraph` (`Mathlib.Combinatorics.Hypergraph.Basic`, E. Spotte-Smith and
+B. Mehta) is set-based (`Set α` vertices, `Set (Set α)` edges) and not uniformity- or
+computation-oriented; this library needs a **finite, computable, arity-indexed**
+representation so that counts are `ℕ`-valued and small instances close by `decide`,
+hence the separate `UniformHypergraph` type. The `toHypergraph` bridge embeds it into
+mathlib's notion.
 -/
 
 namespace RegularityLemmata
@@ -109,6 +117,22 @@ theorem density_complete [Fintype V] [DecidableEq V] (hr : r ≤ Fintype.card V)
 @[simp] theorem density_empty [Fintype V] : (empty r V).density = 0 := by
   unfold density empty
   simp
+
+/-- Bridge to mathlib's set-based `Hypergraph`: full vertex set, edge finsets
+coerced to sets. -/
+def toHypergraph (H : UniformHypergraph r V) : Hypergraph V where
+  vertexSet := Set.univ
+  edgeSet := (fun e : Finset V => (e : Set V)) '' ↑H.edges
+  subset_vertexSet_of_mem_edgeSet' := fun _ _ => Set.subset_univ _
+
+theorem coe_mem_toHypergraph_edgeSet {H : UniformHypergraph r V} {e : Finset V} :
+    (e : Set V) ∈ H.toHypergraph.edgeSet ↔ e ∈ H.edges := by
+  rw [toHypergraph]
+  constructor
+  · rintro ⟨e', he', heq⟩
+    rwa [← Finset.coe_injective heq]
+  · intro he
+    exact ⟨e, he, rfl⟩
 
 /-! ### The ordered injective-tuple realization -/
 

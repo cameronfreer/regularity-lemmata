@@ -68,9 +68,9 @@ Intended results whose proofs are not yet complete are recorded here as prose �
 Lean `Prop` placeholders.
 
 - **Self-regular almost-refining equipartition**: the proved
-  `exists_weakRegular_and_almostRefining_equipartition` produces a weakly regular exact
+  `exists_regular_refinement_and_almostRefining_equipartition` produces a regular exact
   refinement `Q ≤ P₀` plus an equipartition `E` almost-refining both. The stronger
-  version in which `E` is *itself* weakly regular requires running equitabilisation
+  version in which `E` is *itself* regular requires running equitabilisation
   inside the energy-increment loop (transporting the energy across the exceptional
   mass) and is deferred.
 - **Strong-witness counting**: a counting theorem that genuinely consumes a
