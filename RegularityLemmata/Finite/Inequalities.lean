@@ -3,6 +3,10 @@ import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Positivity
+import Mathlib.Tactic.Ring
 
 /-!
 # Engel-form (Titu) inequalities under the division convention
@@ -63,6 +67,19 @@ theorem titu_three {a b c p q r : ℝ} (hp : 0 ≤ p) (hq : 0 ≤ q) (hr : 0 ≤
     (fun i _ => by fin_cases i <;> assumption)
     (fun i _ => by fin_cases i <;> assumption)
   simpa [Fin.sum_univ_three, add_assoc] using this
+
+/-- Engel form with an explicit defect: the two-term inequality improves by the
+weighted squared deviation of the first cell's ratio from the pooled ratio. -/
+theorem engel_defect_lower {a b p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    (a + b) ^ 2 / (p + q) + p * (a / p - (a + b) / (p + q)) ^ 2 ≤ a ^ 2 / p + b ^ 2 / q := by
+  have hpq : (0 : ℝ) < p + q := by linarith
+  have key : a ^ 2 / p + b ^ 2 / q
+      - ((a + b) ^ 2 / (p + q) + p * (a / p - (a + b) / (p + q)) ^ 2)
+      = (a * q - b * p) ^ 2 / (q * (p + q) ^ 2) := by
+    field_simp
+    ring
+  have hnn : (0 : ℝ) ≤ (a * q - b * p) ^ 2 / (q * (p + q) ^ 2) := by positivity
+  linarith
 
 /-! ### Tests and adversarial examples -/
 
