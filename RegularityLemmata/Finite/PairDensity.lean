@@ -31,15 +31,19 @@ theorem pairDensity_nonneg : 0 ≤ pairDensity R A B := densityOn_nonneg
 
 theorem pairDensity_le_one : pairDensity R A B ≤ 1 := densityOn_le_one
 
-/-- Raw count from a density: `#pairs = d·|A||B|` when both sides are nonempty. -/
-theorem pairCount_eq_pairDensity_mul (hA : A.Nonempty) (hB : B.Nonempty) :
+/-- Raw count from the density: `#pairs = d·|A||B|`, unconditionally (an empty side
+gives `0 = d · 0`). -/
+theorem pairCount_eq_pairDensity_mul :
     (pairCount R A B : ℝ) = pairDensity R A B * (((A.card) : ℝ) * B.card) := by
-  have hpos : (0 : ℝ) < ((A.card) : ℝ) * B.card := by
-    have h1 : (0 : ℝ) < A.card := by exact_mod_cast A.card_pos.mpr hA
-    have h2 : (0 : ℝ) < B.card := by exact_mod_cast B.card_pos.mpr hB
-    exact mul_pos h1 h2
-  rw [pairDensity_eq_count_div, div_mul_cancel₀]
-  exact hpos.ne'
+  rcases eq_or_ne (((A.card) : ℝ) * B.card) 0 with hm | hm
+  · rw [hm, mul_zero]
+    rcases mul_eq_zero.mp hm with h | h
+    · rw [pairCount, Finset.card_eq_zero.mp (by exact_mod_cast h : A.card = 0)]
+      simp
+    · rw [pairCount, Finset.card_eq_zero.mp (by exact_mod_cast h : B.card = 0)]
+      simp
+  · rw [pairDensity_eq_count_div, div_mul_cancel₀]
+    exact hm
 
 /-- Sum of part cardinalities over a disjoint cover of `C` equals `|C|` (real cast). -/
 theorem sum_card_biUnion_cast [DecidableEq α] {C : Finset α} (sC : Finset (Finset α))

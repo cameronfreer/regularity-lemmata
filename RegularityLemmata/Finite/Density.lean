@@ -85,14 +85,15 @@ theorem card_filter_le_of_densityOn_le (h : densityOn S p ≤ c) :
           rw [densityOn, div_mul_cancel₀]; exact hcard.ne'
       _ ≤ c * S.card := mul_le_mul_of_nonneg_right h hcard.le
 
-/-- Count from a density lower bound. **Requires** `S.Nonempty`: on `∅` with `c > 0`
-the conclusion `c · 0 ≤ 0` holds but the hypothesis `c ≤ 0` fails to force anything —
-and with the division convention the statement would be false for `c > 0` = density. -/
-theorem le_card_filter_of_le_densityOn (hS : S.Nonempty) (h : c ≤ densityOn S p) :
+/-- Count from a density lower bound. Holds for all `S`: on `∅` the conclusion reads
+`c · 0 ≤ 0`, which is true for every `c`. -/
+theorem le_card_filter_of_le_densityOn (h : c ≤ densityOn S p) :
     c * S.card ≤ ((S.filter p).card : ℝ) := by
-  have hcard : (0 : ℝ) < S.card := by exact_mod_cast S.card_pos.mpr hS
-  calc c * S.card ≤ densityOn S p * S.card := mul_le_mul_of_nonneg_right h hcard.le
-    _ = ((S.filter p).card : ℝ) := by rw [densityOn, div_mul_cancel₀]; exact hcard.ne'
+  rcases S.eq_empty_or_nonempty with rfl | hS
+  · simp
+  · have hcard : (0 : ℝ) < S.card := by exact_mod_cast S.card_pos.mpr hS
+    calc c * S.card ≤ densityOn S p * S.card := mul_le_mul_of_nonneg_right h hcard.le
+      _ = ((S.filter p).card : ℝ) := by rw [densityOn, div_mul_cancel₀]; exact hcard.ne'
 
 /-! ### Tuple densities over boxes -/
 
@@ -151,12 +152,12 @@ theorem card_filter_product_le_of_tupleDensity_le {c : ℝ} (h : tupleDensity R�
   have := card_filter_le_of_densityOn_le h
   rwa [card_filter_piFinset_two, card_piFinset_two, Nat.cast_mul] at this
 
-/-- Count from a binary density lower bound. **Requires** nonempty sides. -/
-theorem le_card_filter_product_of_le_tupleDensity {c : ℝ} (hne : ∀ i, (A₂ i).Nonempty)
-    (h : c ≤ tupleDensity R₂ A₂) :
+/-- Count from a binary density lower bound. Holds for all boxes (empty sides give
+`c · 0 ≤ 0`). -/
+theorem le_card_filter_product_of_le_tupleDensity {c : ℝ} (h : c ≤ tupleDensity R₂ A₂) :
     c * (((A₂ 0).card : ℝ) * (A₂ 1).card)
       ≤ (((A₂ 0 ×ˢ A₂ 1).filter fun p => R₂ ![p.1, p.2]).card : ℝ) := by
-  have := le_card_filter_of_le_densityOn (Fintype.piFinset_nonempty.mpr hne) h
+  have := le_card_filter_of_le_densityOn h
   rwa [card_filter_piFinset_two, card_piFinset_two, Nat.cast_mul] at this
 
 /-! ### Tests and adversarial examples -/

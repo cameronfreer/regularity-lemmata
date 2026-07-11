@@ -14,9 +14,12 @@ These conventions are frozen. Changes require an explicit owner decision recorde
 
 - Densities are **zero on an empty denominator**, via real division's `x / 0 = 0`.
   Definitions carry no `if`-guards for emptiness.
-- Substantive theorems require denominator positivity or support nonemptiness as
-  **explicit hypotheses**. Complement identities such as `d(p) + d(¬p) = 1` are false on
-  empty supports and are only stated with a `Nonempty` hypothesis.
+- Denominator positivity or support nonemptiness is required as an **explicit
+  hypothesis exactly where it is genuinely necessary** — in particular for complement
+  and cancellation statements (`d(p) + d(¬p) = 1` is false on the empty support). It is
+  NOT added categorically: conversion inequalities such as
+  `c ≤ densityOn S p → c·|S| ≤ #filter` hold unconditionally under the convention
+  (`c · 0 ≤ 0`), and are stated guard-free.
 
 ## Injectivity policy
 
