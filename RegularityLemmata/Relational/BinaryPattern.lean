@@ -12,12 +12,12 @@ Phase 10 units 0–1 (design freeze in `ARCHITECTURE.md`): the arity discipline 
 bookkeeping.
 
 `AtMostBinary L` records that `L` has no relation symbol of arity `> 2` (as a Prop,
-not via the loose stored `arityBound`). Under it, for an injective `f`,
+not via the loose stored `arityBound`). Under it, for **any** `f`,
 `PreservesAndReflects P M f` is equivalent to three concrete conditions
 (`preservesAndReflects_iff_profiles_palettes`): nullary compatibility, agreement of
 every vertex profile along `f`, and agreement of every pair palette on distinct
-indices. (The equivalence in fact holds for arbitrary `f`; injectivity is the
-intended domain, supplied by `inducedEmbeddingCountOn`'s filter.) Every later pattern-specific count is then bookkeeping over the palette
+indices. (Injectivity is the intended domain — supplied by
+`inducedEmbeddingCountOn`'s filter — but the equivalence needs it nowhere.) Every later pattern-specific count is then bookkeeping over the palette
 machinery rather than model theory.
 
 `inducedEmbeddingCountOn P M A` counts induced embeddings landing in a prescribed box
@@ -65,9 +65,9 @@ private theorem comp_cons_one {α β : Type*} (f : α → β) (a : α) :
 
 /-! ### The reduction -/
 
-/-- **The load-bearing reduction.** For an injective `f`, preservation-and-reflection
-is exactly nullary compatibility, vertex-profile agreement, and pair-palette agreement
-on distinct indices. -/
+/-- **The load-bearing reduction.** For **any** `f`, preservation-and-reflection is
+exactly nullary compatibility, vertex-profile agreement, and pair-palette agreement on
+distinct indices (injectivity, the intended domain, is not needed). -/
 theorem preservesAndReflects_iff_profiles_palettes [AtMostBinary L]
     {P : FiniteRelModel L W} {M : FiniteRelModel L V} {f : W → V} :
     PreservesAndReflects P M f ↔ NullaryCompatible P M ∧
