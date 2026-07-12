@@ -294,3 +294,44 @@ here: **no removal summit**. A later phase begins with a counting statement free
 (two-vertex palette counts; colored directed path/triangle counts; induced
 three-vertex relational counts; then fixed-pattern / finite-family induced removal),
 which also closes the deferred strong-witness counting item.
+
+## Phase 10 design freeze (binary-palette counting through three vertices)
+
+**Counting only — no removal.** This phase closes the long-deferred strong-witness
+counting item: exact two-vertex palette counts, directed colored path and triangle
+counts, induced three-vertex relational counts, and a theorem genuinely consuming a
+`BinaryPaletteStrongWitness`. Fixed-pattern and finite-family induced **removal** are
+deferred to a later phase — global removal additionally needs control of embeddings
+whose vertices land in the same partition cell (an initial fine equipartition or an
+explicit diagonal-cell error term), which gets its own freeze.
+
+- **Arity discipline.** A dedicated `AtMostBinary L` class
+  (`∀ n, 2 < n → IsEmpty (L.Relations n)`, **not** `arityBound L ≤ 2` — the stored
+  bound is not canonical) gates every theorem that translates palette data into full
+  relational induced embeddings; without it the palette ignores higher-arity
+  relations.
+- **The reduction.** For an injective `f`, `PreservesAndReflects P M f` iff `P` and
+  `M` are nullary-compatible, share vertex profiles along `f`, and share pair palettes
+  on distinct indices — proved for arbitrary finite `W`, so every pattern-specific
+  count is bookkeeping over the palette machinery, not model theory.
+- **The counting chain.** Two-vertex counts are exactly palette pair counts; a generic
+  directed regular-degree calculus feeds directed regular path and triangle counting
+  (stated for three unrelated directed relations, with palettes as an application and
+  the error constant derived, not guessed); induced three-vertex counts reduce to
+  colored triangle counts; and the strong-witness theorem replaces fine densities with
+  coarse ones using a **pattern-local** union bound over only the three required
+  palette colors (not all `4^m`), with error explicit in `E`, `δ/η²`, the `η` product
+  perturbation, and cell masses.
+- **Transversal versus global.** Regularity controls pairs of *distinct* cells, so the
+  strong-witness count is proved first for transversal embeddings (three distinct
+  coarse cells); the nontransversal (diagonal-cell) mass is bounded by a *derived*
+  constant times `m·|s|²`, controlled by starting from an equipartition with enough
+  cells so every later coarse cell inherits the bounded initial cell size — this is
+  the key gate before any removal statement.
+- **Graph bridges** recover directed/ordinary edge, path, triangle, and induced
+  three-vertex simple-graph counts, closing the old deferred checklist item.
+
+Provenance cites the exact counting-lemma source actually followed (mathlib where its
+architecture is reused, otherwise the relevant public graph-regularity/counting
+reference). The Phase 9 language is unchanged: this is binary-palette counting, not
+general relational or hypergraph removal.
