@@ -55,6 +55,7 @@ import RegularityLemmata.Relational.BinaryStrong
 import RegularityLemmata.Relational.BinaryBridges
 import RegularityLemmata.Relational.BinaryPattern
 import RegularityLemmata.Relational.TwoVertexCounting
+import RegularityLemmata.Relational.ThreeVertexCounting
 
 /-!
 # RegularityLemmata
