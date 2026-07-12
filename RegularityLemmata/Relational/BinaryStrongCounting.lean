@@ -284,6 +284,115 @@ theorem coarseInducedEstimate_le_cube (Q : Finpartition s) :
     _ ≤ 1 * ((T 0).card * (T 1).card * (T 2).card) := mul_le_mul_of_nonneg_right hd hv
     _ = (T 0).card * (T 1).card * (T 2).card := by ring
 
+/-! ### Pair-to-triple lifting -/
+
+/-- **Lift a selected `(0,1)`-pair family to transversal triples.** The mass of transversal
+triples whose first two cells lie in `D` is at most the `D`-pair mass times `|s|` (the third
+coordinate ranges over all cells). -/
+theorem selectedPairTripleMass_zero_one_le {Q : Finpartition s}
+    {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts) :
+    ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 0, T 1) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+  have hle : ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 0, T 1) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 0, T 1) ∈ D),
+          ((T 0).card * (T 1).card * (T 2).card : ℝ) :=
+    Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.filter_subset_filter _ (Finset.filter_subset _ _)) fun T _ _ => by positivity
+  refine le_trans hle ?_
+  have hreindex : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 0, T 1) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      = ∑ q ∈ D ×ˢ Q.parts, ((q.1.1.card : ℝ) * q.1.2.card * q.2.card) := by
+    refine Finset.sum_nbij' (fun T => ((T 0, T 1), T 2)) (fun q => ![q.1.1, q.1.2, q.2])
+      (fun T hT => ?_) (fun q hq => ?_) (fun T _ => ?_) (fun q _ => ?_) (fun T _ => rfl)
+    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
+      exact Finset.mem_product.mpr ⟨hT.2, hT.1 2⟩
+    · rw [Finset.mem_product] at hq
+      have hq1 := Finset.mem_product.mp (hD hq.1)
+      rw [Finset.mem_filter, Fintype.mem_piFinset]
+      refine ⟨fun i => ?_, hq.1⟩
+      fin_cases i
+      · exact hq1.1
+      · exact hq1.2
+      · exact hq.2
+    · funext i; fin_cases i <;> rfl
+    · rfl
+  rw [hreindex, Finset.sum_product, Finset.sum_mul]
+  refine le_of_eq (Finset.sum_congr rfl fun p _ => ?_)
+  dsimp only
+  rw [← Finset.mul_sum, sum_card_parts_cast]
+
+/-- **Lift a selected `(0,2)`-pair family to transversal triples.** -/
+theorem selectedPairTripleMass_zero_two_le {Q : Finpartition s}
+    {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts) :
+    ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 0, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+  have hle : ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 0, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 0, T 2) ∈ D),
+          ((T 0).card * (T 1).card * (T 2).card : ℝ) :=
+    Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.filter_subset_filter _ (Finset.filter_subset _ _)) fun T _ _ => by positivity
+  refine le_trans hle ?_
+  have hreindex : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 0, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      = ∑ q ∈ D ×ˢ Q.parts, ((q.1.1.card : ℝ) * q.1.2.card * q.2.card) := by
+    refine Finset.sum_nbij' (fun T => ((T 0, T 2), T 1)) (fun q => ![q.1.1, q.2, q.1.2])
+      (fun T hT => ?_) (fun q hq => ?_) (fun T _ => ?_) (fun q _ => ?_) (fun T _ => by ring)
+    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
+      exact Finset.mem_product.mpr ⟨hT.2, hT.1 1⟩
+    · rw [Finset.mem_product] at hq
+      have hq1 := Finset.mem_product.mp (hD hq.1)
+      rw [Finset.mem_filter, Fintype.mem_piFinset]
+      refine ⟨fun i => ?_, hq.1⟩
+      fin_cases i
+      · exact hq1.1
+      · exact hq.2
+      · exact hq1.2
+    · funext i; fin_cases i <;> rfl
+    · rfl
+  rw [hreindex, Finset.sum_product, Finset.sum_mul]
+  refine le_of_eq (Finset.sum_congr rfl fun p _ => ?_)
+  dsimp only
+  rw [← Finset.mul_sum, sum_card_parts_cast]
+
+/-- **Lift a selected `(1,2)`-pair family to transversal triples.** -/
+theorem selectedPairTripleMass_one_two_le {Q : Finpartition s}
+    {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts) :
+    ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+  have hle : ∑ T ∈ (transversalCellTriples Q).filter (fun T => (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 1, T 2) ∈ D),
+          ((T 0).card * (T 1).card * (T 2).card : ℝ) :=
+    Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.filter_subset_filter _ (Finset.filter_subset _ _)) fun T _ _ => by positivity
+  refine le_trans hle ?_
+  have hreindex : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      = ∑ q ∈ D ×ˢ Q.parts, ((q.1.1.card : ℝ) * q.1.2.card * q.2.card) := by
+    refine Finset.sum_nbij' (fun T => ((T 1, T 2), T 0)) (fun q => ![q.2, q.1.1, q.1.2])
+      (fun T hT => ?_) (fun q hq => ?_) (fun T _ => ?_) (fun q _ => ?_) (fun T _ => by ring)
+    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
+      exact Finset.mem_product.mpr ⟨hT.2, hT.1 0⟩
+    · rw [Finset.mem_product] at hq
+      have hq1 := Finset.mem_product.mp (hD hq.1)
+      rw [Finset.mem_filter, Fintype.mem_piFinset]
+      refine ⟨fun i => ?_, hq.1⟩
+      fin_cases i
+      · exact hq.2
+      · exact hq1.1
+      · exact hq1.2
+    · funext i; fin_cases i <;> rfl
+    · rfl
+  rw [hreindex, Finset.sum_product, Finset.sum_mul]
+  refine le_of_eq (Finset.sum_congr rfl fun p _ => ?_)
+  dsimp only
+  rw [← Finset.mul_sum, sum_card_parts_cast]
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
