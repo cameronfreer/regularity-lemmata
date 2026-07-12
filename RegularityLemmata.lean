@@ -48,6 +48,7 @@ import RegularityLemmata.Relational.BinaryProfile
 import RegularityLemmata.Relational.BinaryEnergy
 import RegularityLemmata.Relational.BinaryIncrement
 import RegularityLemmata.Relational.BinaryRegularity
+import RegularityLemmata.Relational.BinaryStrong
 
 /-!
 # RegularityLemmata
