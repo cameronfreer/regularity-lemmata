@@ -43,6 +43,7 @@ import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.PatternCounts
 import RegularityLemmata.Relational.GraphAdapter
 import RegularityLemmata.Relational.HypergraphAdapters
+import RegularityLemmata.Relational.BinaryPalette
 
 /-!
 # RegularityLemmata
