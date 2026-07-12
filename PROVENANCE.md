@@ -19,7 +19,11 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   - `Mathlib.Order.Partition.Finpartition` / `….Equipartition` and `equitabilise` —
     the partition substrate (`Partition/*.lean`);
   - `Mathlib.Combinatorics.SimpleGraph.Triangle.*`, `….DegreeSum` — triangle
-    counting/removal and edge-count conversions (`Graph/RemovalBridge.lean`);
+    counting/removal and edge-count conversions (`Graph/RemovalBridge.lean`); and the
+    private lower-tail exceptional-degree architecture of `….Triangle.Counting`
+    (`badVertices`, `card_badVertices_le`; Y. Dillies, B. Mehta) is the cited antecedent
+    for the independently authored directed, two-sided exceptional-degree bound in
+    `Graph/RegularDegree.lean`;
   - `Mathlib.Combinatorics.Hypergraph.Basic` (E. Spotte-Smith, B. Mehta) — mathlib's
     set-based hypergraph type, targeted by the `UniformHypergraph.toHypergraph` bridge;
     the finite arity-indexed representation here is deliberately separate

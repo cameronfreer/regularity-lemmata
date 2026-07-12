@@ -18,11 +18,12 @@ a directed relation on a uniform pair, the prerequisite for path and triangle co
 (`lowerDegreeExceptional`/`upperDegreeExceptional`, `ε < |degreeDensity − pairDensity|`
 — equality at `ε` is *not* exceptional, matching the `≤ ε` uniformity convention) are
 each bounded by `ε·|A|` (`card_lowerDegreeExceptional_le`,
-`card_upperDegreeExceptional_le`), so their union — the absolute-deviation set — has
-the safe bound **`2·ε·|A|`** (`card_degreeExceptional_le`), not `ε·|A|`: the two tails
-are disjoint (`disjoint_lower_upper`) and can be simultaneously populated, so the union
-mass genuinely reaches their sum (see the factor-two adversarial test), while uniformity
-only bounds each tail on its own.
+`card_upperDegreeExceptional_le`), so their disjoint union — the absolute-deviation set
+(`disjoint_lower_upper`) — is bounded by adding the two separately controlled tails,
+giving the safe bound **`2·ε·|A|`** (`card_degreeExceptional_le`). Uniformity controls
+each tail only on its own; the two-tail adversarial test exhibits a pair whose two tails
+are simultaneously populated with `|union| = |lower| + |upper|`, validating the union
+decomposition (it does *not* claim the factor of two is optimal among uniform pairs).
 
 This is an independently authored directed, two-sided generalization; the lower-tail,
 positive-density proof architecture is the private `badVertices` /
@@ -65,6 +66,9 @@ theorem degreeDensity_eq (x : α) (B : Finset α) :
 
 theorem degreeDensity_nonneg (x : α) (B : Finset α) : 0 ≤ degreeDensity R x B := by
   rw [degreeDensity_eq]; positivity
+
+theorem degreeDensity_le_one (x : α) (B : Finset α) : degreeDensity R x B ≤ 1 := by
+  rw [degreeDensity]; exact pairDensity_le_one
 
 /-- Fiberwise degree sum for `pairCount`. -/
 theorem pairCount_eq_sum_degree (A B : Finset α) :
@@ -137,6 +141,13 @@ theorem isUniformPair_swapRel (hunif : IsUniformPair R A B ε) :
   rw [pairDensity_swapRel, pairDensity_swapRel]
   exact hunif hA' hB' hAc hBc
 
+omit [DecidableRel R] in
+@[simp] theorem swapRel_swapRel : swapRel (swapRel R) = R := rfl
+
+theorem isUniformPair_swapRel_iff :
+    IsUniformPair (swapRel R) B A ε ↔ IsUniformPair R A B ε :=
+  ⟨fun h => isUniformPair_swapRel (swapRel R) h, isUniformPair_swapRel R⟩
+
 /-! ### The exceptional degree sets -/
 
 /-- Left vertices whose out-degree strictly *undershoots* the pair density by `> ε`. -/
@@ -151,6 +162,20 @@ noncomputable def upperDegreeExceptional (A B : Finset α) (ε : ℝ) : Finset �
 noncomputable def degreeExceptional [DecidableEq α] (A B : Finset α) (ε : ℝ) : Finset α :=
   lowerDegreeExceptional R A B ε ∪ upperDegreeExceptional R A B ε
 
+theorem mem_lowerDegreeExceptional {x : α} :
+    x ∈ lowerDegreeExceptional R A B ε
+      ↔ x ∈ A ∧ degreeDensity R x B < pairDensity R A B - ε := by
+  rw [lowerDegreeExceptional, Finset.mem_filter]
+
+theorem mem_upperDegreeExceptional {x : α} :
+    x ∈ upperDegreeExceptional R A B ε
+      ↔ x ∈ A ∧ pairDensity R A B + ε < degreeDensity R x B := by
+  rw [upperDegreeExceptional, Finset.mem_filter]
+
+theorem degreeExceptional_subset [DecidableEq α] : degreeExceptional R A B ε ⊆ A := by
+  rw [degreeExceptional]
+  exact Finset.union_subset (Finset.filter_subset _ _) (Finset.filter_subset _ _)
+
 /-- The two tails are disjoint once `0 ≤ ε`: no vertex both under- and overshoots. -/
 theorem disjoint_lower_upper (hε : 0 ≤ ε) :
     Disjoint (lowerDegreeExceptional R A B ε) (upperDegreeExceptional R A B ε) := by
@@ -159,6 +184,33 @@ theorem disjoint_lower_upper (hε : 0 ≤ ε) :
   rw [lowerDegreeExceptional, Finset.mem_filter] at hxl
   rw [upperDegreeExceptional, Finset.mem_filter] at hxu
   linarith [hxl.2, hxu.2]
+
+theorem mem_degreeExceptional_iff [DecidableEq α] {x : α} :
+    x ∈ degreeExceptional R A B ε
+      ↔ x ∈ A ∧ ε < |degreeDensity R x B - pairDensity R A B| := by
+  rw [degreeExceptional, Finset.mem_union, mem_lowerDegreeExceptional,
+    mem_upperDegreeExceptional, lt_abs]
+  constructor
+  · rintro (⟨hx, h⟩ | ⟨hx, h⟩)
+    · exact ⟨hx, Or.inr (by linarith)⟩
+    · exact ⟨hx, Or.inl (by linarith)⟩
+  · rintro ⟨hx, h | h⟩
+    · exact Or.inr ⟨hx, by linarith⟩
+    · exact Or.inl ⟨hx, by linarith⟩
+
+/-- **Good-vertex elimination** (the form path counting consumes): a vertex of `A` that
+is not exceptional has degree within `ε` of the pair density. -/
+theorem abs_degreeDensity_sub_le_of_not_mem [DecidableEq α] {x : α} (hx : x ∈ A)
+    (hxE : x ∉ degreeExceptional R A B ε) :
+    |degreeDensity R x B - pairDensity R A B| ≤ ε := by
+  rw [mem_degreeExceptional_iff] at hxE
+  push Not at hxE
+  exact hxE hx
+
+theorem card_degreeExceptional_eq_add [DecidableEq α] (hε : 0 ≤ ε) :
+    (degreeExceptional R A B ε).card
+      = (lowerDegreeExceptional R A B ε).card + (upperDegreeExceptional R A B ε).card := by
+  rw [degreeExceptional, Finset.card_union_of_disjoint (disjoint_lower_upper R hε)]
 
 /-- **Lower-tail bound.** -/
 theorem card_lowerDegreeExceptional_le (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
@@ -257,17 +309,19 @@ example :
       show pairCount (swapRel (fun a b : Fin 3 => (a : ℕ) < b)) {0} {1, 2} = 0 from by decide]
     simp
 
--- **Factor-two adversarial test.** With `B = {2}` a single vertex, the pair density on
+-- **Two-tail adversarial test.** With `B = {2}` a single vertex, the pair density on
 -- `A = {0, 1}` is `1/2`; vertex `0` has degree `0` (a *lower* deviant) and vertex `1`
 -- has degree `1` (an *upper* deviant). At `ε = 1/4` both tails are simultaneously
 -- populated and disjoint, so the absolute-deviation set has cardinality `2 = |lower| +
--- |upper|` — the union genuinely reaches the sum of the two `ε`-bounds, which is why the
--- union bound is `2·ε·|A|` and not `ε·|A|`.
+-- |upper|`: the union genuinely reaches the sum of the two tails, which validates the
+-- `2·ε·|A|` union *decomposition*. This pair is deliberately **not** `1/4`-uniform (last
+-- conjunct), so it does not speak to optimality of the factor of two among uniform pairs.
 example :
     (0 : Fin 3) ∈ lowerDegreeExceptional (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4)
       ∧ (1 : Fin 3) ∈ upperDegreeExceptional (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4)
       ∧ Disjoint (lowerDegreeExceptional (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4))
-          (upperDegreeExceptional (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4)) := by
+          (upperDegreeExceptional (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4))
+      ∧ ¬ IsUniformPair (fun a _ : Fin 3 => a = 1) {0, 1} {2} (1 / 4) := by
   have hpd : pairDensity (fun a _ : Fin 3 => a = 1) {0, 1} {2} = 1 / 2 := by
     rw [pairDensity_eq_count_div,
       show pairCount (fun a _ : Fin 3 => a = 1) {0, 1} {2} = 1 from by decide,
@@ -279,6 +333,7 @@ example :
     rw [pairDensity_eq_count_div,
       show pairCount (fun a _ : Fin 3 => a = 1) {0} {2} = 0 from by decide]
     simp
+  have hpd0 : pairDensity (fun a _ : Fin 3 => a = 1) {0} {2} = 0 := hd0
   have hd1 : degreeDensity (fun a _ : Fin 3 => a = 1) 1 {2} = 1 := by
     show pairDensity (fun a _ : Fin 3 => a = 1) {1} {2} = 1
     rw [pairDensity_eq_count_div,
@@ -286,11 +341,19 @@ example :
       show ({1} : Finset (Fin 3)).card = 1 from by decide,
       show ({2} : Finset (Fin 3)).card = 1 from by decide]
     norm_num
-  refine ⟨?_, ?_, disjoint_lower_upper _ (by norm_num)⟩
+  refine ⟨?_, ?_, disjoint_lower_upper _ (by norm_num), ?_⟩
   · rw [lowerDegreeExceptional, Finset.mem_filter]
     exact ⟨by decide, by rw [hd0, hpd]; norm_num⟩
   · rw [upperDegreeExceptional, Finset.mem_filter]
     exact ⟨by decide, by rw [hd1, hpd]; norm_num⟩
+  · intro huni
+    have hdev := huni (show ({0} : Finset (Fin 3)) ⊆ {0, 1} by decide)
+      (subset_refl ({2} : Finset (Fin 3)))
+      (by rw [show (({0, 1} : Finset (Fin 3)).card) = 2 from by decide,
+        show (({0} : Finset (Fin 3)).card) = 1 from by decide]; norm_num)
+      (by rw [show (({2} : Finset (Fin 3)).card) = 1 from by decide]; norm_num)
+    rw [hpd0, hpd, abs_le] at hdev
+    linarith [hdev.1]
 
 -- The two-sided bound feeds any relation (statement-level).
 example (R : Fin 4 → Fin 4 → Prop) [DecidableRel R] (A B : Finset (Fin 4)) (ε : ℝ)
