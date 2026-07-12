@@ -231,3 +231,55 @@ HypergraphAdapters}.lean`); the frozen decisions are recorded for reference.
   (staging `RegularityLemmata.lean` explicitly, verified via
   `git diff --cached --name-only`) so the axiom audit sees it; small examples close
   by kernel `decide`; no wholesale palette/local-type port.
+
+## Phase 9 design freeze (finite-palette binary relational regularity)
+
+Regularizing the **binary reduct** of a finite relational model: a directed
+adaptation of the mass-weighted graph regularity and strong-regularity machinery
+(`Graph/*.lean`) over the finite relational substrate (`Relational/*.lean`), using
+mathlib's partition substrate and graph-regularity antecedents. **Not general
+relational regularity**: it says nothing about relation symbols of arity `> 2`, and
+removal is deferred to a later phase.
+
+The load-bearing decision is to regularize the **complete two-way binary palette**,
+not each relation symbol independently — separate per-symbol regularity does not
+control correlations *among* symbols, nor the *joint* forward/reverse distribution
+of one symbol, and both are needed for induced binary patterns. Loop values
+`R(v,v)` are atomized into vertex profiles rather than dismissed as collision error.
+Three kernel-`decide` falsification examples (joint-symbol correlation, direction
+correlation, loop/profile sensitivity) are permanent, justifying the full palette.
+
+- **Vertex profile**: `BinaryVertexProfile L = (L.Relations 1 → Bool) ×
+  (L.Relations 2 → Bool)`, recording every unary relation at `v` and every binary
+  loop `R(v,v)`. Nullary symbols are global constants (no partition); arity `> 2` is
+  out of scope. `#BinaryVertexProfile = 2^(#unary + #binary)`.
+- **Pair palette**: `BinaryPairPalette L = L.Relations 2 → Bool × Bool`, recording
+  every binary symbol jointly and in **both** directions `(R(a,b), R(b,a))`. Reversal
+  is explicit (`binaryPairPalette M b a = swap …`) and involutive.
+  `#BinaryPairPalette = 4^(#binary)` — `4^m`, not `2^m`.
+- **Palette regularity**: `IsBinaryPaletteRegular M ε P = ∀ c, IsRegularPartition
+  (HasBinaryPairPalette M c) ε P` — simultaneous over all palette colors, strictly
+  stronger than per-symbol regularity.
+- **Energy `≤ 1`, not `≤ #colors`**: on each nonempty block the palette densities are
+  a probability vector, so `Σ_c d_c² ≤ Σ_c d_c = 1`; mass-weighting and summing over
+  blocks keeps `binaryPaletteEnergy ≤ 1`. This is why the iteration fuel stays
+  `⌈1/ε⁵⌉`, independent of the number of palette colors.
+- **One bad color per step**: a failure yields one bad palette color; the increment
+  applies the existing directed graph theorem to it (others are refinement-monotone),
+  so the part-count recurrence is exactly the graph recurrence — witnesses are **not**
+  atomized for every color simultaneously.
+- **Summit** (`exists_binaryPalette_regular_refinement`): `∃ Q ≤ P` with
+  `Q ≤ binaryProfilePartition M s`, `IsBinaryPaletteRegular M ε Q`, and
+  `Q.parts.card ≤ binaryRegularityBound L ε P.parts.card`, host-independent. The
+  docstring states explicitly that it asserts nothing about arity `> 2`.
+- **Strong palette witness** (`BinaryPaletteStrongWitness`) reuses `ErrorSchedule`,
+  refines the profile partition, and exposes per-color `toStrongWitness` /
+  `deviant_mass_le` conversions to the existing `StrongWitness` API — the handoff to a
+  later colored counting phase (which closes the deferred strong-witness counting
+  item before any relational removal).
+
+Phase 9 ends at the profile-respecting common partition, simultaneous palette
+regularity, host-independent bounds, and the strong palette witness. It contains **no
+removal summit**. The following phase begins with a counting statement freeze
+(two-vertex palette counts; colored directed path/triangle counts; induced
+three-vertex relational counts; then fixed-pattern / finite-family induced removal).
