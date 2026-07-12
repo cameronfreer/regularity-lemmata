@@ -163,6 +163,14 @@ theorem abs_inducedEmbeddingCountOn_three_sub_le [AtMostBinary L]
 
 section Tests
 
+/-- The unique model of the empty language (no relations to interpret). -/
+private def emptyModel (V : Type*) : FiniteRelModel FirstOrder.Language.empty V :=
+  ⟨fun {_} R _ => R.elim⟩
+
+/-- A directed one-binary-symbol test model on `Fin 3`. -/
+private def dModel (p : Fin 3 → Fin 3 → Bool) : FiniteRelModel (singleRelLang 2) (Fin 3) :=
+  ⟨fun {n} _ x => if h : n = 2 then p (x (Fin.cast h.symm 0)) (x (Fin.cast h.symm 1)) else false⟩
+
 -- Nullary incompatibility forces the induced three-vertex count to zero.
 example [AtMostBinary L] {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
     {A B C : Finset V} (h : ¬ NullaryCompatible P M) :
@@ -176,18 +184,42 @@ example [AtMostBinary L] {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
     inducedEmbeddingCountOn P M ![A, B, C] = 0 :=
   inducedEmbeddingCountOn_eq_zero_of_profile_mismatch (i := 1) h
 
--- **Disjointness is genuinely necessary.** With `A = B = C = {v}` the palette triangle
--- count can be `1` (the diagonal triple `(v, v, v)`), yet the induced embedding count is
--- `0`, because the only candidate map `Fin 3 → {v}` is not injective. So the exact bridge
--- `inducedEmbeddingCountOn_three` genuinely requires the disjointness hypotheses.
-example : directedTriangleCount (fun _ _ : Fin 1 => True) (fun _ _ => True) (fun _ _ => True)
-    {0} {0} {0} = 1 := by decide
-
-example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) (M : FiniteRelModel (singleRelLang 2) (Fin 1)) :
-    inducedEmbeddingCountOn P M ![{0}, {0}, {0}] = 0 := by
+-- **Disjointness is genuinely necessary** — same pattern, model, and palette relations.
+-- In the empty language (whose unique palette is automatically realized) with `A = B = C =
+-- {0}` in `Fin 1`, the three required palette relations give triangle count `1` (the
+-- diagonal triple `(0, 0, 0)`), yet the induced embedding count is `0`, because the only
+-- candidate map `Fin 3 → {0}` is not injective. So `inducedEmbeddingCountOn_three` genuinely
+-- requires the disjointness hypotheses.
+example :
+    inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 1)) ![{0}, {0}, {0}] = 0
+      ∧ directedTriangleCount
+          (HasBinaryPairPalette (emptyModel (Fin 1)) (binaryPairPalette (emptyModel (Fin 3)) 0 1))
+          (HasBinaryPairPalette (emptyModel (Fin 1)) (binaryPairPalette (emptyModel (Fin 3)) 0 2))
+          (HasBinaryPairPalette (emptyModel (Fin 1)) (binaryPairPalette (emptyModel (Fin 3)) 1 2))
+          {0} {0} {0} = 1 := by
+  refine ⟨?_, by decide⟩
   rw [inducedEmbeddingCountOn, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
   rintro f _ ⟨hinj, _⟩
   exact absurd (hinj (Subsingleton.elim (f 0) (f 1))) (by decide)
+
+-- A concrete nonzero exact induced count: on disjoint singletons in the empty language, the
+-- single injective map `0 ↦ 0, 1 ↦ 1, 2 ↦ 2` is the only induced embedding.
+example :
+    inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3)) ![{0}, {1}, {2}] = 1 := by
+  rw [inducedEmbeddingCountOn_three (P := emptyModel (Fin 3)) (M := emptyModel (Fin 3))
+    (fun R => isEmptyElim R) (fun _ _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
+    (by decide) (by decide) (by decide)]
+  decide
+
+-- **Orientation matters.** For a directed one-symbol model (`a < b`), the required forward
+-- palette on `(0, 1)` is realized at `(0, 1)` but not at the reversed pair `(1, 0)`, so
+-- reversing a required palette color changes which pairs — hence which triangles — match.
+example :
+    HasBinaryPairPalette (dModel fun a b => decide ((a : ℕ) < b))
+        (binaryPairPalette (dModel fun a b => decide ((a : ℕ) < b)) 0 1) 0 1
+      ∧ ¬ HasBinaryPairPalette (dModel fun a b => decide ((a : ℕ) < b))
+        (binaryPairPalette (dModel fun a b => decide ((a : ℕ) < b)) 0 1) 1 0 :=
+  ⟨rfl, by decide⟩
 
 -- The three-vertex reduction, as a statement-level instance.
 example [AtMostBinary L] {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}

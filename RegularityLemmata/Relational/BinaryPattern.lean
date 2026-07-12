@@ -177,6 +177,9 @@ instance : AtMostBinary (singleRelLang 2) :=
 instance (K : ℕ) : AtMostBinary (coloredRelLang 2 K) :=
   ⟨fun _n hn => isEmpty_relations_of_lt _ hn⟩
 
+instance : AtMostBinary FirstOrder.Language.empty :=
+  ⟨fun _n _ => inferInstance⟩
+
 section Tests
 
 open FiniteRelModel
