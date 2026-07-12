@@ -23,6 +23,15 @@ density yet the wrong unary/loop profile for a coordinate.
 
 The mass identity `sum_transversal_volume_le` bounds the total box volume by `|s|³`, the
 normalization for the error terms in the strong-counting theorem.
+
+The **profile-mismatch vanishing** (`inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles`)
+lets the unfiltered actual count and the profile-filtered estimate share one index set. The
+**refinement decomposition** (`inducedEmbeddingCountOn_refinement_three`) rewrites the induced
+count over a coarse box as a sum over the fine boxes (`refinementTriples`) refining it — a
+disjoint union of `piFinset`s, not bespoke bijections — and `sum_refinement_volume_eq` records
+that refining preserves total volume. Together with the coarse-estimate bounds
+(`coarseInducedEstimate_nonneg`, `coarseInducedEstimate_le_cube`) these are the exact-rewriting
+substrate the strong-counting theorem assembles over.
 -/
 
 namespace RegularityLemmata
@@ -118,6 +127,10 @@ theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles [AtMostBinar
 def refinementFiber (Q : Finpartition s) (C : Finset V) : Finset (Finset V) :=
   Q.parts.filter (· ⊆ C)
 
+/-- The fine boxes refining a coarse box `T` coordinatewise. -/
+def refinementTriples (Q : Finpartition s) (T : Fin 3 → Finset V) : Finset (Fin 3 → Finset V) :=
+  Fintype.piFinset fun i => refinementFiber Q (T i)
+
 /-- **Box cover.** A box over coarse cells is the disjoint union of the boxes over the fine
 cells refining each coordinate. -/
 theorem piFinset_eq_biUnion_refinement {Q Pc : Finpartition s} (hQP : Q ≤ Pc)
@@ -166,8 +179,8 @@ theorem piFinset_refinement_pairwiseDisjoint {Q : Finpartition s} :
 theorem inducedEmbeddingCountOn_refinement_three {Pc : Finpartition s} (hQP : Q ≤ Pc)
     (hT : ∀ i, T i ∈ Pc.parts) :
     inducedEmbeddingCountOn P M T
-      = ∑ W ∈ Fintype.piFinset fun i => refinementFiber Q (T i),
-          inducedEmbeddingCountOn P M W := by
+      = ∑ W ∈ refinementTriples Q T, inducedEmbeddingCountOn P M W := by
+  rw [refinementTriples]
   rw [inducedEmbeddingCountOn, piFinset_eq_biUnion_refinement hQP hT, Finset.filter_biUnion,
     Finset.card_biUnion fun W hW W' hW' hWW' =>
       (piFinset_refinement_pairwiseDisjoint (Finset.mem_coe.mpr hW) (Finset.mem_coe.mpr hW') hWW').mono
@@ -205,6 +218,72 @@ theorem sum_transversal_volume_le (Q : Finpartition s) :
     _ = (s.card : ℝ) ^ 3 := by
         rw [sum_card_parts_cast Q, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
+/-- The fine cells of `Q` contained in a coarse cell partition its cardinality. -/
+theorem sum_card_filter_subset_eq {Q Pc : Finpartition s} (hQP : Q ≤ Pc) {C : Finset V}
+    (hC : C ∈ Pc.parts) :
+    ∑ A ∈ Q.parts.filter (· ⊆ C), (A.card : ℝ) = C.card := by
+  have hnat : C.card = ∑ A ∈ Q.parts.filter (· ⊆ C), A.card := by
+    conv_lhs => rw [← biUnion_filter_subset_eq hQP hC]
+    rw [Finset.card_biUnion fun A hA A' hA' hAA' =>
+      Q.disjoint (Finset.mem_coe.mpr (Finset.mem_filter.mp hA).1)
+        (Finset.mem_coe.mpr (Finset.mem_filter.mp hA').1) hAA']
+    simp
+  rw [hnat, Nat.cast_sum]
+
+/-- **Refinement volume identity.** Refining a box preserves total volume. -/
+theorem sum_refinement_volume_eq {Q Pc : Finpartition s} (hQP : Q ≤ Pc)
+    (hT : ∀ i, T i ∈ Pc.parts) :
+    ∑ W ∈ refinementTriples Q T, ((W 0).card * (W 1).card * (W 2).card : ℝ)
+      = (T 0).card * (T 1).card * (T 2).card := by
+  rw [refinementTriples]
+  calc ∑ W ∈ Fintype.piFinset (fun i => refinementFiber Q (T i)),
+          ((W 0).card * (W 1).card * (W 2).card : ℝ)
+      = ∑ W ∈ Fintype.piFinset (fun i => refinementFiber Q (T i)), ∏ i, ((W i).card : ℝ) := by
+        refine Finset.sum_congr rfl fun W _ => ?_
+        rw [Fin.prod_univ_three]
+    _ = ∏ i, ∑ A ∈ refinementFiber Q (T i), (A.card : ℝ) :=
+        (Finset.prod_univ_sum (fun i => refinementFiber Q (T i)) fun _ A => (A.card : ℝ)).symm
+    _ = ∏ i, ((T i).card : ℝ) := by
+        refine Finset.prod_congr rfl fun i _ => ?_
+        rw [refinementFiber]; exact sum_card_filter_subset_eq hQP (hT i)
+    _ = (T 0).card * (T 1).card * (T 2).card := by rw [Fin.prod_univ_three]
+
+/-! ### Bounds on the coarse estimate -/
+
+theorem coarseInducedEstimate_nonneg (Q : Finpartition s) : 0 ≤ coarseInducedEstimate P M Q := by
+  rw [coarseInducedEstimate]
+  refine Finset.sum_nonneg fun T _ => ?_
+  have h1 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 0 1))
+    (A := T 0) (B := T 1)
+  have h2 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 0 2))
+    (A := T 0) (B := T 2)
+  have h3 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 1 2))
+    (A := T 1) (B := T 2)
+  positivity
+
+theorem coarseInducedEstimate_le_cube (Q : Finpartition s) :
+    coarseInducedEstimate P M Q ≤ (s.card : ℝ) ^ 3 := by
+  rw [coarseInducedEstimate]
+  refine le_trans (Finset.sum_le_sum fun T _ => ?_)
+    (le_trans (Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      fun T _ _ => by positivity) (sum_transversal_volume_le Q))
+  have hd : pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (T 0) (T 1)
+      * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (T 0) (T 2)
+      * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2) ≤ 1 :=
+    mul_le_one₀ (mul_le_one₀ pairDensity_le_one pairDensity_nonneg pairDensity_le_one)
+      pairDensity_nonneg pairDensity_le_one
+  have hv : (0 : ℝ) ≤ (T 0).card * (T 1).card * (T 2).card := by positivity
+  calc pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (T 0) (T 1)
+        * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (T 0) (T 2)
+        * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2)
+        * (T 0).card * (T 1).card * (T 2).card
+      = (pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (T 0) (T 1)
+          * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (T 0) (T 2)
+          * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2))
+          * ((T 0).card * (T 1).card * (T 2).card) := by ring
+    _ ≤ 1 * ((T 0).card * (T 1).card * (T 2).card) := mul_le_mul_of_nonneg_right hd hv
+    _ = (T 0).card * (T 1).card * (T 2).card := by ring
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -217,6 +296,17 @@ example (P : FiniteRelModel (singleRelLang 2) (Fin 3))
   refine ⟨?_, ?_⟩
   · rw [transversalInducedCount, transversalCellTriples]; simp
   · rw [coarseInducedEstimate, transversalCellTriples]; simp
+
+-- A partition into three singleton cells has exactly `3! = 6` ordered transversal triples.
+example : (transversalCellTriples (⊥ : Finpartition (Finset.univ : Finset (Fin 3)))).card = 6 := by
+  decide
+
+-- The refinement decomposition, as a statement-level instance.
+example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) (M : FiniteRelModel (singleRelLang 2) (Fin 4))
+    {Q Pc : Finpartition (Finset.univ : Finset (Fin 4))} (hQP : Q ≤ Pc)
+    {T : Fin 3 → Finset (Fin 4)} (hT : ∀ i, T i ∈ Pc.parts) :
+    inducedEmbeddingCountOn P M T = ∑ W ∈ refinementTriples Q T, inducedEmbeddingCountOn P M W :=
+  inducedEmbeddingCountOn_refinement_three hQP hT
 
 end Tests
 
