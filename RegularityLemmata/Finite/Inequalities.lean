@@ -101,6 +101,35 @@ theorem abs_mul_sub_mul_le {x y d e : ℝ} (hx : |x| ≤ 1) (he : |e| ≤ 1) :
           (mul_le_mul_of_nonneg_right he (abs_nonneg _))
     _ = |x - d| + |y - e| := by ring
 
+/-- Three-factor perturbation bound: replacing each factor of a triple product by a nearby
+value perturbs the product by at most the sum of the three factor errors, given the
+retained factors have absolute value at most one. Consumed by strong three-vertex
+counting. -/
+theorem abs_mul_mul_sub_mul_mul_le {a b c a' b' c' : ℝ}
+    (hb : |b| ≤ 1) (hc : |c| ≤ 1) (ha' : |a'| ≤ 1) (hb' : |b'| ≤ 1) :
+    |a * b * c - a' * b' * c'| ≤ |a - a'| + |b - b'| + |c - c'| := by
+  have key : a * b * c - a' * b' * c'
+      = (a - a') * b * c + a' * (b - b') * c + a' * b' * (c - c') := by ring
+  rw [key]
+  have h1 : |(a - a') * b * c| ≤ |a - a'| := by
+    rw [abs_mul, abs_mul]
+    calc |a - a'| * |b| * |c| ≤ |a - a'| * 1 * 1 := by gcongr
+      _ = |a - a'| := by ring
+  have h2 : |a' * (b - b') * c| ≤ |b - b'| := by
+    rw [abs_mul, abs_mul]
+    calc |a'| * |b - b'| * |c| ≤ 1 * |b - b'| * 1 := by gcongr
+      _ = |b - b'| := by ring
+  have h3 : |a' * b' * (c - c')| ≤ |c - c'| := by
+    rw [abs_mul, abs_mul]
+    calc |a'| * |b'| * |c - c'| ≤ 1 * 1 * |c - c'| := by gcongr
+      _ = |c - c'| := by ring
+  have hstep : |(a - a') * b * c + a' * (b - b') * c + a' * b' * (c - c')|
+      ≤ |(a - a') * b * c| + |a' * (b - b') * c| + |a' * b' * (c - c')| := by
+    have hxy := abs_add_le ((a - a') * b * c) (a' * (b - b') * c)
+    have hxyz := abs_add_le ((a - a') * b * c + a' * (b - b') * c) (a' * b' * (c - c'))
+    linarith
+  linarith [hstep, h1, h2, h3]
+
 /-! ### Tests and adversarial examples -/
 
 -- A strict instance: (1+2)²/(1+1) = 4.5 ≤ 1 + 4 = 5.
@@ -124,5 +153,10 @@ example : ((0 : ℝ) + 0) ^ 2 / (0 + 0) ≤ 0 ^ 2 / 0 + 0 ^ 2 / 0 :=
 -- Two-factor perturbation: |0.9·0.9 − 0.8·0.8| = 0.17 ≤ 0.1 + 0.1 = 0.2.
 example : |(0.9 : ℝ) * 0.9 - 0.8 * 0.8| ≤ |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| :=
   abs_mul_sub_mul_le (by norm_num) (by norm_num)
+
+-- Three-factor perturbation.
+example : |(0.9 : ℝ) * 0.9 * 0.9 - 0.8 * 0.8 * 0.8|
+    ≤ |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| :=
+  abs_mul_mul_sub_mul_mul_le (by norm_num) (by norm_num) (by norm_num) (by norm_num)
 
 end RegularityLemmata

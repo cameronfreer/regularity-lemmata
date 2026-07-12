@@ -97,6 +97,20 @@ theorem IsRegularPartition.mono {ε ε' : ℝ} (hεε : ε ≤ ε')
 /-- Everything is `1`-regular. -/
 theorem isRegularPartition_one : IsRegularPartition R 1 P := badMass_le_one R 1
 
+/-- **Raw regularity conversion**: a regular partition has raw bad mass at most
+`ε·|s|²`. -/
+theorem badMassNum_le_of_isRegularPartition (h : IsRegularPartition R ε P) :
+    badMassNum R ε P ≤ ε * (s.card : ℝ) ^ 2 := by
+  rcases eq_or_ne ((s.card : ℝ)) 0 with h0 | h0
+  · have hle : badMassNum R ε P ≤ (s.card : ℝ) ^ 2 := badMassNum_le_sq R ε
+    rw [h0] at hle ⊢
+    simpa using hle
+  · have hpos : (0 : ℝ) < (s.card : ℝ) ^ 2 := by
+      have : (0 : ℝ) < (s.card : ℝ) := lt_of_le_of_ne (Nat.cast_nonneg _) (Ne.symm h0)
+      positivity
+    rw [IsRegularPartition, badMass, div_le_iff₀ hpos] at h
+    linarith [h]
+
 /-! ### Tests and adversarial examples -/
 
 -- A concrete bad pair: `R a b ↔ a = 0` on `Fin 4`, cells {0,1} and {2,3}. The whole

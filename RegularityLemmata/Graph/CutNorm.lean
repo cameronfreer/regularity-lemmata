@@ -215,17 +215,8 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P)
         = (∑ A ∈ P.parts, (A.card : ℝ)) * (∑ B ∈ P.parts, (B.card : ℝ)) := by
           rw [Finset.sum_mul_sum, Finset.sum_product]
       _ = (s.card : ℝ) ^ 2 := by rw [sum_card_parts_cast, sq]
-  have hbm : badMassNum R ε P ≤ ε * (s.card : ℝ) ^ 2 := by
-    rcases eq_or_ne ((s.card : ℝ)) 0 with h0 | h0
-    · have : badMassNum R ε P ≤ (s.card : ℝ) ^ 2 := badMassNum_le_sq R ε
-      rw [h0] at this ⊢
-      simpa using this
-    · have hpos : (0 : ℝ) < (s.card : ℝ) ^ 2 := by
-        have : (0 : ℝ) < (s.card : ℝ) := lt_of_le_of_ne (Nat.cast_nonneg _) (Ne.symm h0)
-        positivity
-      have := hreg
-      rw [IsRegularPartition, badMass, div_le_iff₀ hpos] at this
-      linarith [this]
+  have hbm : badMassNum R ε P ≤ ε * (s.card : ℝ) ^ 2 :=
+    badMassNum_le_of_isRegularPartition R ε hreg
   rw [hmass]
   linarith
 
