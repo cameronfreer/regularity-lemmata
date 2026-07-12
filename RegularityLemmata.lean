@@ -49,6 +49,7 @@ import RegularityLemmata.Relational.BinaryEnergy
 import RegularityLemmata.Relational.BinaryIncrement
 import RegularityLemmata.Relational.BinaryRegularity
 import RegularityLemmata.Relational.BinaryStrong
+import RegularityLemmata.Relational.BinaryBridges
 
 /-!
 # RegularityLemmata
