@@ -233,6 +233,48 @@ theorem sum_injectiveRelationCount_ofColoredHypergraph
     ← Finset.mul_sum, H.sum_card_colorClass, injectiveTupleCount_eq_descFactorial,
     Nat.descFactorial_eq_factorial_mul_choose]
 
+/-- **Exactly one color.** Every injective tuple realizes exactly one color of the
+adapter — the totality of the coloring, at the tuple level. -/
+theorem existsUnique_coloredRelSymbol_holds (H : ColoredHypergraph r K V)
+    {x : Fin r → V} (hx : Function.Injective x) :
+    ∃! c : Fin K, (ofColoredHypergraph H).Holds (coloredRelSymbol r K c) x := by
+  have hcard : (tupleRange x).card = r := card_tupleRange_of_injective hx
+  refine ⟨H.coloring ⟨tupleRange x, hcard⟩, ?_, ?_⟩
+  · show (ofColoredHypergraph H).Holds
+      (coloredRelSymbol r K (H.coloring ⟨tupleRange x, hcard⟩)) x
+    rw [ofColoredHypergraph_holds]
+    refine ⟨hx, ?_⟩
+    rw [ColoredHypergraph.mem_colorClass]
+    exact ⟨hcard, rfl⟩
+  · intro c' hc'
+    rw [ofColoredHypergraph_holds] at hc'
+    obtain ⟨-, hmem⟩ := hc'
+    rw [ColoredHypergraph.mem_colorClass] at hmem
+    obtain ⟨hc, hcolor'⟩ := hmem
+    exact hcolor'.symm
+
+/-- **Density partition of unity.** On a host with `r ≤ |V|` the per-color injective
+densities sum to `1`. -/
+theorem sum_injectiveRelationDensity_ofColoredHypergraph
+    (H : ColoredHypergraph r K V) (hr : r ≤ Fintype.card V) :
+    ∑ c : Fin K,
+        injectiveRelationDensity (ofColoredHypergraph H) (coloredRelSymbol r K c) = 1 := by
+  have hpos : (0 : ℝ) < ((Fintype.card V).descFactorial r : ℝ) := by
+    exact_mod_cast Nat.descFactorial_pos.mpr hr
+  have hsum : ∑ c : Fin K,
+        injectiveRelationDensity (ofColoredHypergraph H) (coloredRelSymbol r K c)
+      = (∑ c : Fin K,
+          (injectiveRelationCount (ofColoredHypergraph H) (coloredRelSymbol r K c) : ℝ))
+        / ((Fintype.card V).descFactorial r : ℝ) := by
+    rw [Finset.sum_div]
+    exact Finset.sum_congr rfl fun c _ => rfl
+  have hnum : (∑ c : Fin K,
+        (injectiveRelationCount (ofColoredHypergraph H) (coloredRelSymbol r K c) : ℝ))
+      = ((Fintype.card V).descFactorial r : ℝ) := by
+    rw [← Nat.cast_sum, sum_injectiveRelationCount_ofColoredHypergraph H,
+      injectiveTupleCount_eq_descFactorial]
+  rw [hsum, hnum, div_self hpos.ne']
+
 end FiniteRelModel
 
 /-! ### The colored pattern bridges -/
