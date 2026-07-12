@@ -45,6 +45,7 @@ import RegularityLemmata.Relational.GraphAdapter
 import RegularityLemmata.Relational.HypergraphAdapters
 import RegularityLemmata.Relational.BinaryPalette
 import RegularityLemmata.Relational.BinaryProfile
+import RegularityLemmata.Relational.BinaryEnergy
 
 /-!
 # RegularityLemmata
