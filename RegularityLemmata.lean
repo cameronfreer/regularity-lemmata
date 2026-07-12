@@ -26,6 +26,7 @@ import RegularityLemmata.Graph.CutNorm
 import RegularityLemmata.Graph.FriezeKannan
 import RegularityLemmata.Graph.Strong
 import RegularityLemmata.Graph.RegularDegree
+import RegularityLemmata.Graph.PathCounting
 import RegularityLemmata.Hypergraph.Uniform
 import RegularityLemmata.Hypergraph.Colored
 import RegularityLemmata.Hypergraph.Copies

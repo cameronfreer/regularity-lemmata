@@ -85,6 +85,22 @@ theorem engel_defect_lower {a b p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   have hnn : (0 : ℝ) ≤ (a * q - b * p) ^ 2 / (q * (p + q) ^ 2) := by positivity
   linarith
 
+/-- Two-factor perturbation bound: replacing each factor of a product by a nearby
+value perturbs the product by at most the sum of the factor errors, provided the
+retained factors `x` and `e` have absolute value at most one (densities are in `[0,1]`).
+Consumed by path and triangle counting. -/
+theorem abs_mul_sub_mul_le {x y d e : ℝ} (hx : |x| ≤ 1) (he : |e| ≤ 1) :
+    |x * y - d * e| ≤ |x - d| + |y - e| := by
+  have key : x * y - d * e = x * (y - e) + e * (x - d) := by ring
+  rw [key]
+  calc |x * (y - e) + e * (x - d)|
+      ≤ |x * (y - e)| + |e * (x - d)| := abs_add_le _ _
+    _ = |x| * |y - e| + |e| * |x - d| := by rw [abs_mul, abs_mul]
+    _ ≤ 1 * |y - e| + 1 * |x - d| :=
+        add_le_add (mul_le_mul_of_nonneg_right hx (abs_nonneg _))
+          (mul_le_mul_of_nonneg_right he (abs_nonneg _))
+    _ = |x - d| + |y - e| := by ring
+
 /-! ### Tests and adversarial examples -/
 
 -- A strict instance: (1+2)²/(1+1) = 4.5 ≤ 1 + 4 = 5.
@@ -104,5 +120,9 @@ example : ((1 : ℝ) + 1 + 1) ^ 2 / (1 + 1 + 1) ≤ 1 ^ 2 / 1 + 1 ^ 2 / 1 + 1 ^ 
 -- All denominators zero: both sides collapse to 0.
 example : ((0 : ℝ) + 0) ^ 2 / (0 + 0) ≤ 0 ^ 2 / 0 + 0 ^ 2 / 0 :=
   titu_two le_rfl le_rfl (fun _ => rfl) (fun _ => rfl)
+
+-- Two-factor perturbation: |0.9·0.9 − 0.8·0.8| = 0.17 ≤ 0.1 + 0.1 = 0.2.
+example : |(0.9 : ℝ) * 0.9 - 0.8 * 0.8| ≤ |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| :=
+  abs_mul_sub_mul_le (by norm_num) (by norm_num)
 
 end RegularityLemmata
