@@ -28,6 +28,11 @@ The first release concerns **finite combinatorial regularity**, developed in lay
    calculus with a frozen aggregate weighting, homomorphism and induced-embedding
    counts, and adapters for simple graphs, uniform hypergraphs, and colored
    hypergraphs.
+7. **Finite-palette binary relational regularity** — a directed binary adaptation of
+   the graph regularity and strong-regularity machinery over the relational
+   substrate: two-way pair palettes and vertex profiles, simultaneous palette
+   regularity with a host-independent bound, a weak refinement summit, and a strong
+   palette witness with a per-color handoff to the graph strong-witness API.
 
 ## Conventions
 

@@ -232,7 +232,7 @@ HypergraphAdapters}.lean`); the frozen decisions are recorded for reference.
   `git diff --cached --name-only`) so the axiom audit sees it; small examples close
   by kernel `decide`; no wholesale palette/local-type port.
 
-## Phase 9 design freeze (finite-palette binary relational regularity)
+## Phase 9 design freeze (finite-palette binary relational regularity) — COMPLETE
 
 Regularizing the **binary reduct** of a finite relational model: a directed
 adaptation of the mass-weighted graph regularity and strong-regularity machinery
@@ -283,3 +283,14 @@ regularity, host-independent bounds, and the strong palette witness. It contains
 removal summit**. The following phase begins with a counting statement freeze
 (two-vertex palette counts; colored directed path/triangle counts; induced
 three-vertex relational counts; then fixed-pattern / finite-family induced removal).
+
+All Phase 9 units are implemented (`Relational/Binary{Palette,Profile,Energy,
+Increment,Regularity,Strong,Bridges}.lean`): the two-way palettes and vertex
+profiles, the profile partition, the palette energy and regularity surface, the
+one-step increment, the weak summit `exists_binaryPalette_regular_refinement`, the
+strong witness `exists_binaryPaletteStrongWitness` with its per-color
+`toStrongWitness`/`deviant_mass_le` handoff, and the graph bridges. The phase ends
+here: **no removal summit**. A later phase begins with a counting statement freeze
+(two-vertex palette counts; colored directed path/triangle counts; induced
+three-vertex relational counts; then fixed-pattern / finite-family induced removal),
+which also closes the deferred strong-witness counting item.

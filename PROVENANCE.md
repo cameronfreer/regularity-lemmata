@@ -34,6 +34,15 @@ definition or proof is cited publicly, in the relevant file docstring and here.
     The finite `FiniteRelational` typeclass, the Boolean-valued `FiniteRelModel`
     wrapper, and the relational counts, edits, transports, and adapters
     (`Relational/*.lean`) are this repository's implementation over that foundation.
+    The binary-palette regularity layer (`Relational/Binary*.lean`) is a
+    finite-palette, directed binary adaptation of this repository's own
+    mass-weighted graph regularity and strong-regularity machinery
+    (`Graph/*.lean`), using mathlib's partition substrate and graph-regularity
+    antecedents; it is **not** a formalization of a general relational removal
+    theorem — higher arities and removal are explicitly deferred. Its mathematical
+    antecedents are those already cited for the graph ladder (Szemerédi;
+    Dillies–Mehta / mathlib; Zhao for the energy increment; Tao for the strong
+    energy-gap stopping; Alon–Shapira for the directed/induced context).
 - **Graphons in Lean 4** (C. Freer, Apache-2.0,
   <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
   `Graph/FriezeKannan.lean` ports the architecture of
