@@ -23,7 +23,9 @@ definition or proof is cited publicly, in the relevant file docstring and here.
     private lower-tail exceptional-degree architecture of `….Triangle.Counting`
     (`badVertices`, `card_badVertices_le`; Y. Dillies, B. Mehta) is the cited antecedent
     for the independently authored directed, two-sided exceptional-degree bound in
-    `Graph/RegularDegree.lean`;
+    `Graph/RegularDegree.lean` and the apex-neighborhood triangle-counting architecture in
+    `Graph/TriangleCounting.lean` (a directed, two-sided absolute-error generalization;
+    mathlib's theorem is a positive-density lower bound);
   - `Mathlib.Combinatorics.Hypergraph.Basic` (E. Spotte-Smith, B. Mehta) — mathlib's
     set-based hypergraph type, targeted by the `UniformHypergraph.toHypergraph` bridge;
     the finite arity-indexed representation here is deliberately separate

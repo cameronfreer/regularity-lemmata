@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Graph.RegularDegree
+import RegularityLemmata.Graph.PathCounting
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Inequalities
 
@@ -23,9 +24,16 @@ derived, not chosen:
   − d₁₂·|N_B(a)|·|N_C(a)|| ≤ ε·|B||C|`. When both neighborhoods are `ε`-large, uniformity
   of `(B,C)` applies; when either is small, both quantities live in `[0, |N_B||N_C|] ⊆
   [0, ε|B||C|]`, so no positive-density hypothesis is needed (this is the low-density case).
-* `2·ε + 4·ε` — the apex-degree *correlation* term: `|∑_a deg₀₁(a)·deg₀₂(a) − d₀₁·d₀₂·|A||
-  ≤ 6·ε·|A|`, split as `2·ε` on non-exceptional apexes (two-factor perturbation) plus the
-  `4·ε·|A|` mass of the two outer-degree exceptional tails.
+* `2·ε + 4·ε` — the apex-degree *correlation* term: the apex wedges `b → a → c` are a
+  directed path in `(swapRel R₀₁, R₀₂)`, so `|∑_a deg₀₁(a)·deg₀₂(a) − d₀₁·d₀₂·|A|| ≤
+  6·ε·|A|` is exactly the Unit-4 path-counting bound (`abs_directedPathCount_sub_le`) applied
+  to the transpose — reused, not re-proved (`2·ε` non-exceptional two-factor perturbation plus
+  `4·ε·|A|` exceptional degree mass, established there).
+
+The apex-neighborhood organization parallels the private counting architecture of
+`Mathlib.Combinatorics.SimpleGraph.Triangle.Counting` (Y. Dillies, B. Mehta); this is an
+independently authored directed, two-sided absolute-error generalization (mathlib's theorem
+is a positive-density lower bound).
 
 Generic in the three relations; palette colors are an application, instantiated in the
 relational bridge (which depends on `Graph/*`).
@@ -99,17 +107,6 @@ theorem directedTriangleCount_eq_sum (A B C : Finset α) :
 /-! ### The neighborhood-threshold (apex-local) bound -/
 
 omit [DecidableEq α] in
-/-- The neighborhood out-degree as a real count. -/
-private theorem card_filter_eq_degreeDensity_mul (R : α → α → Prop) [DecidableRel R]
-    (x : α) (S : Finset α) :
-    ((S.filter (R x ·)).card : ℝ) = degreeDensity R x S * S.card := by
-  rw [degreeDensity_eq]
-  rcases eq_or_ne (S.card : ℝ) 0 with h | h
-  · have hS : S = ∅ := by rw [← Finset.card_eq_zero]; exact_mod_cast h
-    subst hS; simp
-  · rw [div_mul_cancel₀ _ h]
-
-omit [DecidableEq α] in
 /-- **Neighborhood-threshold bound.** On each apex, the `R₁₂`-count inside the two
 neighborhoods is within `ε·|B||C|` of `d₁₂·|N_B(a)|·|N_C(a)|`, with no positive-density
 hypothesis (the small-neighborhood / low-density case is absorbed). -/
@@ -161,90 +158,6 @@ private theorem abs_pairCount_nbhd_sub_le (hε0 : 0 ≤ ε)
     · nlinarith [hpc1, hsmall, hM, hd12, hd12']
     · nlinarith [hpc0, hsmall, hM, hd12, hd12']
 
-/-! ### The apex-degree correlation bound -/
-
-/-- **Apex-degree correlation bound.** The average of the product of the two apex
-out-degrees is within `6·ε` of the product of the two pair densities: `2·ε` on
-non-exceptional apexes (two-factor perturbation) plus the `4·ε·|A|` mass of the two
-outer-degree exceptional tails. -/
-private theorem abs_corr_sub_le (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
-    (h01 : IsUniformPair R₀₁ A B ε) (h02 : IsUniformPair R₀₂ A C ε) :
-    |∑ a ∈ A, degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-        - pairDensity R₀₁ A B * pairDensity R₀₂ A C * A.card| ≤ 6 * ε * A.card := by
-  set E := degreeExceptional R₀₁ A B ε ∪ degreeExceptional R₀₂ A C ε with hEdef
-  have hEsub : E ⊆ A := by
-    rw [hEdef]
-    exact Finset.union_subset (degreeExceptional_subset R₀₁) (degreeExceptional_subset R₀₂)
-  have hE : (E.card : ℝ) ≤ 4 * ε * A.card := by
-    have h1 := card_degreeExceptional_le R₀₁ hε0 hε1 h01
-    have h2 := card_degreeExceptional_le R₀₂ hε0 hε1 h02
-    have hu : (E.card : ℝ)
-        ≤ ((degreeExceptional R₀₁ A B ε).card : ℝ) + (degreeExceptional R₀₂ A C ε).card := by
-      rw [hEdef]; exact_mod_cast Finset.card_union_le _ _
-    linarith
-  have hbad : ∀ a ∈ E, |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-      - pairDensity R₀₁ A B * pairDensity R₀₂ A C| ≤ 1 := by
-    intro a _
-    have hu1 : degreeDensity R₀₁ a B * degreeDensity R₀₂ a C ≤ 1 := by
-      nlinarith [degreeDensity_nonneg R₀₁ a B, degreeDensity_le_one R₀₁ a B,
-        degreeDensity_nonneg R₀₂ a C, degreeDensity_le_one R₀₂ a C]
-    have hu0 : 0 ≤ degreeDensity R₀₁ a B * degreeDensity R₀₂ a C :=
-      mul_nonneg (degreeDensity_nonneg _ _ _) (degreeDensity_nonneg _ _ _)
-    have hv1 : pairDensity R₀₁ A B * pairDensity R₀₂ A C ≤ 1 := by
-      nlinarith [pairDensity_nonneg (R := R₀₁) (A := A) (B := B),
-        pairDensity_le_one (R := R₀₁) (A := A) (B := B),
-        pairDensity_nonneg (R := R₀₂) (A := A) (B := C),
-        pairDensity_le_one (R := R₀₂) (A := A) (B := C)]
-    have hv0 : 0 ≤ pairDensity R₀₁ A B * pairDensity R₀₂ A C :=
-      mul_nonneg pairDensity_nonneg pairDensity_nonneg
-    rw [abs_le]
-    constructor <;> linarith
-  have hgood : ∀ a ∈ A \ E, |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-      - pairDensity R₀₁ A B * pairDensity R₀₂ A C| ≤ 2 * ε := by
-    intro a ha
-    rw [Finset.mem_sdiff] at ha
-    obtain ⟨haA, haE⟩ := ha
-    rw [hEdef, Finset.mem_union, not_or] at haE
-    obtain ⟨ha1, ha2⟩ := haE
-    have hgA : |degreeDensity R₀₁ a B - pairDensity R₀₁ A B| ≤ ε :=
-      abs_degreeDensity_sub_le_of_not_mem R₀₁ haA ha1
-    have hgC : |degreeDensity R₀₂ a C - pairDensity R₀₂ A C| ≤ ε :=
-      abs_degreeDensity_sub_le_of_not_mem R₀₂ haA ha2
-    have hx1 : |degreeDensity R₀₁ a B| ≤ 1 := by
-      rw [abs_of_nonneg (degreeDensity_nonneg _ _ _)]; exact degreeDensity_le_one _ _ _
-    have he1 : |pairDensity R₀₂ A C| ≤ 1 := by
-      rw [abs_of_nonneg pairDensity_nonneg]; exact pairDensity_le_one
-    calc |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-          - pairDensity R₀₁ A B * pairDensity R₀₂ A C|
-        ≤ |degreeDensity R₀₁ a B - pairDensity R₀₁ A B|
-          + |degreeDensity R₀₂ a C - pairDensity R₀₂ A C| := abs_mul_sub_mul_le hx1 he1
-      _ ≤ 2 * ε := by linarith
-  have hconst : (∑ _a ∈ A, pairDensity R₀₁ A B * pairDensity R₀₂ A C)
-      = pairDensity R₀₁ A B * pairDensity R₀₂ A C * A.card := by
-    rw [Finset.sum_const, nsmul_eq_mul, mul_comm]
-  rw [show (∑ a ∈ A, degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-        - pairDensity R₀₁ A B * pairDensity R₀₂ A C * A.card)
-      = ∑ a ∈ A, (degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-          - pairDensity R₀₁ A B * pairDensity R₀₂ A C) from by
-    rw [Finset.sum_sub_distrib, hconst]]
-  refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
-  have hcard : ((A \ E).card : ℝ) ≤ A.card := by exact_mod_cast Finset.card_le_card Finset.sdiff_subset
-  calc ∑ a ∈ A, |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-        - pairDensity R₀₁ A B * pairDensity R₀₂ A C|
-      = ∑ a ∈ A \ E, |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-            - pairDensity R₀₁ A B * pairDensity R₀₂ A C|
-        + ∑ a ∈ E, |degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-            - pairDensity R₀₁ A B * pairDensity R₀₂ A C| := (Finset.sum_sdiff hEsub).symm
-    _ ≤ ∑ _a ∈ A \ E, 2 * ε + ∑ _a ∈ E, (1 : ℝ) :=
-        add_le_add (Finset.sum_le_sum hgood) (Finset.sum_le_sum hbad)
-    _ = 2 * ε * (A \ E).card + E.card := by
-        rw [Finset.sum_const, Finset.sum_const, nsmul_eq_mul, nsmul_eq_mul]; ring
-    _ ≤ 2 * ε * A.card + 4 * ε * A.card := by
-        have hmul : 2 * ε * ((A \ E).card : ℝ) ≤ 2 * ε * A.card :=
-          mul_le_mul_of_nonneg_left hcard (by linarith)
-        linarith
-    _ = 6 * ε * A.card := by ring
-
 /-! ### The triangle-counting approximation -/
 
 /-- **Triangle-count approximation.** Under `ε`-uniformity of all three pairs, the
@@ -260,11 +173,17 @@ theorem abs_directedTriangleCount_sub_le (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
   have hfib : (directedTriangleCount R₀₁ R₀₂ R₁₂ A B C : ℝ)
       = ∑ a ∈ A, (pairCount R₁₂ (B.filter (R₀₁ a ·)) (C.filter (R₀₂ a ·)) : ℝ) := by
     rw [directedTriangleCount_eq_sum, Nat.cast_sum]
+  -- The apex wedges `b → a → c` form a directed path in `(swapRel R₀₁, R₀₂)`.
+  have hW : (directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)
+      = ∑ a ∈ A, ((B.filter (R₀₁ a ·)).card : ℝ) * (C.filter (R₀₂ a ·)).card := by
+    rw [directedPathCount_eq_sum, Nat.cast_sum]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    push_cast
+    rfl
   have hstep1 : |(directedTriangleCount R₀₁ R₀₂ R₁₂ A B C : ℝ)
-      - ∑ a ∈ A, pairDensity R₁₂ B C
-          * ((B.filter (R₀₁ a ·)).card * (C.filter (R₀₂ a ·)).card)|
+      - pairDensity R₁₂ B C * (directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)|
       ≤ ε * A.card * B.card * C.card := by
-    rw [hfib, ← Finset.sum_sub_distrib]
+    rw [hfib, hW, Finset.mul_sum, ← Finset.sum_sub_distrib]
     refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
     calc ∑ a ∈ A, |(pairCount R₁₂ (B.filter (R₀₁ a ·)) (C.filter (R₀₂ a ·)) : ℝ)
             - pairDensity R₁₂ B C
@@ -272,44 +191,40 @@ theorem abs_directedTriangleCount_sub_le (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
         ≤ ∑ _a ∈ A, ε * B.card * C.card :=
           Finset.sum_le_sum fun a _ => abs_pairCount_nbhd_sub_le R₀₁ R₀₂ R₁₂ hε0 h12 a
       _ = ε * A.card * B.card * C.card := by rw [Finset.sum_const, nsmul_eq_mul]; ring
-  have hQ : (∑ a ∈ A, pairDensity R₁₂ B C
-        * ((B.filter (R₀₁ a ·)).card * (C.filter (R₀₂ a ·)).card))
-      = pairDensity R₁₂ B C * B.card * C.card
-          * ∑ a ∈ A, degreeDensity R₀₁ a B * degreeDensity R₀₂ a C := by
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun a _ => ?_
-    rw [card_filter_eq_degreeDensity_mul, card_filter_eq_degreeDensity_mul]; ring
-  have hstep2 : |(∑ a ∈ A, pairDensity R₁₂ B C
-        * ((B.filter (R₀₁ a ·)).card * (C.filter (R₀₂ a ·)).card))
+  -- The wedge count is `6·ε`-close to `d₀₁·d₀₂·|A||B||C|` — Unit 4 on the transpose.
+  have hcorr : |(directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)
+      - pairDensity R₀₁ A B * pairDensity R₀₂ A C * (A.card * B.card * C.card)|
+      ≤ 6 * ε * (A.card * B.card * C.card) := by
+    have hpath := abs_directedPathCount_sub_le (swapRel R₀₁) R₀₂ hε0 hε1
+      (isUniformPair_swapRel R₀₁ h01) h02
+    rw [pairDensity_swapRel] at hpath
+    rw [show pairDensity R₀₁ A B * pairDensity R₀₂ A C * (↑A.card * ↑B.card * ↑C.card)
+          = pairDensity R₀₁ A B * pairDensity R₀₂ A C * ↑B.card * ↑A.card * ↑C.card from by ring,
+      show (6 : ℝ) * ε * (↑A.card * ↑B.card * ↑C.card) = 6 * ε * ↑B.card * ↑A.card * ↑C.card
+        from by ring]
+    exact hpath
+  have hstep2 : |pairDensity R₁₂ B C * (directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)
       - pairDensity R₀₁ A B * pairDensity R₀₂ A C * pairDensity R₁₂ B C
           * A.card * B.card * C.card|
       ≤ 6 * ε * A.card * B.card * C.card := by
-    rw [hQ,
-      show pairDensity R₀₁ A B * pairDensity R₀₂ A C * pairDensity R₁₂ B C
-            * ↑A.card * ↑B.card * ↑C.card
-        = pairDensity R₁₂ B C * ↑B.card * ↑C.card
-            * (pairDensity R₀₁ A B * pairDensity R₀₂ A C * ↑A.card) from by ring,
-      ← mul_sub, abs_mul,
-      abs_of_nonneg (mul_nonneg (mul_nonneg pairDensity_nonneg (Nat.cast_nonneg _))
-        (Nat.cast_nonneg _) : (0 : ℝ) ≤ pairDensity R₁₂ B C * ↑B.card * ↑C.card)]
-    have hcorr := abs_corr_sub_le R₀₁ R₀₂ hε0 hε1 h01 h02
-    calc pairDensity R₁₂ B C * ↑B.card * ↑C.card
-          * |∑ a ∈ A, degreeDensity R₀₁ a B * degreeDensity R₀₂ a C
-              - pairDensity R₀₁ A B * pairDensity R₀₂ A C * ↑A.card|
-        ≤ 1 * ↑B.card * ↑C.card * (6 * ε * ↑A.card) :=
-          mul_le_mul
-            (mul_le_mul_of_nonneg_right
-              (mul_le_mul_of_nonneg_right pairDensity_le_one (by positivity)) (by positivity))
-            hcorr (abs_nonneg _) (by positivity)
+    rw [show pairDensity R₀₁ A B * pairDensity R₀₂ A C * pairDensity R₁₂ B C
+          * ↑A.card * ↑B.card * ↑C.card
+        = pairDensity R₁₂ B C
+            * (pairDensity R₀₁ A B * pairDensity R₀₂ A C * (↑A.card * ↑B.card * ↑C.card))
+        from by ring,
+      ← mul_sub, abs_mul, abs_of_nonneg pairDensity_nonneg]
+    calc pairDensity R₁₂ B C
+          * |(directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)
+              - pairDensity R₀₁ A B * pairDensity R₀₂ A C * (↑A.card * ↑B.card * ↑C.card)|
+        ≤ 1 * (6 * ε * (↑A.card * ↑B.card * ↑C.card)) :=
+          mul_le_mul pairDensity_le_one hcorr (abs_nonneg _) (by norm_num)
       _ = 6 * ε * A.card * B.card * C.card := by ring
   calc |(directedTriangleCount R₀₁ R₀₂ R₁₂ A B C : ℝ)
         - pairDensity R₀₁ A B * pairDensity R₀₂ A C * pairDensity R₁₂ B C
             * A.card * B.card * C.card|
       ≤ |(directedTriangleCount R₀₁ R₀₂ R₁₂ A B C : ℝ)
-            - ∑ a ∈ A, pairDensity R₁₂ B C
-                * ((B.filter (R₀₁ a ·)).card * (C.filter (R₀₂ a ·)).card)|
-        + |(∑ a ∈ A, pairDensity R₁₂ B C
-                * ((B.filter (R₀₁ a ·)).card * (C.filter (R₀₂ a ·)).card))
+            - pairDensity R₁₂ B C * (directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)|
+        + |pairDensity R₁₂ B C * (directedPathCount (swapRel R₀₁) R₀₂ B A C : ℝ)
             - pairDensity R₀₁ A B * pairDensity R₀₂ A C * pairDensity R₁₂ B C
                 * A.card * B.card * C.card| := abs_sub_le _ _ _
     _ ≤ ε * A.card * B.card * C.card + 6 * ε * A.card * B.card * C.card :=
@@ -392,11 +307,11 @@ example : directedTriangleCount (fun _ _ : Fin 2 => True) (fun _ _ => True) (fun
 example : directedTriangleCount (fun a b : Fin 3 => (a : ℕ) < b) (fun a c => (a : ℕ) < c)
     (fun b c => (b : ℕ) < c) {0} {1} {2} = 1 := by decide
 
--- **Regularity is necessary.** Three relations each of pairwise density `1/2` on `Fin 2`,
--- but with *no* triangle: `a = b`, `a = c`, `b ≠ c` forces `a = b = c` yet `b ≠ c`. The
--- naive product estimate `d₀₁·d₀₂·d₁₂·|A||B||C| = (1/2)³·8 = 1` is wrong (true count `0`)
--- because these unstructured relations are not regular — pairwise densities alone do not
--- determine the triangle count.
+-- **Pairwise densities alone do not determine the triangle count.** Three relations each of
+-- pairwise density `1/2` on `Fin 2`, but with *no* triangle: `a = b`, `a = c`, `b ≠ c` forces
+-- `a = b = c` yet `b ≠ c`. The naive product estimate `d₀₁·d₀₂·d₁₂·|A||B||C| = (1/2)³·8 = 1`
+-- is wrong (true count `0`); the three pairwise densities do not pin down the count. (This is
+-- why the theorem's uniformity hypotheses are needed, beyond mere density values.)
 example :
     directedTriangleCount (fun a b : Fin 2 => a = b) (fun a c => a = c) (fun b c => b ≠ c)
         {0, 1} {0, 1} {0, 1} = 0
