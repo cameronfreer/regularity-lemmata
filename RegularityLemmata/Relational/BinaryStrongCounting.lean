@@ -65,4 +65,86 @@ theorem sum_refinement_isBadPair_mass_eq {Q Pc : Finpartition s} (hQP : Q ≤ Pc
   rw [← sum_selectedFinePairs_mass (sel := fun _ p => IsBadPair R τ p.1 p.2),
     selectedFinePairs_isBadPair_eq hQP R τ, badMassNum]
 
+/-! ### Common-index expansions -/
+
+open FirstOrder FiniteRelModel
+
+variable {L : FirstOrder.Language} [FiniteRelational L]
+
+/-- The product of the three required palette densities on a box. -/
+noncomputable def requiredPaletteProduct (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (T : Fin 3 → Finset V) : ℝ :=
+  pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (T 0) (T 1) *
+    pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (T 0) (T 2) *
+    pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2)
+
+/-- The box volume. -/
+def cellTripleVolume (T : Fin 3 → Finset V) : ℝ :=
+  (T 0).card * (T 1).card * (T 2).card
+
+omit [DecidableEq V] in
+theorem cellTripleVolume_nonneg (T : Fin 3 → Finset V) : 0 ≤ cellTripleVolume T := by
+  rw [cellTripleVolume]; positivity
+
+omit [DecidableEq V] in
+theorem requiredPaletteProduct_nonneg (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (T : Fin 3 → Finset V) : 0 ≤ requiredPaletteProduct P M T := by
+  rw [requiredPaletteProduct]
+  have h1 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 0 1))
+    (A := T 0) (B := T 1)
+  have h2 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 0 2))
+    (A := T 0) (B := T 2)
+  have h3 := pairDensity_nonneg (R := HasBinaryPairPalette M (binaryPairPalette P 1 2))
+    (A := T 1) (B := T 2)
+  positivity
+
+omit [DecidableEq V] in
+theorem requiredPaletteProduct_le_one (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (T : Fin 3 → Finset V) : requiredPaletteProduct P M T ≤ 1 :=
+  mul_le_one₀ (mul_le_one₀ pairDensity_le_one pairDensity_nonneg pairDensity_le_one)
+    pairDensity_nonneg pairDensity_le_one
+
+/-- The fine step estimate: the actual estimate expanded over the fine refinement, using the
+**fine** cells' palette densities. -/
+noncomputable def fineInducedEstimate (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (Q Pc : Finpartition s) : ℝ :=
+  ∑ T ∈ (transversalCellTriples Pc).filter (MatchesThreeProfiles P M),
+    ∑ W ∈ refinementTriples Q T, requiredPaletteProduct P M W * cellTripleVolume W
+
+variable {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} {Q Pc : Finpartition s}
+
+/-- **Actual count over the common fine index.** -/
+theorem transversalInducedCount_eq_sum_refinement_of_profiled [AtMostBinary L]
+    (hQP : Q ≤ Pc) (hprofile : Pc ≤ binaryProfilePartition M s) :
+    (transversalInducedCount P M Pc : ℝ)
+      = ∑ T ∈ (transversalCellTriples Pc).filter (MatchesThreeProfiles P M),
+          ∑ W ∈ refinementTriples Q T, (inducedEmbeddingCountOn P M W : ℝ) := by
+  rw [transversalInducedCount, Nat.cast_sum,
+    ← Finset.sum_filter_add_sum_filter_not (transversalCellTriples Pc) (MatchesThreeProfiles P M)
+      (fun T => (inducedEmbeddingCountOn P M T : ℝ))]
+  have hzero : ∑ T ∈ (transversalCellTriples Pc).filter (fun T => ¬ MatchesThreeProfiles P M T),
+      (inducedEmbeddingCountOn P M T : ℝ) = 0 := by
+    refine Finset.sum_eq_zero fun T hT => ?_
+    rw [Finset.mem_filter] at hT
+    rw [inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles hprofile
+      (fun i => transversalCellTriples_cell_mem hT.1 i) hT.2, Nat.cast_zero]
+  rw [hzero, add_zero]
+  refine Finset.sum_congr rfl fun T hT => ?_
+  rw [Finset.mem_filter] at hT
+  rw [inducedEmbeddingCountOn_refinement_three hQP
+    (fun i => transversalCellTriples_cell_mem hT.1 i), Nat.cast_sum]
+
+/-- **Coarse estimate over the common fine index** (using the coarse density on each box). -/
+theorem coarseInducedEstimate_eq_sum_refinement (hQP : Q ≤ Pc) :
+    coarseInducedEstimate P M Pc
+      = ∑ T ∈ (transversalCellTriples Pc).filter (MatchesThreeProfiles P M),
+          ∑ W ∈ refinementTriples Q T, requiredPaletteProduct P M T * cellTripleVolume W := by
+  rw [coarseInducedEstimate]
+  refine Finset.sum_congr rfl fun T hT => ?_
+  rw [Finset.mem_filter] at hT
+  have hvol : ∑ W ∈ refinementTriples Q T, cellTripleVolume W = cellTripleVolume T :=
+    sum_refinement_volume_eq hQP (fun i => transversalCellTriples_cell_mem hT.1 i)
+  rw [← Finset.mul_sum, hvol, requiredPaletteProduct, cellTripleVolume]
+  ring
+
 end RegularityLemmata
