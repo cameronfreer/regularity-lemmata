@@ -58,6 +58,7 @@ import RegularityLemmata.Relational.TwoVertexCounting
 import RegularityLemmata.Relational.ThreeVertexCounting
 import RegularityLemmata.Relational.TransversalCounting
 import RegularityLemmata.Relational.StrongCountingLifting
+import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 import RegularityLemmata.Relational.BinaryStrongCounting
 
 /-!
