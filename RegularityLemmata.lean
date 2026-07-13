@@ -61,6 +61,7 @@ import RegularityLemmata.Relational.StrongCountingLifting
 import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 import RegularityLemmata.Relational.BinaryStrongCounting
 import RegularityLemmata.Relational.DiagonalGate
+import RegularityLemmata.Relational.GraphCounting
 
 /-!
 # RegularityLemmata
