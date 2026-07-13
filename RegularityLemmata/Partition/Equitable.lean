@@ -180,6 +180,12 @@ theorem equitabilise_uncovered_card_le {h : a * m + b * (m + 1) = s.card} {t : F
     (t \ ((P.equitabilise h).parts.filter (· ⊆ t)).biUnion id).card ≤ m :=
   P.card_parts_equitabilise_subset_le (h := h) ht
 
+/-- **Equipartition part-size bound.** Every cell of an equipartition has cardinality at most
+`|s| / #parts + 1`. -/
+theorem forall_card_le_of_isEquipartition (hP : P.IsEquipartition) :
+    ∀ B ∈ P.parts, B.card ≤ s.card / P.parts.card + 1 :=
+  fun _ hB => hP.card_part_le_average_add_one hB
+
 /-! ### Tests and adversarial examples -/
 
 -- `twoPartition` on an explicit 4-element finset.

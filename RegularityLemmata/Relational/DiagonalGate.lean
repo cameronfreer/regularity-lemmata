@@ -62,6 +62,63 @@ theorem globalInducedCount_eq_transversal_add_nontransversal :
   exact (Finset.sum_filter_add_sum_filter_not (Fintype.piFinset fun _ => Q.parts)
     Function.Injective _).symm
 
+/-- **The full box is the disjoint union of the cell boxes.** Every vertex of `s` lies in a unique
+cell, so a function into `s` lands in a unique cell-triple box. -/
+theorem piFinset_const_eq_biUnion_cellTriples (Q : Finpartition s) :
+    Fintype.piFinset (fun _ : Fin 3 => s)
+      = (Fintype.piFinset fun _ : Fin 3 => Q.parts).biUnion Fintype.piFinset := by
+  ext f
+  rw [Fintype.mem_piFinset, Finset.mem_biUnion]
+  constructor
+  · intro hf
+    choose C hC using fun i => (Q.existsUnique_mem (hf i)).exists
+    exact ⟨C, Fintype.mem_piFinset.mpr fun i => (hC i).1,
+      Fintype.mem_piFinset.mpr fun i => (hC i).2⟩
+  · rintro ⟨T, hT, hfT⟩
+    rw [Fintype.mem_piFinset] at hT hfT
+    exact fun i => Finset.mem_of_subset (Q.le (hT i)) (hfT i)
+
+/-- The cell boxes over distinct cell-triples are pairwise disjoint. -/
+theorem piFinset_pairwiseDisjoint_cellTriples (Q : Finpartition s) :
+    (↑(Fintype.piFinset fun _ : Fin 3 => Q.parts) : Set (Fin 3 → Finset V)).PairwiseDisjoint
+      Fintype.piFinset := by
+  intro T hT T' hT' hTT'
+  rw [Finset.mem_coe, Fintype.mem_piFinset] at hT hT'
+  simp only [Function.onFun]
+  rw [Finset.disjoint_left]
+  intro f hfT hfT'
+  rw [Fintype.mem_piFinset] at hfT hfT'
+  obtain ⟨i, hi⟩ := Function.ne_iff.mp hTT'
+  exact Finset.disjoint_left.mp
+    (Q.disjoint (Finset.mem_coe.mpr (hT i)) (Finset.mem_coe.mpr (hT' i)) hi) (hfT i) (hfT' i)
+
+/-- **The global count is the library's actual induced-embedding count over the full box.** The
+partition-cell sum equals `inducedEmbeddingCountOn` on `fun _ => s`. -/
+theorem globalInducedCount_eq_inducedEmbeddingCountOn :
+    globalInducedCount P M Q = inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) := by
+  rw [inducedEmbeddingCountOn, piFinset_const_eq_biUnion_cellTriples Q, Finset.filter_biUnion,
+    Finset.card_biUnion fun T hT T' hT' hTT' =>
+      (piFinset_pairwiseDisjoint_cellTriples Q (Finset.mem_coe.mpr hT)
+        (Finset.mem_coe.mpr hT') hTT').mono (Finset.filter_subset _ _) (Finset.filter_subset _ _),
+    globalInducedCount]
+  exact Finset.sum_congr rfl fun T _ => rfl
+
+/-- **Partition-independence of the global count**: it does not depend on the cell partition (both
+sides equal the actual count over the full box). -/
+theorem globalInducedCount_eq_globalInducedCount (Q Q' : Finpartition s) :
+    globalInducedCount P M Q = globalInducedCount P M Q' :=
+  (globalInducedCount_eq_inducedEmbeddingCountOn (Q := Q)).trans
+    (globalInducedCount_eq_inducedEmbeddingCountOn (Q := Q')).symm
+
+/-- **Full-carrier bridge to the Phase 8 counting API.** On a finite carrier partitioned as
+`Finpartition univ`, the global count is exactly the diagonal-sensitive `inducedEmbeddingCount`. -/
+theorem globalInducedCount_eq_inducedEmbeddingCount [Fintype V]
+    {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
+    (Q : Finpartition (Finset.univ : Finset V)) :
+    globalInducedCount P M Q = inducedEmbeddingCount P M := by
+  rw [globalInducedCount_eq_inducedEmbeddingCountOn, inducedEmbeddingCountOn, inducedEmbeddingCount,
+    Fintype.piFinset_univ]
+
 /-! ### `Fin 3` collision characterization -/
 
 /-- A `Fin 3`-indexed triple fails to be injective exactly when two coordinates collide. -/
@@ -208,35 +265,21 @@ theorem sum_nontransversal_inducedEmbeddingCountOn_le {m : ℕ} (hm : ∀ C ∈ 
           (sum_collision_one_two_le hm)
     _ = 3 * m * (s.card : ℝ) ^ 2 := by ring
 
-/-! ### Part-size inheritance and equipartition specialization -/
-
-/-- **Part-size inheritance under refinement.** If `Q` refines `P` and every cell of `P` has
-cardinality at most `m`, then so does every cell of `Q` (a finer cell sits inside a coarse one). -/
-theorem card_le_of_le_of_forall_card_le {m : ℕ} {P₁ P₂ : Finpartition s} (hle : P₁ ≤ P₂)
-    (hm : ∀ B ∈ P₂.parts, B.card ≤ m) : ∀ A ∈ P₁.parts, A.card ≤ m := by
-  intro A hA
-  obtain ⟨B, hB, hAB⟩ := hle hA
-  exact le_trans (Finset.card_le_card hAB) (hm B hB)
-
-/-- **Equipartition part-size bound.** Every cell of an equipartition has cardinality at most
-`|s| / #parts + 1`. -/
-theorem forall_card_le_of_isEquipartition {P₁ : Finpartition s} (hP : P₁.IsEquipartition) :
-    ∀ B ∈ P₁.parts, B.card ≤ s.card / P₁.parts.card + 1 :=
-  fun _ hB => hP.card_part_le_average_add_one hB
-
 /-! ### The global strong-counting corollary -/
 
 /-- **Global strong three-vertex counting.** Adding the diagonal charge to the summit: for a
-binary-palette strong witness whose coarse cells all have cardinality at most `m`, the *global*
-induced count is within `(10·τ + 3·η + 3·δ/η²)·|s|³ + 3·m·|s|²` of the coarse step estimate. -/
-theorem BinaryPaletteStrongWitness.abs_globalInducedCount_sub_coarseInducedEstimate_le
+binary-palette strong witness whose coarse cells all have cardinality at most `m`, the actual
+number of induced pattern embeddings on the whole carrier (`inducedEmbeddingCountOn` over the full
+box `fun _ => s`) is within `(10·τ + 3·η + 3·δ/η²)·|s|³ + 3·m·|s|²` of the coarse step estimate. -/
+theorem BinaryPaletteStrongWitness.abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le
     [AtMostBinary L] {M : FiniteRelModel L V} {E : ErrorSchedule} {P₀ : Finpartition s}
     (w : BinaryPaletteStrongWitness M E δ P₀) (P : FiniteRelModel L (Fin 3))
     (hnull : NullaryCompatible P M) (hτ1 : E w.coarse.parts.card ≤ 1) {η : ℝ} (hη : 0 < η)
     {m : ℕ} (hm : ∀ C ∈ w.coarse.parts, C.card ≤ m) :
-    |(globalInducedCount P M w.coarse : ℝ) - coarseInducedEstimate P M w.coarse|
+    |(inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) : ℝ) - coarseInducedEstimate P M w.coarse|
       ≤ (10 * E w.coarse.parts.card + 3 * η + 3 * (δ / η ^ 2)) * (s.card : ℝ) ^ 3
         + 3 * m * (s.card : ℝ) ^ 2 := by
+  rw [← globalInducedCount_eq_inducedEmbeddingCountOn (Q := w.coarse)]
   have hsummit := w.abs_transversalInducedCount_sub_coarseInducedEstimate_le P hnull hτ1 hη
   have hdiag : |(globalInducedCount P M w.coarse : ℝ) - (transversalInducedCount P M w.coarse : ℝ)|
       ≤ 3 * m * (s.card : ℝ) ^ 2 := by
@@ -256,18 +299,19 @@ theorem BinaryPaletteStrongWitness.abs_globalInducedCount_sub_coarseInducedEstim
           + 3 * m * (s.card : ℝ) ^ 2 := by ring
 
 /-- **Equipartition specialization.** When the witness's starting partition `P₀` is an
-equipartition, its `|s| / #parts + 1` part-size bound is inherited by the coarse partition,
-supplying the diagonal charge without a separate cell-size hypothesis. -/
-theorem BinaryPaletteStrongWitness.abs_globalInducedCount_sub_coarseInducedEstimate_le_of_equipartition
+equipartition, its `|s| / #parts + 1` part-size bound is inherited by the coarse partition
+(`part_card_le_of_refines`), supplying the diagonal charge without a separate cell-size
+hypothesis. -/
+theorem BinaryPaletteStrongWitness.abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le_of_equipartition
     [AtMostBinary L] {M : FiniteRelModel L V} {E : ErrorSchedule} {P₀ : Finpartition s}
     (w : BinaryPaletteStrongWitness M E δ P₀) (hP₀ : P₀.IsEquipartition)
     (P : FiniteRelModel L (Fin 3)) (hnull : NullaryCompatible P M)
     (hτ1 : E w.coarse.parts.card ≤ 1) {η : ℝ} (hη : 0 < η) :
-    |(globalInducedCount P M w.coarse : ℝ) - coarseInducedEstimate P M w.coarse|
+    |(inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) : ℝ) - coarseInducedEstimate P M w.coarse|
       ≤ (10 * E w.coarse.parts.card + 3 * η + 3 * (δ / η ^ 2)) * (s.card : ℝ) ^ 3
         + 3 * ((s.card / P₀.parts.card + 1 : ℕ) : ℝ) * (s.card : ℝ) ^ 2 :=
-  w.abs_globalInducedCount_sub_coarseInducedEstimate_le P hnull hτ1 hη
-    (card_le_of_le_of_forall_card_le w.coarse_le (forall_card_le_of_isEquipartition hP₀))
+  w.abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le P hnull hτ1 hη
+    (part_card_le_of_refines w.coarse_le (forall_card_le_of_isEquipartition hP₀))
 
 /-! ### Tests and adversarial examples -/
 
@@ -275,9 +319,42 @@ section Tests
 
 open FiniteRelModel
 
--- **Empty host partition.** Over the empty host there are no cells, so *every* cell-triple set is
--- empty — in particular there are no nontransversal (diagonal) triples to charge.
-example : nontransversalCellTriples (⊥ : Finpartition (∅ : Finset (Fin 0))) = ∅ := by decide
+/-- The unique model of the empty language (no relations to interpret). -/
+private def emptyModel (W : Type*) : FiniteRelModel FirstOrder.Language.empty W :=
+  ⟨fun {_} R _ => R.elim⟩
+
+-- **The gate controls actual embeddings: `3! = 6` on the empty language.** With the indiscrete
+-- partition `⊤` (one cell) no ordered triple is transversal, yet the global count sees all `6`
+-- injective self-maps of `Fin 3` — the whole count is diagonal (nontransversal).
+example : globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 3))) = 6 := by decide
+
+example : transversalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 3))) = 0 := by decide
+
+-- **Discrete partition `⊥`**: every vertex is its own cell, so all `6` injective maps land in
+-- three distinct cells — global and transversal agree, with zero nontransversal contribution.
+example : globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) = 6 := by decide
+
+example : transversalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) = 6 := by decide
+
+example : (∑ T ∈ nontransversalCellTriples (⊥ : Finpartition (Finset.univ : Finset (Fin 3))),
+    inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3)) T) = 0 := by decide
+
+-- **Full-carrier bridge to the Phase 8 counting API.**
+example : globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 3)))
+    = inducedEmbeddingCount (emptyModel (Fin 3)) (emptyModel (Fin 3)) :=
+  globalInducedCount_eq_inducedEmbeddingCount _
+
+-- **Partition-independence of the global count**, concretely: `⊤` and `⊥` agree.
+example : globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 3)))
+    = globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) :=
+  globalInducedCount_eq_globalInducedCount _ _
 
 -- **Collision characterization is exhaustive.** On `Fin 3` non-injectivity is precisely one of
 -- the three coordinate collisions.
@@ -285,17 +362,13 @@ example {α : Type*} (T : Fin 3 → α) :
     ¬ Function.Injective T ↔ T 0 = T 1 ∨ T 0 = T 2 ∨ T 1 = T 2 :=
   not_injective_fin_three
 
--- **Singleton host, one cell.** With a single cell no ordered triple has three distinct cells, so
--- the transversal set is empty; every cell-triple is a diagonal one (here exactly `![{0},{0},{0}]`).
-example : transversalCellTriples (⊤ : Finpartition ({0} : Finset (Fin 1))) = ∅ := by decide
-
-example : (nontransversalCellTriples (⊤ : Finpartition ({0} : Finset (Fin 1)))).card = 1 := by
-  decide
+-- **Empty-host bridge**: over the empty host there are no cell-triples to charge.
+example : nontransversalCellTriples (⊥ : Finpartition (∅ : Finset (Fin 0))) = ∅ := by decide
 
 -- **Part-size inheritance is a refinement fact**, needing neither the language nor the model.
 example {m : ℕ} {P₁ P₂ : Finpartition s} (hle : P₁ ≤ P₂) (hm : ∀ B ∈ P₂.parts, B.card ≤ m) :
     ∀ A ∈ P₁.parts, A.card ≤ m :=
-  card_le_of_le_of_forall_card_le hle hm
+  part_card_le_of_refines hle hm
 
 -- **Equipartition supplies the cell bound**, statement-level.
 example {P₁ : Finpartition s} (hP : P₁.IsEquipartition) :

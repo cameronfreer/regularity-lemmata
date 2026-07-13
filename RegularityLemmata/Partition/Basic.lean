@@ -284,6 +284,15 @@ theorem predicatePartition_parts (p : α → Prop) [DecidablePred p] (s : Finset
   rw [mem_predicatePartition, Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton]
   tauto
 
+/-- **Part-size inheritance under refinement.** If `P` refines `Q` (`P ≤ Q`) and every cell of
+`Q` has cardinality at most `m`, then so does every cell of `P` — a finer cell sits inside a
+coarse one. -/
+theorem part_card_le_of_refines {m : ℕ} {P Q : Finpartition s} (hle : P ≤ Q)
+    (hm : ∀ B ∈ Q.parts, B.card ≤ m) : ∀ A ∈ P.parts, A.card ≤ m := by
+  intro A hA
+  obtain ⟨B, hB, hAB⟩ := hle hA
+  exact le_trans (Finset.card_le_card hAB) (hm B hB)
+
 /-! ### Tests and adversarial examples -/
 
 -- Tiny concrete partitions of {0,1,2}: singletons (⊥) and the indiscrete partition (⊤).
