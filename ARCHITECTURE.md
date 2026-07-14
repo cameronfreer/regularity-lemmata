@@ -303,9 +303,11 @@ summit list above).
 counting item: exact two-vertex palette counts, directed colored path and triangle
 counts, induced three-vertex relational counts, and a theorem genuinely consuming a
 `BinaryPaletteStrongWitness`. Fixed-pattern and finite-family induced **removal** are
-deferred to a later phase — global removal additionally needs control of embeddings
-whose vertices land in the same partition cell (an initial fine equipartition or an
-explicit diagonal-cell error term), which gets its own freeze.
+deferred to a later phase. Global removal additionally needs control of embeddings
+whose vertices land in the same partition cell, so this phase includes the explicit
+diagonal-cell gate (an initial equipartition bounding coarse cell sizes and an
+explicit diagonal-cell error term — the Unit 8 diagonal gate below); removal itself
+remains deferred.
 
 - **Arity discipline.** A dedicated `AtMostBinary L` class
   (`∀ n, 2 < n → IsEmpty (L.Relations n)`, **not** `arityBound L ≤ 2` — the stored
@@ -344,8 +346,10 @@ All Phase 10 units are implemented: the arity discipline and the reduction
 directed path/triangle counting (`Graph/RegularDegree.lean`, `Graph/PathCounting.lean`,
 `Graph/TriangleCounting.lean`), induced three-vertex counts
 (`Relational/ThreeVertexCounting.lean`), the strong-witness counting chain — the
-density-shift charge (`Relational/BinaryStrongRegularityCharge.lean`), the lifting
-calculus (`Relational/StrongCountingLifting.lean`), and the transversal summit
+selected-pair lifting calculus (`Relational/StrongCountingLifting.lean`), the
+common-index expansions with the `10τ` regularity charge
+(`Relational/BinaryStrongRegularityCharge.lean`), and the `3η + 3δ/η²` density-shift
+charge with the assembled transversal summit
 `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le`
 (`Relational/BinaryStrongCounting.lean`, over the transversal counts of
 `Relational/TransversalCounting.lean`) — the

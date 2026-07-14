@@ -20,8 +20,8 @@ the library's finite calculus:
   the full box is twice the number of removed edges (and its normalized form
   `relativeEditDistance_adj_of_le`).
 
-The remaining conversion — injective ordered triangle count `= 6 · #cliqueFinset 3` —
-belongs to the deferred strong-witness counting stage (see `ARCHITECTURE.md`).
+The companion conversion — ordered triangle count `= 6 · #cliqueFinset 3` — is
+`directedTriangleCount_adj_eq_six_mul_cliqueFinset` in `Relational/GraphCounting.lean`.
 This file is kept separate from `Graph/Bridge.lean` because the triangle-removal import
 is heavy; import it only where the removal results are consumed.
 -/
