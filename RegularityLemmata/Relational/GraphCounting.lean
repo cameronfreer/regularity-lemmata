@@ -16,14 +16,22 @@ Exact bridges from the relational counting machinery to simple graphs via
 `FiniteRelModel.ofSimpleGraph` (mathlib's graph language, one binary adjacency symbol). No removal
 theorem enters this file.
 
-* **Symmetric palettes as adjacency.** The graph language has four binary palettes; on the
-  symmetric adapter `ofSimpleGraph G`, the all-adjacent palette `adjPalette` realizes exactly the
-  adjacency relation (`hasBinaryPairPalette_adjPalette_eq`).
+* **Symmetric palettes as adjacency and nonadjacency.** The graph language has four binary
+  palettes; on the symmetric adapter `ofSimpleGraph G`, the all-adjacent palette `adjPalette`
+  realizes exactly the adjacency relation (`hasBinaryPairPalette_adjPalette_eq`) and the
+  all-nonadjacent palette `nonadjPalette` realizes exactly nonadjacency
+  (`hasBinaryPairPalette_nonadjPalette_eq`); every graph-adapter pair carries one of the two
+  (`binaryPairPalette_ofSimpleGraph`), making the induced nature — edges *and* nonedges —
+  visible.
 * **Ordered edge and length-two-path counts.** The palette pair count is the graph edge count
   (`pairCount G.Adj`); the palette directed-path count is the graph length-two-path count.
 * **Ordered triangle count and the `3! = 6` clique conversion.** The palette directed-triangle
   count is `directedTriangleCount G.Adj G.Adj G.Adj`, which over the full carrier is
   `6 · #(G.cliqueFinset 3)`.
+* **Induced graph copies.** On disjoint cells the induced relational count of a pattern graph is
+  the directed-triangle count of adjacency/nonadjacency relations
+  (`inducedEmbeddingCountOn_three_ofSimpleGraph_adj`); over the full carrier it is the existing
+  induced graph-copy count (`inducedEmbeddingCountOn_univ_ofSimpleGraph`).
 * **Corollary specialization.** The global strong-counting corollary specializes to
   `ofSimpleGraph G` (nullary compatibility is automatic; the graph language is `AtMostBinary`).
 -/
@@ -73,6 +81,51 @@ theorem hasBinaryPairPalette_adjPalette_eq (G : SimpleGraph V) [DecidableRel G.A
     HasBinaryPairPalette (ofSimpleGraph G) adjPalette = G.Adj := by
   ext a b; exact hasBinaryPairPalette_adjPalette_iff G a b
 
+/-- **Nonadjacency is the all-nonadjacent palette.** On the symmetric adapter, a pair carries the
+all-nonadjacent palette exactly when the two vertices are not adjacent. -/
+theorem hasBinaryPairPalette_nonadjPalette_iff (G : SimpleGraph V) [DecidableRel G.Adj]
+    (a b : V) :
+    HasBinaryPairPalette (ofSimpleGraph G) nonadjPalette a b ↔ ¬ G.Adj a b := by
+  rw [HasBinaryPairPalette]
+  constructor
+  · intro h
+    have h2 := congrFun h FirstOrder.Language.adj
+    rw [binaryPairPalette, nonadjPalette, rel_ofSimpleGraph_adj, Prod.mk.injEq] at h2
+    exact of_decide_eq_false h2.1
+  · intro h
+    funext R
+    cases R
+    rw [binaryPairPalette, nonadjPalette, rel_ofSimpleGraph_adj, rel_ofSimpleGraph_adj]
+    exact Prod.ext (decide_eq_false h) (decide_eq_false fun h' => h h'.symm)
+
+/-- **Nonadjacency as a relation is the all-nonadjacent palette.** -/
+theorem hasBinaryPairPalette_nonadjPalette_eq (G : SimpleGraph V) [DecidableRel G.Adj] :
+    HasBinaryPairPalette (ofSimpleGraph G) nonadjPalette = fun a b => ¬ G.Adj a b := by
+  ext a b; exact hasBinaryPairPalette_nonadjPalette_iff G a b
+
+/-- **Palette classification on graph adapters.** Every ordered pair of a graph adapter carries
+the all-adjacent or the all-nonadjacent palette, according to adjacency; the induced nature of the
+count — edges *and* nonedges — is therefore visible at the palette level. -/
+theorem binaryPairPalette_ofSimpleGraph (G : SimpleGraph V) [DecidableRel G.Adj] (a b : V) :
+    binaryPairPalette (ofSimpleGraph G) a b
+      = if G.Adj a b then adjPalette else nonadjPalette := by
+  by_cases h : G.Adj a b
+  · rw [if_pos h]
+    exact (hasBinaryPairPalette_adjPalette_iff G a b).mpr h
+  · rw [if_neg h]
+    exact (hasBinaryPairPalette_nonadjPalette_iff G a b).mpr h
+
+/-- The palette relation required by a pattern pair is adjacency on a pattern edge and
+nonadjacency on a pattern nonedge. -/
+theorem hasBinaryPairPalette_binaryPairPalette_ofSimpleGraph {W : Type*} (P : SimpleGraph W)
+    [DecidableRel P.Adj] (G : SimpleGraph V) [DecidableRel G.Adj] (i j : W) :
+    HasBinaryPairPalette (ofSimpleGraph G) (binaryPairPalette (ofSimpleGraph P) i j)
+      = if P.Adj i j then G.Adj else fun a b => ¬ G.Adj a b := by
+  rw [binaryPairPalette_ofSimpleGraph]
+  by_cases h : P.Adj i j
+  · rw [if_pos h, if_pos h, hasBinaryPairPalette_adjPalette_eq]
+  · rw [if_neg h, if_neg h, hasBinaryPairPalette_nonadjPalette_eq]
+
 /-! ### Ordered edge and length-two-path counts -/
 
 /-- **Edge count.** The all-adjacent palette pair count is the graph edge count. -/
@@ -111,7 +164,7 @@ theorem directedTriangleCount_adjPalette (G : SimpleGraph V) [DecidableRel G.Adj
 variable [DecidableEq V]
 
 /-- The range of a `Fin 3`-tuple is its three-element image. -/
-theorem tupleRange_three (f : Fin 3 → V) : tupleRange f = {f 0, f 1, f 2} := by
+private theorem tupleRange_three (f : Fin 3 → V) : tupleRange f = {f 0, f 1, f 2} := by
   rw [tupleRange]
   ext a
   simp only [Finset.mem_image, Finset.mem_univ, true_and, Finset.mem_insert,
@@ -187,6 +240,43 @@ theorem inducedEmbeddingCountOn_three_ofSimpleGraph (P : SimpleGraph (Fin 3)) [D
     (fun v _ => binaryVertexProfile_ofSimpleGraph G P v 1)
     (fun v _ => binaryVertexProfile_ofSimpleGraph G P v 2) hAB hAC hBC
 
+/-- A pointwise `if` between two decidable relations is decidable. -/
+instance {α : Type*} {p : Prop} [Decidable p] (R S : α → α → Prop) [hR : DecidableRel R]
+    [hS : DecidableRel S] : DecidableRel (if p then R else S) := by
+  split
+  · exact hR
+  · exact hS
+
+/-- **Three-vertex induced graph copies, graph-facing form.** The three required palette
+relations of `inducedEmbeddingCountOn_three_ofSimpleGraph` rewritten through the palette
+classification: adjacency on pattern edges, nonadjacency on pattern nonedges. -/
+theorem inducedEmbeddingCountOn_three_ofSimpleGraph_adj (P : SimpleGraph (Fin 3))
+    [DecidableRel P.Adj] (G : SimpleGraph V) [DecidableRel G.Adj] {A B C : Finset V}
+    (hAB : Disjoint A B) (hAC : Disjoint A C) (hBC : Disjoint B C) :
+    inducedEmbeddingCountOn (ofSimpleGraph P) (ofSimpleGraph G) ![A, B, C]
+      = directedTriangleCount
+          (if P.Adj 0 1 then G.Adj else fun a b => ¬ G.Adj a b)
+          (if P.Adj 0 2 then G.Adj else fun a b => ¬ G.Adj a b)
+          (if P.Adj 1 2 then G.Adj else fun a b => ¬ G.Adj a b) A B C := by
+  rw [inducedEmbeddingCountOn_three_ofSimpleGraph P G hAB hAC hBC, directedTriangleCount,
+    directedTriangleCount, tupleCount, tupleCount]
+  refine congrArg Finset.card (Finset.filter_congr fun f _ => ?_)
+  rw [directedTriangleObs, directedTriangleObs,
+    hasBinaryPairPalette_binaryPairPalette_ofSimpleGraph,
+    hasBinaryPairPalette_binaryPairPalette_ofSimpleGraph,
+    hasBinaryPairPalette_binaryPairPalette_ofSimpleGraph]
+
+/-- **Full-carrier bridge to induced graph copies.** Over the whole carrier, the box-restricted
+induced relational count between graph adapters is the existing induced graph-copy count of the
+edge hypergraphs. -/
+theorem inducedEmbeddingCountOn_univ_ofSimpleGraph [Fintype V] (P : SimpleGraph (Fin 3))
+    [DecidableRel P.Adj] (G : SimpleGraph V) [DecidableRel G.Adj] :
+    inducedEmbeddingCountOn (ofSimpleGraph P) (ofSimpleGraph G) (fun _ : Fin 3 => Finset.univ)
+      = UniformHypergraph.inducedCopyCount (UniformHypergraph.ofSimpleGraph P)
+          (UniformHypergraph.ofSimpleGraph G) := by
+  rw [← inducedEmbeddingCount_ofSimpleGraph, inducedEmbeddingCountOn, inducedEmbeddingCount,
+    Fintype.piFinset_univ]
+
 end FiniteRelModel
 
 open FiniteRelModel
@@ -226,6 +316,30 @@ example {V : Type*} (G : SimpleGraph V) [DecidableRel G.Adj] (a b : V) :
 -- The two symmetric graph palettes are distinct (adjacent vs nonadjacent).
 example : (adjPalette : BinaryPairPalette FirstOrder.Language.graph) ≠ nonadjPalette := by decide
 
+-- **Nonadjacency is the all-nonadjacent palette** (statement level).
+example {V : Type*} (G : SimpleGraph V) [DecidableRel G.Adj] (a b : V) :
+    HasBinaryPairPalette (ofSimpleGraph G) nonadjPalette a b ↔ ¬ G.Adj a b :=
+  hasBinaryPairPalette_nonadjPalette_iff G a b
+
+-- **Concrete: the all-nonadjacent palette holds exactly on a nonedge** — it holds on the
+-- pair (0, 1) in the empty graph and fails on the same pair in the complete graph.
+example :
+    HasBinaryPairPalette (ofSimpleGraph (⊥ : SimpleGraph (Fin 3))) nonadjPalette 0 1 := by decide
+
+example :
+    ¬ HasBinaryPairPalette (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) nonadjPalette 0 1 := by
+  decide
+
+-- Adversarial: the diagonal pair carries the all-nonadjacent palette even in the complete
+-- graph (looplessness) — "nonedge" includes the diagonal.
+example :
+    HasBinaryPairPalette (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) nonadjPalette 0 0 := by decide
+
+-- **Pattern palettes classify as adjacency/nonadjacency** (statement level).
+example {V : Type*} (G : SimpleGraph V) [DecidableRel G.Adj] (a b : V) :
+    binaryPairPalette (ofSimpleGraph G) a b = if G.Adj a b then adjPalette else nonadjPalette :=
+  binaryPairPalette_ofSimpleGraph G a b
+
 -- **Edge count is the graph pair count** (statement level).
 example {V : Type*} [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj] (A B : Finset V) :
     pairCount (HasBinaryPairPalette (ofSimpleGraph G) adjPalette) A B = pairCount G.Adj A B :=
@@ -248,6 +362,24 @@ example : directedTriangleCount (⊤ : SimpleGraph (Fin 3)).Adj (⊤ : SimpleGra
     (⊤ : SimpleGraph (Fin 3)).Adj Finset.univ Finset.univ Finset.univ = 6 := by
   rw [directedTriangleCount_adj_eq_six_mul_cliqueFinset]
   decide
+
+-- **Full-carrier induced copies** (statement level).
+example {V : Type*} [Fintype V] [DecidableEq V] (P : SimpleGraph (Fin 3)) [DecidableRel P.Adj]
+    (G : SimpleGraph V) [DecidableRel G.Adj] :
+    inducedEmbeddingCountOn (ofSimpleGraph P) (ofSimpleGraph G) (fun _ : Fin 3 => Finset.univ)
+      = UniformHypergraph.inducedCopyCount (UniformHypergraph.ofSimpleGraph P)
+          (UniformHypergraph.ofSimpleGraph G) :=
+  inducedEmbeddingCountOn_univ_ofSimpleGraph P G
+
+-- **Concrete: the complete pattern has six induced copies in the complete host** on `Fin 3`
+-- (the six bijections).
+example : inducedEmbeddingCountOn (ofSimpleGraph (⊤ : SimpleGraph (Fin 3)))
+    (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) (fun _ : Fin 3 => Finset.univ) = 6 := by decide
+
+-- **Concrete: a noncomplete pattern has no induced copies in the complete host** — induced
+-- counts see nonedges, unlike homomorphism counts.
+example : inducedEmbeddingCountOn (ofSimpleGraph (⊥ : SimpleGraph (Fin 3)))
+    (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) (fun _ : Fin 3 => Finset.univ) = 0 := by decide
 
 end Tests
 
