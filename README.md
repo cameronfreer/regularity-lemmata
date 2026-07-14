@@ -57,7 +57,7 @@ lake build
 bash scripts/check.sh
 ```
 
-Toolchain: `leanprover/lean4:v4.32.0-rc1` with mathlib `v4.32.0-rc1`.
+Toolchain: `leanprover/lean4:v4.32.0` with mathlib `v4.32.0`.
 
 The triadic development now includes the weak and edited regularization summits:
 every 3-uniform hypergraph admits a boundedly-colored pair coloring with small bad
