@@ -73,11 +73,11 @@ Lean `Prop` placeholders.
   version in which `E` is *itself* regular requires running equitabilisation
   inside the energy-increment loop (transporting the energy across the exceptional
   mass) and is deferred.
-- **Strong-witness counting**: a counting theorem that genuinely consumes a
-  `StrongWitness` (edge, triangle, path, and induced three-vertex pattern counts with
-  explicit error scales), followed by induced graph counting and finite-family induced
-  removal. This is the remaining Phase 4d sub-stage; its statements will be frozen only
-  after their falsification gates.
+- **Relational induced removal**: fixed-pattern and finite-family induced removal over
+  the binary-palette counting layer. The counting inputs — including the strong-witness
+  counting theorems and the diagonal-cell gate — are complete (see the Phase 10
+  section); removal receives its own statement freeze and falsification gates in a
+  later phase.
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -295,7 +295,7 @@ here: **no removal summit**. A later phase begins with a counting statement free
 three-vertex relational counts; then fixed-pattern / finite-family induced removal),
 which also closes the deferred strong-witness counting item.
 
-## Phase 10 design freeze (binary-palette counting through three vertices)
+## Phase 10 design freeze (binary-palette counting through three vertices) — COMPLETE
 
 **Counting only — no removal.** This phase closes the long-deferred strong-witness
 counting item: exact two-vertex palette counts, directed colored path and triangle
@@ -335,3 +335,24 @@ Provenance cites the exact counting-lemma source actually followed (mathlib wher
 architecture is reused, otherwise the relevant public graph-regularity/counting
 reference). The Phase 9 language is unchanged: this is binary-palette counting, not
 general relational or hypergraph removal.
+
+All Phase 10 units are implemented: the arity discipline and the reduction
+(`Relational/BinaryPattern.lean`), two-vertex counts
+(`Relational/TwoVertexCounting.lean`), the directed regular-degree calculus and
+directed path/triangle counting (`Graph/RegularDegree.lean`, `Graph/PathCounting.lean`,
+`Graph/TriangleCounting.lean`), induced three-vertex counts
+(`Relational/ThreeVertexCounting.lean`), the strong-witness counting chain — the
+density-shift charge (`Relational/BinaryStrongRegularityCharge.lean`), the lifting
+calculus (`Relational/StrongCountingLifting.lean`), and the transversal summit
+`BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le`
+(`Relational/TransversalCounting.lean`, `Relational/BinaryStrongCounting.lean`) — the
+diagonal gate with the global strong-counting corollary
+`abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le` and the full-carrier
+identity `globalInducedCount_eq_inducedEmbeddingCount`
+(`Relational/DiagonalGate.lean`), and the graph bridges
+(`Relational/GraphCounting.lean`): adjacency/nonadjacency palettes with the palette
+classification, edge, path, and triangle counts with the `6 · #cliqueFinset 3`
+conversion, induced three-vertex graph copies in both the disjoint-cell
+(adjacency/nonadjacency) form and the full-carrier `inducedCopyCount` bridge, and the
+strong-counting corollary specialized to `ofSimpleGraph`. The phase ends here: **no
+removal theorem**.

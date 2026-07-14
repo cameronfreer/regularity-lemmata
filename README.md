@@ -33,6 +33,14 @@ The first release concerns **finite combinatorial regularity**, developed in lay
    substrate: two-way pair palettes and vertex profiles, simultaneous palette
    regularity with a host-independent bound, a weak refinement summit, and a strong
    palette witness with a per-color handoff to the graph strong-witness API.
+8. **Binary-palette counting through three vertices** — exact two-vertex palette
+   counts, a directed regular-degree calculus feeding directed path and triangle
+   counting, induced three-vertex relational counts, a global strong-counting
+   theorem consuming the strong palette witness (with explicit regularity,
+   density-shift, and diagonal-cell error terms), and graph bridges recovering
+   edge, path, triangle, and induced three-vertex simple-graph counts. Counting
+   only: this layer contains **no relational removal theorem** — removal is
+   deferred to a later phase with its own statement freeze.
 
 ## Conventions
 

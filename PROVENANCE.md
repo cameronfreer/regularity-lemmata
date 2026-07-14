@@ -40,15 +40,30 @@ definition or proof is cited publicly, in the relevant file docstring and here.
     The finite `FiniteRelational` typeclass, the Boolean-valued `FiniteRelModel`
     wrapper, and the relational counts, edits, transports, and adapters
     (`Relational/*.lean`) are this repository's implementation over that foundation.
-    The binary-palette regularity layer (`Relational/Binary*.lean`) is a
-    finite-palette, directed binary adaptation of this repository's own
-    mass-weighted graph regularity and strong-regularity machinery
+    The binary-palette regularity layer
+    (`Relational/Binary{Palette,Profile,Energy,Increment,Regularity,Strong,
+    Bridges}.lean`) is a finite-palette, directed binary adaptation of this
+    repository's own mass-weighted graph regularity and strong-regularity machinery
     (`Graph/*.lean`), using mathlib's partition substrate and graph-regularity
     antecedents; it is **not** a formalization of a general relational removal
     theorem — higher arities and removal are explicitly deferred. Its mathematical
     antecedents are those already cited for the graph ladder (Szemerédi;
     Dillies–Mehta / mathlib; Zhao for the energy increment; Tao for the strong
     energy-gap stopping; Alon–Shapira for the directed/induced context).
+    The binary-palette counting layer (`Relational/BinaryPattern.lean`,
+    `Relational/TwoVertexCounting.lean`, `Relational/ThreeVertexCounting.lean`,
+    `Relational/TransversalCounting.lean`, `Relational/StrongCountingLifting.lean`,
+    `Relational/BinaryStrongRegularityCharge.lean`,
+    `Relational/BinaryStrongCounting.lean`, `Relational/DiagonalGate.lean`,
+    `Relational/GraphCounting.lean`) is likewise this repository's own composition
+    of already documented APIs: it specializes the independently authored directed
+    exceptional-degree, path-, and triangle-counting lemmas
+    (`Graph/RegularDegree.lean`, `Graph/PathCounting.lean`,
+    `Graph/TriangleCounting.lean`; antecedents cited above) to palette relations,
+    lifts them through the Phase 9 strong palette witness, and bridges the results
+    to simple graphs through the Phase 8 adapters and the hypergraph copy API
+    (`Relational/GraphAdapter.lean`, `Hypergraph/Copies.lean`). It involves no
+    antecedent beyond those already cited, and contains no removal theorem.
 - **Graphons in Lean 4** (C. Freer, Apache-2.0,
   <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
   `Graph/FriezeKannan.lean` ports the architecture of
