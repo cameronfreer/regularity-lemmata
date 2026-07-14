@@ -381,6 +381,23 @@ example : inducedEmbeddingCountOn (ofSimpleGraph (⊤ : SimpleGraph (Fin 3)))
 example : inducedEmbeddingCountOn (ofSimpleGraph (⊥ : SimpleGraph (Fin 3)))
     (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) (fun _ : Fin 3 => Finset.univ) = 0 := by decide
 
+/-- The path `0 — 1 — 2` on `Fin 3`: a mixed pattern with edges `01`, `12` and nonedge `02`. -/
+private abbrev pathPattern : SimpleGraph (Fin 3) :=
+  SimpleGraph.fromRel fun a b => a = 0 ∧ b = 1 ∨ a = 1 ∧ b = 2
+
+-- **Adversarial, mixed pattern**: the path has no induced copies in the complete host (its
+-- nonedge cannot be realized) but exactly two in itself (the identity and the reversal) — the
+-- adjacency and nonadjacency gates of the graph-facing corollary both genuinely fire.
+example : inducedEmbeddingCountOn (ofSimpleGraph pathPattern)
+    (ofSimpleGraph (⊤ : SimpleGraph (Fin 3))) (fun _ : Fin 3 => Finset.univ) = 0 := by decide
+
+example : inducedEmbeddingCountOn (ofSimpleGraph pathPattern) (ofSimpleGraph pathPattern)
+    (fun _ : Fin 3 => Finset.univ) = 2 := by decide
+
+-- On singleton cells only the identity survives.
+example : inducedEmbeddingCountOn (ofSimpleGraph pathPattern) (ofSimpleGraph pathPattern)
+    ![{0}, {1}, {2}] = 1 := by decide
+
 end Tests
 
 end RegularityLemmata
