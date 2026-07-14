@@ -274,15 +274,16 @@ correlation, loop/profile sensitivity) are permanent, justifying the full palett
   docstring states explicitly that it asserts nothing about arity `> 2`.
 - **Strong palette witness** (`BinaryPaletteStrongWitness`) reuses `ErrorSchedule`,
   refines the profile partition, and exposes per-color `toStrongWitness` /
-  `deviant_mass_le` conversions to the existing `StrongWitness` API — the handoff to a
-  later colored counting phase (which closes the deferred strong-witness counting
-  item before any relational removal).
+  `deviant_mass_le` conversions to the existing `StrongWitness` API — the handoff
+  consumed by the Phase 10 counting layer (which closed the old strong-witness
+  counting item; relational removal is still deferred).
 
 Phase 9 ends at the profile-respecting common partition, simultaneous palette
 regularity, host-independent bounds, and the strong palette witness. It contains **no
-removal summit**. The following phase begins with a counting statement freeze
+removal summit**. The following Phase 10 delivered the counting statement freeze
 (two-vertex palette counts; colored directed path/triangle counts; induced
-three-vertex relational counts; then fixed-pattern / finite-family induced removal).
+three-vertex relational counts); fixed-pattern / finite-family induced removal
+remains deferred.
 
 All Phase 9 units are implemented (`Relational/Binary{Palette,Profile,Energy,
 Increment,Regularity,Strong,Bridges}.lean`): the two-way palettes and vertex
@@ -290,10 +291,11 @@ profiles, the profile partition, the palette energy and regularity surface, the
 one-step increment, the weak summit `exists_binaryPalette_regular_refinement`, the
 strong witness `exists_binaryPaletteStrongWitness` with its per-color
 `toStrongWitness`/`deviant_mass_le` handoff, and the graph bridges. The phase ends
-here: **no removal summit**. A later phase begins with a counting statement freeze
+here: **no removal summit**. Phase 10 (below) delivered the counting statement freeze
 (two-vertex palette counts; colored directed path/triangle counts; induced
-three-vertex relational counts; then fixed-pattern / finite-family induced removal),
-which also closes the deferred strong-witness counting item.
+three-vertex relational counts), closing the old strong-witness counting item;
+fixed-pattern / finite-family induced removal remains deferred (see the deferred
+summit list above).
 
 ## Phase 10 design freeze (binary-palette counting through three vertices) — COMPLETE
 
@@ -345,7 +347,8 @@ directed path/triangle counting (`Graph/RegularDegree.lean`, `Graph/PathCounting
 density-shift charge (`Relational/BinaryStrongRegularityCharge.lean`), the lifting
 calculus (`Relational/StrongCountingLifting.lean`), and the transversal summit
 `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le`
-(`Relational/TransversalCounting.lean`, `Relational/BinaryStrongCounting.lean`) — the
+(`Relational/BinaryStrongCounting.lean`, over the transversal counts of
+`Relational/TransversalCounting.lean`) — the
 diagonal gate with the global strong-counting corollary
 `abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le` and the full-carrier
 identity `globalInducedCount_eq_inducedEmbeddingCount`
