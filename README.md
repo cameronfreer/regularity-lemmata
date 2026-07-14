@@ -49,6 +49,25 @@ densities and errors in `ℝ`; densities are zero on an empty denominator, with 
 required explicitly in substantive theorems; committed code contains no `sorry` and no
 custom axioms (enforced by `scripts/check.sh` in CI).
 
+## Using as a dependency
+
+Add to your `lakefile.toml` (your project's toolchain should match this library's
+`lean-toolchain`):
+
+```toml
+[[require]]
+name = "RegularityLemmata"
+git = "https://github.com/cameronfreer/regularity-lemmata"
+rev = "main"
+```
+
+Then `import RegularityLemmata` (or individual modules such as
+`RegularityLemmata.Relational.GraphCounting`).
+
+**Stability:** this library is pre-1.0. Statements pass a review-and-falsification
+gate before their API freezes, but names and signatures may still change between
+releases; pin a tag or revision.
+
 ## Building
 
 ```bash

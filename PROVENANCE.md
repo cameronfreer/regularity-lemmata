@@ -1,8 +1,10 @@
 # Provenance
 
-Public intellectual dependencies of this library. All Lean source was authored by the
-copyright holder; no third-party source text is copied into this repository (see
-`LICENSE` and the per-file SPDX headers). The entries below record the formal
+Public intellectual dependencies of this library. As of the initial public release,
+all Lean source was authored by the copyright holder; no third-party source text is
+copied into this repository (see `LICENSE` and the per-file SPDX headers; external
+contributions after that release are recorded in the Git history and are licensed
+under Apache-2.0 per `CONTRIBUTING.md`). The entries below record the formal
 developments and publications whose results, interfaces, or proof architectures
 materially inform it; mathlib and other dependencies are consumed through Lake as
 ordinary imports. Every public mathematical antecedent materially informing a

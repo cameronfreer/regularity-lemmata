@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: If you use this library, please cite it as below.
+title: "RegularityLemmata: finite regularity, counting, and removal infrastructure in Lean 4"
+type: software
+authors:
+  - family-names: Freer
+    given-names: Cameron
+license: Apache-2.0
+repository-code: https://github.com/cameronfreer/regularity-lemmata
+version: 0.1.0
+date-released: 2026-07-14
+keywords:
+  - Lean 4
+  - mathlib
+  - formalization
+  - combinatorics
+  - Szemerédi regularity lemma
+  - hypergraph regularity
+  - counting lemma
