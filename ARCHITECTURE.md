@@ -73,11 +73,11 @@ Lean `Prop` placeholders.
   version in which `E` is *itself* regular requires running equitabilisation
   inside the energy-increment loop (transporting the energy across the exceptional
   mass) and is deferred.
-- **Relational induced removal**: fixed-pattern and finite-family induced removal over
-  the binary-palette counting layer. The counting inputs — including the strong-witness
-  counting theorems and the diagonal-cell gate — are complete (see the Phase 10
-  section); removal receives its own statement freeze and falsification gates in a
-  later phase.
+- **Relational induced removal**: fixed-pattern and family induced removal for
+  three-vertex patterns over the binary-palette counting layer. The scope and
+  normalization are frozen in the Phase 11 section below; the exact quantitative
+  signatures remain provisional until the diagonal/repeated-cell feasibility gate
+  recorded there.
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -363,3 +363,145 @@ conversion, induced three-vertex graph copies in both the disjoint-cell
 (adjacency/nonadjacency) form and the full-carrier `inducedCopyCount` bridge, and the
 strong-counting corollary specialized to `ofSimpleGraph`. The phase ends here: **no
 removal theorem**.
+
+## Phase 11 scope and normalization freeze (relational induced removal, three vertices)
+
+**Scope and invariants are frozen here; the exact quantitative signatures and the
+removal modulus remain provisional until the diagonal/repeated-cell feasibility gate
+below passes.** The phase runs in two internal stages — 11A (feasibility) and 11B
+(removal) — separated by a mandatory re-scope checkpoint; no public removal API lands
+before that checkpoint.
+
+**Target.** Induced removal for three-vertex binary-palette patterns, in two forms
+produced by ONE construction: a fixed pattern `P : FiniteRelModel L (Fin 3)`, and an
+arbitrary `ι`-indexed family `F : ι → FiniteRelModel L (Fin 3)` with **no**
+`Finite ι`/`Fintype ι`/`DecidableEq ι` assumption. One cleaned model `N` is
+constructed independently of the family; a **pattern-uniform certificate** ("any
+three-vertex pattern occurring in `N` had strictly more than `δ·|V|³` induced copies
+in `M`", on large hosts) yields the family summit pointwise and the fixed-pattern
+theorem via a singleton index. If the family corollary ever becomes substantial,
+pattern dependence has leaked into the construction — stop and re-examine. The
+removal modulus depends on `L` and the edit budget `ε` only — never on the carrier,
+the index type, the family size, or the particular patterns.
+
+**Provisional target shape** (recorded for orientation, NOT frozen):
+
+```
+∀ ε > 0, ∃ δ > 0, ∀ {ι V} [Fintype V] [DecidableEq V]
+  (F : ι → FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V),
+  (∀ i, (inducedEmbeddingCount (F i) M : ℝ) ≤ δ * (Fintype.card V : ℝ) ^ 3) →
+  ∃ N, relativeAggregateEdit M N ≤ ε ∧ ∀ i, inducedEmbeddingCount (F i) N = 0
+```
+
+- **Guard-free endpoint**: the smallness hypothesis uses `≤` and the certificate is
+  strict (`δ·|V|³ < count` for surviving patterns on large hosts), so the
+  empty-host/nonempty-family instance is a meaningful theorem rather than vacuous at
+  the zero-denominator endpoint; a small-host branch (the modulus is small against
+  `(N₀+1)⁻³`, forcing the ℕ-valued count to zero) handles the rest.
+- **Edit measure**: the frozen `relativeAggregateEdit` (all arities, the Phase 8
+  cross-arity weighting). A binary-only measure is FALSE — in a unary-only language a
+  rare-profile pattern has order `n²` copies removable only by unary edits.
+- `AtMostBinary L` is a hypothesis of every summit; `N` is an arbitrary
+  `FiniteRelModel L V` (swap-consistency, profile preservation and the like are proof
+  artifacts of the cleaning, never statement-side constraints); host = full carrier.
+
+**Three-layer cleaning (frozen).** (1) Nullary relations are preserved exactly
+(`NullaryCompatible P N ↔ NullaryCompatible P M`). (2) Exceptional vertex-profile
+cleaning: unary values AND binary loops, via absorption of small or
+exceptional-profile coarse cells into a maximal proxy cell (edit-free in the
+degenerate no-symbol case). (3) Off-diagonal pair-palette cleaning respecting the
+reversal law: keep a pair whose existing palette has COARSE block density `≥ θ`,
+otherwise recolor to the coarse-majority palette
+`c(C,D) ∈ argmax_c pairDensity (HasBinaryPairPalette M c) C D`, with
+`c(D,C) = swap (c(C,D))` holding by construction via a canonical orientation of
+unordered coarse-cell pairs. For a diagonal coarse pair the recolor target is a
+palette ORBIT `{c, swap c}` oriented by a local (noncomputable, non-instance)
+ordering of distinct host vertices — a constant palette on `(C,C)` must be symmetric,
+and the dense object may be an asymmetric orbit. Loops stay in layer (2). The
+principal pair-edit charge is the sparse-palette mass `≤ 4^m·θ·|V|²` plus pairs
+incident to profile/proxy-edited vertices; density-deviant fine pairs are NOT
+recolored.
+
+**Diagonal-inclusive regularity is a parallel additive layer.** Copies with two or
+three vertices in one cell require uniformity of diagonal cell pairs `(C,C)`, which
+the frozen off-diagonal `IsRegularPartition` deliberately does not control. The
+increment machinery is distinctness-agnostic (the witness atomisation and energy
+bookkeeping never use cell-distinctness, and the energy is diagonal-inclusive by the
+frozen convention above), so a diagonal-inclusive ladder ports with identical fuel
+and part-count recurrences. It is added as NEW predicates with a bridge to the
+off-diagonal layer; the frozen `IsBadPair`/`IsRegularPartition` surface is unchanged
+— an in-place redefinition would break the mathlib uniformity bridge (which cannot
+deliver diagonal control) and the frozen counting-charge reindexings, and is
+explicitly not taken.
+
+**Role-indexed representatives.** Freeness counting runs in the ORIGINAL model on
+representative fine cells: THREE role-indexed representatives per large coarse cell
+(`rep : coarse.parts → Fin 3 → fine.parts`), selected mass-weighted from candidates
+with the size guarantee stated in multiplication form (`2·q·|rep C i| ≥ |C|`, `q` the
+host-independent fine-part bound — never natural-number division), uniform and
+density-close for every ordered coordinate pair with distinct roles (including equal
+coarse cells: those events are weighted `|A|·|B|`, exactly what diagonal bad mass
+controls), for every palette color, by one simultaneous union bound — independent of
+the pattern family. Representative densities are within `η` of coarse densities, so
+the working density floor is `ρ = min(θ, 1/4^m) − η` (with `η < min(θ, 1/4^m)`), and
+every distinct-realization lower bound carries an explicit loop/collision
+subtraction: "density product − regularity error − collision slack" (full-square
+densities only; no off-diagonal density variant; no unqualified `1/4^m` bound for
+distinct pairs). Copy counts decompose over the FIVE placement strata (all cells
+distinct; exactly 0=1; exactly 0=2; exactly 1=2; all equal).
+
+**Rejected alternatives (recorded so they are not re-derived).** Pure-majority
+recoloring (edit mass ~`(1−4^{-m})·n²`); constant-palette recoloring (no spare
+palette — a path pattern in graphs requires both symmetric palettes; on diagonal
+pairs a constant palette must be symmetric, forcing orbit orientation);
+local-averaging density transfer (its witness-gap tolerance depends on the coarse
+part count, which grows with the tolerance — circular); a SINGLE representative per
+coarse cell (converts the diagonal bad-mass control `Σ|A|²` into `Σ|A|` at cost
+`2q`, and `q` grows with the regularity tolerance — the same circularity; no
+Cauchy–Schwarz argument removes it).
+
+**What Phase 10 machinery is consumed.** The strong palette witness (upgraded to its
+diagonal-inclusive twin), `deviant_mass_le` (consumed ONLY for representative
+selection, never to charge host pairs), the profile/palette reduction
+(`preservesAndReflects_iff_profiles_palettes`, `preservesAndReflects_three_iff`), and
+the directed triangle lower bound (`directedTriangleCount_ge`). NOT on the removal
+path: the coarse-estimate counting summit, the `3·m·|s|²` diagonal gate, and
+equipartition seeding — freeness counting happens in the original model on
+representatives.
+
+**Falsification gates (kernel-`decide` where expressible; all must be green before
+any 11B statement freezes).** G1 subgraph deletion creates induced copies; G2 a
+single pair recolor creates copies, with exact ordered-tuple edit accounting; G3 no
+spare palette (the path pattern requires both symmetric palettes; asymmetric palettes
+are never realized by graph adapters); G4 a planted within-cell copy is invisible to
+transversal counting; G5 unary-only rare profile — removal achievable only by unary
+edits; G6 rare loop profile with constant off-diagonal data — loop edits belong to
+the profile layer; G7 a swap-inconsistent palette assignment is realized by no model;
+G8 nullary incompatibility forces count zero unconditionally; G9 scope degeneracies
+(hosts with fewer than three vertices; the meaningful empty-host instance under the
+`≤` endpoint; duplicate patterns; the empty family; an infinite constant family).
+
+**Feasibility gate (the 11A→11B checkpoint).** 11B begins only when: the diagonal
+increments and bounds are proved; all five strata counting statements are proved with
+explicit errors; the profile/loop gates are green; an actual pattern-independent
+role-indexed representative system is constructed with its size guarantee; one
+uniform lower-bound certificate covers every stratum on those representatives in both
+palette orientations; nothing depends on the family index type; the explicit
+constants are viable; and the selection's union bound introduces no hidden dependence
+of the strong-witness tolerance on the fine-part bound. The exact modulus freezes
+only after the surgery primitives' edit formulas AND their composition into the total
+relative aggregate-edit bound are proved — if that composition needs
+cleaning-specific facts, the freeze is delayed rather than constants guessed.
+
+**Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
+languages varying after `ε` or moduli depending on the family (the language is fixed
+before `ε`; the family is quantified after `ε` and may be arbitrary);
+property-testing formulations; arity `> 2` or hypergraph removal; quantitative
+optimality of the modulus; equitable strong regularity (stays deferred — this route
+avoids it); deletion-only edits; box-relative removal; computable cleaning.
+
+**Provenance.** The route is a formalization-oriented adaptation of the induced
+removal argument of Alon–Fischer–Krivelevich–Szegedy, in the strong-regularity
+presentation surveyed by Conlon–Fox; both will be cited in `PROVENANCE.md` and the
+relevant file docstrings when the corresponding units land. Mathlib is the
+architectural source only for the reused regularity machinery already credited.
