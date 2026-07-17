@@ -69,6 +69,7 @@ import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.InducedRemovalGates
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
+import RegularityLemmata.Relational.RepresentativeSelection
 
 /-!
 # RegularityLemmata
