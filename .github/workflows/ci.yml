@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache .lake
         # actions/cache v4.2.3, pinned to an immutable revision
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: .lake
           key: lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml') }}
