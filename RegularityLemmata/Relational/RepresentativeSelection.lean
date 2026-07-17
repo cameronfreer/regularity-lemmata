@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.BinaryDiagStrong
 import RegularityLemmata.Relational.TransversalCounting
+import RegularityLemmata.Finite.WeightedChoice
 
 /-!
 # Phase 11 unit 7: role-indexed representative selection
@@ -149,5 +150,46 @@ theorem repCandidates_nonempty {Q Pc : Finpartition s} (hQP : Q ≤ Pc) {C : Fin
   rw [hne, Finset.sum_empty] at this
   have : (C.card : ℝ) ≤ 0 := by linarith
   exact absurd (by exact_mod_cast this : C.card ≤ 0) (Nat.not_le.mpr hCpos)
+
+/-! ### The two mass bounds feeding the union bound -/
+
+open Classical in
+/-- The non-uniform fiber-pair mass inside any box pair is dominated by the
+diagonal-inclusive bad mass of the whole partition. -/
+theorem sum_fiber_nonuniform_le_badMassDiagNum (R : V → V → Prop) [DecidableRel R]
+    {ε : ℝ} (Q : Finpartition s) (C D : Finset V) :
+    ∑ p ∈ (refinementFiber Q C ×ˢ refinementFiber Q D).filter
+        (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card)
+      ≤ badMassDiagNum R ε Q := by
+  rw [badMassDiagNum]
+  refine Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_)
+    (fun p _ _ => by positivity)
+  rw [Finset.mem_filter, Finset.mem_product, refinementFiber, refinementFiber,
+    Finset.mem_filter, Finset.mem_filter] at hp
+  rw [Finset.mem_filter, Finset.mem_product]
+  exact ⟨⟨hp.1.1.1, hp.1.2.1⟩, hp.2⟩
+
+open FirstOrder in
+/-- The `η`-deviant fiber-pair mass of a SINGLE coarse pair is dominated by the
+witness's total deviant mass — including diagonal coarse pairs. -/
+theorem BinaryPaletteStrongDiagWitness.deviant_pair_mass_le
+    {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V}
+    {E : ErrorSchedule} {δ : ℝ} {P₀ : Finpartition s}
+    (w : BinaryPaletteStrongDiagWitness M E δ P₀) (c : BinaryPairPalette L)
+    {η : ℝ} (hη : 0 < η) {pd : Finset V × Finset V}
+    (hpd : pd ∈ w.coarse.parts ×ˢ w.coarse.parts) :
+    ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+        (fun p => η < |pairDensity (HasBinaryPairPalette M c) p.1 p.2
+          - pairDensity (HasBinaryPairPalette M c) pd.1 pd.2|),
+      ((p.1.card : ℝ) * p.2.card)
+      ≤ δ / η ^ 2 * (s.card : ℝ) ^ 2 := by
+  classical
+  refine le_trans (Finset.single_le_sum (f := fun pd : Finset V × Finset V =>
+      ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+          (fun p => η < |pairDensity (HasBinaryPairPalette M c) p.1 p.2
+            - pairDensity (HasBinaryPairPalette M c) pd.1 pd.2|),
+        ((p.1.card : ℝ) * p.2.card))
+    (fun pd' _ => Finset.sum_nonneg fun p _ => by positivity) hpd)
+    (w.deviant_mass_le c hη)
 
 end RegularityLemmata
