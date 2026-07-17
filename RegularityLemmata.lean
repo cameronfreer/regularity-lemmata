@@ -6,6 +6,7 @@ import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Finite.Injective
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Edit
+import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Partition.Basic
