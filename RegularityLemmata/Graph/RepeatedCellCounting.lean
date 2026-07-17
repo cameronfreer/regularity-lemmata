@@ -108,11 +108,17 @@ theorem ne_of_placementClass_eq_eq01 {T : Fin 3 → β}
   rw [placementClass_eq_eq01_iff] at h
   exact fun h02 => h.2 (h.1.symm.trans h02)
 
-/-- … and `eq12` forces `T 0 ≠ T 2`. -/
+/-- … `eq12` forces `T 0 ≠ T 2`, … -/
 theorem ne_of_placementClass_eq_eq12 {T : Fin 3 → β}
     (h : placementClass T = .eq12) : T 0 ≠ T 2 := by
   rw [placementClass_eq_eq12_iff] at h
   exact fun h02 => h.2 (h02.trans h.1.symm)
+
+/-- … and `eq02` forces `T 1 ≠ T 2`. -/
+theorem ne_of_placementClass_eq_eq02 {T : Fin 3 → β}
+    (h : placementClass T = .eq02) : T 1 ≠ T 2 := by
+  rw [placementClass_eq_eq02_iff] at h
+  exact fun h12 => h.2 (h.1.trans h12.symm)
 
 /-! ### The exact five-stratum decomposition -/
 
@@ -281,7 +287,8 @@ theorem card_filter_noninjective_le (A B C : Finset α) :
 
 /-- **The generic injective lower bound** — "density product − regularity error −
 collision slack", for arbitrary (possibly coinciding) boxes. Full-square densities
-throughout; the collision slack is the exact box-restricted intersection mass. -/
+throughout; the collision slack is the box-restricted union-bound mass — the three
+collision events overlap, so the slack is an upper bound, not an exact mass. -/
 theorem injectiveTriangleCount_ge {A B C : Finset α} (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
     (h01 : IsUniformPair R₀₁ A B ε) (h02 : IsUniformPair R₀₂ A C ε)
     (h12 : IsUniformPair R₁₂ B C ε) :
@@ -403,6 +410,10 @@ example :
         (fun T => placementClass T = .allDistinct)).card = 6 ∧
       ((Finset.univ : Finset (Fin 3 → Fin 3)).filter
         (fun T => placementClass T = .eq01)).card = 6 ∧
+      ((Finset.univ : Finset (Fin 3 → Fin 3)).filter
+        (fun T => placementClass T = .eq02)).card = 6 ∧
+      ((Finset.univ : Finset (Fin 3 → Fin 3)).filter
+        (fun T => placementClass T = .eq12)).card = 6 ∧
       ((Finset.univ : Finset (Fin 3 → Fin 3)).filter
         (fun T => placementClass T = .allEqual)).card = 3 := by decide
 
