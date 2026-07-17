@@ -6,6 +6,7 @@ import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Finite.Injective
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Edit
+import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Partition.Basic
@@ -68,6 +69,7 @@ import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.InducedRemovalGates
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
+import RegularityLemmata.Relational.RepresentativeSelection
 
 /-!
 # RegularityLemmata
