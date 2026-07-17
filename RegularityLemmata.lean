@@ -18,8 +18,10 @@ import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
+import RegularityLemmata.Graph.BadMassDiag
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.Regularity
+import RegularityLemmata.Graph.RegularityDiag
 import RegularityLemmata.Graph.Bridge
 import RegularityLemmata.Graph.RemovalBridge
 import RegularityLemmata.Graph.CutNorm
