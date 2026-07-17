@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import RegularityLemmata.Relational.BinaryPattern
 import RegularityLemmata.Graph.PathCounting
 import RegularityLemmata.Graph.TriangleCounting
+import RegularityLemmata.Graph.RepeatedCellCounting
 
 /-!
 # Induced three-vertex relational counting
@@ -134,6 +135,29 @@ theorem inducedEmbeddingCountOn_three [AtMostBinary L]
   rw [Fintype.mem_piFinset] at hf
   exact preservesAndReflects_three_iff hnull (hA _ (hf 0)) (hB _ (hf 1)) (hC _ (hf 2))
 
+/-- **Exact three-vertex count WITHOUT disjointness.** On profile-matching boxes that
+may overlap or coincide, the induced count is the INJECTIVE triangle count of the
+three required palette colors — the explicit injectivity condition is retained in the
+count rather than derived from disjointness. This is the bridge the Phase 11
+placement-strata certificate consumes on role-indexed representative boxes (whose
+coarse parents may coincide while the fine boxes differ, and vice versa). -/
+theorem inducedEmbeddingCountOn_three_eq_injectiveTriangleCount [AtMostBinary L]
+    {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} {A B C : Finset V}
+    (hnull : NullaryCompatible P M)
+    (hA : ∀ v ∈ A, binaryVertexProfile M v = binaryVertexProfile P 0)
+    (hB : ∀ v ∈ B, binaryVertexProfile M v = binaryVertexProfile P 1)
+    (hC : ∀ v ∈ C, binaryVertexProfile M v = binaryVertexProfile P 2) :
+    inducedEmbeddingCountOn P M ![A, B, C]
+      = injectiveTriangleCount
+          (HasBinaryPairPalette M (binaryPairPalette P 0 1))
+          (HasBinaryPairPalette M (binaryPairPalette P 0 2))
+          (HasBinaryPairPalette M (binaryPairPalette P 1 2)) A B C := by
+  rw [inducedEmbeddingCountOn, injectiveTriangleCount]
+  refine congrArg Finset.card (Finset.filter_congr fun f hf => ?_)
+  rw [Fintype.mem_piFinset] at hf
+  have hiff := preservesAndReflects_three_iff hnull (hA _ (hf 0)) (hB _ (hf 1)) (hC _ (hf 2))
+  exact ⟨fun h => ⟨hiff.mp h.2, h.1⟩, fun h => ⟨h.2, hiff.mpr h.1⟩⟩
+
 /-! ### The induced three-vertex counting theorem -/
 
 /-- **Induced three-vertex approximation.** On disjoint profile-matching cells with all
@@ -170,6 +194,34 @@ private def emptyModel (V : Type*) : FiniteRelModel FirstOrder.Language.empty V 
 /-- A directed one-binary-symbol test model on `Fin 3`. -/
 private def dModel (p : Fin 3 → Fin 3 → Bool) : FiniteRelModel (singleRelLang 2) (Fin 3) :=
   ⟨fun {n} _ x => if h : n = 2 then p (x (Fin.cast h.symm 0)) (x (Fin.cast h.symm 1)) else false⟩
+
+-- **The no-disjointness bridge on COINCIDING boxes** (statement level): overlapping or
+-- equal boxes are allowed; injectivity is carried by the count, not by disjointness.
+example [AtMostBinary L] {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
+    {A : Finset V} (hnull : NullaryCompatible P M)
+    (hA0 : ∀ v ∈ A, binaryVertexProfile M v = binaryVertexProfile P 0)
+    (hA1 : ∀ v ∈ A, binaryVertexProfile M v = binaryVertexProfile P 1)
+    (hA2 : ∀ v ∈ A, binaryVertexProfile M v = binaryVertexProfile P 2) :
+    inducedEmbeddingCountOn P M ![A, A, A]
+      = injectiveTriangleCount
+          (HasBinaryPairPalette M (binaryPairPalette P 0 1))
+          (HasBinaryPairPalette M (binaryPairPalette P 0 2))
+          (HasBinaryPairPalette M (binaryPairPalette P 1 2)) A A A :=
+  inducedEmbeddingCountOn_three_eq_injectiveTriangleCount hnull hA0 hA1 hA2
+
+-- Concretely, on the empty language with the full coincident box: both sides are the
+-- `6` bijections of `Fin 3`.
+example : inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    ![(Finset.univ : Finset (Fin 3)), Finset.univ, Finset.univ] = 6 := by decide
+
+example : injectiveTriangleCount
+    (HasBinaryPairPalette (emptyModel (Fin 3))
+      (binaryPairPalette (emptyModel (Fin 3)) 0 1))
+    (HasBinaryPairPalette (emptyModel (Fin 3))
+      (binaryPairPalette (emptyModel (Fin 3)) 0 2))
+    (HasBinaryPairPalette (emptyModel (Fin 3))
+      (binaryPairPalette (emptyModel (Fin 3)) 1 2))
+    (Finset.univ : Finset (Fin 3)) Finset.univ Finset.univ = 6 := by decide
 
 -- Nullary incompatibility forces the induced three-vertex count to zero.
 example [AtMostBinary L] {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
