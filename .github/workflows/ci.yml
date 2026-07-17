@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      # actions/checkout v4.2.2, pinned to an immutable revision
+      # actions/checkout v7.0.0, pinned to an immutable revision
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
@@ -35,7 +35,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Cache .lake
-        # actions/cache v4.2.3, pinned to an immutable revision
+        # actions/cache v6.1.0, pinned to an immutable revision
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: .lake

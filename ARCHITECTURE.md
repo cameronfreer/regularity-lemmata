@@ -77,7 +77,7 @@ Lean `Prop` placeholders.
   three-vertex patterns over the binary-palette counting layer. The scope and
   normalization are frozen in the Phase 11 section below; the exact quantitative
   signatures remain provisional until the diagonal/repeated-cell feasibility gate
-  recorded there.
+  recorded there passes.
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -409,7 +409,10 @@ the index type, the family size, or the particular patterns.
 (`NullaryCompatible P N ↔ NullaryCompatible P M`). (2) Exceptional vertex-profile
 cleaning: unary values AND binary loops, via absorption of small or
 exceptional-profile coarse cells into a maximal proxy cell (edit-free in the
-degenerate no-symbol case). (3) Off-diagonal pair-palette cleaning respecting the
+degenerate no-symbol case). Pairs involving absorbed vertices are classified using
+their **post-absorption proxy labels**: the proxy cell's coarse block pair supplies
+the density that controls their keep/recolor decision, never the original small or
+exceptional cell. (3) Off-diagonal pair-palette cleaning respecting the
 reversal law: keep a pair whose existing palette has COARSE block density `≥ θ`,
 otherwise recolor to the coarse-majority palette
 `c(C,D) ∈ argmax_c pairDensity (HasBinaryPairPalette M c) C D`, with
