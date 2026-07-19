@@ -39,6 +39,10 @@ removal API**.
 * **G9 — scope degeneracies.** Hosts with fewer than three vertices have count zero;
   duplicate members, the empty family, and an infinite constant family are all
   harmless; the guard-free `≤` endpoint keeps the empty host meaningful.
+* **G10 — role-pair palette incompatibility.** Two representative role pairs below the
+  same coarse pair can have DISJOINT palette supports; a role-independent palette
+  choice then has no positive density floor valid for every placement. Per-pair
+  density closeness rules this out; aggregate deviance alone does not.
 -/
 
 namespace RegularityLemmata
@@ -231,5 +235,42 @@ example : ∀ i : Empty, inducedEmbeddingCount ((fun j => j.elim) i : FiniteRelM
 -- An infinite constant family (`ι = ℕ`) demands nothing beyond its single member:
 -- the frozen statement quantifies over an arbitrary index type with no finiteness.
 example : ∀ _i : ℕ, inducedEmbeddingCount marked unmarked = 0 := fun _ => by decide
+
+/-! ### G10 — role-pair palette incompatibility (11A checkpoint, round 2) -/
+
+/-- One edge `0 — 2` inside `Fin 4`; in particular `1, 3` is a nonedge. -/
+private abbrev oneEdge02 : SimpleGraph (Fin 4) :=
+  SimpleGraph.fromRel fun a b => a = 0 ∧ b = 2
+
+-- Two representative role pairs below the SAME coarse pair (`C = {0,1}`, `D = {2,3}`,
+-- with `rep C 0 = {0}`, `rep C 1 = {1}`, `rep D 1 = {2}`, `rep D 2 = {3}`) can have
+-- DISJOINT palette supports: `({0},{2})` realizes only the all-adjacent palette while
+-- `({1},{3})` realizes only the all-nonadjacent one. A cleaner that assigns ONE
+-- palette to the coarse pair, independent of the role pair through which it is
+-- realized, then has no positive density floor valid for every placement: whichever
+-- palette is chosen, some role pair supports it with density zero. Unit 7's per-pair
+-- density-closeness clause rules this configuration out among the SELECTED
+-- representatives (all six role-pair densities are within `2η` of the common coarse
+-- density); an aggregate deviant-cost clause alone does NOT — hence the
+-- role-independent rounding certificate is a standing obligation of any re-scope
+-- that drops per-pair closeness.
+example : pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) adjPalette)
+    {0} {2} = 1 := by decide
+
+example : pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) nonadjPalette)
+    {0} {2} = 0 := by decide
+
+example : pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) adjPalette)
+    {1} {3} = 0 := by decide
+
+example : pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) nonadjPalette)
+    {1} {3} = 1 := by decide
+
+-- The incompatibility is not an artifact of tiny boxes: no palette has positive
+-- count on BOTH role pairs simultaneously.
+example : ∀ c : BinaryPairPalette FirstOrder.Language.graph,
+    pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) c) {0} {2} = 0
+    ∨ pairCount (HasBinaryPairPalette (ofSimpleGraph oneEdge02) c) {1} {3} = 0 := by
+  decide
 
 end RegularityLemmata

@@ -496,6 +496,28 @@ only after the surgery primitives' edit formulas AND their composition into the 
 relative aggregate-edit bound are proved — if that composition needs
 cleaning-specific facts, the freeze is delayed rather than constants guessed.
 
+**Checkpoint status (2026-07-19): re-scope required; aggregate proposal not yet
+validated.** The 11A units are landed and sound, but the gate is NOT passed: the
+current parameter hierarchy cannot close uniformly using the available fixed-gap
+witness bound together with the per-pair density-closeness requirement
+(`deviant_condition_forces_gap_lt` proves the necessary inequality at a realized
+coarse complexity; `exists_selection_schedule` shows the uniformity half alone is
+schedulable). The candidate re-scope — an aggregate deviant-cost clause consumed only
+in the edit budget — carries two open mathematical obligations before any 11B unit
+may land: (1) the conditioned cost bound, now proved abstractly
+(`exists_piFinset_forall_not_mem_bad_cost_le`, factor `1/(1−σ)`) with the exact
+role/palette factors derived (`sum_selEvent_deviantMass_le`: unconditional
+`24·K·(δ/η²)·n²`, conditioned `48·K·(δ/η²)·n²`); and (2) **role consistency** — the
+cleaner assigns one palette per coarse block pair while a placement may realize it
+through any of six representative role pairs, and without per-pair closeness those
+role pairs can have disjoint palette supports (gate G10), so a role-independent
+rounding certificate (every realizable palette positively dense on the representative
+boxes of every placement, and at least one such palette available) must be proved or
+refuted before choosing between a complexity-dependent/scheduled-gap strong witness
+and a stronger one-subset-per-cell lemma with self-regularity. The Unit 7/8 theorems
+stay as sound conditional results; the frozen cleaning rule is amended only after one
+route proves both the freeness certificate and the aggregate edit bound.
+
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
 before `ε`; the family is quantified after `ε` and may be arbitrary);

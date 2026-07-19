@@ -209,6 +209,90 @@ private abbrev SelEvent (w : BinaryPaletteStrongDiagWitness M E δ P₀) (α : �
     × ({ij : Fin 3 × Fin 3 // ij.1 ≠ ij.2} × BinaryPairPalette L)
 
 open Classical in
+/-- **The exact role/palette factor of the aggregate deviant mass** (11A checkpoint,
+round 2): summing each event's deviant fiber-pair mass over the FULL event index —
+six ordered role pairs times the `K = Fintype.card (BinaryPairPalette L)` palette
+colors times all ordered large coarse pairs — costs exactly `6·K` times the per-color
+witness deviance bound `(δ/η²)·n²`.
+
+Factor accounting for the candidate re-scope, on record: charging each deviant event
+the coarse-pair volume `|C|·|D|` and dividing by the two pinned candidate weights
+(each at least `|C|/2` by the half-mass theorem) multiplies this bound by at most `4`,
+giving the unconditional expected-cost input `μ ≤ 24·K·(δ/η²)·n²` of
+`sum_piFinset_weight_mul_eventCost_le`; conditioning on all uniformity events under
+the half-budget schedule (`σ ≤ 1/2`) doubles it, so the honest selected-cost constant
+is `48·K·(δ/η²)·n²` (`exists_piFinset_forall_not_mem_bad_cost_le`). The
+selection-with-cost wiring is deliberately NOT installed pending the round-2 route
+decision on the re-scope. -/
+theorem BinaryPaletteStrongDiagWitness.sum_selEvent_deviantMass_le
+    (w : BinaryPaletteStrongDiagWitness M E δ P₀) (α : ℝ) {η : ℝ} (hη : 0 < η) :
+    ∑ e : SelEvent w α,
+        ∑ p ∈ ((w.fine.parts.filter (· ⊆ e.1.1.1)) ×ˢ
+            (w.fine.parts.filter (· ⊆ e.1.2.1))).filter
+          (fun p => η < |pairDensity (HasBinaryPairPalette M e.2.2) p.1 p.2
+            - pairDensity (HasBinaryPairPalette M e.2.2) e.1.1.1 e.1.2.1|),
+          ((p.1.card : ℝ) * p.2.card)
+      ≤ 6 * (Fintype.card (BinaryPairPalette L) : ℝ)
+          * (δ / η ^ 2 * (s.card : ℝ) ^ 2) := by
+  classical
+  set f : Finset V × Finset V → BinaryPairPalette L → ℝ := fun pd c =>
+    ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+        (fun p => η < |pairDensity (HasBinaryPairPalette M c) p.1 p.2
+          - pairDensity (HasBinaryPairPalette M c) pd.1 pd.2|),
+      ((p.1.card : ℝ) * p.2.card) with hf
+  have hfnn : ∀ pd c, 0 ≤ f pd c := fun pd c =>
+    Finset.sum_nonneg fun p _ => by positivity
+  have hcardR : Fintype.card {ij : Fin 3 × Fin 3 // ij.1 ≠ ij.2} = 6 := by decide
+  -- Per color, the sum over ordered large coarse pairs is dominated by the witness's
+  -- per-color deviance bound (the sum over ALL ordered coarse pairs).
+  have hfbound : ∀ c : BinaryPairPalette L,
+      ∑ CD : {C // C ∈ largeParts w.coarse α} × {C // C ∈ largeParts w.coarse α},
+        f (CD.1.1, CD.2.1) c ≤ δ / η ^ 2 * (s.card : ℝ) ^ 2 := by
+    intro c
+    have heq : ∑ CD : {C // C ∈ largeParts w.coarse α}
+          × {C // C ∈ largeParts w.coarse α}, f (CD.1.1, CD.2.1) c
+        = ∑ pd ∈ largeParts w.coarse α ×ˢ largeParts w.coarse α, f pd c := by
+      rw [Fintype.sum_prod_type, Finset.sum_product, Finset.univ_eq_attach,
+        ← Finset.sum_attach (largeParts w.coarse α)
+          (fun C => ∑ D ∈ largeParts w.coarse α, f (C, D) c)]
+      refine Finset.sum_congr rfl fun C _ => ?_
+      show ∑ D ∈ (largeParts w.coarse α).attach, f (C.1, D.1) c
+          = ∑ D ∈ largeParts w.coarse α, f (C.1, D) c
+      exact Finset.sum_attach (largeParts w.coarse α) (fun D => f (C.1, D) c)
+    rw [heq]
+    exact le_trans (Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.product_subset_product largeParts_subset largeParts_subset)
+        fun pd _ _ => hfnn pd c)
+      (w.deviant_mass_le c hη)
+  show ∑ e : SelEvent w α, f (e.1.1.1, e.1.2.1) e.2.2
+      ≤ 6 * (Fintype.card (BinaryPairPalette L) : ℝ)
+          * (δ / η ^ 2 * (s.card : ℝ) ^ 2)
+  calc ∑ e : SelEvent w α, f (e.1.1.1, e.1.2.1) e.2.2
+      = ∑ CD : {C // C ∈ largeParts w.coarse α} × {C // C ∈ largeParts w.coarse α},
+          ∑ rc : {ij : Fin 3 × Fin 3 // ij.1 ≠ ij.2} × BinaryPairPalette L,
+            f (CD.1.1, CD.2.1) rc.2 :=
+        Fintype.sum_prod_type _
+    _ = ∑ CD : {C // C ∈ largeParts w.coarse α} × {C // C ∈ largeParts w.coarse α},
+          (6 : ℝ) * ∑ c : BinaryPairPalette L, f (CD.1.1, CD.2.1) c := by
+        refine Finset.sum_congr rfl fun CD _ => ?_
+        rw [Fintype.sum_prod_type]
+        show ∑ _r : {ij : Fin 3 × Fin 3 // ij.1 ≠ ij.2}, ∑ c : BinaryPairPalette L,
+            f (CD.1.1, CD.2.1) c
+          = (6 : ℝ) * ∑ c : BinaryPairPalette L, f (CD.1.1, CD.2.1) c
+        rw [Finset.sum_const, Finset.card_univ, hcardR, nsmul_eq_mul]
+        norm_num
+    _ = (6 : ℝ) * ∑ c : BinaryPairPalette L,
+          ∑ CD : {C // C ∈ largeParts w.coarse α} × {C // C ∈ largeParts w.coarse α},
+            f (CD.1.1, CD.2.1) c := by
+        rw [← Finset.mul_sum, Finset.sum_comm]
+    _ ≤ (6 : ℝ) * ∑ _c : BinaryPairPalette L, (δ / η ^ 2 * (s.card : ℝ) ^ 2) :=
+        mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun c _ => hfbound c)
+          (by norm_num)
+    _ = 6 * (Fintype.card (BinaryPairPalette L) : ℝ)
+          * (δ / η ^ 2 * (s.card : ℝ) ^ 2) := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, ← mul_assoc]
+
+open Classical in
 /-- **Role-indexed representative selection.** Under the host-free arithmetic
 hypothesis — coarse complexity, palette count, schedule, and gap parameters ONLY; the
 fine-part bound `q` appears in the size guarantee and NOWHERE in the tolerance — there
