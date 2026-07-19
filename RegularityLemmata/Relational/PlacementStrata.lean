@@ -406,7 +406,7 @@ theorem exists_viable_constants (K : ℕ) {θ : ℝ} (hθ0 : 0 < θ) (hθK : θ 
   · intro q a n hq
     nlinarith [hq]
 
-/-! ### The parameter hierarchy: the viable half and the formalized obstruction -/
+/-! ### The parameter hierarchy: the viable half and the formalized circularity -/
 
 /-- **The uniformity-side hierarchy is viable, in the correct quantifier order**: the
 schedule is chosen BEFORE any witness, and at EVERY realized coarse complexity `k` it
@@ -471,17 +471,19 @@ theorem exists_selection_schedule (K : ℕ) {ρ δ' : ℝ} (hρ : 0 < ρ) (hδ' 
           exact mul_le_mul_of_nonneg_right this (by positivity)
       _ < δ' ^ 2 := hstep
 
-/-- **The obstruction, made precise.** The deviant half of the Unit 7 selection
-inequality against the coverage-forced threshold `α = δ'/(k+1)` FORCES the witness
-gap below `η²·δ'²/(48·K·k²·(k+1)²)` at the realized coarse complexity `k`. Since `δ`
-must be fixed before the witness while `k` is produced by it (with a bound that
-itself grows as `δ` shrinks), no fixed gap satisfies this at every realizable `k` —
-the fixed-gap strong-witness API cannot support the per-pair density-closeness clause
-of the Unit 7 selection at scale. This is the checkpoint finding; the proposed
-re-scope replaces the per-pair closeness clause by an aggregate deviant-cost clause
-(consumed only in the 11B edit budget), which removes `δ/η²` from the selection
-inequality entirely and makes the hierarchy schedule-satisfiable
-(`exists_selection_schedule`). -/
+/-- **The circularity, made precise.** The deviant half of the Unit 7 selection
+inequality against the coverage-forced threshold `α = δ'/(k+1)` forces the witness
+gap below `η²·δ'²/(48·K·k²·(k+1)²)` at the realized coarse complexity `k` — a
+NECESSARY inequality at a given realized `k`, while `δ` must be fixed before the
+witness and the available witness complexity bound grows as `δ` shrinks. The current
+parameter hierarchy therefore cannot close uniformly using the available fixed-gap
+witness bound together with the per-pair closeness requirement (this theorem does
+not, and cannot, rule out every conceivable fixed-gap route). The candidate re-scope
+replaces the per-pair closeness clause by an aggregate deviant-cost clause (consumed
+only in the 11B edit budget), which removes THIS PARTICULAR circularity from the
+selection inequality (cf. `exists_selection_schedule` for the uniformity half); its
+own obligations — the conditioned cost bound and role-consistent rounding — are
+recorded at the checkpoint and are NOT yet validated. -/
 theorem deviant_condition_forces_gap_lt (K : ℕ) {δ η δ' : ℝ} (hη : 0 < η)
     {k : ℕ} (hK : 0 < K) (hk : 0 < k)
     (h : 48 * (k : ℝ) ^ 2 * K * (δ / η ^ 2) < (δ' / ((k : ℝ) + 1)) ^ 2) :
