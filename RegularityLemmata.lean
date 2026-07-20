@@ -16,6 +16,7 @@ import RegularityLemmata.Partition.Energy
 import RegularityLemmata.Partition.AlmostRefines
 import RegularityLemmata.Partition.Fiber
 import RegularityLemmata.Graph.Uniformity
+import RegularityLemmata.Graph.UniformSlicing
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
