@@ -2,8 +2,10 @@
 Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
+import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Algebra.BigOperators.Pi
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Linarith
@@ -420,6 +422,58 @@ example (t : Fin 1 × Fin 2 → Finset (Fin 3)) (wt : Fin 3 → ℝ) (hwt : ∀ 
     ∃ g ∈ Fintype.piFinset t, ∀ e : Unit, (g (0, 0), g (0, 1)) ∉ Bad e :=
   exists_piFinset_forall_not_mem_bad t wt hwt (fun _ => (0, 0)) (fun _ => (0, 1))
     (fun _ => by decide) Bad hlt
+
+-- SHARPNESS of the conditioning factor. Two equal-weight selections over
+-- `t = ![{0, 1}, {0}]` (unit weights), one event marking `![1, 0]` bad, and ALL cost
+-- on the surviving selection `![0, 0]`. The inputs hold with equality at
+-- `σ = μ = 1/2`, and EVERY good selection has cost exactly `μ/(1 − σ) = 1 > μ`:
+-- the factor `1/(1 − σ)` is attained and cannot be improved, and the unconditioned
+-- bound `cost ≤ μ` is FALSE for this instance.
+section Sharpness
+
+private abbrev tSharp : Fin 2 → Finset (Fin 2) := ![{0, 1}, {0}]
+
+private abbrev badSharp : Finset (Fin 2 × Fin 2) := {(1, 0)}
+
+private abbrev costSharp : (Fin 2 → Fin 2) → ℝ := fun g => if g 0 = 0 then 1 else 0
+
+-- The theorem applies at `σ = μ = 1/2` and yields a good selection of cost ≤ 1…
+example : ∃ g ∈ Fintype.piFinset tSharp,
+    (∀ _e : Unit, (g 0, g 1) ∉ badSharp) ∧ costSharp g ≤ (1 / 2 : ℝ) / (1 - 1 / 2) := by
+  have hpi : Fintype.piFinset tSharp = {![0, 0], ![1, 0]} := by decide
+  refine exists_piFinset_forall_not_mem_bad_cost_le (σ := 1 / 2) (μ := 1 / 2) tSharp
+    (fun _ => (1 : ℝ)) (fun _ => zero_le_one) (fun _ : Unit => 0) (fun _ => 1)
+    (fun _ => by decide) (fun _ => badSharp) costSharp
+    (fun g => by dsimp only [costSharp]; split <;> norm_num) (by norm_num) ?_ ?_ ?_
+  · -- total weight `2 > 0`
+    rw [Fin.prod_univ_two]
+    norm_num
+  · -- bad mass `= 1 = σ · 2` with `σ = 1/2`, exactly
+    rw [Fin.prod_univ_two]
+    have hinter : badSharp ∩ (tSharp 0 ×ˢ tSharp 1) = {(1, 0)} := by decide
+    have hempty : ((Finset.univ.erase (0 : Fin 2)).erase 1) = ∅ := by decide
+    rw [Finset.sum_const, Finset.card_univ, hinter, hempty]
+    norm_num
+  · -- expected cost `= 1 = μ · 2` with `μ = 1/2`, exactly
+    rw [hpi, Fin.prod_univ_two]
+    rw [Finset.sum_insert (by decide), Finset.sum_singleton]
+    norm_num [costSharp]
+
+-- …and the factor is ATTAINED: every good selection has cost exactly
+-- `μ/(1 − σ) = 1`, strictly above `μ = 1/2`.
+example : ∀ g ∈ Fintype.piFinset tSharp, (g 0, g 1) ∉ badSharp →
+    costSharp g = (1 / 2 : ℝ) / (1 - 1 / 2) := by
+  intro g hg hgood
+  have h1 : g 1 = 0 := by
+    have := Fintype.mem_piFinset.mp hg 1
+    simpa [tSharp] using this
+  have h0 : g 0 = 0 := by
+    have hne : g 0 ≠ 1 := fun h => hgood (by simp [badSharp, h, h1])
+    omega
+  rw [costSharp, if_pos h0]
+  norm_num
+
+end Sharpness
 
 -- The conditioned cost bound at the degenerate parameters: no events, zero cost,
 -- `σ = 0` — the conclusion specializes to the plain union bound with cost `≤ μ`.
