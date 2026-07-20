@@ -505,9 +505,11 @@ coarse complexity; `exists_selection_schedule` shows the uniformity half alone i
 schedulable). The candidate re-scope — an aggregate deviant-cost clause consumed only
 in the edit budget — carries two open mathematical obligations before any 11B unit
 may land: (1) the conditioned cost bound, now proved abstractly
-(`exists_piFinset_forall_not_mem_bad_cost_le`, factor `1/(1−σ)`) with the exact
-role/palette factors derived (`sum_selEvent_deviantMass_le`: unconditional
-`24·K·(δ/η²)·n²`, conditioned `48·K·(δ/η²)·n²`); and (2) **role consistency** — the
+(`exists_piFinset_forall_not_mem_bad_cost_le`, factor `1/(1−σ)`, sharpness test
+attaining it) with the `6·K` role/palette multiplicity bounded in
+`sum_selEvent_deviantMass_le` and the `24K`/`48K` constants composed in prose from
+the proved generic lemmas (not packaged as one relational theorem); and
+(2) **role consistency** — the
 cleaner assigns one palette per coarse block pair while a placement may realize it
 through any of six representative role pairs, and without per-pair closeness those
 role pairs can have disjoint palette supports (gate G10), so a role-independent
@@ -517,6 +519,60 @@ refuted before choosing between a complexity-dependent/scheduled-gap strong witn
 and a stronger one-subset-per-cell lemma with self-regularity. The Unit 7/8 theorems
 stay as sound conditional results; the frozen cleaning rule is amended only after one
 route proves both the freeness certificate and the aggregate edit bound.
+
+**Route decision (2026-07-20): checkpoint signed off as re-scope; route (b) chosen —
+the one-subset-per-cell route. 11B remains closed.** Gate G10 killed the aggregate-cost
+cleaner in its role-indexed form, and the role-indexed conditional theorems stay as
+sound diagnostics (G10 is permanent: it records why that route cannot drive a
+role-independent cleaner without density coherence). Between the two candidate
+routes, the scheduled-gap alternative (a) was REJECTED for a new termination problem:
+with permitted gap `D(k)` at complexity `k`, bounded energy proves termination only
+when the forced increments along the complexity recurrence `kᵢ₊₁ ≈ monoStepBound E kᵢ`
+have partial sum exceeding `1`, and the required `D(k)` shrinks polynomially in an
+explosively growing `k` — positivity of every `D(k)` does not preclude summability,
+so without that numerical termination certificate route (a) is another prospective
+circularity, not a solution. Route (b) matches the published architecture
+(Conlon–Fox survey, arXiv:1211.3487, §3.1, Lemmas 3.2–3.3; self-regular subsets as
+in its Lemmas 3.6–3.7): ONE representative subset `W C` per coarse cell, every
+ordered pair `(W C, W D)` regular INCLUDING self-pairs, only aggregate closeness
+exceptions, and every placement consulting the same density table `d(W C, W D)` —
+which removes G10 structurally.
+
+**Route (b) ladder (frozen order; Unit 7 unchanged, the replacement is built
+alongside it; no `Recolor.lean` and no cleaning until step 6 composes).**
+1. *Self-regular-subset lemma* (the genuinely new within-cell unit): for every
+   sufficiently large `A`, a subset `W ⊆ A` with `|W| ≥ γ·|A|` such that every
+   palette relation is uniform on `(W, W)`. Proof shape per the survey's Lemma 3.6:
+   a large collection of disjoint comparable-size pieces pairwise uniform for all
+   palettes; pieces pair-colored by the discretized vector of `K` palette densities
+   (interval width `α`, so `(1/α)^K` colors); a finite multicolor Ramsey extraction
+   of a subcollection of size `s ≥ 2/α` with all pairwise density vectors in one
+   class; and a union lemma — the union of `s` comparable pieces, pairwise uniform
+   with close densities, is uniform on itself, the within-piece (diagonal)
+   contribution vanishing like `1/s`. No circularity: `α` is fixed by the target
+   tolerance, the Ramsey demand fixes the needed collection size, and only then is
+   the piece-supplying tolerance chosen. If mathlib lacks finite multicolor Ramsey,
+   a self-contained pigeonhole-iteration bound lands in `Finite/` first.
+2. *Slicing/inheritance API* (load-bearing for step 1's comparable-size trimming as
+   well): if `(A, B)` is sufficiently uniform and `W_A ⊆ A`, `W_B ⊆ B` retain fixed
+   positive fractions, then `(W_A, W_B)` is uniform with explicit tolerance
+   degradation, with density control.
+3. *One-subset representative theorem* (the immediate summit): for every large
+   coarse cell `C`, one `W C` with (i) `W C ⊆ C` and a uniform linear size floor;
+   (ii) all ordered `(W C, W D)` — including `C = D` — uniform for every palette;
+   (iii) off-diagonal coarse pairs whose `W`-density vector is not close carrying
+   bounded aggregate `|C|·|D|` mass (the aggregate-exception clause consumed by the
+   selection machinery already in `Finite/WeightedChoice.lean`).
+4. *Diagonal coarse blocks charged separately*: seed with a bounded-cell
+   equipartition and inherit the maximum cell size through refinement, so diagonal
+   blocks are charged by `Σ_C |C|² ≤ (max_C |C|)·n` — no transfer of diagonal
+   densities back to coarse densities is needed.
+5. *Reuse Unit 8*: instantiate the arbitrary-box certificate with `Aᵢ = W (T i)`;
+   repeated coarse cells make the boxes literally repeat, which the collision-slack
+   theorems were built to handle.
+6. *Abstract rounding certificate and edit inequality BEFORE cleaning*: only after
+   both compose does the cleaning rule of this freeze change and `Recolor.lean`
+   begin.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
