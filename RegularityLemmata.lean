@@ -27,6 +27,7 @@ import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.BadMassDiag
+import RegularityLemmata.Graph.FamilyRegularity
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.Regularity
 import RegularityLemmata.Graph.RegularityDiag
