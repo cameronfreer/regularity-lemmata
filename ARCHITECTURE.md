@@ -581,8 +581,14 @@ property-testing formulations; arity `> 2` or hypergraph removal; quantitative
 optimality of the modulus; equitable strong regularity (stays deferred — this route
 avoids it); deletion-only edits; box-relative removal; computable cleaning.
 
-**Provenance.** The route is a formalization-oriented adaptation of the induced
-removal argument of Alon–Fischer–Krivelevich–Szegedy, in the strong-regularity
-presentation surveyed by Conlon–Fox; both will be cited in `PROVENANCE.md` and the
-relevant file docstrings when the corresponding units land. Mathlib is the
-architectural source only for the reused regularity machinery already credited.
+**Provenance.** The route adapts the Lemma 3.6 self-regular-subset construction of
+the Conlon–Fox survey (arXiv:1211.3487, §§3.1–3.2), together with its Lemma 3.2
+representative-set architecture, to directed finite binary palettes and three-vertex
+induced removal (the original argument being Alon–Fischer–Krivelevich–Szegedy). Both
+are now cited in `PROVENANCE.md` — with the precise scope map and explicit
+NON-formalized items: the strong cylinder lemma (their 3.5), the quantitative bounds
+of their 3.6–3.9 (the piece supplier here follows the weaker
+regularity-plus-independent-set route, so no tower-type bound is claimed), their 3.7
+partition, arbitrary-size counting, their Theorem 3.1, and infinite removal — and in
+the route (b) unit docstrings. Mathlib is the architectural source only for the
+reused regularity machinery already credited.

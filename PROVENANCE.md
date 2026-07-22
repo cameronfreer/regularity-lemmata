@@ -89,6 +89,28 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   quantity behind `blockEnergy`.
 - N. Alon, A. Shapira, *Testing subgraphs in directed graphs*, JCSS 69 (2004) —
   directed regularity.
+- D. Conlon, J. Fox, *Graph removal lemmas*, Surveys in Combinatorics 2013 (also
+  arXiv:1211.3487), especially §§3.1–3.2 — the induced-removal proof architecture
+  the route (b) units follow (with N. Alon, E. Fischer, M. Krivelevich, M. Szegedy,
+  *Efficient testing of large graphs*, Combinatorica 20 (2000), as the original
+  argument the survey presents). Scope of the borrowing, precisely: this repository
+  adapts the survey's **Lemma 3.6 self-regular-subset construction** (equal-sized
+  pairwise-regular pieces → Ramsey extraction with close densities → the union is
+  self-regular: `Graph/UnionCenter.lean`, `Graph/UniformUnion.lean`,
+  `Finite/DensityBuckets.lean`, `Finite/MulticolorRamsey.lean`, with
+  `Graph/UniformSlicing.lean` supporting the equal-size trimming), together with the
+  **Lemma 3.2 representative-set architecture** (one large representative per coarse
+  cell, every representative pair regular including self-pairs, most representative
+  densities close to the coarse densities — the Phase 11 one-subset-per-cell
+  program), to directed finite binary relational palettes and three-vertex induced
+  removal; the counting on representative boxes (their Lemma 3.3 shape) is Phase
+  10's palette/repeated-cell counting. This repository does **not** formalize their
+  strong cylinder regularity lemma (Lemma 3.5), the quantitative bounds of Lemmas
+  3.6–3.9 (the piece supplier here follows the weaker Szemerédi-plus-independent-set
+  route the survey mentions, not their improved cylinder-lemma bound — no tower-type
+  bound is claimed), Lemma 3.7's partition into self-regular sets (unless later
+  needed), arbitrary-size induced counting, their Theorem 3.1 for arbitrary `H`, or
+  the infinite removal lemma.
 - Y. Dillies, B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022.
 - W. T. Gowers, *Hypergraph regularity and the multidimensional Szemerédi theorem*,
   Ann. of Math. 166 (2007); V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa,

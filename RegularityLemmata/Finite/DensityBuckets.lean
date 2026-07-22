@@ -32,9 +32,12 @@ aligned within `α`, for every relation of a finite family and in BOTH orientati
   for palette families the swap law determines it, but retaining both explicitly is
   harmless and clearer (reviewer decision 2026-07-21).
 
-The union theorem (`Graph/UniformUnion.lean`) consumes exactly this alignment: all
-pairwise densities of the extracted pieces lie in a common `α`-window, so any member
-serves as the class center `d` at width `2α`.
+The union theorem (`Graph/UniformUnion.lean`) consumes exactly this alignment: any
+two extracted densities differ by STRICTLY less than `α`, hence by at most `α` —
+so any member's density serves as the class center `d` at width `α`, exactly the
+`hclose` input of the union estimates. Provenance: the bucket-and-extract step of
+the Lemma 3.6 construction in D. Conlon and J. Fox, *Graph removal lemmas*
+(arXiv:1211.3487, §3.2); see `PROVENANCE.md` for the precise scope.
 -/
 
 namespace RegularityLemmata
