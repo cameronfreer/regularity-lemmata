@@ -8,23 +8,17 @@ import RegularityLemmata.Graph.Uniformity
 /-!
 # Route (b) supplier checkpoint, item 2: the piece-supplier obligation (statement)
 
-`ARCHITECTURE.md` route (b), supplier checkpoint (2026-07-22). This file FREEZES the
-statement of the piece supplier as `Prop`-valued definitions and records, as
-permanent gates, why the weighted-mass control of the existing regularity API does
-not discharge it. **No proof is attempted here** — the checkpoint record in
-`ARCHITECTURE.md` explains why the current diagonal-palette regularity API cannot
-prove it and what mathematics is missing; per the reviewer's instruction the phase
-STOPS for review at this point.
+`ARCHITECTURE.md` route (b), supplier checkpoint (2026-07-22). This file carries the
+piece-family PREDICATE and the checkpoint's permanent gates. The supplier SUMMIT
+itself is recorded in prose only, under `ARCHITECTURE.md`'s deferred summit
+statements — per the repository policy that unproved summits are never Lean `Prop`
+placeholders (governance resolved at the 2026-07-22 review: `IsPieceFamily` stays,
+the obligation lives in prose until proved) — and its prose signature demands
+`0 < t`: gate G-S2 below shows the zero-target instance is FALSE.
 
 * `IsPieceFamily` — `t` pairwise-disjoint pieces inside a host `A`, of EQUAL
   cardinality `m`, with every ordered pair of distinct pieces `τ`-uniform for every
   relation of a finite family (ordered pairs quantified, so both directions).
-* `PieceSupplierStatement` — the obligation: for every palette count, target count,
-  and tolerance `τ > 0`, there are a retention floor `κ > 0` and a host threshold
-  `N₀` — depending on `(K, t, τ)` ONLY, hence fixed before any partition is
-  produced, with no inequality in which `τ` depends on its own output complexity —
-  such that every sufficiently large host admits such a family carrying at least a
-  `κ` fraction of the host mass.
 * Gate **G-S1**: weighted bad-pair mass does NOT bound the unweighted bad-pair
   count. One heavy cell and seven unit cells with EVERY distinct ordered pair bad:
   the weighted mass passes the `τ = 3/49` regularity-style test, yet every
@@ -43,7 +37,7 @@ Turán; see `PROVENANCE.md` for the precise formalization scope.
 
 namespace RegularityLemmata
 
-/-! ### The frozen statement -/
+/-! ### The piece-family predicate -/
 
 /-- `t` pairwise-disjoint pieces inside `A`, of equal cardinality `m`, with every
 ordered pair of DISTINCT pieces `τ`-uniform for every relation of the family. -/
@@ -54,19 +48,6 @@ def IsPieceFamily {V : Type*} {K : ℕ} (Rk : Fin K → V → V → Prop)
   (∀ i j : Fin t, i ≠ j → Disjoint (P i) (P j)) ∧
   (∀ i, (P i).card = m) ∧
   (∀ k : Fin K, ∀ i j : Fin t, i ≠ j → IsUniformPair (Rk k) (P i) (P j) τ)
-
-/-- **The route (b) piece-supplier obligation** (STATEMENT ONLY — supplier
-checkpoint, 2026-07-22): the retention floor `κ` and host threshold `N₀` depend on
-`(K, t, τ)` alone, so they are fixed BEFORE any partition is produced and no
-inequality lets `τ` depend on its own output complexity. The mass floor is stated
-in multiplication form on the total `t·m`. -/
-def PieceSupplierStatement : Prop :=
-  ∀ (K t : ℕ) (τ : ℝ), 0 < τ →
-  ∃ (κ : ℝ) (N₀ : ℕ), 0 < κ ∧
-    ∀ (V : Type) (_ : DecidableEq V) (Rk : Fin K → V → V → Prop)
-      (_ : ∀ k, DecidableRel (Rk k)) (A : Finset V), N₀ ≤ A.card →
-    ∃ (m : ℕ) (P : Fin t → Finset V), 0 < m ∧
-      IsPieceFamily Rk A τ m P ∧ κ * (A.card : ℝ) ≤ (t : ℝ) * m
 
 /-! ### Gate G-S1 — weighted mass does not bound unweighted counts -/
 
@@ -93,6 +74,25 @@ example (T : Finset (Fin 8))
   have h2 : 1 < T.card := by omega
   obtain ⟨x, hx, y, hy, hxy⟩ := Finset.one_lt_card.mp h2
   exact hclean x hx y hy hxy hxy
+
+/-! ### Gate G-S2 — the zero-target rejection -/
+
+-- With `t = 0` a piece family exists VACUOUSLY at any tolerance and any claimed
+-- common size…
+example (Rk : Fin 1 → Fin 3 → Fin 3 → Prop) [∀ k, DecidableRel (Rk k)] (τ : ℝ) :
+    IsPieceFamily Rk (Finset.univ : Finset (Fin 3)) τ (t := 0) 1
+      (fun i => i.elim0) :=
+  ⟨fun i => i.elim0, fun i => i.elim0, fun i => i.elim0, fun _ i => i.elim0⟩
+
+-- …while any positive mass floor `κ·|A| ≤ t·m = 0` fails on every nonempty host:
+-- the prose supplier signature must demand `0 < t` (it does — `ARCHITECTURE.md`,
+-- deferred summit statements).
+example (κ : ℝ) (hκ : 0 < κ) :
+    ¬ (κ * (((Finset.univ : Finset (Fin 3)).card : ℕ) : ℝ)
+      ≤ ((0 : ℕ) : ℝ) * ((1 : ℕ) : ℝ)) := by
+  simp only [Finset.card_univ, Fintype.card_fin, Nat.cast_ofNat, Nat.cast_zero,
+    zero_mul, not_le]
+  positivity
 
 end Gates
 

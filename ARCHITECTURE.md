@@ -78,6 +78,23 @@ Lean `Prop` placeholders.
   normalization are frozen in the Phase 11 section below; the exact quantitative
   signatures remain provisional until the diagonal/repeated-cell feasibility gate
   recorded there passes.
+- **Route (b) piece supplier** (signature corrected 2026-07-22 — the `t = 0`
+  instance is FALSE, gate G-S2 in `Graph/PieceSupplier.lean`): for every palette
+  count `K`, target count `t` with **`0 < t`**, and tolerance `τ > 0`, there exist a
+  retention floor `κ > 0` and a host threshold `N₀`, depending on `(K, t, τ)` only —
+  fixed before any partition is produced, with no inequality in which `τ` depends on
+  its own output complexity — such that every host `A` with `N₀ ≤ |A|` admits a
+  common size `m > 0` and pieces `P : Fin t → Finset V` with
+  `IsPieceFamily Rk A τ m P` (equal cardinality `m`; pairwise disjoint; every
+  ordered pair of distinct pieces `τ`-uniform for every relation) and the mass floor
+  `κ·|A| ≤ t·m`. Recorded in prose per the placeholder policy above; the Lean
+  predicate `IsPieceFamily` is proved infrastructure, the summit is not.
+- **Equitable finite-family regularity** (the supplier's engine, review decision
+  2026-07-22): for finitely many DIRECTED relations simultaneously, an
+  equipartition that is `ρ`-regular for every relation, with part count between `l`
+  and `familyRegularityBound K ρ l`. Ordinary off-diagonal regularity for a finite
+  family — NOT equitable strong regularity, which stays deferred (first entry
+  above).
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -603,6 +620,40 @@ single-relation and symmetric, unusable for `K` directed palettes. The missing
 mathematics is an equitable/multi-relation regularity supplier or a nontrivial use
 of the almost-refining equipartition — not a small finite combinatorics lemma. The
 self-regular-subset assembly and 11B stay closed pending review.
+
+**Supplier route decision (2026-07-22 review): build the equitable finite-family
+regularity supplier; the almost-refining route is rejected.** Rationale for the
+choice: it yields equal/comparable cells BEFORE independent-set extraction (directly
+neutralizing G-S1); its parameters are acyclic (internal tolerance `ρ` from
+`(K, t, τ)`, then a host-independent part bound `B`, only then `κ` and `N₀`); after
+an equitable output with cell sizes `m` or `m+1`, trimming every selected cell to
+`m` retains at least half, so slicing needs only `2ρ ≤ τ` — no output-complexity
+factor; and it is ORDINARY off-diagonal regularity for finitely many directed
+relations, not equitable strong regularity (that deferral stands). Mathlib's
+`Regularity/Chunk`, `Increment`, and `Lemma` provide the Apache-compatible
+architecture to adapt, with attribution, from one symmetric graph to a finite
+directed family. The almost-refining route is rejected because its uncovered-mass
+bound is roughly `#Q · ⌊|A|/r⌋`, so many equitable cells inside regular parents
+require `r` to dominate the output complexity `#Q`, and uniformity transfer then
+retains fractions around `1/r` — the same circularity in different clothing, absent
+a new fixed-fraction containment theorem. Implementation sequence (frozen): (1) the
+`t = 0` repair and the placeholder-policy resolution [this commit]; (2) generic
+finite-family surfaces in `Graph/` — `IsFamilyRegular Rk ε P := ∀ k,
+IsRegularPartition (Rk k) ε P`, `familyEnergy` (sum; ceiling `K`),
+`familyRegularityBound K ε l`; (3) the equitable chunk adaptation (witness cuts for
+every relation and ordered pair; equitabilise each parent chunk; every new cell of
+size `m` or `m+1`; bounded discarded remainder); (4) the one-step theorem
+(nonregular equitable partition → bounded larger equipartition with positive
+family-energy gain; ceiling `K`, quantitative optimality irrelevant); (5) the
+iterate: an equipartition, `l ≤ #parts ≤ familyRegularityBound K ρ l`,
+family-`ρ`-regular; (6) discharge the piece supplier (weighted-to-unweighted
+conversion via `m ≤ |C| ≤ m+1`; `Finite/IndependentSet.lean`; trim `m+1` cells to
+`m`; slicing at fixed retention `1/2`; `κ ≈ t/(2B)`; `N₀` making `m > 0`);
+(7) only then the self-regular-subset assembly (buckets, Ramsey, union). Permanent
+tests must include `K = 0`, an asymmetric relation, exact `m`/`m+1` trimming, the
+`t = 0` rejection (G-S2), and a theorem-level check that `ρ` is defined before —
+and does not mention — `familyRegularityBound`. 11B and Unit 7 stay closed until
+the supplier theorem is actually inhabited.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
