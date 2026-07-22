@@ -574,6 +574,36 @@ alongside it; no `Recolor.lean` and no cleaning until step 6 composes).**
    both compose does the cleaning rule of this freeze change and `Recolor.lean`
    begin.
 
+**Supplier checkpoint (2026-07-22): statement frozen; NOT provable from the current
+API — stopped for review.** The route (b) step-1 assembly is NOT one commit: before
+the self-regular-subset summit, the piece supplier must exist. Delivered: (1) the
+abstract greedy/independent-set substrate with EXPLICIT unweighted counting
+hypotheses (`Finite/IndependentSet.lean` — symmetrized bad-neighborhoods, the greedy
+`1/(D+1)` core, the Markov half, and the `1/(2(D+1))` summit; the bad-degree total
+carries the `2·K` palette/orientation factor); (2) the supplier obligation frozen as
+`PieceSupplierStatement` (`Graph/PieceSupplier.lean`): pairwise-disjoint EQUAL-size
+pieces, every ordered distinct pair `τ`-uniform for every relation, a linear mass
+floor, with the retention floor `κ` and threshold `N₀` depending on `(K, t, τ)` only
+— fixed before any partition, no inequality letting `τ` depend on its own output
+complexity. Feasibility finding, why the current API cannot prove it: (i) the
+diagonal-palette regularity ladder controls bad pairs by WEIGHTED mass `|C|·|D|`
+with no size control, and weighted mass does not bound the unweighted bad-pair
+count the extraction consumes — gate G-S1 (one heavy cell, seven unit cells, all
+pairs bad) passes a `τ = 3/49` regularity-style mass test while every
+pairwise-clean subfamily is a singleton; (ii) the available fine candidate cells
+retain only a `1/(2q)` fraction of their coarse cell with `q` the OUTPUT fine-part
+bound, so trimming plus slicing would need a supplier tolerance `≤ target/(2q)` —
+recreating the circularity route (b) exists to avoid; (iii) `Graph/Bridge.lean`
+produces an `ε`-regular refinement AND a separate almost-refining equipartition,
+explicitly NOT one partition simultaneously regular and equitable
+("equitabilisation inside the increment loop" is deferred there), and transferring
+uniformity from regular cells to equitable cells again retains only
+output-complexity-dependent fractions; mathlib's equitable Szemerédi is
+single-relation and symmetric, unusable for `K` directed palettes. The missing
+mathematics is an equitable/multi-relation regularity supplier or a nontrivial use
+of the almost-refining equipartition — not a small finite combinatorics lemma. The
+self-regular-subset assembly and 11B stay closed pending review.
+
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
 before `ε`; the family is quantified after `ε` and may be arbitrary);

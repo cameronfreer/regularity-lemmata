@@ -9,6 +9,7 @@ import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.MulticolorRamsey
 import RegularityLemmata.Finite.DensityBuckets
+import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Partition.Basic
@@ -21,6 +22,7 @@ import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.UniformSlicing
 import RegularityLemmata.Graph.UnionCenter
 import RegularityLemmata.Graph.UniformUnion
+import RegularityLemmata.Graph.PieceSupplier
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
