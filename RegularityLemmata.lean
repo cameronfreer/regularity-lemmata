@@ -29,6 +29,7 @@ import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.BadMassDiag
 import RegularityLemmata.Graph.FamilyRegularity
 import RegularityLemmata.Graph.Atomise
+import RegularityLemmata.Graph.EquitableChunk
 import RegularityLemmata.Graph.Regularity
 import RegularityLemmata.Graph.RegularityDiag
 import RegularityLemmata.Graph.Bridge
