@@ -17,7 +17,11 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   - `Mathlib.Combinatorics.SimpleGraph.Regularity.*` (Y. Dillies, B. Mehta) — pair
     uniformity, witness selection, atomisation bounds, and the bounded
     energy-increment iteration (`Graph/Uniformity.lean`, `Graph/Atomise.lean`,
-    `Graph/Regularity.lean`, `Graph/Bridge.lean`);
+    `Graph/Regularity.lean`, `Graph/Bridge.lean`); and specifically the
+    `Regularity/Chunk` construction (per-part equitabilisation of a witness
+    atomisation, with its `m`/`m + 1` cell-size and part-count arithmetic) as the
+    architecture adapted — to an arbitrary host, an arbitrary directed relation, and
+    the ladder's own per-parent chunk count — in `Graph/EquitableChunk.lean`;
   - `Mathlib.Order.Partition.Finpartition` / `….Equipartition` and `equitabilise` —
     the partition substrate (`Partition/*.lean`);
   - `Mathlib.Combinatorics.SimpleGraph.Triangle.*`, `….DegreeSum` — triangle

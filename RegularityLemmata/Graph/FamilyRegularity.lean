@@ -228,6 +228,11 @@ theorem familyChunksPerPart_mono {m n : ℕ} (h : m ≤ n) :
     Nat.pow_le_pow_right (by norm_num) (Nat.mul_le_mul h h2)
   exact Nat.mul_le_mul h2 h4
 
+/-- The step bound is positive exactly on a nonempty partition — the nondegeneracy the
+step-3 construction needs to divide the host size by it. -/
+theorem familyStepBound_pos {n : ℕ} (hn : 0 < n) : 0 < familyStepBound n :=
+  Nat.mul_pos hn (familyChunksPerPart_pos n)
+
 theorem le_familyStepBound (n : ℕ) : n ≤ familyStepBound n :=
   calc n = n * 1 := (mul_one n).symm
     _ ≤ n * familyChunksPerPart n := Nat.mul_le_mul (le_refl n) (familyChunksPerPart_pos n)
