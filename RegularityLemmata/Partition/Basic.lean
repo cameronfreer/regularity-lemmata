@@ -166,6 +166,48 @@ theorem filter_subset_disjoint {P : Finpartition s} {C C' : Finset α} :
   obtain ⟨x, hx⟩ := P.nonempty_of_mem_parts hE1.1
   exact absurd (hE1.2 hx) (Finset.disjoint_left.mp hdisjEC' hx)
 
+/-! ### The inner part-union approximation -/
+
+/-- The largest part union of `P` inside `S`: the union of the parts contained in `S`.
+It equals `S` exactly when `S` is itself a part union — so it is the canonical inner
+approximation of an arbitrary set by a partition, and `S \ innerPartUnion P S` is the
+uncovered remainder that approximation arguments must bound. -/
+def innerPartUnion (P : Finpartition s) (S : Finset α) : Finset α :=
+  (P.parts.filter (· ⊆ S)).biUnion id
+
+theorem innerPartUnion_subset {P : Finpartition s} {S : Finset α} :
+    innerPartUnion P S ⊆ S := by
+  refine Finset.biUnion_subset.mpr fun E hE => ?_
+  simpa using (Finset.mem_filter.mp hE).2
+
+/-- A part contained in `S` is contained in the inner approximation. -/
+theorem subset_innerPartUnion {P : Finpartition s} {S E : Finset α} (hE : E ∈ P.parts)
+    (hES : E ⊆ S) : E ⊆ innerPartUnion P S := fun _ hx =>
+  Finset.mem_biUnion.mpr ⟨E, Finset.mem_filter.mpr ⟨hE, hES⟩, hx⟩
+
+/-- The inner approximation is monotone. -/
+theorem innerPartUnion_mono {P : Finpartition s} {S T : Finset α} (hST : S ⊆ T) :
+    innerPartUnion P S ⊆ innerPartUnion P T := by
+  refine Finset.biUnion_subset.mpr fun E hE => ?_
+  rw [Finset.mem_filter] at hE
+  exact subset_innerPartUnion hE.1 (hE.2.trans hST)
+
+/-- The inner approximation is a part union. -/
+theorem isPartUnion_innerPartUnion {P : Finpartition s} {S : Finset α} :
+    IsPartUnion P (innerPartUnion P S) := by
+  have hfil : P.parts.filter (· ⊆ innerPartUnion P S) = P.parts.filter (· ⊆ S) := by
+    ext E
+    simp only [Finset.mem_filter]
+    exact and_congr_right fun hE =>
+      ⟨fun h => h.trans innerPartUnion_subset, fun h => subset_innerPartUnion hE h⟩
+  show (P.parts.filter (· ⊆ innerPartUnion P S)).biUnion id = innerPartUnion P S
+  rw [hfil]
+  rfl
+
+/-- `S` is a part union exactly when it is its own inner approximation. -/
+theorem isPartUnion_iff_innerPartUnion_eq {P : Finpartition s} {S : Finset α} :
+    IsPartUnion P S ↔ innerPartUnion P S = S := Iff.rfl
+
 /-! ### Refinement fibers -/
 
 /-- When `Q` refines `P`, the `Q`-parts inside a `P`-part `C` cover `C`. -/

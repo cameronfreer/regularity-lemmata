@@ -21,7 +21,11 @@ definition or proof is cited publicly, in the relevant file docstring and here.
     `Regularity/Chunk` construction (per-part equitabilisation of a witness
     atomisation, with its `m`/`m + 1` cell-size and part-count arithmetic) as the
     architecture adapted — to an arbitrary host, an arbitrary directed relation, and
-    the ladder's own per-parent chunk count — in `Graph/EquitableChunk.lean`;
+    the ladder's own per-parent chunk count — in `Graph/EquitableChunk.lean`, together
+    with its per-atom-remainder argument for the uncovered part of a witness side
+    (`card_nonuniformWitness_sdiff_biUnion_star`), adapted in
+    `Graph/EquitableChunkApprox.lean`; the density and energy estimates there are this
+    repository's own, stated in an `ε`-free multiplication form with the loss explicit;
   - `Mathlib.Order.Partition.Finpartition` / `….Equipartition` and `equitabilise` —
     the partition substrate (`Partition/*.lean`);
   - `Mathlib.Combinatorics.SimpleGraph.Triangle.*`, `….DegreeSum` — triangle

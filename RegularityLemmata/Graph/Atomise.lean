@@ -58,6 +58,26 @@ theorem witnessCuts_subset (P : Finpartition s) {C : Finset α}
     · exact (NonuniformWitness.ofNotUniform h.2).right_subset
     · exact Finset.empty_subset _
 
+/-- The left witness of a bad pair `(C, D)` is one of `C`'s cuts. -/
+theorem left_mem_witnessCuts {P : Finpartition s} {C D : Finset α} (hD : D ∈ P.parts)
+    (hbad : IsBadPair R ε C D) :
+    (NonuniformWitness.ofNotUniform hbad.2).left ∈ witnessCuts R ε P C := by
+  classical
+  rw [witnessCuts, Finset.mem_union]
+  left
+  rw [Finset.mem_image]
+  exact ⟨D, hD, dif_pos hbad⟩
+
+/-- The right witness of a bad pair `(C, D)` is one of `D`'s cuts. -/
+theorem right_mem_witnessCuts {P : Finpartition s} {C D : Finset α} (hC : C ∈ P.parts)
+    (hbad : IsBadPair R ε C D) :
+    (NonuniformWitness.ofNotUniform hbad.2).right ∈ witnessCuts R ε P D := by
+  classical
+  rw [witnessCuts, Finset.mem_union]
+  right
+  rw [Finset.mem_image]
+  exact ⟨C, hC, dif_pos hbad⟩
+
 /-- The simultaneous witness refinement: each cell atomised by its own cuts. -/
 noncomputable def witnessRefinement (P : Finpartition s) : Finpartition s :=
   P.bind fun C _ => Finpartition.atomise C (witnessCuts R ε P C)
@@ -114,18 +134,10 @@ theorem witnessRefinement_resolves (P : Finpartition s) :
   classical
   intro C hC D hD hbad
   refine ⟨NonuniformWitness.ofNotUniform hbad.2, ?_, ?_⟩
-  · refine isPartUnion_bind_atomise hC ?_
+  · exact isPartUnion_bind_atomise hC (left_mem_witnessCuts R ε hD hbad)
       (NonuniformWitness.ofNotUniform hbad.2).left_subset
-    rw [witnessCuts, Finset.mem_union]
-    left
-    rw [Finset.mem_image]
-    exact ⟨D, hD, dif_pos hbad⟩
-  · refine isPartUnion_bind_atomise hD ?_
+  · exact isPartUnion_bind_atomise hD (right_mem_witnessCuts R ε hC hbad)
       (NonuniformWitness.ofNotUniform hbad.2).right_subset
-    rw [witnessCuts, Finset.mem_union]
-    right
-    rw [Finset.mem_image]
-    exact ⟨C, hC, dif_pos hbad⟩
 
 /-! ### Tests and adversarial examples -/
 
