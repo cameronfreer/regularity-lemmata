@@ -92,7 +92,9 @@ Lean `Prop` placeholders.
 - **Equitable finite-family regularity** (the supplier's engine, review decision
   2026-07-22): for finitely many DIRECTED relations simultaneously, an
   equipartition that is `ρ`-regular for every relation, with part count between `l`
-  and `familyRegularityBound K ρ l`. Ordinary off-diagonal regularity for a finite
+  and a bound `familyRegularityBoundAux (fuel) (familyInitialBound C ρ l)` whose fuel
+  `⌈K/(c·ρ⁵)⌉` is frozen only once the one-step retained-gain constant `c` is proved
+  (step 4 of the sequence below). Ordinary off-diagonal regularity for a finite
   family — NOT equitable strong regularity, which stays deferred (first entry
   above).
 - **Colored arity-three counting/removal**: planned for later releases; statements
@@ -636,24 +638,35 @@ directed family. The almost-refining route is rejected because its uncovered-mas
 bound is roughly `#Q · ⌊|A|/r⌋`, so many equitable cells inside regular parents
 require `r` to dominate the output complexity `#Q`, and uniformity transfer then
 retains fractions around `1/r` — the same circularity in different clothing, absent
-a new fixed-fraction containment theorem. Implementation sequence (frozen): (1) the
-`t = 0` repair and the placeholder-policy resolution [this commit]; (2) generic
+a new fixed-fraction containment theorem. Implementation sequence (frozen; the
+single-relation-per-step design and the deferred final bound are the 2026-07-24
+hardening): (1) the `t = 0` repair and the placeholder-policy resolution; (2) generic
 finite-family surfaces in `Graph/` — `IsFamilyRegular Rk ε P := ∀ k,
-IsRegularPartition (Rk k) ε P`, `familyEnergy` (sum; ceiling `K`),
-`familyRegularityBound K ε l`; (3) the equitable chunk adaptation (witness cuts for
-every relation and ordered pair; equitabilise each parent chunk; every new cell of
-size `m` or `m+1`; bounded discarded remainder); (4) the one-step theorem
-(nonregular equitable partition → bounded larger equipartition with positive
-family-energy gain; ceiling `K`, quantitative optimality irrelevant); (5) the
-iterate: an equipartition, `l ≤ #parts ≤ familyRegularityBound K ρ l`,
-family-`ρ`-regular; (6) discharge the piece supplier (weighted-to-unweighted
-conversion via `m ≤ |C| ≤ m+1`; `Finite/IndependentSet.lean`; trim `m+1` cells to
-`m`; slicing at fixed retention `1/2`; `κ ≈ t/(2B)`; `N₀` making `m > 0`);
-(7) only then the self-regular-subset assembly (buckets, Ramsey, union). Permanent
-tests must include `K = 0`, an asymmetric relation, exact `m`/`m+1` trimming, the
-`t = 0` rejection (G-S2), and a theorem-level check that `ρ` is defined before —
-and does not mention — `familyRegularityBound`. 11B and Unit 7 stay closed until
-the supplier theorem is actually inhabited.
+IsRegularPartition (Rk k) ε P`, `familyEnergy` (sum; ceiling `K`), the **lifting
+lemma** `familyEnergy_add_le_of_component` (a one-relation gain lifts to the family
+sum, so the iteration resolves ONE offending relation per step), and the schedule in
+SEPARATE provisional pieces — `familyInitialBound C ε l` (ε-dependent floor meeting
+`C ≤ 4^(·)·ε⁵`, `C` the K-independent chunk constant), the **K-free** single-relation
+`familyStepBound n`, and `familyRegularityBoundAux fuel initial` — with **no final
+bound frozen**; (3) the equitable chunk adaptation for the ONE selected nonregular
+relation (witness cuts over both ordered directions; equitabilise each parent chunk;
+every new cell of size `m` or `m+1`; bounded discarded remainder; the numerical
+condition `C ≤ 4^(#P)·ε⁵` met by `familyInitialBound`); (4) the one-step theorem
+(nonregular equitable partition → bounded larger equipartition; the exact-refinement
+`ε⁵` gain degrades to a RETAINED gain `c·ε⁵` with `c < 1` derived from the chunk
+remainder, lifted to the family sum by the lifting lemma; ceiling `K`, quantitative
+optimality irrelevant); (5) the iterate — freeze the fuel `⌈K/(c·ε⁵)⌉` (now that `c`
+is proved) and the final bound
+`familyRegularityBoundAux (fuel) (familyInitialBound C ρ l)`, yielding an
+equipartition, `l ≤ #parts ≤ (that bound)`, family-`ρ`-regular; (6) discharge the
+piece supplier (weighted-to-unweighted conversion via `m ≤ |C| ≤ m+1`;
+`Finite/IndependentSet.lean`; trim `m+1` cells to `m`; slicing at fixed retention
+`1/2`; `κ ≈ t/(2B)`; `N₀` making `m > 0`); (7) only then the self-regular-subset
+assembly (buckets, Ramsey, union). Permanent tests must include `K = 0`, an
+asymmetric relation, exact `m`/`m+1` trimming, the `t = 0` rejection (G-S2), and a
+theorem-level check that `ρ` is defined before — and does not mention — the final
+part-count bound. 11B and Unit 7 stay closed until the supplier theorem is actually
+inhabited.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed

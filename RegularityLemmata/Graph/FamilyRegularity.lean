@@ -7,29 +7,46 @@ import Mathlib.Algebra.Order.Floor.Semifield
 import RegularityLemmata.Graph.BadMass
 
 /-!
-# Equitable-supplier ladder, step 2: finite-family regularity surfaces
+# Equitable-supplier ladder, step 2 (+ numerical-schedule hardening)
 
 `ARCHITECTURE.md` supplier route decision (2026-07-22), implementation sequence
 step 2: the generic surfaces for regularity of finitely many DIRECTED relations
-simultaneously — in `Graph/`, independent of relational palettes.
+simultaneously — in `Graph/`, independent of relational palettes — HARDENED per the
+2026-07-24 review so that no final part-count bound is frozen before the one-step
+gain constant is proved.
 
 * `IsFamilyRegular Rk ε P` — `ε`-regularity (off-diagonal, mass-weighted) for EVERY
   relation of the family. No symmetry is assumed anywhere: each `Rk k` is an
   arbitrary directed relation, and the singleton bridge (`isFamilyRegular_single`)
   applies verbatim to an asymmetric relation (permanent test below).
-* `familyEnergy Rk P` — the SUM of the per-relation partition energies. The ceiling
-  is `K`, not `1` (`familyEnergy_le_card`): the family iteration's fuel scales
-  accordingly, and the one-step energy gain (sequence step 4) lifts a
-  single-relation increment into the sum by monotonicity of every other summand
-  under refinement (`familyEnergy_mono`).
-* `familyStepBound` / `familyRegularityBound K ε l` — the closed-form part-count
-  bound for the iterate (sequence step 5): one step atomises by the witness cuts of
-  all `K` relations over both ordered directions (at most `2·K·n` cuts per cell,
-  hence a `2^(2·K·n)` factor) and then equitabilises (a further mathlib-style
-  `4^…` factor); the fuel is `⌈K/ε⁵⌉ + 1`, the energy ceiling `K` divided by the
-  per-step gain. The bound is DELIBERATELY generous — only finiteness and
-  monotonicity matter, quantitative optimality is out of scope, and no tower-type
-  claim is made (see the Conlon–Fox scope in `PROVENANCE.md`).
+* `familyEnergy Rk P` — the SUM of the per-relation partition energies; ceiling `K`,
+  not `1` (`familyEnergy_le_card`), monotone under refinement (`familyEnergy_mono`).
+* `familyEnergy_add_le_of_component` — **the lifting lemma** (step 4's vehicle): a
+  gain `g` in ONE relation's energy across a refinement `Q ≤ P` lifts to a gain `g`
+  in the family energy, because every other summand is monotone. This is what
+  `energy_le_familyEnergy` alone could not deliver, and it is why the iteration
+  resolves ONE offending relation per step: on a non-family-regular partition some
+  `Rk k` is nonregular; atomise/equitabilise ITS witnesses only; the result refines
+  `P`, so the other `K − 1` summands cannot decrease.
+
+The numerical schedule is kept in SEPARATE provisional pieces — no final bound is
+frozen here, because the equitabilised step retains only `c·ε⁵` of the exact
+refinement's `ε⁵` energy gain for a `c < 1` derived from the step-3 chunk remainder:
+
+* `familyInitialBound C ε l` — the ε-dependent initial floor (mathlib `initialBound`
+  architecture): `max (max l 2) ⌈C/ε⁵⌉₊`, proved to meet the chunk's numerical
+  condition `C ≤ 4^(familyInitialBound C ε l)·ε⁵` (`le_pow_familyInitialBound_mul`).
+  The threshold `C` is the chunk-derived, **K-independent** constant — resolving one
+  relation per step reuses mathlib's per-graph chunk condition — so it is a parameter
+  here, instantiated once step 3 fixes it; the K-dependence lives only in the fuel.
+* `familyStepBound n` — one single-relation equitabilised step's part-count growth.
+  **K-FREE**: only the selected relation is cut (`2n` witness roles → a `2^(2n)`
+  atom factor, then a mathlib-style equitabilisation factor). Deliberately generous.
+* `familyRegularityBoundAux fuel initial` — the raw `fuel`-fold iterate of the step.
+
+The FINAL bound and the fuel `⌈K/(c·ε⁵)⌉` are DELIBERATELY not frozen here: they wait
+for step 4 (`ARCHITECTURE.md`), where `c` is proved. No tower-type claim is made (the
+supplier follows the weak route; Conlon–Fox scope in `PROVENANCE.md`).
 
 Ordinary off-diagonal regularity only: this ladder does NOT touch equitable strong
 regularity (deferred in `ARCHITECTURE.md`) nor the diagonal-inclusive layer.
@@ -87,11 +104,32 @@ theorem familyEnergy_le_card : familyEnergy Rk P ≤ (K : ℝ) := by
 theorem familyEnergy_mono (hQ : Q ≤ P) : familyEnergy Rk P ≤ familyEnergy Rk Q :=
   Finset.sum_le_sum fun k _ => energy_mono (Rk k) hQ
 
-/-- A single relation's energy is dominated by the family energy — the vehicle by
-which a one-relation increment lifts into the family sum. -/
+/-- A single relation's energy is dominated by the family energy. Weaker than the
+lifting lemma below — kept as a convenience. -/
 theorem energy_le_familyEnergy (k : Fin K) : energy (Rk k) P ≤ familyEnergy Rk P :=
   Finset.single_le_sum (f := fun k => energy (Rk k) P)
     (fun j _ => energy_nonneg (Rk j)) (Finset.mem_univ k)
+
+/-- **The lifting lemma** (step 4's vehicle): a gain `g` in one relation's energy
+across a refinement `Q ≤ P` lifts to the SAME gain in the family energy, because
+every other summand is monotone under refinement. This packages the preservation of
+the untouched `K − 1` summands, and is exactly why the family iteration can resolve
+a single offending relation at each step. -/
+theorem familyEnergy_add_le_of_component {g : ℝ} (hQP : Q ≤ P) (k : Fin K)
+    (hgain : energy (Rk k) P + g ≤ energy (Rk k) Q) :
+    familyEnergy Rk P + g ≤ familyEnergy Rk Q := by
+  have hpoint : ∀ j ∈ (Finset.univ : Finset (Fin K)),
+      energy (Rk j) P + (if j = k then g else 0) ≤ energy (Rk j) Q := by
+    intro j _
+    by_cases hjk : j = k
+    · subst hjk
+      simpa using hgain
+    · rw [if_neg hjk, add_zero]
+      exact energy_mono (Rk j) hQP
+  have hsum := Finset.sum_le_sum hpoint
+  rw [Finset.sum_add_distrib, Finset.sum_ite_eq' Finset.univ k fun _ => g] at hsum
+  simp only [Finset.mem_univ, if_true] at hsum
+  exact hsum
 
 /-- The empty family has zero energy. -/
 theorem familyEnergy_zero (Rk : Fin 0 → α → α → Prop)
@@ -100,59 +138,82 @@ theorem familyEnergy_zero (Rk : Fin 0 → α → α → Prop)
 
 end Family
 
-/-! ### The part-count bound -/
+/-! ### The numerical schedule (provisional; final bound deferred to step 5) -/
 
-/-- One equitabilised family-refinement step, in closed form: witness atomisation
-for `K` relations over both ordered directions splits each of `n` cells into at
-most `2^(2·K·n)` atoms, and mathlib-style equitabilisation costs a further
-exponential factor. Deliberately generous. -/
-def familyStepBound (K n : ℕ) : ℕ :=
-  n * 2 ^ (2 * K * n) * 4 ^ (n * 2 ^ (2 * K * n))
+private theorem nat_le_four_pow (n : ℕ) : n ≤ 4 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have h1 : 1 ≤ 4 ^ n := Nat.one_le_pow n 4 (by norm_num)
+    calc n + 1 ≤ 4 ^ n + 1 := by omega
+      _ ≤ 4 ^ (n + 1) := by rw [pow_succ]; omega
 
-/-- The fuel-indexed iterate of the step bound. -/
-def familyRegularityBoundAux (K : ℕ) : ℕ → ℕ → ℕ
+/-- **The ε-dependent initial floor**, in the mathlib `initialBound` style: at least
+the requested `l` (and `2`), and large enough that `4^·` beats the target `C/ε⁵`, so
+the chunk's numerical condition `C ≤ 4^(·)·ε⁵` holds (`le_pow_familyInitialBound_mul`).
+The threshold `C` is the chunk-derived, K-independent constant — a parameter until
+step 3 fixes it. -/
+noncomputable def familyInitialBound (C ε : ℝ) (l : ℕ) : ℕ :=
+  max (max l 2) ⌈C / ε ^ 5⌉₊
+
+/-- One single-relation equitabilised refinement step's part-count growth, in closed
+form. **K-free**: only the selected relation is cut. Deliberately generous — only
+finiteness and monotonicity are used downstream. -/
+def familyStepBound (n : ℕ) : ℕ :=
+  n * 2 ^ (2 * n) * 4 ^ (n * 2 ^ (2 * n))
+
+/-- The fuel-indexed iterate of the single-relation step bound. The fuel itself
+(`⌈K/(c·ε⁵)⌉`) is fixed only at step 5, once `c` is proved. -/
+def familyRegularityBoundAux : ℕ → ℕ → ℕ
   | 0, m => m
-  | t + 1, m => familyRegularityBoundAux K t (familyStepBound K m)
+  | t + 1, m => familyRegularityBoundAux t (familyStepBound m)
 
-/-- **The family part-count bound**: the step bound iterated `⌈K/ε⁵⌉ + 1` times
-from `max l 2` — the energy ceiling `K` divided by the per-step gain, starting no
-lower than the requested minimum part count. -/
-noncomputable def familyRegularityBound (K : ℕ) (ε : ℝ) (l : ℕ) : ℕ :=
-  familyRegularityBoundAux K (⌈(K : ℝ) / ε ^ 5⌉₊ + 1) (max l 2)
+theorem le_familyInitialBound (C ε : ℝ) (l : ℕ) : l ≤ familyInitialBound C ε l :=
+  le_trans (le_max_left l 2) (le_max_left _ _)
 
-theorem le_familyStepBound (K n : ℕ) : n ≤ familyStepBound K n := by
-  have h1 : 1 ≤ 2 ^ (2 * K * n) := Nat.one_le_two_pow
-  have h2 : 1 ≤ 4 ^ (n * 2 ^ (2 * K * n)) := Nat.one_le_pow _ _ (by norm_num)
+theorem two_le_familyInitialBound (C ε : ℝ) (l : ℕ) :
+    2 ≤ familyInitialBound C ε l :=
+  le_trans (le_max_right l 2) (le_max_left _ _)
+
+/-- **The chunk numerical condition is met by the initial floor**: for the ε-dependent
+floor, `4^(familyInitialBound C ε l)·ε⁵ ≥ C`. This is the family analogue of mathlib's
+`100 ≤ 4^#P·ε⁵`, with the constant left as the parameter `C`. -/
+theorem le_pow_familyInitialBound_mul {C ε : ℝ} (_hC : 0 ≤ C) (hε : 0 < ε) (l : ℕ) :
+    C ≤ 4 ^ familyInitialBound C ε l * ε ^ 5 := by
+  have hε5 : (0 : ℝ) < ε ^ 5 := by positivity
+  have hceil_le : (⌈C / ε ^ 5⌉₊ : ℝ) ≤ (familyInitialBound C ε l : ℝ) := by
+    have : ⌈C / ε ^ 5⌉₊ ≤ familyInitialBound C ε l := le_max_right _ _
+    exact_mod_cast this
+  have hdiv_le : C / ε ^ 5 ≤ (familyInitialBound C ε l : ℝ) :=
+    le_trans (Nat.le_ceil _) hceil_le
+  have hF4 : (familyInitialBound C ε l : ℝ) ≤ 4 ^ familyInitialBound C ε l := by
+    exact_mod_cast nat_le_four_pow (familyInitialBound C ε l)
+  have hkey : C / ε ^ 5 ≤ 4 ^ familyInitialBound C ε l := le_trans hdiv_le hF4
+  calc C = C / ε ^ 5 * ε ^ 5 := (div_mul_cancel₀ C (ne_of_gt hε5)).symm
+    _ ≤ 4 ^ familyInitialBound C ε l * ε ^ 5 :=
+        mul_le_mul_of_nonneg_right hkey (le_of_lt hε5)
+
+theorem le_familyStepBound (n : ℕ) : n ≤ familyStepBound n := by
+  have h1 : 1 ≤ 2 ^ (2 * n) := Nat.one_le_two_pow
+  have h2 : 1 ≤ 4 ^ (n * 2 ^ (2 * n)) := Nat.one_le_pow _ _ (by norm_num)
   calc n = n * 1 * 1 := by ring
-    _ ≤ n * 2 ^ (2 * K * n) * 4 ^ (n * 2 ^ (2 * K * n)) :=
+    _ ≤ n * 2 ^ (2 * n) * 4 ^ (n * 2 ^ (2 * n)) :=
       Nat.mul_le_mul (Nat.mul_le_mul_left n h1) h2
 
-theorem le_familyRegularityBoundAux (K t m : ℕ) :
-    m ≤ familyRegularityBoundAux K t m := by
+theorem le_familyRegularityBoundAux (t m : ℕ) :
+    m ≤ familyRegularityBoundAux t m := by
   induction t generalizing m with
   | zero => simp [familyRegularityBoundAux]
   | succ t IH =>
     rw [familyRegularityBoundAux]
-    exact le_trans (le_familyStepBound K m) (IH _)
-
-/-- The requested minimum part count survives to the bound. -/
-theorem le_familyRegularityBound (K : ℕ) (ε : ℝ) (l : ℕ) :
-    l ≤ familyRegularityBound K ε l := by
-  rw [familyRegularityBound]
-  exact le_trans (le_max_left l 2) (le_familyRegularityBoundAux K _ _)
-
-/-- The bound is at least `2` — iterates never collapse below the seed. -/
-theorem two_le_familyRegularityBound (K : ℕ) (ε : ℝ) (l : ℕ) :
-    2 ≤ familyRegularityBound K ε l := by
-  rw [familyRegularityBound]
-  exact le_trans (le_max_right l 2) (le_familyRegularityBoundAux K _ _)
+    exact le_trans (le_familyStepBound m) (IH _)
 
 /-! ### Tests -/
 
 section Tests
 
 -- The `K = 0` endpoint, concretely: any partition of any host is family-regular
--- for the empty family at any tolerance, with zero family energy.
+-- for the empty family at any tolerance.
 example (P : Finpartition (Finset.univ : Finset (Fin 3))) (ε : ℝ) :
     IsFamilyRegular (fun _ : Fin 0 => fun _ _ : Fin 3 => True) ε P :=
   isFamilyRegular_zero _
@@ -164,11 +225,28 @@ example (P : Finpartition (Finset.univ : Finset (Fin 3))) (ε : ℝ)
     IsFamilyRegular (fun _ : Fin 1 => fun a b : Fin 3 => a = 0 ∧ b = 1) ε P :=
   isFamilyRegular_single.mpr h
 
--- The step bound at the smallest seeds, by kernel computation: growth is monotone
--- and explosive, exactly as documented — only finiteness matters.
-example : familyStepBound 0 2 = 32 := by decide
+-- The lifting lemma at work: a gain in the energy of ONE relation lifts to a gain in
+-- the family energy — the single-selected-relation increment of sequence step 4.
+example (Rk : Fin 2 → Fin 3 → Fin 3 → Prop) [∀ k, DecidableRel (Rk k)]
+    {P Q : Finpartition (Finset.univ : Finset (Fin 3))} {g : ℝ}
+    (hQP : Q ≤ P) (hgain : energy (Rk 0) P + g ≤ energy (Rk 0) Q) :
+    familyEnergy Rk P + g ≤ familyEnergy Rk Q :=
+  familyEnergy_add_le_of_component hQP 0 hgain
 
-example : familyStepBound 1 1 = 4 * 4 ^ 4 := by decide
+-- The ε-dependent floor meets the chunk's numerical condition at a concrete
+-- threshold (mathlib's constant is `100`): `C ≤ 4^(familyInitialBound C ε l)·ε⁵`.
+example : (100 : ℝ) ≤ 4 ^ familyInitialBound 100 (1 / 2) 3 * (1 / 2) ^ 5 :=
+  le_pow_familyInitialBound_mul (by norm_num) (by norm_num) 3
+
+-- The floor is genuinely ε-dependent: it dominates `⌈C/ε⁵⌉₊`, which blows up as
+-- `ε → 0` — this is the mechanism a fixed chunk-to-atom ratio lacks.
+example (C ε : ℝ) (l : ℕ) : ⌈C / ε ^ 5⌉₊ ≤ familyInitialBound C ε l :=
+  le_max_right _ _
+
+-- The single-relation step bound at the smallest seeds, by kernel computation.
+example : familyStepBound 0 = 0 := by decide
+
+example : familyStepBound 1 = 4 * 4 ^ 4 := by decide
 
 end Tests
 
