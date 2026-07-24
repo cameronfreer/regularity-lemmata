@@ -35,14 +35,21 @@ refinement's `ε⁵` energy gain for a `c < 1` derived from the step-3 chunk rem
 
 * `familyInitialBound C ε l` — the ε-dependent initial floor (mathlib `initialBound`
   architecture): `max (max l 2) ⌈C/ε⁵⌉₊`, proved to meet the chunk's numerical
-  condition `C ≤ 4^(familyInitialBound C ε l)·ε⁵` (`le_pow_familyInitialBound_mul`).
-  The threshold `C` is the chunk-derived, **K-independent** constant — resolving one
+  condition `C ≤ 4^(familyInitialBound C ε l)·ε⁵` (`le_pow_familyInitialBound_mul`),
+  transported to EVERY later part count `≥` the floor by
+  `le_pow_mul_of_familyInitialBound_le` (the form the iteration consumes). The
+  threshold `C` is the chunk-derived, **K-independent** constant — resolving one
   relation per step reuses mathlib's per-graph chunk condition — so it is a parameter
   here, instantiated once step 3 fixes it; the K-dependence lives only in the fuel.
-* `familyStepBound n` — one single-relation equitabilised step's part-count growth.
-  **K-FREE**: only the selected relation is cut (`2n` witness roles → a `2^(2n)`
-  atom factor, then a mathlib-style equitabilisation factor). Deliberately generous.
-* `familyRegularityBoundAux fuel initial` — the raw `fuel`-fold iterate of the step.
+* `familyChunksPerPart n` / `familyStepBound n = n · familyChunksPerPart n` — one
+  single-relation equitabilised step's part-count growth. **K-FREE**: only the
+  selected relation is cut (`2n` witness roles → a `2^(2n)` atom factor, then a
+  mathlib-style equitabilisation factor). The per-parent chunk count is factored out
+  so step 3 can produce the SAME number of chunks in every parent cell, making the
+  exact part-count and equitability arguments uniform. Deliberately generous.
+* `familyRegularityBoundAux fuel initial` — the raw `fuel`-fold iterate of the step,
+  monotone in its initial argument (`familyRegularityBoundAux_mono`), as step 5's
+  replacement of actual part counts by their recursive upper bounds requires.
 
 The FINAL bound and the fuel `⌈K/(c·ε⁵)⌉` are DELIBERATELY not frozen here: they wait
 for step 4 (`ARCHITECTURE.md`), where `c` is proved. No tower-type claim is made (the
@@ -156,11 +163,18 @@ step 3 fixes it. -/
 noncomputable def familyInitialBound (C ε : ℝ) (l : ℕ) : ℕ :=
   max (max l 2) ⌈C / ε ^ 5⌉₊
 
-/-- One single-relation equitabilised refinement step's part-count growth, in closed
-form. **K-free**: only the selected relation is cut. Deliberately generous — only
-finiteness and monotonicity are used downstream. -/
+/-- The number of chunks step 3 produces in EVERY parent cell — the same count in
+each, which is what makes the exact part-count and equitability arguments uniform:
+the single-relation atom factor times the equitabilisation factor. -/
+def familyChunksPerPart (n : ℕ) : ℕ :=
+  2 ^ (2 * n) * 4 ^ (n * 2 ^ (2 * n))
+
+/-- One single-relation equitabilised refinement step's part-count growth: `n` parent
+cells, each split into `familyChunksPerPart n` chunks. **K-free**: only the selected
+relation is cut. Deliberately generous — only finiteness and monotonicity are used
+downstream. -/
 def familyStepBound (n : ℕ) : ℕ :=
-  n * 2 ^ (2 * n) * 4 ^ (n * 2 ^ (2 * n))
+  n * familyChunksPerPart n
 
 /-- The fuel-indexed iterate of the single-relation step bound. The fuel itself
 (`⌈K/(c·ε⁵)⌉`) is fixed only at step 5, once `c` is proved. -/
@@ -177,8 +191,9 @@ theorem two_le_familyInitialBound (C ε : ℝ) (l : ℕ) :
 
 /-- **The chunk numerical condition is met by the initial floor**: for the ε-dependent
 floor, `4^(familyInitialBound C ε l)·ε⁵ ≥ C`. This is the family analogue of mathlib's
-`100 ≤ 4^#P·ε⁵`, with the constant left as the parameter `C`. -/
-theorem le_pow_familyInitialBound_mul {C ε : ℝ} (_hC : 0 ≤ C) (hε : 0 < ε) (l : ℕ) :
+`100 ≤ 4^#P·ε⁵`, with the constant left as the parameter `C`. (No sign hypothesis on
+`C` is needed: `⌈C/ε⁵⌉₊ = 0` for `C ≤ 0`, and `C ≤ 0 ≤ 4^··ε⁵` there.) -/
+theorem le_pow_familyInitialBound_mul {C ε : ℝ} (hε : 0 < ε) (l : ℕ) :
     C ≤ 4 ^ familyInitialBound C ε l * ε ^ 5 := by
   have hε5 : (0 : ℝ) < ε ^ 5 := by positivity
   have hceil_le : (⌈C / ε ^ 5⌉₊ : ℝ) ≤ (familyInitialBound C ε l : ℝ) := by
@@ -193,12 +208,33 @@ theorem le_pow_familyInitialBound_mul {C ε : ℝ} (_hC : 0 ≤ C) (hε : 0 < ε
     _ ≤ 4 ^ familyInitialBound C ε l * ε ^ 5 :=
         mul_le_mul_of_nonneg_right hkey (le_of_lt hε5)
 
-theorem le_familyStepBound (n : ℕ) : n ≤ familyStepBound n := by
-  have h1 : 1 ≤ 2 ^ (2 * n) := Nat.one_le_two_pow
-  have h2 : 1 ≤ 4 ^ (n * 2 ^ (2 * n)) := Nat.one_le_pow _ _ (by norm_num)
-  calc n = n * 1 * 1 := by ring
-    _ ≤ n * 2 ^ (2 * n) * 4 ^ (n * 2 ^ (2 * n)) :=
-      Nat.mul_le_mul (Nat.mul_le_mul_left n h1) h2
+/-- **The transported numerical bridge**: the chunk condition holds at EVERY part
+count `N` at or above the initial floor, not only at the floor itself — the form the
+iteration consumes (`N := P.parts.card` at each refinement stage). -/
+theorem le_pow_mul_of_familyInitialBound_le {C ε : ℝ} (hε : 0 < ε) {l N : ℕ}
+    (hN : familyInitialBound C ε l ≤ N) : C ≤ 4 ^ N * ε ^ 5 := by
+  refine le_trans (le_pow_familyInitialBound_mul hε l) ?_
+  have h4 : (4 : ℝ) ^ familyInitialBound C ε l ≤ 4 ^ N :=
+    pow_le_pow_right₀ (by norm_num) hN
+  exact mul_le_mul_of_nonneg_right h4 (by positivity)
+
+theorem familyChunksPerPart_pos (n : ℕ) : 0 < familyChunksPerPart n :=
+  Nat.mul_pos (pow_pos (by norm_num) _) (pow_pos (by norm_num) _)
+
+theorem familyChunksPerPart_mono {m n : ℕ} (h : m ≤ n) :
+    familyChunksPerPart m ≤ familyChunksPerPart n := by
+  have h2 : 2 ^ (2 * m) ≤ 2 ^ (2 * n) := Nat.pow_le_pow_right (by norm_num) (by omega)
+  have h4 : 4 ^ (m * 2 ^ (2 * m)) ≤ 4 ^ (n * 2 ^ (2 * n)) :=
+    Nat.pow_le_pow_right (by norm_num) (Nat.mul_le_mul h h2)
+  exact Nat.mul_le_mul h2 h4
+
+theorem le_familyStepBound (n : ℕ) : n ≤ familyStepBound n :=
+  calc n = n * 1 := (mul_one n).symm
+    _ ≤ n * familyChunksPerPart n := Nat.mul_le_mul (le_refl n) (familyChunksPerPart_pos n)
+
+theorem familyStepBound_mono {m n : ℕ} (h : m ≤ n) :
+    familyStepBound m ≤ familyStepBound n :=
+  Nat.mul_le_mul h (familyChunksPerPart_mono h)
 
 theorem le_familyRegularityBoundAux (t m : ℕ) :
     m ≤ familyRegularityBoundAux t m := by
@@ -207,6 +243,16 @@ theorem le_familyRegularityBoundAux (t m : ℕ) :
   | succ t IH =>
     rw [familyRegularityBoundAux]
     exact le_trans (le_familyStepBound m) (IH _)
+
+/-- Monotonicity of the iterate in its initial argument — step 5 uses this to replace
+actual part counts by their recursive upper bounds. -/
+theorem familyRegularityBoundAux_mono (t : ℕ) {m n : ℕ} (h : m ≤ n) :
+    familyRegularityBoundAux t m ≤ familyRegularityBoundAux t n := by
+  induction t generalizing m n with
+  | zero => exact h
+  | succ t IH =>
+    rw [familyRegularityBoundAux, familyRegularityBoundAux]
+    exact IH (familyStepBound_mono h)
 
 /-! ### Tests -/
 
@@ -236,17 +282,32 @@ example (Rk : Fin 2 → Fin 3 → Fin 3 → Prop) [∀ k, DecidableRel (Rk k)]
 -- The ε-dependent floor meets the chunk's numerical condition at a concrete
 -- threshold (mathlib's constant is `100`): `C ≤ 4^(familyInitialBound C ε l)·ε⁵`.
 example : (100 : ℝ) ≤ 4 ^ familyInitialBound 100 (1 / 2) 3 * (1 / 2) ^ 5 :=
-  le_pow_familyInitialBound_mul (by norm_num) (by norm_num) 3
+  le_pow_familyInitialBound_mul (by norm_num) 3
+
+-- The transported bridge: the condition holds at EVERY later part count `N` at or
+-- above the floor, not only at the floor itself — the iteration's form.
+example {N : ℕ} (hN : familyInitialBound 100 (1 / 2) 3 ≤ N) :
+    (100 : ℝ) ≤ 4 ^ N * (1 / 2) ^ 5 :=
+  le_pow_mul_of_familyInitialBound_le (by norm_num) hN
 
 -- The floor is genuinely ε-dependent: it dominates `⌈C/ε⁵⌉₊`, which blows up as
 -- `ε → 0` — this is the mechanism a fixed chunk-to-atom ratio lacks.
 example (C ε : ℝ) (l : ℕ) : ⌈C / ε ^ 5⌉₊ ≤ familyInitialBound C ε l :=
   le_max_right _ _
 
--- The single-relation step bound at the smallest seeds, by kernel computation.
+-- The single-relation step bound at the smallest seeds, by kernel computation, and
+-- the uniform per-parent chunk count it factors through.
 example : familyStepBound 0 = 0 := by decide
 
 example : familyStepBound 1 = 4 * 4 ^ 4 := by decide
+
+example : familyChunksPerPart 1 = 4 * 4 ^ 4 := by decide
+
+-- Monotonicity of the step bound and of the iterate in its initial argument.
+example : familyStepBound 2 ≤ familyStepBound 5 := familyStepBound_mono (by norm_num)
+
+example : familyRegularityBoundAux 3 2 ≤ familyRegularityBoundAux 3 5 :=
+  familyRegularityBoundAux_mono 3 (by norm_num)
 
 end Tests
 
