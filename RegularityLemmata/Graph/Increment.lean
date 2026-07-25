@@ -15,6 +15,15 @@ If the ordered block `(A, B)` fails `ε`-uniformity, witnessed by the sub-rectan
 the gain to any partition in which the block and both witness sides are part unions —
 the per-pair bridge consumed by the global bad-mass increment.
 
+Both come in an `ε`-free general form — `blockEnergy_increment_general` and
+`blockEnergy_increment_refined_general` — in which the distinguished sub-rectangle is
+ARBITRARY and the gain is AT LEAST its own mass-weighted squared deviation from the
+parent density — an inequality, never an equality: the other three cells may contribute
+further variance. The witness enters only through `NonuniformWitness.pow_four_mul_le`,
+the single lemma that converts the witness's two defining inequalities into the raw `ε⁴`
+gain. The general forms are what an approximate (equitabilised) refinement needs, since
+there the recovered sides are not witnesses for any prescribed tolerance.
+
 The algebra is isolated in `energy_increment_abstract`: four cells refining a parent,
 with the distinguished (witness) cell's variance against the parent mean as the gain
 (an `engel_defect_lower` + `titu_three` consequence).
@@ -63,34 +72,25 @@ theorem energy_increment_abstract {c11 c12 c21 c22 m11 m12 m21 m22 M c gain : �
     simp
     linarith [hg0]
 
-/-- **The one-block energy increment.** A nonuniformity witness turns into an
-`ε⁴ · |A| · |B|` energy gain across the `2 × 2` witness refinement. -/
-theorem blockEnergy_increment [DecidableEq α] {A B : Finset α}
-    (w : NonuniformWitness R A B ε) (hε : 0 < ε) :
-    blockEnergy R A B + ε ^ 4 * (A.card : ℝ) * (B.card : ℝ)
-      ≤ blockEnergy R w.left w.right + blockEnergy R w.left (B \ w.right)
-        + blockEnergy R (A \ w.left) w.right + blockEnergy R (A \ w.left) (B \ w.right) := by
-  obtain ⟨A', B', hA', hB', hAc, hBc, hdev⟩ := w
-  have hApos : 0 < (A.card : ℝ) := by
-    rcases Nat.eq_zero_or_pos A.card with h0 | hpos
-    · exfalso
-      have hA'0 : A'.card = 0 := Nat.le_zero.mp (le_trans (Finset.card_le_card hA') h0.le)
-      rw [pairDensity_of_left_card_eq_zero R B' hA'0,
-        pairDensity_of_left_card_eq_zero R B h0] at hdev
-      simp at hdev
-      linarith
-    · exact_mod_cast hpos
-  have hBpos : 0 < (B.card : ℝ) := by
-    rcases Nat.eq_zero_or_pos B.card with h0 | hpos
-    · exfalso
-      have hB'0 : B'.card = 0 := Nat.le_zero.mp (le_trans (Finset.card_le_card hB') h0.le)
-      rw [pairDensity_of_right_card_eq_zero R A' hB'0,
-        pairDensity_of_right_card_eq_zero R A h0] at hdev
-      simp at hdev
-      linarith
-    · exact_mod_cast hpos
-  have hA'pos : 0 < (A'.card : ℝ) := lt_of_lt_of_le (mul_pos hε hApos) hAc
-  have hB'pos : 0 < (B'.card : ℝ) := lt_of_lt_of_le (mul_pos hε hBpos) hBc
+/-- **The general one-block energy increment.** Refining `(A, B)` by ANY nondegenerate
+sub-rectangle `(A', B')` gains AT LEAST that cell's mass-weighted squared deviation from
+the parent density; the remaining three cells may contribute more, so this is an
+inequality. No tolerance and no witness are involved: the two consumers below supply
+their own lower bound for the gain. -/
+theorem blockEnergy_increment_general [DecidableEq α] {A B A' B' : Finset α}
+    (hA' : A' ⊆ A) (hB' : B' ⊆ B) (hpos : 0 < (A'.card : ℝ) * (B'.card : ℝ)) :
+    blockEnergy R A B
+        + (A'.card : ℝ) * (B'.card : ℝ) * (pairDensity R A' B' - pairDensity R A B) ^ 2
+      ≤ blockEnergy R A' B' + blockEnergy R A' (B \ B')
+        + blockEnergy R (A \ A') B' + blockEnergy R (A \ A') (B \ B') := by
+  have hA'pos : 0 < (A'.card : ℝ) := by
+    rcases (mul_pos_iff.mp hpos) with ⟨h, _⟩ | ⟨h, _⟩
+    · exact h
+    · exact absurd h (not_lt.mpr (Nat.cast_nonneg _))
+  have hB'pos : 0 < (B'.card : ℝ) := by
+    rcases (mul_pos_iff.mp hpos) with ⟨_, h⟩ | ⟨_, h⟩
+    · exact h
+    · exact absurd h (not_lt.mpr (Nat.cast_nonneg _))
   have hAsplit : (A.card : ℝ) = (A'.card : ℝ) + ((A \ A').card : ℝ) := by
     have h := Finset.card_sdiff_add_card_eq_card hA'
     rw [← h]; push_cast; ring
@@ -124,25 +124,126 @@ theorem blockEnergy_increment [DecidableEq α] {A B : Finset α}
   · rw [hAsplit, hBsplit]; ring
   · have hsplit := pairCount_split R A' B' hA' hB'
     rw [hsplit]; push_cast; ring
-  · have hDsq : ε ^ 2 < (pairDensity R A' B' - pairDensity R A B) ^ 2 := by
-      nlinarith [sq_abs (pairDensity R A' B' - pairDensity R A B), hdev, hε,
-        abs_nonneg (pairDensity R A' B' - pairDensity R A B)]
-    have hmass : ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ)) ≤ (A'.card : ℝ) * (B'.card : ℝ) := by
-      have h1 : (ε * (A.card : ℝ)) * (ε * (B.card : ℝ)) ≤ (A'.card : ℝ) * (B'.card : ℝ) :=
-        mul_le_mul hAc hBc (mul_nonneg hε.le (Nat.cast_nonneg _)) (le_of_lt hA'pos)
-      nlinarith [h1]
-    have hstep : ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ)) * ε ^ 2
-        ≤ ((A'.card : ℝ) * (B'.card : ℝ)) * (pairDensity R A' B' - pairDensity R A B) ^ 2 :=
-      mul_le_mul hmass hDsq.le (sq_nonneg ε) (by positivity)
-    have hd11 : (pairCount R A' B' : ℝ) / ((A'.card : ℝ) * (B'.card : ℝ))
-        = pairDensity R A' B' := (pairDensity_eq_count_div).symm
-    have hd : (pairCount R A B : ℝ) / ((A.card : ℝ) * (B.card : ℝ)) = pairDensity R A B :=
-      (pairDensity_eq_count_div).symm
-    rw [hd11, hd]
-    calc ε ^ 4 * (A.card : ℝ) * (B.card : ℝ)
-        = ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ)) * ε ^ 2 := by ring
-      _ ≤ ((A'.card : ℝ) * (B'.card : ℝ))
-            * (pairDensity R A' B' - pairDensity R A B) ^ 2 := hstep
+  · rw [(pairDensity_eq_count_div : pairDensity R A' B' = _),
+      (pairDensity_eq_count_div : pairDensity R A B = _)]
+
+/-- Both sides of a nonuniformity witness's ambient block are nonempty: an empty side
+would force both densities to `0`, contradicting the strict deviation. -/
+private theorem card_pos_of_witness {A B : Finset α} (w : NonuniformWitness R A B ε)
+    (hε : 0 < ε) : 0 < (A.card : ℝ) ∧ 0 < (B.card : ℝ) := by
+  obtain ⟨A', B', hA', hB', _, _, hdev⟩ := w
+  constructor
+  · rcases Nat.eq_zero_or_pos A.card with h0 | hpos
+    · exfalso
+      have hA'0 : A'.card = 0 := Nat.le_zero.mp (le_trans (Finset.card_le_card hA') h0.le)
+      rw [pairDensity_of_left_card_eq_zero R B' hA'0,
+        pairDensity_of_left_card_eq_zero R B h0] at hdev
+      simp at hdev
+      linarith
+    · exact_mod_cast hpos
+  · rcases Nat.eq_zero_or_pos B.card with h0 | hpos
+    · exfalso
+      have hB'0 : B'.card = 0 := Nat.le_zero.mp (le_trans (Finset.card_le_card hB') h0.le)
+      rw [pairDensity_of_right_card_eq_zero R A' hB'0,
+        pairDensity_of_right_card_eq_zero R A h0] at hdev
+      simp at hdev
+      linarith
+    · exact_mod_cast hpos
+
+/-- The witness rectangle is nondegenerate. -/
+theorem NonuniformWitness.card_mul_pos {A B : Finset α} (w : NonuniformWitness R A B ε)
+    (hε : 0 < ε) : 0 < (w.left.card : ℝ) * (w.right.card : ℝ) := by
+  obtain ⟨hApos, hBpos⟩ := card_pos_of_witness w hε
+  exact mul_pos (lt_of_lt_of_le (mul_pos hε hApos) w.left_card)
+    (lt_of_lt_of_le (mul_pos hε hBpos) w.right_card)
+
+/-- **The witness gain bound**: a nonuniformity witness's mass-weighted squared deviation
+dominates the raw `ε⁴ · |A| · |B|`. This is the ONLY place the witness's two defining
+inequalities are consumed; everything else about the increment is `ε`-free. -/
+theorem NonuniformWitness.pow_four_mul_le {A B : Finset α} (w : NonuniformWitness R A B ε)
+    (hε : 0 < ε) :
+    ε ^ 4 * (A.card : ℝ) * (B.card : ℝ)
+      ≤ (w.left.card : ℝ) * (w.right.card : ℝ)
+        * (pairDensity R w.left w.right - pairDensity R A B) ^ 2 := by
+  obtain ⟨hApos, hBpos⟩ := card_pos_of_witness w hε
+  have hA'pos : 0 < (w.left.card : ℝ) := lt_of_lt_of_le (mul_pos hε hApos) w.left_card
+  have hDsq : ε ^ 2 < (pairDensity R w.left w.right - pairDensity R A B) ^ 2 := by
+    nlinarith [sq_abs (pairDensity R w.left w.right - pairDensity R A B), w.dev, hε,
+      abs_nonneg (pairDensity R w.left w.right - pairDensity R A B)]
+  have hmass : ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ))
+      ≤ (w.left.card : ℝ) * (w.right.card : ℝ) := by
+    have h1 : (ε * (A.card : ℝ)) * (ε * (B.card : ℝ))
+        ≤ (w.left.card : ℝ) * (w.right.card : ℝ) :=
+      mul_le_mul w.left_card w.right_card (mul_nonneg hε.le (Nat.cast_nonneg _))
+        (le_of_lt hA'pos)
+    nlinarith [h1]
+  have hstep : ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ)) * ε ^ 2
+      ≤ ((w.left.card : ℝ) * (w.right.card : ℝ))
+        * (pairDensity R w.left w.right - pairDensity R A B) ^ 2 :=
+    mul_le_mul hmass hDsq.le (sq_nonneg ε) (by positivity)
+  calc ε ^ 4 * (A.card : ℝ) * (B.card : ℝ)
+      = ε ^ 2 * ((A.card : ℝ) * (B.card : ℝ)) * ε ^ 2 := by ring
+    _ ≤ _ := hstep
+
+/-- **The one-block energy increment.** A nonuniformity witness turns into an
+`ε⁴ · |A| · |B|` energy gain across the `2 × 2` witness refinement. -/
+theorem blockEnergy_increment [DecidableEq α] {A B : Finset α}
+    (w : NonuniformWitness R A B ε) (hε : 0 < ε) :
+    blockEnergy R A B + ε ^ 4 * (A.card : ℝ) * (B.card : ℝ)
+      ≤ blockEnergy R w.left w.right + blockEnergy R w.left (B \ w.right)
+        + blockEnergy R (A \ w.left) w.right + blockEnergy R (A \ w.left) (B \ w.right) := by
+  refine le_trans ?_
+    (blockEnergy_increment_general w.left_subset w.right_subset (w.card_mul_pos hε))
+  have := w.pow_four_mul_le hε
+  linarith
+
+/-- **The general per-pair bridge**: any nondegenerate sub-rectangle whose sides — and
+whose ambient block — are part unions of `P'` transports at least its own weighted
+squared deviation to the summed energies of the refined sub-blocks. The `ε`-free form: the
+consumer chooses the sub-rectangle and supplies the gain bound. -/
+theorem blockEnergy_increment_refined_general [DecidableEq α] {s : Finset α}
+    {P' : Finpartition s} (R : α → α → Prop) [DecidableRel R] {C D A' B' : Finset α}
+    (hA' : A' ⊆ C) (hB' : B' ⊆ D) (hpos : 0 < (A'.card : ℝ) * (B'.card : ℝ))
+    (hCU : IsPartUnion P' C) (hDU : IsPartUnion P' D)
+    (hlU : IsPartUnion P' A') (hrU : IsPartUnion P' B') :
+    blockEnergy R C D
+        + (A'.card : ℝ) * (B'.card : ℝ) * (pairDensity R A' B' - pairDensity R C D) ^ 2 ≤
+      ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
+        blockEnergy R C' D' := by
+  have hpd : ∀ S : Finset α,
+      (↑(P'.parts.filter (· ⊆ S)) : Set (Finset α)).PairwiseDisjoint id := fun S =>
+    P'.supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact Finset.filter_subset _ _)
+  have hC2U : IsPartUnion P' (C \ A') := isPartUnion_sdiff hCU hlU hA'
+  have hD2U : IsPartUnion P' (D \ B') := isPartUnion_sdiff hDU hrU hB'
+  have hb11 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ A'))
+    (P'.parts.filter (· ⊆ B')) (hpd _) hlU (hpd _) hrU
+  have hb12 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ A'))
+    (P'.parts.filter (· ⊆ D \ B')) (hpd _) hlU (hpd _) hD2U
+  have hb21 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ C \ A'))
+    (P'.parts.filter (· ⊆ B')) (hpd _) hC2U (hpd _) hrU
+  have hb22 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ C \ A'))
+    (P'.parts.filter (· ⊆ D \ B')) (hpd _) hC2U (hpd _) hD2U
+  have hdecomp : ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
+        blockEnergy R C' D'
+      = (∑ C' ∈ P'.parts.filter (· ⊆ A'), ∑ D' ∈ P'.parts.filter (· ⊆ B'),
+          blockEnergy R C' D')
+        + (∑ C' ∈ P'.parts.filter (· ⊆ A'),
+            ∑ D' ∈ P'.parts.filter (· ⊆ D \ B'), blockEnergy R C' D')
+        + (∑ C' ∈ P'.parts.filter (· ⊆ C \ A'),
+            ∑ D' ∈ P'.parts.filter (· ⊆ B'), blockEnergy R C' D')
+        + (∑ C' ∈ P'.parts.filter (· ⊆ C \ A'),
+            ∑ D' ∈ P'.parts.filter (· ⊆ D \ B'), blockEnergy R C' D') := by
+    rw [filter_subset_eq_union hlU hA', filter_subset_eq_union hrU hB']
+    simp only [Finset.sum_union filter_subset_disjoint, Finset.sum_add_distrib]
+    ring
+  rw [hdecomp]
+  calc blockEnergy R C D
+        + (A'.card : ℝ) * (B'.card : ℝ) * (pairDensity R A' B' - pairDensity R C D) ^ 2
+      ≤ blockEnergy R A' B' + blockEnergy R A' (D \ B')
+        + blockEnergy R (C \ A') B' + blockEnergy R (C \ A') (D \ B') :=
+        blockEnergy_increment_general hA' hB' hpos
+    _ ≤ _ := add_le_add (add_le_add (add_le_add hb11 hb12) hb21) hb22
 
 /-- The per-pair bridge: a witness whose block and sides are part unions of `P'`
 transports the `ε⁴` gain to the summed energies of the refined sub-blocks. -/
@@ -154,39 +255,10 @@ theorem blockEnergy_increment_refined [DecidableEq α] {s : Finset α}
     blockEnergy R C D + ε ^ 4 * (C.card : ℝ) * (D.card : ℝ) ≤
       ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
         blockEnergy R C' D' := by
-  have hpd : ∀ S : Finset α,
-      (↑(P'.parts.filter (· ⊆ S)) : Set (Finset α)).PairwiseDisjoint id := fun S =>
-    P'.supIndep.pairwiseDisjoint.subset
-      (by rw [Finset.coe_subset]; exact Finset.filter_subset _ _)
-  have hC2U : IsPartUnion P' (C \ w.left) := isPartUnion_sdiff hCU hlU w.left_subset
-  have hD2U : IsPartUnion P' (D \ w.right) := isPartUnion_sdiff hDU hrU w.right_subset
-  have hb11 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ w.left))
-    (P'.parts.filter (· ⊆ w.right)) (hpd _) hlU (hpd _) hrU
-  have hb12 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ w.left))
-    (P'.parts.filter (· ⊆ D \ w.right)) (hpd _) hlU (hpd _) hD2U
-  have hb21 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ C \ w.left))
-    (P'.parts.filter (· ⊆ w.right)) (hpd _) hC2U (hpd _) hrU
-  have hb22 := blockEnergy_superadditive R (P'.parts.filter (· ⊆ C \ w.left))
-    (P'.parts.filter (· ⊆ D \ w.right)) (hpd _) hC2U (hpd _) hD2U
-  have hdecomp : ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
-        blockEnergy R C' D'
-      = (∑ C' ∈ P'.parts.filter (· ⊆ w.left), ∑ D' ∈ P'.parts.filter (· ⊆ w.right),
-          blockEnergy R C' D')
-        + (∑ C' ∈ P'.parts.filter (· ⊆ w.left),
-            ∑ D' ∈ P'.parts.filter (· ⊆ D \ w.right), blockEnergy R C' D')
-        + (∑ C' ∈ P'.parts.filter (· ⊆ C \ w.left),
-            ∑ D' ∈ P'.parts.filter (· ⊆ w.right), blockEnergy R C' D')
-        + (∑ C' ∈ P'.parts.filter (· ⊆ C \ w.left),
-            ∑ D' ∈ P'.parts.filter (· ⊆ D \ w.right), blockEnergy R C' D') := by
-    rw [filter_subset_eq_union hlU w.left_subset, filter_subset_eq_union hrU w.right_subset]
-    simp only [Finset.sum_union filter_subset_disjoint, Finset.sum_add_distrib]
-    ring
-  rw [hdecomp]
-  calc blockEnergy R C D + ε ^ 4 * (C.card : ℝ) * (D.card : ℝ)
-      ≤ blockEnergy R w.left w.right + blockEnergy R w.left (D \ w.right)
-        + blockEnergy R (C \ w.left) w.right + blockEnergy R (C \ w.left) (D \ w.right) :=
-        blockEnergy_increment w hε
-    _ ≤ _ := add_le_add (add_le_add (add_le_add hb11 hb12) hb21) hb22
+  refine le_trans ?_ (blockEnergy_increment_refined_general R w.left_subset w.right_subset
+    (w.card_mul_pos hε) hCU hDU hlU hrU)
+  have := w.pow_four_mul_le hε
+  linarith
 
 /-! ### Tests and adversarial examples -/
 
