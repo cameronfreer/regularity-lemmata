@@ -23,6 +23,7 @@ import RegularityLemmata.Graph.UniformSlicing
 import RegularityLemmata.Graph.UnionCenter
 import RegularityLemmata.Graph.UniformUnion
 import RegularityLemmata.Graph.PieceSupplier
+import RegularityLemmata.Graph.PieceExtraction
 import RegularityLemmata.Graph.Variance
 import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
