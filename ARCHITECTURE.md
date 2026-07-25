@@ -78,25 +78,11 @@ Lean `Prop` placeholders.
   normalization are frozen in the Phase 11 section below; the exact quantitative
   signatures remain provisional until the diagonal/repeated-cell feasibility gate
   recorded there passes.
-- **Route (b) piece supplier** (signature corrected 2026-07-22 — the `t = 0`
-  instance is FALSE, gate G-S2 in `Graph/PieceSupplier.lean`): for every palette
-  count `K`, target count `t` with **`0 < t`**, and tolerance `τ > 0`, there exist a
-  retention floor `κ > 0` and a host threshold `N₀`, depending on `(K, t, τ)` only —
-  fixed before any partition is produced, with no inequality in which `τ` depends on
-  its own output complexity — such that every host `A` with `N₀ ≤ |A|` admits a
-  common size `m > 0` and pieces `P : Fin t → Finset V` with
-  `IsPieceFamily Rk A τ m P` (equal cardinality `m`; pairwise disjoint; every
-  ordered pair of distinct pieces `τ`-uniform for every relation) and the mass floor
-  `κ·|A| ≤ t·m`. Recorded in prose per the placeholder policy above; the Lean
-  predicate `IsPieceFamily` is proved infrastructure, the summit is not.
-- **Equitable finite-family regularity** (the supplier's engine, review decision
-  2026-07-22): for finitely many DIRECTED relations simultaneously, an
-  equipartition that is `ρ`-regular for every relation, with part count between `l`
-  and a bound `familyRegularityBoundAux (fuel) (familyInitialBound C ρ l)` whose fuel
-  `⌈K/(c·ρ⁵)⌉` is frozen only once the one-step retained-gain constant `c` is proved
-  (step 4 of the sequence below). Ordinary off-diagonal regularity for a finite
-  family — NOT equitable strong regularity, which stays deferred (first entry
-  above).
+- (**No longer deferred — proved 2026-07-25**: the *equitable finite-family
+  regularity* engine and the *route (b) piece supplier*. Both were recorded here as
+  prose after the 2026-07-22 checkpoint; they are now Lean theorems, and their
+  statements and frozen constants are recorded in the supplier route-decision
+  section below rather than in this list.)
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -694,12 +680,39 @@ summit `exists_familyRegular_equipartition` delivers, for `0 < ε ≤ 1`, an equ
 that is `ε`-regular for every relation of the family with `l ≤ #parts ≤ familyRegularityBound
 K ε l`.
 
+
 Its host requirement is `familyRegularityBound K ε l ≤ #s` — room for the partition the
 iteration actually produces, and nothing beyond it. No room is required for a further
 step: the terminal fuel-zero argument contradicts the ceiling `K` using the energy gain
 alone, which carries no host hypothesis. That is the `N₀` obligation step 6 must meet; it
 is stated, never hidden, and a permanent test records both that it fails on small hosts
 and that the signature has not been strengthened. No tower-type claim is made or implied.
+
+**Step 6 proved (2026-07-25): the piece supplier is inhabited.** The obligation frozen
+at the 2026-07-22 checkpoint — for every palette count `K`, target `t` with **`0 < t`**,
+and tolerance `τ > 0`, a retention floor `κ > 0` and a host threshold `N₀` depending on
+`(K, t, τ)` ONLY, such that every host `A` with `N₀ ≤ |A|` admits a common size `m > 0`
+and pieces with `IsPieceFamily Rk A τ m P` and the mass floor `κ·|A| ≤ t·m` — is proved
+(`Graph/PieceExtraction.lean`, `Graph/PieceSchedule.lean`). The schedule, frozen:
+
+- `supplierTolerance K t τ = min (τ/2) (1/(64(K+1)t))` — the internal `ρ`, from
+  `(K, t, τ)` only. It does NOT mention the part-count bound; the bound is defined from
+  it, and the reverse dependency is the circularity route (b) exists to avoid. The factor
+  `64(K+1)t` is DERIVED: it is what makes `16Kρn ≤ n/(4t)` in the independent-set
+  estimate.
+- `supplierParts t = 4t` — the requested part count, which is what keeps the
+  natural-number division `n/(2t)` in the degree budget from losing more than half.
+- `supplierBound K t τ = familyRegularityBound K ρ (4t)`, `supplierThreshold = that
+  bound`, `supplierRetention = t/(2·supplierBound)`.
+
+What defeats gate **G-S1**: the equipartition's `m ≤ |C| ≤ m+1 ≤ 2m` converts weighted
+bad mass to an unweighted bad-pair count (`|F| ≤ 4ρn²`), which is exactly the step the
+gate shows is false without equal sizes. Trimming every selected cell to `m` retains at
+least half, so slicing costs only the factor `2` (`2ρ ≤ τ`) — no output-complexity
+factor anywhere. Gate **G-S2** stays permanent: `0 < t` is required, and the zero-target
+instance remains false.
+
+Still closed: the self-regular-subset assembly (route (b) step 1), 11B, and Unit 7.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
