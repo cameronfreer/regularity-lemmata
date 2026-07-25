@@ -25,14 +25,21 @@ parts gaining `ε⁵/5` of family energy. This file iterates it.
   because the step's part count is EXACT: the equipartition property, the floor
   `familyInitialBound ⋯ ≤ #parts` (part counts only grow), and the host-size requirement.
 * `exists_familyRegular_equipartition` — **the summit**: for every finite directed family,
-  every tolerance `0 < ε ≤ 1`, and every requested `l`, a host admitting the step's part
-  count carries an equipartition that is `ε`-regular for EVERY relation of the family, with
-  `l ≤ #parts ≤ familyRegularityBound K ε l`.
+  every tolerance `0 < ε ≤ 1`, and every requested `l`, a host with
+  `familyRegularityBound K ε l ≤ #s` carries an equipartition that is `ε`-regular for
+  EVERY relation of the family, with `l ≤ #parts ≤ familyRegularityBound K ε l`.
 
-**The host-size requirement is real and is stated, not hidden.** The iteration needs
-`familyStepBound (familyRegularityBound K ε l) ≤ #s`: enough room to run the last step at
-the worst part count. That is the `N₀` the piece supplier will have to meet (step 6), and
-it is why nothing here is asserted for small hosts.
+**The host-size requirement is exactly `familyRegularityBound K ε l ≤ #s`** — room for
+the partition the iteration can actually produce, and nothing beyond it. In particular no
+room is demanded for a further step: the terminal (fuel-zero) argument concludes
+regularity by contradiction from the ENERGY gain alone, and
+`familyEnergy_equitableIncrement_increment` carries no host hypothesis — even with
+`chunkSize = 0` the equitabilised increment exists, refines `P`, is an equipartition, and
+gains `ε⁵/5`, which is already impossible against the ceiling `K`. The exact new part
+count, the only thing that needs host room, is used solely to transport the part-count
+invariant through a step that really happens. This is the `N₀` the piece supplier will
+have to meet (step 6); it is stated, not hidden, and a permanent test records that it
+fails on small hosts.
 
 **No tower-type claim.** `familyStepBound` is deliberately generous and the bound is a
 `familyFuel`-fold iterate of it; only finiteness and host-independence are used or
@@ -93,13 +100,13 @@ theorem card_le_familyFuel_mul (hε : 0 < ε) (K : ℕ) :
 /-- **Fuel-parametrized iteration.** From family energy within `t · ε⁵/5` of the ceiling
 `K`, `t` equitabilised steps reach a family-regular equipartition.
 
-The host hypothesis is stated at the part count the LAST of the `t` steps could reach,
-which is exactly what the recursion consumes: at fuel `t + 1` it unfolds to the fuel-`t`
-hypothesis for the stepped partition, and it dominates the single step taken now. -/
+The host hypothesis is the part count the LAST of the `t` steps could reach — no more:
+at fuel `t + 1` it unfolds to the fuel-`t` hypothesis for the stepped partition and
+dominates the single step taken now, and at fuel `0` it is not used at all. -/
 theorem familyRegularity_iterate (hε : 0 < ε) (hε1 : ε ≤ 1) {l : ℕ} :
     ∀ (t : ℕ) (P : Finpartition s), P.IsEquipartition →
       familyInitialBound familyChunkThreshold ε l ≤ P.parts.card →
-      familyStepBound (familyRegularityBoundAux t P.parts.card) ≤ s.card →
+      familyRegularityBoundAux t P.parts.card ≤ s.card →
       (K : ℝ) - (t : ℝ) * (familyRetainedFraction * ε ^ 5) ≤ familyEnergy Rk P →
       ∃ Q : Finpartition s, Q ≤ P ∧ Q.IsEquipartition ∧ IsFamilyRegular Rk ε Q ∧
         familyInitialBound familyChunkThreshold ε l ≤ Q.parts.card ∧
@@ -109,14 +116,19 @@ theorem familyRegularity_iterate (hε : 0 < ε) (hε1 : ε ≤ 1) {l : ℕ} :
   intro t
   induction t with
   | zero =>
-    intro P hP hfloor hs hbudget
+    intro P hP hfloor _hs hbudget
     refine ⟨P, le_rfl, hP, ?_, hfloor, le_familyRegularityBoundAux 0 _⟩
     by_contra hreg
-    have hstep : familyStepBound P.parts.card ≤ s.card := by
-      simpa [familyRegularityBoundAux] using hs
-    obtain ⟨Q, -, -, -, hQgain⟩ :=
-      exists_familyEnergy_increment_equitable Rk hP hε hε1 hfloor hstep hreg
-    have hceil : familyEnergy Rk Q ≤ (K : ℝ) := familyEnergy_le_card
+    -- The terminal contradiction needs only the ENERGY gain, not the exact new part
+    -- count: `familyEnergy_equitableIncrement_increment` carries no host hypothesis, so
+    -- fuel `0` requires no room for a further step.
+    rw [IsFamilyRegular] at hreg
+    push Not at hreg
+    obtain ⟨k, hk⟩ := hreg
+    have hgainQ := familyEnergy_equitableIncrement_increment (Rk := Rk) hP hε hε1 hfloor k
+      (lt_of_not_ge hk)
+    have hceil : familyEnergy Rk (equitableIncrement (Rk k) ε hP) ≤ (K : ℝ) :=
+      familyEnergy_le_card
     simp only [Nat.cast_zero, zero_mul, sub_zero] at hbudget
     linarith
   | succ t IH =>
@@ -126,14 +138,13 @@ theorem familyRegularity_iterate (hε : 0 < ε) (hε1 : ε ≤ 1) {l : ℕ} :
     · -- Unfold the host hypothesis once: it is the fuel-`t` hypothesis after the step.
       rw [familyRegularityBoundAux] at hs
       have hstep : familyStepBound P.parts.card ≤ s.card :=
-        le_trans (le_trans (le_familyRegularityBoundAux t (familyStepBound P.parts.card))
-          (le_familyStepBound _)) hs
+        le_trans (le_familyRegularityBoundAux t (familyStepBound P.parts.card)) hs
       obtain ⟨P', hP'P, hP'eq, hP'card, hP'gain⟩ :=
         exists_familyEnergy_increment_equitable Rk hP hε hε1 hfloor hstep hreg
       have hfloor' : familyInitialBound familyChunkThreshold ε l ≤ P'.parts.card := by
         rw [hP'card]
         exact le_trans hfloor (le_familyStepBound _)
-      have hs' : familyStepBound (familyRegularityBoundAux t P'.parts.card) ≤ s.card := by
+      have hs' : familyRegularityBoundAux t P'.parts.card ≤ s.card := by
         rw [hP'card]; exact hs
       have hbudget' : (K : ℝ) - (t : ℝ) * (familyRetainedFraction * ε ^ 5)
           ≤ familyEnergy Rk P' := by
@@ -147,29 +158,27 @@ theorem familyRegularity_iterate (hε : 0 < ε) (hε1 : ε ≤ 1) {l : ℕ} :
 /-! ### The summit -/
 
 /-- **Equitable finite-family regularity.** For finitely many arbitrary DIRECTED relations
-on a host admitting the step's part count, and every tolerance `0 < ε ≤ 1` and requested
-part count `l`, there is an EQUIPARTITION that is `ε`-regular for EVERY relation of the
-family, with `l ≤ #parts ≤ familyRegularityBound K ε l`.
+on a host with `familyRegularityBound K ε l ≤ #s`, and every tolerance `0 < ε ≤ 1` and
+requested part count `l`, there is an EQUIPARTITION that is `ε`-regular for EVERY relation
+of the family, with `l ≤ #parts ≤ familyRegularityBound K ε l`. The host requirement is
+the produced part count itself — no room is asked for a step that never happens.
 
 No symmetry is assumed anywhere. The bound is host-independent; the host hypothesis is a
 lower bound on `#s`, not on the bound. Ordinary off-diagonal regularity only — equitable
 STRONG regularity stays deferred (`ARCHITECTURE.md`), and no tower-type claim is made. -/
 theorem exists_familyRegular_equipartition (Rk : Fin K → α → α → Prop)
     [∀ k, DecidableRel (Rk k)] (hε : 0 < ε) (hε1 : ε ≤ 1) (l : ℕ)
-    (hs : familyStepBound (familyRegularityBound K ε l) ≤ s.card) :
+    (hs : familyRegularityBound K ε l ≤ s.card) :
     ∃ Q : Finpartition s, Q.IsEquipartition ∧ IsFamilyRegular Rk ε Q ∧
       l ≤ Q.parts.card ∧ Q.parts.card ≤ familyRegularityBound K ε l := by
   set n := familyInitialBound familyChunkThreshold ε l with hn
   have hn0 : n ≠ 0 := by
     have := two_le_familyInitialBound familyChunkThreshold ε l
     omega
-  have hns : n ≤ s.card :=
-    le_trans (le_trans (le_familyRegularityBound K ε l)
-      (le_familyStepBound (familyRegularityBound K ε l))) hs
+  have hns : n ≤ s.card := le_trans (le_familyRegularityBound K ε l) hs
   obtain ⟨P, hPeq, hPcard⟩ := Finpartition.exists_equipartition_card_eq s hn0 hns
   have hfloor : n ≤ P.parts.card := hPcard.ge
-  have hs' : familyStepBound (familyRegularityBoundAux (familyFuel K ε) P.parts.card)
-      ≤ s.card := by
+  have hs' : familyRegularityBoundAux (familyFuel K ε) P.parts.card ≤ s.card := by
     rw [hPcard]
     exact hs
   have hbudget : (K : ℝ) - (familyFuel K ε : ℝ) * (familyRetainedFraction * ε ^ 5)
@@ -188,7 +197,8 @@ theorem exists_familyRegular_equipartition (Rk : Fin K → α → α → Prop)
 
 /-- **The `K = 0` endpoint.** The empty family needs no steps: the fuel is `0` and the
 bound is the initial floor itself, so the summit returns an equipartition of the requested
-size, family-regular for vacuous reasons. -/
+size, family-regular for vacuous reasons — and its host requirement is just enough
+vertices for that initial equipartition. -/
 theorem familyRegularityBound_zero (ε : ℝ) (l : ℕ) :
     familyRegularityBound 0 ε l = familyInitialBound familyChunkThreshold ε l := by
   rw [familyRegularityBound, familyFuel_zero, familyRegularityBoundAux]
@@ -222,34 +232,35 @@ example (K : ℕ) (ε : ℝ) (l : ℕ) :
       = familyRegularityBoundAux (familyFuel K ε)
           (familyInitialBound familyChunkThreshold ε l) := rfl
 
--- The summit on a concrete host, for a family of two ASYMMETRIC relations on `Fin 3`:
--- the statement is inhabited, under the honest host hypothesis.
-example (hs : familyStepBound (familyRegularityBound 2 (1 / 2 : ℝ) 2)
-      ≤ ({0, 1, 2} : Finset (Fin 3)).card) :
+-- **Regression guard on the host hypothesis.** The summit asks only for
+-- `familyRegularityBound ⋯ ≤ #s`, NOT `familyStepBound (familyRegularityBound ⋯) ≤ #s`:
+-- the fuel-zero contradiction is powered by the energy gain alone
+-- (`familyEnergy_equitableIncrement_increment` carries no host hypothesis), so no room is
+-- demanded for a step that never happens. This example pins that signature — reinstating
+-- the extra step's room would stop it compiling.
+example (hs : familyRegularityBound 2 (1 / 2 : ℝ) 2 ≤ ({0, 1, 2} : Finset (Fin 3)).card) :
     ∃ Q : Finpartition ({0, 1, 2} : Finset (Fin 3)), Q.IsEquipartition ∧
       IsFamilyRegular (fun k : Fin 2 => fun a b : Fin 3 => if k = 0 then a < b else b < a)
         (1 / 2 : ℝ) Q ∧
       2 ≤ Q.parts.card ∧ Q.parts.card ≤ familyRegularityBound 2 (1 / 2 : ℝ) 2 :=
   exists_familyRegular_equipartition _ (by norm_num) (by norm_num) 2 hs
 
--- The host hypothesis is NOT vacuous and NOT satisfiable on small hosts: three elements
--- cannot carry even the first step's part count at these parameters. This is the `N₀`
--- obligation the piece supplier will have to meet, recorded as a permanent test.
-example : ¬ familyStepBound (familyRegularityBound 2 (1 / 2 : ℝ) 2)
-    ≤ ({0, 1, 2} : Finset (Fin 3)).card := by
+-- The weakened hypothesis is still not vacuous: at these parameters the ε-dependent
+-- initial floor alone is `3200`, so a three-element host cannot carry the partition. This
+-- is the `N₀` obligation the piece supplier will have to meet.
+example : familyInitialBound familyChunkThreshold (1 / 2 : ℝ) 2 = 3200 := by
+  rw [familyInitialBound, familyChunkThreshold]
+  norm_num
+
+example : ¬ familyRegularityBound 2 (1 / 2 : ℝ) 2 ≤ ({0, 1, 2} : Finset (Fin 3)).card := by
   have hcard : ({0, 1, 2} : Finset (Fin 3)).card = 3 := by decide
+  have h3200 : familyInitialBound familyChunkThreshold (1 / 2 : ℝ) 2 = 3200 := by
+    rw [familyInitialBound, familyChunkThreshold]
+    norm_num
+  have hfloor : (3200 : ℕ) ≤ familyRegularityBound 2 (1 / 2 : ℝ) 2 := by
+    rw [← h3200]
+    exact le_familyRegularityBound _ _ _
   rw [hcard]
-  intro hcon
-  have h1 : familyRegularityBound 2 (1 / 2 : ℝ) 2
-      ≤ familyStepBound (familyRegularityBound 2 (1 / 2 : ℝ) 2) :=
-    le_familyStepBound _
-  have h2 : 2 ≤ familyRegularityBound 2 (1 / 2 : ℝ) 2 :=
-    le_familyRegularityBound_of_le 2 (1 / 2 : ℝ) 2
-  have h3 : familyRegularityBound 2 (1 / 2 : ℝ) 2 ≤ 3 := le_trans h1 hcon
-  -- Two parts already force `familyStepBound 2 = 2 · 2⁴ · 4^(2·2⁴) > 3`.
-  have h4 : familyStepBound 2 ≤ familyStepBound (familyRegularityBound 2 (1 / 2 : ℝ) 2) :=
-    familyStepBound_mono h2
-  have h5 : (3 : ℕ) < familyStepBound 2 := by decide
   omega
 
 end Tests

@@ -694,10 +694,12 @@ summit `exists_familyRegular_equipartition` delivers, for `0 < ε ≤ 1`, an equ
 that is `ε`-regular for every relation of the family with `l ≤ #parts ≤ familyRegularityBound
 K ε l`.
 
-Its host requirement is `familyStepBound (familyRegularityBound K ε l) ≤ #s` — room to run
-one more step at the worst part count, which is what the exhausted-budget argument needs.
-That is the `N₀` obligation step 6 must meet; it is stated, never hidden, and a permanent
-test records that it fails on small hosts. No tower-type claim is made or implied.
+Its host requirement is `familyRegularityBound K ε l ≤ #s` — room for the partition the
+iteration actually produces, and nothing beyond it. No room is required for a further
+step: the terminal fuel-zero argument contradicts the ceiling `K` using the energy gain
+alone, which carries no host hypothesis. That is the `N₀` obligation step 6 must meet; it
+is stated, never hidden, and a permanent test records both that it fails on small hosts
+and that the signature has not been strengthened. No tower-type claim is made or implied.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
