@@ -35,17 +35,21 @@ namespace RegularityLemmata
 variable {α : Type*} [DecidableEq α] {s : Finset α}
 variable (R : α → α → Prop) [DecidableRel R] {ε : ℝ}
 
-/-- **Global increment, un-normalized.** A refinement resolving every bad pair's
-witness gains at least `ε⁴ · badMassNum` of energy. -/
-theorem energyNum_increment_of_badMassNum {P P' : Finpartition s} (hP' : P' ≤ P)
-    (hε : 0 < ε)
-    (hwit : ∀ C ∈ P.parts, ∀ D ∈ P.parts, IsBadPair R ε C D →
-      ∃ w : NonuniformWitness R C D ε, IsPartUnion P' w.left ∧ IsPartUnion P' w.right) :
-    energyNum R P + ε ^ 4 * badMassNum R ε P ≤ energyNum R P' := by
+/-- **Global increment from a per-pair gain, un-normalized.** If a refinement gains
+`g · |C||D|` on every BAD ordered pair of parts, it gains `g · badMassNum` overall: the
+good pairs contribute nothing but cannot lose, by refinement superadditivity. The gain
+`g` is arbitrary here — the exact witness refinement supplies `g = ε⁴`, an
+equitabilised refinement a degraded `g = c·ε⁴`. -/
+theorem energyNum_increment_of_pairwise_gain {P P' : Finpartition s} (hP' : P' ≤ P) {g : ℝ}
+    (hpair : ∀ C ∈ P.parts, ∀ D ∈ P.parts, IsBadPair R ε C D →
+      blockEnergy R C D + g * ((C.card : ℝ) * (D.card : ℝ))
+        ≤ ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
+            blockEnergy R C' D') :
+    energyNum R P + g * badMassNum R ε P ≤ energyNum R P' := by
   classical
   have hpp : ∀ uv ∈ P.parts ×ˢ P.parts,
       blockEnergy R uv.1 uv.2
-        + (if IsBadPair R ε uv.1 uv.2 then ε ^ 4 * ((uv.1.card : ℝ) * (uv.2.card : ℝ))
+        + (if IsBadPair R ε uv.1 uv.2 then g * ((uv.1.card : ℝ) * (uv.2.card : ℝ))
           else 0)
       ≤ ∑ C' ∈ P'.parts.filter (· ⊆ uv.1), ∑ D' ∈ P'.parts.filter (· ⊆ uv.2),
           blockEnergy R C' D' := by
@@ -53,15 +57,13 @@ theorem energyNum_increment_of_badMassNum {P P' : Finpartition s} (hP' : P' ≤ 
     rw [Finset.mem_product] at huv
     obtain ⟨hC, hD⟩ := huv
     by_cases hbad : IsBadPair R ε uv.1 uv.2
-    · rw [if_pos hbad, ← mul_assoc]
-      obtain ⟨w, hlU, hrU⟩ := hwit uv.1 hC uv.2 hD hbad
-      exact blockEnergy_increment_refined R hε w
-        (isPartUnion_of_mem_of_le hP' hC) (isPartUnion_of_mem_of_le hP' hD) hlU hrU
+    · rw [if_pos hbad]
+      exact hpair uv.1 hC uv.2 hD hbad
     · rw [if_neg hbad, add_zero]
       exact blockEnergy_le_sum_refined hP' R hC hD
-  calc energyNum R P + ε ^ 4 * badMassNum R ε P
+  calc energyNum R P + g * badMassNum R ε P
       = ∑ uv ∈ P.parts ×ˢ P.parts, (blockEnergy R uv.1 uv.2
-          + (if IsBadPair R ε uv.1 uv.2 then ε ^ 4 * ((uv.1.card : ℝ) * (uv.2.card : ℝ))
+          + (if IsBadPair R ε uv.1 uv.2 then g * ((uv.1.card : ℝ) * (uv.2.card : ℝ))
             else 0)) := by
         unfold energyNum badMassNum
         rw [Finset.mul_sum, Finset.sum_filter, ← Finset.sum_add_distrib]
@@ -71,34 +73,67 @@ theorem energyNum_increment_of_badMassNum {P P' : Finpartition s} (hP' : P' ≤ 
         rw [Finset.sum_product]
         exact energyNum_eq_sum_refined R hP'
 
-/-- **Global increment, normalized.** If the normalized bad mass exceeds `ε`, a
-witness-resolving refinement raises the normalized energy by at least `ε⁵`. (The
-hypothesis `ε < badMass` with `0 < ε` forces a nonempty ground set — no separate
-`Nonempty` assumption.) -/
-theorem energy_increment_of_badMass {P P' : Finpartition s} (hP' : P' ≤ P) (hε : 0 < ε)
+/-- **Global increment, un-normalized.** A refinement resolving every bad pair's
+witness gains at least `ε⁴ · badMassNum` of energy. -/
+theorem energyNum_increment_of_badMassNum {P P' : Finpartition s} (hP' : P' ≤ P)
+    (hε : 0 < ε)
     (hwit : ∀ C ∈ P.parts, ∀ D ∈ P.parts, IsBadPair R ε C D →
-      ∃ w : NonuniformWitness R C D ε, IsPartUnion P' w.left ∧ IsPartUnion P' w.right)
+      ∃ w : NonuniformWitness R C D ε, IsPartUnion P' w.left ∧ IsPartUnion P' w.right) :
+    energyNum R P + ε ^ 4 * badMassNum R ε P ≤ energyNum R P' := by
+  refine energyNum_increment_of_pairwise_gain R hP' fun C hC D hD hbad => ?_
+  obtain ⟨w, hlU, hrU⟩ := hwit C hC D hD hbad
+  rw [← mul_assoc]
+  exact blockEnergy_increment_refined R hε w
+    (isPartUnion_of_mem_of_le hP' hC) (isPartUnion_of_mem_of_le hP' hD) hlU hrU
+
+/-- **Global increment from a per-pair gain, normalized.** If the normalized bad mass
+exceeds `ε`, a refinement with per-pair gain `g ≥ 0` raises the normalized energy by at
+least `g · ε`. (The hypothesis `ε < badMass` with `0 < ε` forces a nonempty ground set —
+no separate `Nonempty` assumption.) -/
+theorem energy_increment_of_pairwise_gain {P P' : Finpartition s} (hP' : P' ≤ P)
+    (hε : 0 < ε) {g : ℝ} (hg : 0 ≤ g)
+    (hpair : ∀ C ∈ P.parts, ∀ D ∈ P.parts, IsBadPair R ε C D →
+      blockEnergy R C D + g * ((C.card : ℝ) * (D.card : ℝ))
+        ≤ ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ P'.parts.filter (· ⊆ D),
+            blockEnergy R C' D')
     (hbm : ε < badMass R ε P) :
-    energy R P + ε ^ 5 ≤ energy R P' := by
+    energy R P + g * ε ≤ energy R P' := by
   have hs : (0 : ℝ) < (s.card : ℝ) ^ 2 := by
     by_contra hzero
     push Not at hzero
     have h0 : ((s.card : ℝ)) ^ 2 = 0 := le_antisymm hzero (by positivity)
     rw [badMass, h0, div_zero] at hbm
     linarith
-  have hmain := energyNum_increment_of_badMassNum R hP' hε hwit
+  have hmain := energyNum_increment_of_pairwise_gain R hP' hpair
   have hbmN : ε * (s.card : ℝ) ^ 2 < badMassNum R ε P := by
     rw [badMass, lt_div_iff₀ hs] at hbm
     linarith
-  have hgain : ε ^ 5 * (s.card : ℝ) ^ 2 ≤ ε ^ 4 * badMassNum R ε P := by
-    have hrw : ε ^ 5 * (s.card : ℝ) ^ 2 = ε ^ 4 * (ε * (s.card : ℝ) ^ 2) := by ring
+  have hgain : g * ε * (s.card : ℝ) ^ 2 ≤ g * badMassNum R ε P := by
+    have hrw : g * ε * (s.card : ℝ) ^ 2 = g * (ε * (s.card : ℝ) ^ 2) := by ring
     rw [hrw]
-    exact mul_le_mul_of_nonneg_left hbmN.le (by positivity)
-  have key : energyNum R P + ε ^ 5 * (s.card : ℝ) ^ 2 ≤ energyNum R P' := by
+    exact mul_le_mul_of_nonneg_left hbmN.le hg
+  have key : energyNum R P + g * ε * (s.card : ℝ) ^ 2 ≤ energyNum R P' := by
     linarith
   unfold energy
   rw [div_add' _ _ _ hs.ne']
   gcongr
+
+/-- **Global increment, normalized.** If the normalized bad mass exceeds `ε`, a
+witness-resolving refinement raises the normalized energy by at least `ε⁵`. -/
+theorem energy_increment_of_badMass {P P' : Finpartition s} (hP' : P' ≤ P) (hε : 0 < ε)
+    (hwit : ∀ C ∈ P.parts, ∀ D ∈ P.parts, IsBadPair R ε C D →
+      ∃ w : NonuniformWitness R C D ε, IsPartUnion P' w.left ∧ IsPartUnion P' w.right)
+    (hbm : ε < badMass R ε P) :
+    energy R P + ε ^ 5 ≤ energy R P' := by
+  have h := energy_increment_of_pairwise_gain R hP' hε (g := ε ^ 4) (by positivity)
+    (fun C hC D hD hbad => by
+      obtain ⟨w, hlU, hrU⟩ := hwit C hC D hD hbad
+      rw [← mul_assoc]
+      exact blockEnergy_increment_refined R hε w
+        (isPartUnion_of_mem_of_le hP' hC) (isPartUnion_of_mem_of_le hP' hD) hlU hrU)
+    hbm
+  have hrw : ε ^ 4 * ε = ε ^ 5 := by ring
+  rwa [hrw] at h
 
 /-- **The weak step.** A partition with normalized bad mass exceeding `ε` has a
 refinement gaining `ε⁵` of energy, with part count at most `k · 2^(2k)`. -/
