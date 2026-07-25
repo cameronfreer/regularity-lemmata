@@ -140,8 +140,8 @@ theorem pairCount_le_add :
 
 /-- **Multiplication-form density comparison.** Shrinking a rectangle to `A' ⊆ A`,
 `B' ⊆ B` moves the pair density by at most the discarded mass — stated multiplied through
-by the shrunken mass, so that no denominator positivity is needed (both sides are `0`
-when the shrunken rectangle is degenerate). -/
+by the shrunken mass, so that no denominator positivity is needed: when the shrunken
+rectangle is degenerate the left side is `0` and the right side is nonnegative. -/
 theorem abs_pairDensity_sub_mul_le (hA : A' ⊆ A) (hB : B' ⊆ B) :
     |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
       ≤ ((A \ A').card : ℝ) * (B.card : ℝ) + (A.card : ℝ) * ((B \ B').card : ℝ) := by

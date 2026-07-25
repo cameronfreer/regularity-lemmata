@@ -17,11 +17,12 @@ the per-pair bridge consumed by the global bad-mass increment.
 
 Both come in an `ε`-free general form — `blockEnergy_increment_general` and
 `blockEnergy_increment_refined_general` — in which the distinguished sub-rectangle is
-ARBITRARY and the gain is its own mass-weighted squared deviation from the parent
-density. The witness enters only through `NonuniformWitness.pow_four_mul_le`, the single
-lemma that converts the witness's two defining inequalities into the raw `ε⁴` gain. The
-general forms are what an approximate (equitabilised) refinement needs, since there the
-recovered sides are not witnesses for any prescribed tolerance.
+ARBITRARY and the gain is AT LEAST its own mass-weighted squared deviation from the
+parent density — an inequality, never an equality: the other three cells may contribute
+further variance. The witness enters only through `NonuniformWitness.pow_four_mul_le`,
+the single lemma that converts the witness's two defining inequalities into the raw `ε⁴`
+gain. The general forms are what an approximate (equitabilised) refinement needs, since
+there the recovered sides are not witnesses for any prescribed tolerance.
 
 The algebra is isolated in `energy_increment_abstract`: four cells refining a parent,
 with the distinguished (witness) cell's variance against the parent mean as the gain
@@ -72,9 +73,10 @@ theorem energy_increment_abstract {c11 c12 c21 c22 m11 m12 m21 m22 M c gain : �
     linarith [hg0]
 
 /-- **The general one-block energy increment.** Refining `(A, B)` by ANY nondegenerate
-sub-rectangle `(A', B')` gains exactly that cell's mass-weighted squared deviation from
-the parent density. No tolerance and no witness are involved: the two consumers below
-supply their own lower bound for the gain. -/
+sub-rectangle `(A', B')` gains AT LEAST that cell's mass-weighted squared deviation from
+the parent density; the remaining three cells may contribute more, so this is an
+inequality. No tolerance and no witness are involved: the two consumers below supply
+their own lower bound for the gain. -/
 theorem blockEnergy_increment_general [DecidableEq α] {A B A' B' : Finset α}
     (hA' : A' ⊆ A) (hB' : B' ⊆ B) (hpos : 0 < (A'.card : ℝ) * (B'.card : ℝ)) :
     blockEnergy R A B
@@ -196,8 +198,8 @@ theorem blockEnergy_increment [DecidableEq α] {A B : Finset α}
   linarith
 
 /-- **The general per-pair bridge**: any nondegenerate sub-rectangle whose sides — and
-whose ambient block — are part unions of `P'` transports its own weighted squared
-deviation to the summed energies of the refined sub-blocks. The `ε`-free form: the
+whose ambient block — are part unions of `P'` transports at least its own weighted
+squared deviation to the summed energies of the refined sub-blocks. The `ε`-free form: the
 consumer chooses the sub-rectangle and supplies the gain bound. -/
 theorem blockEnergy_increment_refined_general [DecidableEq α] {s : Finset α}
     {P' : Finpartition s} (R : α → α → Prop) [DecidableRel R] {C D A' B' : Finset α}

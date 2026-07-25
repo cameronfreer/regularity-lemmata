@@ -32,7 +32,10 @@ estimates only afterwards.
    the same after filtering by any subset of the parent. These keep the dependent-proof
    bookkeeping of `Finpartition.bind` out of every later sum.
 2. Per-atom remainder ≤ `chunkSize P`; a witness side is a union of its atoms; at most
-   `2 ^ (2·#P.parts)` atoms contribute; hence the witness-side remainder bound.
+   `2 ^ (2·#P.parts)` atoms contribute; hence the witness-side remainder bound. Then
+   `chunkWitnessRemainder_mul_pow_le_card_part`: the remainder is smaller than every
+   parent cell by the whole equitabilisation factor `4^(n·2^(2n))` — the exact
+   structural inequality that discharges the gain theorem's numerical hypotheses.
 3. `innerPartUnion Q W` (`Partition/Basic.lean`) is the recovered side: the union of the
    chunks contained in `W`. It is a part union of `Q` by construction, so it can be fed
    straight into the increment bridge.
@@ -133,6 +136,42 @@ most `chunkSize P`. Deliberately unsharpened — halving the atom count would no
 what step 4 needs. -/
 def chunkWitnessRemainder (P : Finpartition s) : ℕ :=
   2 ^ (2 * P.parts.card) * chunkSize P
+
+theorem chunkWitnessRemainder_eq_zero_iff : chunkWitnessRemainder P = 0 ↔ chunkSize P = 0 := by
+  have h : (2 : ℕ) ^ (2 * P.parts.card) ≠ 0 := (pow_pos (by norm_num : (0 : ℕ) < 2) _).ne'
+  rw [chunkWitnessRemainder, Nat.mul_eq_zero]
+  tauto
+
+/-- **The remainder-to-cell inequality.** The witness-side remainder is smaller than every
+parent cell by the full equitabilisation factor: `r · 4^(n·2^(2n)) ≤ |C|`, because
+`r · 4^(n·2^(2n)) = chunkSize P · familyChunksPerPart n`, which is what one parent cell's
+share of the host is built from.
+
+This is the exact structural bridge between the remainder and the cell sizes: it is what
+lets a caller discharge the `r < ε|C|` and density-error hypotheses of the gain theorem
+below, since the ratio `r / |C|` is at most `4^(−n·2^(2n))`. It chooses no `δ`, no
+retained fraction, and no threshold — those are step 4's, where this is combined with
+`le_pow_mul_of_familyInitialBound_le`. -/
+theorem chunkWitnessRemainder_mul_pow_le_card_part (hP : P.IsEquipartition) {C : Finset α}
+    (hC : C ∈ P.parts) :
+    chunkWitnessRemainder P * 4 ^ (P.parts.card * 2 ^ (2 * P.parts.card)) ≤ C.card := by
+  have hfactor : chunkWitnessRemainder P * 4 ^ (P.parts.card * 2 ^ (2 * P.parts.card))
+      = chunkSize P * familyChunksPerPart P.parts.card := by
+    rw [chunkWitnessRemainder, familyChunksPerPart]
+    ring
+  rw [hfactor]
+  calc chunkSize P * familyChunksPerPart P.parts.card
+      ≤ chunkSize P * familyChunksPerPart P.parts.card + chunkRem P := Nat.le_add_right _ _
+    _ = s.card / P.parts.card := chunkSize_mul_add_chunkRem
+    _ ≤ C.card := hP.average_le_card_part hC
+
+/-- The real-cast form of the remainder-to-cell inequality, the shape the numerical
+hypotheses of the gain theorem are stated in. -/
+theorem chunkWitnessRemainder_mul_pow_le_card_part_cast (hP : P.IsEquipartition)
+    {C : Finset α} (hC : C ∈ P.parts) :
+    (chunkWitnessRemainder P : ℝ) * 4 ^ (P.parts.card * 2 ^ (2 * P.parts.card))
+      ≤ (C.card : ℝ) := by
+  exact_mod_cast chunkWitnessRemainder_mul_pow_le_card_part hP hC
 
 /-- **Step 4: the witness-side remainder bound.** A chosen witness side is, up to
 `chunkWitnessRemainder P` elements, a union of chunks. This is the exact sense in which
@@ -357,8 +396,9 @@ example :
         * ((((Finset.univ : Finset (Fin 3)) \ {1, 2}).card : ℝ)) :=
   abs_pairDensity_sub_mul_le (by decide) (by decide)
 
--- The general increment with NO witness: any nondegenerate sub-rectangle gains its own
--- weighted squared deviation. Here the sub-rectangle `{0} ×ˢ {1,2}` of the full square.
+-- The general increment with NO witness: any nondegenerate sub-rectangle gains at least
+-- its own weighted squared deviation (the other three cells may add more). Here the
+-- sub-rectangle `{0} ×ˢ {1,2}` of the full square.
 example :
     blockEnergy (fun a b : Fin 3 => a < b) Finset.univ Finset.univ
         + ((({0} : Finset (Fin 3)).card : ℝ) * (({1, 2} : Finset (Fin 3)).card : ℝ))
@@ -376,11 +416,11 @@ example :
 example (ε mC mD : ℝ) : (ε * mC - 0) * (ε * mD - 0) * (ε - 0) ^ 2 = ε ^ 4 * mC * mD := by
   ring
 
--- Consistently, the remainder vanishes exactly when the common chunk size does (the
--- degenerate regime, where the chunks are singletons and do refine the atoms).
-example (P : Finpartition (Finset.univ : Finset (Fin 4))) (h : chunkSize P = 0) :
-    chunkWitnessRemainder P = 0 := by
-  rw [chunkWitnessRemainder, h, Nat.mul_zero]
+-- Consistently, the remainder vanishes exactly when the common chunk size does — both
+-- directions (the degenerate regime, where the chunks are singletons and DO refine the
+-- atoms).
+example (P : Finpartition (Finset.univ : Finset (Fin 4))) :
+    chunkWitnessRemainder P = 0 ↔ chunkSize P = 0 := chunkWitnessRemainder_eq_zero_iff
 
 -- The degenerate regime the gain theorem excludes: if the remainder swallows the witness
 -- lower bound (`r ≥ ε|C|`), the recovered side may be empty and no gain survives. The
