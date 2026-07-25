@@ -686,9 +686,18 @@ an owner decision recorded here):
   refinement that is again an equipartition, has exactly `familyStepBound #P.parts` parts,
   and gains `ε⁵/5` of family energy (`exists_familyEnergy_increment_equitable`).
 
-The step-5 fuel is ANTICIPATED to be `⌈5K/ε⁵⌉₊ = ⌈K/(c·ε⁵)⌉₊`, from the family-energy
-ceiling `K` and the gain above. It is **not yet proved**, and neither is the final
-part-count bound; both are step 5 and are deliberately absent from the library until then.
+**Step 5 proved (2026-07-25).** The fuel is `familyFuel K ε = ⌈5K/ε⁵⌉₊ = ⌈K/(c·ε⁵)⌉₊`,
+from the family-energy ceiling `K` and the gain above, and the final part-count bound is
+`familyRegularityBound K ε l = familyRegularityBoundAux (familyFuel K ε)
+(familyInitialBound 100 ε l)` — host-independent, mentioning only `K`, `ε`, and `l`. The
+summit `exists_familyRegular_equipartition` delivers, for `0 < ε ≤ 1`, an equipartition
+that is `ε`-regular for every relation of the family with `l ≤ #parts ≤ familyRegularityBound
+K ε l`.
+
+Its host requirement is `familyStepBound (familyRegularityBound K ε l) ≤ #s` — room to run
+one more step at the worst part count, which is what the exhausted-budget argument needs.
+That is the `N₀` obligation step 6 must meet; it is stated, never hidden, and a permanent
+test records that it fails on small hosts. No tower-type claim is made or implied.
 
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
