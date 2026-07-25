@@ -668,6 +668,28 @@ theorem-level check that `ρ` is defined before — and does not mention — the
 part-count bound. 11B and Unit 7 stay closed until the supplier theorem is actually
 inhabited.
 
+**Supplier constants frozen (2026-07-25 review, step 4 proved).** The numerical schedule
+left open by steps 2–3 is now closed, and these values are frozen (changing them requires
+an owner decision recorded here):
+
+- `familyChunkThreshold = 100` — the K-independent threshold `C` that `familyInitialBound`
+  is instantiated at. Its content, proved: at every part count at or above the floor,
+  `100 · r ≤ ε⁵ · |C|` for every cell, where `r` is the per-witness-side chunk remainder.
+- `familyChunkDensityError ε = ε / 2` — the density error `δ` charged for replacing a
+  witness side by the chunks it contains.
+- `familyRetainedFraction = 1 / 5` — the retained fraction `c`. **Uniform**: independent
+  of the relation, the partition, the cells, the host, and `ε`. The proof delivers
+  `9801/40000 ≈ 0.245`, so `1/5` is claimed with slack; the constants are robust, not
+  tuned. A `c` depending on output complexity is the circularity this route rejects, so
+  the uniformity is guarded by a permanent test.
+- **The one-step gain is therefore `ε⁵/5`**: a non-family-regular equipartition admits a
+  refinement that is again an equipartition, has exactly `familyStepBound #P.parts` parts,
+  and gains `ε⁵/5` of family energy (`exists_familyEnergy_increment_equitable`).
+
+The step-5 fuel is ANTICIPATED to be `⌈5K/ε⁵⌉₊ = ⌈K/(c·ε⁵)⌉₊`, from the family-energy
+ceiling `K` and the gain above. It is **not yet proved**, and neither is the final
+part-count bound; both are step 5 and are deliberately absent from the library until then.
+
 **Non-goals.** Patterns on carriers other than `Fin 3` (even two-vertex removal);
 languages varying after `ε` or moduli depending on the family (the language is fixed
 before `ε`; the family is quantified after `ε` and may be arbitrary);

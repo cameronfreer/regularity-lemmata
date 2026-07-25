@@ -22,8 +22,9 @@ closes the numerics, in the order the constants actually depend on each other:
 2. **The density error is fixed**: `familyChunkDensityError ε = ε/2`, and the retained
    fraction `familyRetainedFraction = 1/5` is proved uniform — independent of the
    relation, the partition, the cells, the host, and `ε` itself. Both drop out of one
-   elementary numerical lemma (`chunk_gain_numerics`), which discharges all four
-   hypotheses of `blockEnergy_equitableIncrement_gain_of_retained` at once.
+   elementary numerical lemma (`chunk_gain_numerics`), whose conclusion IS the
+   hypothesis bundle of `blockEnergy_equitableIncrement_gain_of_retained` — stated at the
+   named constants, which are unfolded nowhere else.
 3. **The per-pair gain is summed**: `energy_equitableIncrement_increment` — on a
    partition whose bad mass exceeds `ε`, the equitabilised refinement of the offending
    relation raises that relation's normalized energy by `(1/5)·ε⁵`. This is step 3's
@@ -100,18 +101,25 @@ theorem chunkThreshold_mul_chunkWitnessRemainder_le (hP : P.IsEquipartition) (h�
 /-! ### Step 2: the density error and the retained fraction -/
 
 /-- **The numerical core of the step.** From `100·r ≤ ε⁵·a` and `100·r ≤ ε⁵·b` on the two
-(nonempty) cells, with `0 < ε ≤ 1`, all four hypotheses of
-`blockEnergy_equitableIncrement_gain_of_retained` hold for `δ = ε/2` and `c = 1/5`:
-the remainder is dominated by both witness lower bounds; the discarded mass is within
-`δ` of the recovered rectangle; and the degraded product still retains a fifth of the raw
-gain. Every margin is wide — `9801/40000 ≥ 1/5` for the last — so the constants are
-robust, not tuned. -/
+(nonempty) cells, with `0 < ε ≤ 1`, EVERY hypothesis of
+`blockEnergy_equitableIncrement_gain_of_retained` holds at the frozen constants
+`familyChunkDensityError` and `familyRetainedFraction`: the error is a legitimate
+tolerance; the remainder is dominated by both witness lower bounds; the discarded mass is
+within the error of the recovered rectangle; and the degraded product still retains a
+fifth of the raw gain. The conclusion is exactly that theorem's hypothesis bundle, so the
+call site needs no glue.
+
+This is the ONLY place the two constants are unfolded. Every margin is wide —
+`9801/40000 ≥ 1/5` for the last — so they are robust, not tuned. -/
 private theorem chunk_gain_numerics {a b r ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1)
-    (ha : 0 < a) (hb : 0 < b) (_hr0 : 0 ≤ r)
+    (ha : 0 < a) (hb : 0 < b)
     (hra : 100 * r ≤ ε ^ 5 * a) (hrb : 100 * r ≤ ε ^ 5 * b) :
-    r < ε * a ∧ r < ε * b
-      ∧ r * b + a * r ≤ ε / 2 * ((ε * a - r) * (ε * b - r))
-      ∧ 1 / 5 * (ε ^ 4 * a * b) ≤ (ε * a - r) * (ε * b - r) * (ε - ε / 2) ^ 2 := by
+    0 ≤ familyChunkDensityError ε ∧ familyChunkDensityError ε ≤ ε
+      ∧ r < ε * a ∧ r < ε * b
+      ∧ r * b + a * r ≤ familyChunkDensityError ε * ((ε * a - r) * (ε * b - r))
+      ∧ familyRetainedFraction * (ε ^ 4 * a * b)
+          ≤ (ε * a - r) * (ε * b - r) * (ε - familyChunkDensityError ε) ^ 2 := by
+  rw [familyChunkDensityError, familyRetainedFraction]
   have hεa : 0 < ε * a := mul_pos hε ha
   have hεb : 0 < ε * b := mul_pos hε hb
   have hab : 0 < a * b := mul_pos ha hb
@@ -126,8 +134,8 @@ private theorem chunk_gain_numerics {a b r ε : ℝ} (hε : 0 < ε) (hε1 : ε �
   have hApos : 0 < ε * a - r := by linarith
   have hAB : 99 * (ε * a) / 100 * (99 * (ε * b) / 100) ≤ (ε * a - r) * (ε * b - r) :=
     mul_le_mul hA hB (by positivity) (le_of_lt hApos)
-  refine ⟨by linarith, by linarith, ?_, ?_⟩
-  · -- The discarded mass is within `δ = ε/2` of the recovered rectangle.
+  refine ⟨by linarith, by linarith, by linarith, by linarith, ?_, ?_⟩
+  · -- The discarded mass is within the density error of the recovered rectangle.
     have h1 : r * b ≤ ε ^ 5 * a / 100 * b := mul_le_mul_of_nonneg_right (by linarith) hb.le
     have h2 : a * r ≤ a * (ε ^ 5 * b / 100) := mul_le_mul_of_nonneg_left (by linarith) ha.le
     have hlhs : r * b + a * r ≤ ε ^ 5 * (a * b) / 50 := by nlinarith
@@ -152,8 +160,9 @@ private theorem chunk_gain_numerics {a b r ε : ℝ} (hε : 0 < ε) (hε1 : ε �
 /-! ### Step 3: the per-pair gain, summed -/
 
 /-- **The per-pair gain with the constants fixed**: a bad ordered pair contributes
-`(1/5)·ε⁴·|C||D|` across the equitabilised refinement. All four numerical hypotheses of
-step 3's loss theorem are discharged from the chunk condition alone. -/
+`(1/5)·ε⁴·|C||D|` across the equitabilised refinement. Every numerical hypothesis of
+step 3's loss theorem is discharged from the chunk condition alone, at the named
+constants. -/
 theorem blockEnergy_equitableIncrement_retained (hP : P.IsEquipartition) (hε : 0 < ε)
     (hε1 : ε ≤ 1) {l : ℕ}
     (hfloor : familyInitialBound familyChunkThreshold ε l ≤ P.parts.card)
@@ -169,11 +178,10 @@ theorem blockEnergy_equitableIncrement_retained (hP : P.IsEquipartition) (hε : 
   have hrC := chunkThreshold_mul_chunkWitnessRemainder_le hP hε hfloor hC
   have hrD := chunkThreshold_mul_chunkWitnessRemainder_le hP hε hfloor hD
   rw [familyChunkThreshold] at hrC hrD
-  obtain ⟨h1, h2, h3, h4⟩ := chunk_gain_numerics hε hε1 hCpos hDpos
-    (Nat.cast_nonneg (chunkWitnessRemainder P)) hrC hrD
+  obtain ⟨hd0, hdε, h1, h2, h3, h4⟩ := chunk_gain_numerics hε hε1 hCpos hDpos hrC hrD
   have hmain := blockEnergy_equitableIncrement_gain_of_retained R ε hP hC hD hbad
-    (δ := ε / 2) (by linarith) (by linarith) h1 h2 (by linarith [h3])
-    (c := familyRetainedFraction) (by rw [familyRetainedFraction]; linarith [h4])
+    (δ := familyChunkDensityError ε) hd0 hdε h1 h2 h3
+    (c := familyRetainedFraction) h4
   have hrw : familyRetainedFraction * (ε ^ 4 * (C.card : ℝ) * (D.card : ℝ))
       = familyRetainedFraction * ε ^ 4 * ((C.card : ℝ) * (D.card : ℝ)) := by ring
   rwa [hrw] at hmain
