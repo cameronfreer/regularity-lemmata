@@ -28,6 +28,16 @@ comparability factor `Λ` in both within-piece terms (gate G-U2), and the frozen
 design trims comparable pieces to equal size FIRST via `Graph/UniformSlicing.lean`.
 The `α·m ≤ |X∩Aᵢ|` cutoff is inclusive (gate G-U4), matching `IsUniformPair`.
 
+**A single common center is a genuine hypothesis too, and it is what breaks the
+DIRECTED self-union composition** (gate G-U5, 2026-07-26): `hclose` demands one `d`
+for EVERY ordered pair, while the density-bucket extraction
+(`Finite/DensityBuckets.lean`) aligns a forward class and a reverse class which by
+gate G-U3 need not agree. For the strict order relation they are `1` and `0`, no
+center is within `α < 1/2` of both, and indeed no positive-linear-size self-uniform
+subset exists at tolerance `1/4`. The theorems in this file are unaffected and
+remain valid — what fails is the proposed route (b) step 1 composition for arbitrary
+directed relations; see `ARCHITECTURE.md`.
+
 Provenance: this adapts the Lemma 3.6 self-regular-subset construction of
 D. Conlon and J. Fox, *Graph removal lemmas* (arXiv:1211.3487, §3.2) to directed
 finite binary palettes; the piece supplier follows the weaker
@@ -154,6 +164,103 @@ example : ¬ (|pairDensity (fun a b : Fin 4 => a ≠ 0 ∧ b ≠ 0)
 example : pairCount (fun a b : Fin 2 => a = 0 ∧ b = 1) {0} {1} = 1 := by decide
 
 example : pairCount (fun a b : Fin 2 => a = 0 ∧ b = 1) {1} {0} = 0 := by decide
+
+-- **G-U5: the directed self-union composition is FALSE.** The union theorem's `hclose`
+-- demands ONE center `d` for EVERY ordered pair; the density-bucket extraction supplies a
+-- forward class and a reverse class, and by G-U3 these need not agree. Strict order on
+-- `Fin 4` with the four singleton pieces is decisive: the pieces are equal-sized,
+-- pairwise disjoint, and PERFECTLY uniform in both directions (below), the forward class
+-- is `{1}` and the reverse class is `{0}` — so Ramsey alignment succeeds — yet the union
+-- is not `1/4`-uniform with itself, and `isUniformPair_self_union` cannot be instantiated
+-- because no `d` is within `α` of both `1` and `0`.
+--
+-- The obstruction is not a small-host artifact: for `<` on any linearly ordered `W` with
+-- `|W| ≥ 2`, `d(W, W) = (|W|-1)/(2|W|) ≤ 1/2` while the lower and upper halves have
+-- density `1`, so NO positive-linear-size self-uniform subset exists at tolerance `1/4`.
+-- The `Fin 8` instance below records that the gap does not close as the host grows.
+
+/-- Singletons are perfectly uniform: at a positive tolerance the only admissible test
+sets are the singletons themselves. -/
+private theorem isUniformPair_singleton {W : Type*} [DecidableEq W] {R : W → W → Prop}
+    [DecidableRel R] (x y : W) {α : ℝ} (hα : 0 < α) : IsUniformPair R {x} {y} α := by
+  intro X' hX' Y' hY' hXc hYc
+  simp only [Finset.card_singleton, Nat.cast_one, mul_one] at hXc hYc
+  have hX : X' = {x} := by
+    rcases Finset.subset_singleton_iff.mp hX' with rfl | h
+    · rw [Finset.card_empty] at hXc
+      exact absurd hXc (by push_cast; linarith)
+    · exact h
+  have hY : Y' = {y} := by
+    rcases Finset.subset_singleton_iff.mp hY' with rfl | h
+    · rw [Finset.card_empty] at hYc
+      exact absurd hYc (by push_cast; linarith)
+    · exact h
+  rw [hX, hY, sub_self, abs_zero]
+  exact hα.le
+
+-- The four singleton pieces are equal-sized, disjoint, and pairwise uniform in BOTH
+-- directions at every positive tolerance.
+example (α : ℝ) (hα : 0 < α) (i j : Fin 4) :
+    IsUniformPair (fun a b : Fin 4 => a < b) {i} {j} α := isUniformPair_singleton i j hα
+
+example (i j : Fin 4) (hij : i ≠ j) : Disjoint ({i} : Finset (Fin 4)) {j} := by
+  simpa using hij
+
+example (i : Fin 4) : ({i} : Finset (Fin 4)).card = 1 := Finset.card_singleton i
+
+-- Forward class `1`, reverse class `0`: alignment succeeds, with NO common center.
+example : pairDensity (fun a b : Fin 4 => a < b) {0} {1} = 1 := by
+  rw [pairDensity_eq_count_div,
+    show pairCount (fun a b : Fin 4 => a < b) {0} {1} = 1 from by decide]
+  norm_num
+
+example : pairDensity (fun a b : Fin 4 => a < b) {1} {0} = 0 := by
+  rw [pairDensity_eq_count_div,
+    show pairCount (fun a b : Fin 4 => a < b) {1} {0} = 0 from by decide]
+  norm_num
+
+-- No center is within `α < 1/2` of both orientation classes.
+example {d α : ℝ} (hα : α < 1 / 2) (h1 : |(1 : ℝ) - d| ≤ α) (h0 : |(0 : ℝ) - d| ≤ α) :
+    False := by
+  rw [abs_le] at h1 h0
+  linarith [h1.1, h1.2, h0.1, h0.2]
+
+-- The pieces do union to the whole host…
+example : (Finset.univ.biUnion fun i : Fin 4 => ({i} : Finset (Fin 4))) = Finset.univ := by
+  decide
+
+-- …and that union is NOT `1/4`-uniform with itself: the lower and upper halves are
+-- `1/4`-large and have density `1` against the host density `6/16 = 3/8`.
+example : ¬ IsUniformPair (fun a b : Fin 4 => a < b)
+    (Finset.univ : Finset (Fin 4)) Finset.univ (1 / 4 : ℝ) := by
+  intro h
+  have h3 := h (X' := {0, 1}) (Finset.subset_univ _) (Y' := {2, 3}) (Finset.subset_univ _)
+    (by norm_num [Finset.card_univ]) (by norm_num [Finset.card_univ])
+  rw [pairDensity_eq_count_div, pairDensity_eq_count_div] at h3
+  norm_num [show pairCount (fun a b : Fin 4 => a < b) {0, 1} {2, 3} = 4 from by decide,
+    show pairCount (fun a b : Fin 4 => a < b)
+      (Finset.univ : Finset (Fin 4)) Finset.univ = 6 from by decide,
+    show ({0, 1} : Finset (Fin 4)).card = 2 from by decide,
+    show ({2, 3} : Finset (Fin 4)).card = 2 from by decide,
+    Finset.card_univ] at h3
+
+-- The same failure on a larger host: `d(univ, univ) = 28/64 = 7/16`, halves at density
+-- `1`. Growing the host does not close the gap.
+example : ¬ IsUniformPair (fun a b : Fin 8 => a < b)
+    (Finset.univ : Finset (Fin 8)) Finset.univ (1 / 4 : ℝ) := by
+  intro h
+  have h3 := h (X' := {0, 1, 2, 3}) (Finset.subset_univ _) (Y' := {4, 5, 6, 7})
+    (Finset.subset_univ _)
+    (by norm_num [Finset.card_univ, show ({0, 1, 2, 3} : Finset (Fin 8)).card = 4 from by decide])
+    (by norm_num [Finset.card_univ, show ({4, 5, 6, 7} : Finset (Fin 8)).card = 4 from by decide])
+  rw [pairDensity_eq_count_div, pairDensity_eq_count_div] at h3
+  norm_num [show pairCount (fun a b : Fin 8 => a < b) {0, 1, 2, 3} {4, 5, 6, 7} = 16 from
+      by decide,
+    show pairCount (fun a b : Fin 8 => a < b)
+      (Finset.univ : Finset (Fin 8)) Finset.univ = 28 from by decide,
+    show ({0, 1, 2, 3} : Finset (Fin 8)).card = 4 from by decide,
+    show ({4, 5, 6, 7} : Finset (Fin 8)).card = 4 from by decide,
+    Finset.card_univ] at h3
 
 -- G-U4: the largeness cutoff is INCLUSIVE — a test set of size exactly `ε·|A|`
 -- enters the regularity-controlled case (matching `IsUniformPair`'s inclusive
