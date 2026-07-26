@@ -610,10 +610,24 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    because its solution may require clone or proxy coarse cells, which would change the
    representative event index**): prove that the proposed diagonal rounding makes every
    surviving induced pattern admit a distinct-coarse-cell realization, or else supply a
-   separate original-copy lower bound for repeated-cell realizations. Until this has a
-   credible statement, the retirement of repeated-cell counting is PROVISIONAL — an edit
-   bound on `C × C` changes which pattern a within-cell triple induces but does not stop
-   it inducing one (gate G4).
+   separate original-copy lower bound for repeated-cell realizations. The retirement of
+   repeated-cell counting is PROVISIONAL — an edit bound on `C × C` changes which pattern
+   a within-cell triple induces but does not stop it inducing one (gate G4).
+
+   **Statement and initial falsification gates landed 2026-07-27**
+   (`Relational/Transversalization.lean`): `IsTransversalizable N Q` — every three-vertex
+   pattern realized on the ground set is realized on a transversal cell triple — stated on
+   the existing exact `globalInducedCount = transversalInducedCount + nontransversal`
+   decomposition, with the consumption form the freeness proof would call, the G4
+   configuration shown to violate it, three-cell necessity proved (any pattern occurring
+   on the ground set forces `3 ≤ #Q.parts`), and satisfiability shown only on singleton
+   cells. **The CONSTRUCTION remains open**: no cleaning is proved to achieve the
+   certificate, so `11B` stays closed. The route is not rejected; the sanctioned next probe
+   is the narrowly combinatorial orientation/profile lemma behind the monochromatic-triple
+   variant (three cells of equal vertex profile including loop data, a non-symmetric
+   two-way palette, canonical cell-pair orientation against the internal vertex order,
+   equality of the resulting three-vertex models) — Ramsey extraction only after that
+   lemma works, and no rounding or selection before it.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
