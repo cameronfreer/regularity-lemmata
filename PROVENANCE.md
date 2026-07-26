@@ -116,7 +116,11 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   strong cylinder regularity lemma (Lemma 3.5), the quantitative bounds of Lemmas
   3.6–3.9 (the piece supplier here follows the weaker Szemerédi-plus-independent-set
   route the survey mentions, not their improved cylinder-lemma bound — no tower-type
-  bound is claimed), Lemma 3.7's partition into self-regular sets (unless later
+  bound is claimed; that weaker route is `Finite/IndependentSet.lean` for the greedy
+  extraction under a degree cap, `Graph/PieceExtraction.lean` for the equal-size
+  weighted-to-unweighted conversion and the trimming, and `Graph/PieceSchedule.lean`
+  for the acyclic parameter schedule and the supplier summit, over this repository's
+  own equitable finite-family regularity engine rather than a cylinder lemma), Lemma 3.7's partition into self-regular sets (unless later
   needed), arbitrary-size induced counting, their Theorem 3.1 for arbitrary `H`, or
   the infinite removal lemma.
 - Y. Dillies, B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022.
