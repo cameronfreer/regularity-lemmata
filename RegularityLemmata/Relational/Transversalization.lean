@@ -17,8 +17,10 @@ proves no cleaning achieves the certificate** — that is the open mathematics.
 
 ## The certificate
 
-`IsTransversalizable N Q`: every three-vertex pattern realized ANYWHERE in the cleaned
-model `N` is realized on a transversal cell triple of `Q`. Stated on the existing exact
+`IsTransversalizable N Q`: every three-vertex pattern realized anywhere **on the ground
+set `s`** — `globalInducedCount` sums over cell triples of `Q`, so it sees only embeddings
+whose images lie in `s`, not all of `V` — is realized on a transversal cell triple of `Q`.
+Phase 11 instantiates `s = univ`, where the two coincide. Stated on the existing exact
 decomposition `globalInducedCount = transversalInducedCount + nontransversal`
 (`Relational/DiagonalGate.lean`), it is
 
@@ -40,10 +42,11 @@ transversal, nor the same triple, nor any statement about patterns absent from `
   every induced path copy lies inside one cell fails it outright. So the certificate must
   be EARNED by the diagonal rounding; it cannot be assumed.
 * **It forces at least three cells.** With fewer than three cells there are no transversal
-  triples at all, so the certificate degenerates to "`N` realizes no three-vertex pattern"
-  — false on any host with three vertices carrying a pattern. This is the small
-  one- or two-cell test: the route needs `3 ≤ #Q.parts`, which the equipartition seed
-  supplies, and no cleaning can rescue a one- or two-cell partition.
+  triples at all, so the certificate degenerates to "`N` realizes no three-vertex pattern
+  on `s`". Contrapositively, once ANY three-vertex pattern occurs on `s` the certificate
+  forces `3 ≤ #Q.parts` (`three_le_card_parts_of_isTransversalizable`) — no cleaning
+  rescues a one- or two-cell partition in that case, and the equipartition seed supplies
+  the three cells. Ground sets too small to carry a pattern are the legitimate exception.
 * **It is satisfiable** (singleton cells): when every cell is a singleton no repeated-cell
   triple admits an injective map, so global and transversal counts agree identically. The
   predicate is therefore not vacuous — but the witness is the degenerate partition that
@@ -78,9 +81,11 @@ variable {L : FirstOrder.Language} [FiniteRelational L] {V : Type*} [DecidableEq
 
 /-! ### The certificate -/
 
-/-- **The transversalization certificate**: every three-vertex pattern realized anywhere in
-`N` is realized on a triple of DISTINCT cells of `Q`. This is the obligation that makes the
-retirement of repeated-cell counting sound; nothing in this file proves any cleaning
+/-- **The transversalization certificate**: every three-vertex pattern realized anywhere on
+the ground set `s` is realized on a triple of DISTINCT cells of `Q`. Note the scope:
+`globalInducedCount` sums over cell triples of `Q`, hence counts only embeddings landing in
+`s` — Phase 11 uses `s = univ`, where that is all of `N`. This is the obligation that makes
+the retirement of repeated-cell counting sound; nothing in this file proves any cleaning
 achieves it. -/
 def IsTransversalizable (N : FiniteRelModel L V) (Q : Finpartition s) : Prop :=
   ∀ P : FiniteRelModel L (Fin 3),
@@ -135,8 +140,7 @@ theorem transversalCellTriples_eq_empty_of_card_lt_three (Q : Finpartition s)
   omega
 
 /-- **The one- or two-cell test.** Below three cells the certificate degenerates: it asserts
-that `N` realizes NO three-vertex pattern anywhere. No cleaning can rescue such a
-partition, so the route requires `3 ≤ #Q.parts` — which the equipartition seed supplies. -/
+that no three-vertex pattern is realized on `s` at all. -/
 theorem globalInducedCount_eq_zero_of_card_lt_three (h : IsTransversalizable N Q)
     (hcard : Q.parts.card < 3) (P : FiniteRelModel L (Fin 3)) :
     globalInducedCount P N Q = 0 := by
@@ -145,6 +149,19 @@ theorem globalInducedCount_eq_zero_of_card_lt_three (h : IsTransversalizable N Q
   have := h P hpos
   rw [transversalInducedCount, transversalCellTriples_eq_empty_of_card_lt_three Q hcard,
     Finset.sum_empty] at this
+  omega
+
+/-- **Three-cell necessity, positively.** If any three-vertex pattern occurs on `s`, the
+certificate forces at least three cells. So no cleaning rescues a one- or two-cell
+partition — except on ground sets too small to carry a pattern at all, which is the
+legitimate exception. -/
+theorem three_le_card_parts_of_isTransversalizable (h : IsTransversalizable N Q)
+    (hP : 0 < globalInducedCount P N Q) : 3 ≤ Q.parts.card := by
+  by_contra hcard
+  have ht := h P hP
+  rw [transversalInducedCount,
+    transversalCellTriples_eq_empty_of_card_lt_three Q (by omega),
+    Finset.sum_empty] at ht
   omega
 
 /-! ### The certificate is satisfiable (singleton cells) -/
@@ -209,8 +226,8 @@ example : ¬ IsTransversalizable (ofSimpleGraph pathHost4) cellsG4 := by
       cellsG4 = 0 := by decide
   omega
 
--- The two-cell partition has exactly two cells, so it is also excluded by the structural
--- three-cell requirement — the same failure seen from the cell-count side.
+-- Seen from the cell-count side: the host does carry a pattern on `s`, so the certificate
+-- would force three cells, and this partition has two.
 example : cellsG4.parts.card = 2 := twoPartition_card
 
 example : transversalCellTriples cellsG4 = (∅ : Finset (Fin 3 → Finset (Fin 4))) :=
