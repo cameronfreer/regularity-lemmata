@@ -76,9 +76,11 @@ Lean `Prop` placeholders.
 - **Relational induced removal**: fixed-pattern and family induced removal for
   three-vertex patterns over the binary-palette counting layer. The scope and
   normalization are frozen in the Phase 11 section below; the exact quantitative
-  signatures remain provisional. Since the 2026-07-26 re-freeze they wait on the
-  transversal rounding certificate (route (b) ladder step 5), not on repeated-cell
-  counting: repeated coarse cells are charged as an edit cost rather than counted.
+  signatures remain provisional. Since the 2026-07-26 re-freeze they wait on TWO route (b)
+  ladder gates: the transversalization gate (step 2) and the transversal rounding
+  certificate (step 5). Repeated-cell counting is only PROVISIONALLY retired — the
+  intended edit charge on repeated coarse cells does not by itself show those cells
+  induce no surviving pattern, which is exactly what step 2 must settle.
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -417,25 +419,30 @@ degenerate no-symbol case). Pairs involving absorbed vertices are classified usi
 their **post-absorption proxy labels**: the proxy cell's coarse block pair supplies
 the density that controls their keep/recolor decision, never the original small or
 exceptional cell. (3) Off-diagonal pair-palette cleaning respecting the
-reversal law: keep a pair whose existing palette has COARSE block density `≥ θ`,
-otherwise recolor to the coarse-majority palette
-`c(C,D) ∈ argmax_c pairDensity (HasBinaryPairPalette M c) C D`, with
+reversal law (**representative-driven since 2026-07-26 — both the threshold and the
+replacement palette**): keep a pair whose existing palette has REPRESENTATIVE block
+density `≥ θ`, otherwise recolor to the REPRESENTATIVE-majority palette
+`c(C,D) ∈ argmax_c pairDensity (HasBinaryPairPalette M c) (rep C) (rep D)`, with
 `c(D,C) = swap (c(C,D))` holding by construction via a canonical orientation of
-unordered coarse-cell pairs. For a diagonal coarse pair the recolor target is a
+unordered coarse-cell pairs. The replacement must NOT be the coarse-majority palette:
+on a deviant pair that palette can have ZERO representative density, which destroys the
+freeness certificate even though its edit cost is duly charged. For a diagonal coarse pair the recolor target is a
 palette ORBIT `{c, swap c}` oriented by a local (noncomputable, non-instance)
 ordering of distinct host vertices — a constant palette on `(C,C)` must be symmetric,
 and the dense object may be an asymmetric orbit. Loops stay in layer (2). The
 principal pair-edit charge is the sparse-palette mass `≤ 4^m·θ·|V|²` plus pairs
 incident to profile/proxy-edited vertices.
 
-**Amended 2026-07-26 for the directed redesign.** The keep/recolor threshold is driven by
-the REPRESENTATIVE densities, not the coarse ones: representative densities are what the
-freeness proof has a floor for, and only on nondeviant pairs. Coarse pairs whose
-representative densities deviate are charged WHOLESALE through the aggregate edit
-allowance rather than kept uncharged — the earlier clause "density-deviant fine pairs are
-NOT recolored" belonged to the superseded coarse-density cleaner and is withdrawn.
-Without this the aggregate deviation bound has no consumer and the freeness argument has
-no density floor to stand on.
+**Amended 2026-07-26 for the directed redesign.** Representative densities are what the
+freeness proof has a floor for, and only on nondeviant pairs — hence both the threshold
+and the recolor target above are representative-driven. Coarse pairs whose representative
+densities deviate are charged WHOLESALE through the aggregate edit allowance rather than
+kept uncharged; the earlier clause "density-deviant fine pairs are NOT recolored"
+belonged to the superseded coarse-density cleaner and is withdrawn. Without this the
+aggregate deviation bound has no consumer and the freeness argument has no density floor
+to stand on. Note the two failure modes are distinct: charging a deviant pair fixes the
+EDIT budget, not the certificate — a target palette with zero representative density
+still leaves the pattern unrealizable on the representatives.
 
 **Diagonal-inclusive regularity is a parallel additive layer.** Copies with two or
 three vertices in one cell require uniformity of diagonal cell pairs `(C,C)`, which
@@ -660,8 +667,9 @@ argument and does not extend to arbitrary directed palettes in its present form.
 **Scope decision TAKEN (2026-07-26): option (b).** Arbitrary directed binary relations
 are preserved and Phase 11 is redesigned around transversal counting plus separately
 charged diagonal cells; restricting to symmetric palettes was rejected as abandoning the
-scope the relational API was built to support. `11B` stays closed pending the transversal
-rounding certificate, and the transversalization gate precedes representative selection.
+scope the relational API was built to support. `11B` stays closed pending BOTH the
+transversalization gate (ladder step 2, which precedes representative selection) and the
+transversal rounding certificate (ladder step 5).
 The two options as they were weighed:
 
 - *(a) Symmetric restriction* — an explicitly symmetry-restricted self-regular-subset
@@ -671,7 +679,7 @@ The two options as they were weighed:
   `(W_C, W_C)` self-regularity requirement and rebuild around transversal counting with
   separately charged diagonal cells, likely reusing `Relational/DiagonalGate.lean`.
 
-`11B` and `Unit 7` stay closed pending this correction.
+`11B` and `Unit 7` stay closed pending those gates.
 
 **Supplier checkpoint (2026-07-22): statement frozen; NOT provable from the current
 API — stopped for review.** The route (b) step-1 assembly is NOT one commit: before
