@@ -76,8 +76,9 @@ Lean `Prop` placeholders.
 - **Relational induced removal**: fixed-pattern and family induced removal for
   three-vertex patterns over the binary-palette counting layer. The scope and
   normalization are frozen in the Phase 11 section below; the exact quantitative
-  signatures remain provisional until the diagonal/repeated-cell feasibility gate
-  recorded there passes.
+  signatures remain provisional. Since the 2026-07-26 re-freeze they wait on the
+  transversal rounding certificate (route (b) ladder step 4), not on repeated-cell
+  counting: repeated coarse cells are charged as an edit cost rather than counted.
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits
@@ -367,8 +368,10 @@ removal theorem**.
 ## Phase 11 scope and normalization freeze (relational induced removal, three vertices)
 
 **Scope and invariants are frozen here; the exact quantitative signatures and the
-removal modulus remain provisional until the diagonal/repeated-cell feasibility gate
-below passes.** The phase runs in two internal stages — 11A (feasibility) and 11B
+removal modulus remain provisional.** Until 2026-07-26 they waited on the
+diagonal/repeated-cell feasibility gate; the re-freeze of that date retires the
+repeated-cell COUNTING consumption in favour of an explicit diagonal edit charge, so what
+remains outstanding is the transversal rounding certificate (route (b) ladder step 4). The phase runs in two internal stages — 11A (feasibility) and 11B
 (removal) — separated by a mandatory re-scope checkpoint; no public removal API lands
 before that checkpoint.
 
@@ -437,31 +440,42 @@ off-diagonal layer; the frozen `IsBadPair`/`IsRegularPartition` surface is uncha
 deliver diagonal control) and the frozen counting-charge reindexings, and is
 explicitly not taken.
 
-**Role-indexed representatives.** Freeness counting runs in the ORIGINAL model on
-representative fine cells: THREE role-indexed representatives per large coarse cell
-(`rep : coarse.parts → Fin 3 → fine.parts`), selected mass-weighted from candidates
-with the size guarantee stated in multiplication form (`2·q·|rep C i| ≥ |C|`, `q` the
-host-independent fine-part bound — never natural-number division), uniform and
-density-close for every ordered coordinate pair with distinct roles (including equal
-coarse cells: those events are weighted `|A|·|B|`, exactly what diagonal bad mass
-controls), for every palette color, by one simultaneous union bound — independent of
-the pattern family. Representative densities are within `η` of coarse densities, so
-the working density floor is `ρ = min(θ, 1/4^m) − η` (with `η < min(θ, 1/4^m)`), and
-every distinct-realization lower bound carries an explicit loop/collision
-subtraction: "density product − regularity error − collision slack" (full-square
-densities only; no off-diagonal density variant; no unqualified `1/4^m` bound for
-distinct pairs). Copy counts decompose over the FIVE placement strata (all cells
-distinct; exactly 0=1; exactly 0=2; exactly 1=2; all equal).
+**Off-diagonal representatives (re-frozen 2026-07-26; supersedes the role-indexed
+design).** Freeness counting runs in the ORIGINAL model on representative fine cells:
+ONE representative per large coarse cell (`rep : coarse.parts → fine.parts`), selected
+mass-weighted from candidates with the size guarantee in multiplication form
+(`2·q·|rep C| ≥ |C|`, `q` the host-independent fine-part bound — never natural-number
+division), uniform and density-close for every ordered pair of representatives of
+**DISTINCT** coarse cells, for every palette color, by one simultaneous union bound —
+independent of the pattern family, and with `C = D` excluded from the event index.
+Representative densities are within `η` of coarse densities, so the working density floor
+is `ρ = min(θ, 1/4^m) − η` (with `η < min(θ, 1/4^m)`), and every distinct-realization
+lower bound carries an explicit loop/collision subtraction: "density product − regularity
+error − collision slack" (full-square densities only; no off-diagonal density variant; no
+unqualified `1/4^m` bound for distinct pairs).
+
+Copy counts no longer decompose over the five placement strata for COUNTING purposes:
+only the all-cells-distinct stratum is counted, through transversal counting on the
+representatives; the four repeated-cell strata are charged as an EDIT cost by the
+diagonal surgery calculus (ladder step 3) instead of being counted. This is what
+retires the repeated-cell counting consumption.
 
 **Rejected alternatives (recorded so they are not re-derived).** Pure-majority
 recoloring (edit mass ~`(1−4^{-m})·n²`); constant-palette recoloring (no spare
 palette — a path pattern in graphs requires both symmetric palettes; on diagonal
 pairs a constant palette must be symmetric, forcing orbit orientation);
 local-averaging density transfer (its witness-gap tolerance depends on the coarse
-part count, which grows with the tolerance — circular); a SINGLE representative per
-coarse cell (converts the diagonal bad-mass control `Σ|A|²` into `Σ|A|` at cost
-`2q`, and `q` grows with the regularity tolerance — the same circularity; no
-Cauchy–Schwarz argument removes it).
+part count, which grows with the tolerance — circular); and a SINGLE representative per
+coarse cell **while still consuming diagonal events** (that converts the diagonal
+bad-mass control `Σ|A|²` into `Σ|A|` at cost `2q` with `q` growing with the regularity
+tolerance — the same circularity; no Cauchy–Schwarz argument removes it).
+
+**That last rejection is superseded, conditionally, by the 2026-07-26 re-freeze**, and
+the condition is load-bearing: the single-representative design is admissible ONLY
+because `C = D` now leaves the event index entirely — no diagonal uniformity is
+requested, so there is no diagonal bad-mass control to convert, and the diagonal is paid
+for in edit cost instead. If a diagonal event ever re-enters the union bound, the
+original rejection applies again verbatim.
 
 **What Phase 10 machinery is consumed.** The strong palette witness (upgraded to its
 diagonal-inclusive twin), `deviant_mass_le` (consumed ONLY for representative
@@ -536,43 +550,49 @@ circularity, not a solution. Route (b) matches the published architecture
 in its Lemmas 3.6–3.7): ONE representative subset `W C` per coarse cell, every
 ordered pair `(W C, W D)` regular INCLUDING self-pairs, only aggregate closeness
 exceptions, and every placement consulting the same density table `d(W C, W D)` —
-which removes G10 structurally.
+which removes G10 structurally. (**The self-pair clause is SUPERSEDED by the
+2026-07-26 re-freeze below**: gate G-U5 refutes it for directed relations. What
+removes G10 is the *one representative per cell shared by every role*, which the
+re-freeze keeps; self-regularity was never what removed it.)
 
-**Route (b) ladder (frozen order; Unit 7 unchanged, the replacement is built
-alongside it; no `Recolor.lean` and no cleaning until step 6 composes).**
-1. *Self-regular-subset lemma* (the genuinely new within-cell unit): for every
-   sufficiently large `A`, a subset `W ⊆ A` with `|W| ≥ γ·|A|` such that every
-   palette relation is uniform on `(W, W)`. Proof shape per the survey's Lemma 3.6:
-   a large collection of disjoint comparable-size pieces pairwise uniform for all
-   palettes; pieces pair-colored by the discretized vector of `K` palette densities
-   (interval width `α`, so `(1/α)^K` colors); a finite multicolor Ramsey extraction
-   of a subcollection of size `s ≥ 2/α` with all pairwise density vectors in one
-   class; and a union lemma — the union of `s` comparable pieces, pairwise uniform
-   with close densities, is uniform on itself, the within-piece (diagonal)
-   contribution vanishing like `1/s`. No circularity: `α` is fixed by the target
-   tolerance, the Ramsey demand fixes the needed collection size, and only then is
-   the piece-supplying tolerance chosen. If mathlib lacks finite multicolor Ramsey,
-   a self-contained pigeonhole-iteration bound lands in `Finite/` first.
-2. *Slicing/inheritance API* (load-bearing for step 1's comparable-size trimming as
-   well): if `(A, B)` is sufficiently uniform and `W_A ⊆ A`, `W_B ⊆ B` retain fixed
-   positive fractions, then `(W_A, W_B)` is uniform with explicit tolerance
-   degradation, with density control.
-3. *One-subset representative theorem* (the immediate summit): for every large
-   coarse cell `C`, one `W C` with (i) `W C ⊆ C` and a uniform linear size floor;
-   (ii) all ordered `(W C, W D)` — including `C = D` — uniform for every palette;
-   (iii) off-diagonal coarse pairs whose `W`-density vector is not close carrying
-   bounded aggregate `|C|·|D|` mass (the aggregate-exception clause consumed by the
-   selection machinery already in `Finite/WeightedChoice.lean`).
-4. *Diagonal coarse blocks charged separately*: seed with a bounded-cell
-   equipartition and inherit the maximum cell size through refinement, so diagonal
-   blocks are charged by `Σ_C |C|² ≤ (max_C |C|)·n` — no transfer of diagonal
-   densities back to coarse densities is needed.
-5. *Reuse Unit 8*: instantiate the arbitrary-box certificate with `Aᵢ = W (T i)`;
-   repeated coarse cells make the boxes literally repeat, which the collision-slack
-   theorems were built to handle.
-6. *Abstract rounding certificate and edit inequality BEFORE cleaning*: only after
-   both compose does the cleaning rule of this freeze change and `Recolor.lean`
-   begin.
+**Route (b) ladder — RE-FROZEN 2026-07-26 (option (b): preserve arbitrary directed
+binary relations).** The 2026-07-20 ladder is superseded: its step 1 (self-regular
+subsets) is FALSE in the directed setting (gate G-U5, correction recorded below), and its
+step 5 consumed repeated coarse cells. Restricting to symmetric palettes was rejected as
+abandoning the scope the relational API was built for. The replacement, frozen in order;
+no `Recolor.lean` and no cleaning until step 4 composes:
+
+1. *Docs-only route re-freeze* (this entry).
+2. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
+   coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
+   size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
+   every ordered pair with **`C ≠ D`** — self-pairs are neither required nor provided;
+   (iii) an AGGREGATE off-diagonal density-deviation bound, never a per-pair closeness
+   requirement, consumed through `Finite/WeightedChoice.lean`. The simultaneous union
+   bound conditions on all off-diagonal uniformity events and **excludes `C = D` from the
+   event index**. The same `W C` serves every pattern role, which is what removes G10's
+   role-consistency failure structurally.
+3. *Diagonal surgery calculus*: the aggregate EDIT cost of recoloring all within-cell
+   tuples, derived from `Σ_C |C|² ≤ m·|V|` with `m` the maximum cell size inherited from
+   the bounded-cell equipartition seed, under the frozen per-symbol weighting of
+   `relativeAggregateEdit`. Kept SEPARATE from `Relational/DiagonalGate.lean`, which
+   controls counts, not edit cost.
+4. *Transversal rounding certificate*: consumes only triples of DISTINCT coarse cells,
+   through the existing three-vertex transversal counting APIs on the `W C`. The abstract
+   freeness certificate and the aggregate edit inequality are proved BEFORE `Recolor.lean`
+   begins.
+5. *Only after that succeeds*: the cleaning construction, the removal modulus, and 11B.
+
+**Hard stops (permanent).** No self-uniformity assumption anywhere; no role-indexed
+representatives; no per-pair density-closeness requirement; no tolerance depending on the
+produced fine complexity.
+
+**What carries over.** The slicing/inheritance API (`Graph/UniformSlicing.lean`) stays as
+proved infrastructure for size trimming. The piece supplier, density buckets, multicolor
+Ramsey extraction, and union theorems remain valid and are retained for a later
+explicitly symmetric self-regular-subset theorem; they are **no longer Phase 11
+blockers**.
+
 
 **Route (b) step 1 correction (2026-07-26 review): the frozen self-regular-subset
 statement is FALSE for arbitrary directed relations, and step 1 as specified above does
