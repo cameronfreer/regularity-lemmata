@@ -371,10 +371,12 @@ removal theorem**.
 
 **Scope and invariants are frozen here; the exact quantitative signatures and the
 removal modulus remain provisional.** Until 2026-07-26 they waited on the
-diagonal/repeated-cell feasibility gate; the re-freeze of that date retires the
-repeated-cell COUNTING consumption in favour of an explicit diagonal edit charge, so what
-remains outstanding are the transversalization gate (ladder step 2) and the transversal
-rounding certificate (ladder step 5). The phase runs in two internal stages — 11A (feasibility) and 11B
+diagonal/repeated-cell feasibility gate; the re-freeze of that date PROVISIONALLY retires
+the repeated-cell COUNTING consumption in favour of an explicit diagonal edit charge —
+provisionally, because an edit charge does not by itself show a within-cell triple induces
+no surviving pattern. What remains outstanding are therefore the transversalization gate
+(ladder step 2), which must settle exactly that, and the transversal rounding certificate
+(ladder step 5). The phase runs in two internal stages — 11A (feasibility) and 11B
 (removal) — separated by a mandatory re-scope checkpoint; no public removal API lands
 before that checkpoint.
 
