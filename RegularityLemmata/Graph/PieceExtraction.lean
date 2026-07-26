@@ -37,6 +37,12 @@ The order is the one gate **G-S1** forces:
 
 Nothing here mentions a part-count bound, so no tolerance can depend on the produced
 number of parts.
+
+Provenance: this is step 1 of the Lemma 3.6 construction of D. Conlon and J. Fox,
+*Graph removal lemmas* (arXiv:1211.3487, §3.2), taken by the **weaker
+Szemerédi-plus-independent-set route** the survey mentions rather than by their strong
+cylinder regularity lemma — so no tower-type bound is claimed. See `PROVENANCE.md` for the
+precise scope map.
 -/
 
 namespace RegularityLemmata
@@ -379,6 +385,41 @@ example {m : ℕ} (Rk : Fin 1 → Fin 3 → Fin 3 → Prop) [∀ k, DecidableRel
     (h : IsPieceFamily Rk A τ m Pc) :
     IsUniformPair (Rk 0) (Pc 0) (Pc 1) τ ∧ IsUniformPair (Rk 0) (Pc 1) (Pc 0) τ :=
   ⟨h.2.2.2 0 0 1 (by decide), h.2.2.2 0 1 0 (by decide)⟩
+
+-- **Concrete `m + 1 → m` trimming.** A five-element host split as `{0,1}` and `{2,3,4}`
+-- is an equipartition whose common size is `m = 5/2 = 2`, and whose second cell is
+-- genuinely OVERSIZED at `m + 1 = 3`. This is the case the trimming exists for.
+example :
+    (twoPartition ({0, 1, 2, 3, 4} : Finset (Fin 5)) {0, 1} (by decide) (by decide)
+      (by decide)).IsEquipartition := by
+  refine Set.equitableOn_iff_exists_eq_eq_add_one.2 ⟨2, fun u hu => ?_⟩
+  rw [Finset.mem_coe, twoPartition_parts] at hu
+  revert hu
+  revert u
+  decide
+
+example :
+    ({0, 1, 2, 3, 4} : Finset (Fin 5)).card
+        / (twoPartition ({0, 1, 2, 3, 4} : Finset (Fin 5)) {0, 1} (by decide) (by decide)
+          (by decide)).parts.card = 2 := by
+  rw [twoPartition_card]
+  decide
+
+-- The oversized cell is a genuine `m + 1`, and the sandwich `m ≤ |C| ≤ m + 1` is tight
+-- on it.
+example : ({2, 3, 4} : Finset (Fin 5)).card = 2 + 1 := by decide
+
+-- Trimming it to `{2,3}` restores the EXACT common size `m`, and the retention
+-- `1/2 · |C| ≤ |W|` — the hypothesis `IsUniformPair.slice` consumes at retention `1/2` —
+-- holds with the oversized cell, which is the only case where it is not trivial.
+example :
+    ∃ W ⊆ ({2, 3, 4} : Finset (Fin 5)), W.card = 2 ∧
+      (1 : ℝ) / 2 * ((({2, 3, 4} : Finset (Fin 5)).card : ℕ) : ℝ) ≤ ((W.card : ℕ) : ℝ) := by
+  refine ⟨{2, 3}, by decide, by decide, ?_⟩
+  have h1 : ({2, 3, 4} : Finset (Fin 5)).card = 3 := by decide
+  have h2 : ({2, 3} : Finset (Fin 5)).card = 2 := by decide
+  rw [h1, h2]
+  norm_num
 
 -- The `K = 0` endpoint: the empty family is regular at every tolerance, so the extraction
 -- hypothesis is free and the tolerance bound reads `ρ ≤ 1/(64t)`.

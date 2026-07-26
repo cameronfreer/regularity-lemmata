@@ -9,12 +9,14 @@ import RegularityLemmata.Graph.Uniformity
 # Route (b) supplier checkpoint, item 2: the piece-supplier obligation (statement)
 
 `ARCHITECTURE.md` route (b), supplier checkpoint (2026-07-22). This file carries the
-piece-family PREDICATE and the checkpoint's permanent gates. The supplier SUMMIT
-itself is recorded in prose only, under `ARCHITECTURE.md`'s deferred summit
-statements — per the repository policy that unproved summits are never Lean `Prop`
-placeholders (governance resolved at the 2026-07-22 review: `IsPieceFamily` stays,
-the obligation lives in prose until proved) — and its prose signature demands
-`0 < t`: gate G-S2 below shows the zero-target instance is FALSE.
+piece-family PREDICATE and the checkpoint's permanent gates.
+
+**The supplier summit is proved** (2026-07-25): `pieceSupplier` and
+`exists_pieceFamily` in `Graph/PieceSchedule.lean`, from the extraction of
+`Graph/PieceExtraction.lean`. Until then it was recorded in prose only, per the
+repository policy that unproved summits are never Lean `Prop` placeholders; the gates
+below stay permanent. Its signature demands `0 < t`: gate G-S2 below shows the
+zero-target instance is FALSE.
 
 * `IsPieceFamily` — `t` pairwise-disjoint pieces inside a host `A`, of EQUAL
   cardinality `m`, with every ordered pair of distinct pieces `τ`-uniform for every

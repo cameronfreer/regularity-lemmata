@@ -78,11 +78,6 @@ Lean `Prop` placeholders.
   normalization are frozen in the Phase 11 section below; the exact quantitative
   signatures remain provisional until the diagonal/repeated-cell feasibility gate
   recorded there passes.
-- (**No longer deferred — proved 2026-07-25**: the *equitable finite-family
-  regularity* engine and the *route (b) piece supplier*. Both were recorded here as
-  prose after the 2026-07-22 checkpoint; they are now Lean theorems, and their
-  statements and frozen constants are recorded in the supplier route-decision
-  section below rather than in this list.)
 - **Colored arity-three counting/removal**: planned for later releases; statements
   will be frozen only after their falsification gates. (The triadic regular
   approximation itself is no longer deferred: both the weak and the edited summits

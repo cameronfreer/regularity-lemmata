@@ -32,6 +32,12 @@ shape, with `κ` and `N₀` produced before the family and the host are quantifi
 **`0 < t` is required and gate G-S2 stays permanent**: with `t = 0` a piece family exists
 vacuously while every positive mass floor fails, so the zero-target instance is FALSE
 (`Graph/PieceSupplier.lean`).
+
+Provenance: step 1 of the Lemma 3.6 construction of D. Conlon and J. Fox, *Graph removal
+lemmas* (arXiv:1211.3487, §3.2), by the **weaker Szemerédi-plus-independent-set route**
+the survey mentions — over this repository's own equitable finite-family regularity
+engine, not their strong cylinder regularity lemma, so no tower-type bound is claimed.
+See `PROVENANCE.md` for the precise scope map.
 -/
 
 namespace RegularityLemmata
