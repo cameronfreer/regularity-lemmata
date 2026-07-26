@@ -32,10 +32,19 @@ aligned within `α`, for every relation of a finite family and in BOTH orientati
   for palette families the swap law determines it, but retaining both explicitly is
   harmless and clearer (reviewer decision 2026-07-21).
 
-The union theorem (`Graph/UniformUnion.lean`) consumes exactly this alignment: any
-two extracted densities differ by STRICTLY less than `α`, hence by at most `α` —
-so any member's density serves as the class center `d` at width `α`, exactly the
-`hclose` input of the union estimates. Provenance: the bucket-and-extract step of
+**What this feeds, and when.** Any two extracted densities of the SAME orientation
+differ by strictly less than `α`, hence by at most `α`, so any member of a class
+serves as that class's center at width `α`. But the union theorem
+(`Graph/UniformUnion.lean`) consumes a SINGLE center `d` for EVERY ordered pair of
+distinct pieces — both orientations at once. This extraction supplies two classes,
+one forward and one reverse, and they feed `hclose` only when they share a common
+center; symmetry of the relation is the clean sufficient condition, since then the
+two classes coincide. For arbitrary DIRECTED relations they need not agree: gate
+**G-U5** in `Graph/UniformUnion.lean` exhibits the strict order, forward class `1`
+and reverse class `0`, where no center is within `α < 1/2` of both — and where the
+self-union conclusion is not merely uninstantiable but FALSE. The results in this
+file are unaffected; what fails is the proposed composition (`ARCHITECTURE.md`,
+2026-07-26). Provenance: the bucket-and-extract step of
 the Lemma 3.6 construction in D. Conlon and J. Fox, *Graph removal lemmas*
 (arXiv:1211.3487, §3.2); see `PROVENANCE.md` for the precise scope.
 -/

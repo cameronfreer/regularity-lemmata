@@ -574,6 +574,38 @@ alongside it; no `Recolor.lean` and no cleaning until step 6 composes).**
    both compose does the cleaning rule of this freeze change and `Recolor.lean`
    begin.
 
+**Route (b) step 1 correction (2026-07-26 review): the frozen self-regular-subset
+statement is FALSE for arbitrary directed relations, and step 1 as specified above does
+not compose.** Two independently valid units do not join:
+`exists_bucketAligned_subfamily` (`Finite/DensityBuckets.lean`) aligns a FORWARD density
+class and a REVERSE class, while `isUniformPair_self_union` (`Graph/UniformUnion.lean`)
+requires ONE common center `d` for every ordered pair of distinct pieces. Gate G-U3
+already recorded that the two orientations need not agree.
+
+The counterexample is decisive, not technical. For the strict order `<` on any linearly
+ordered `W` with `|W| ≥ 2`, `d(W, W) = (|W| − 1)/(2|W|) ≤ 1/2`, while the lower and upper
+halves are `1/4`-large with density `1`; so `(W, W)` is not `1/4`-uniform and NO
+positive-linear-size self-uniform subset exists. With singleton pieces the forward class
+is `1` and the reverse class is `0`: Ramsey alignment succeeds and the union theorem
+still cannot be instantiated. Permanent gate **G-U5** (`Graph/UniformUnion.lean`) records
+this on `Fin 4`, with a `Fin 8` instance showing the gap does not close as the host grows.
+
+What remains valid and useful: the piece supplier, the density buckets, the multicolor
+Ramsey extraction, and the union theorems. What fails is only their proposed DIRECTED
+self-union composition. The Conlon–Fox Lemma 3.6 route is an undirected/symmetric
+argument and does not extend to arbitrary directed palettes in its present form.
+
+**Scope decision OPEN** (nothing beyond the gates is implemented pending it):
+
+- *(a) Symmetric restriction* — an explicitly symmetry-restricted self-regular-subset
+  theorem for symmetric relation families, where the two orientation classes coincide and
+  the existing composition goes through unchanged.
+- *(b) Directed redesign* — for arbitrary binary relational structures, drop the
+  `(W_C, W_C)` self-regularity requirement and rebuild around transversal counting with
+  separately charged diagonal cells, likely reusing `Relational/DiagonalGate.lean`.
+
+`11B` and `Unit 7` stay closed pending this correction.
+
 **Supplier checkpoint (2026-07-22): statement frozen; NOT provable from the current
 API — stopped for review.** The route (b) step-1 assembly is NOT one commit: before
 the self-regular-subset summit, the piece supplier must exist. Delivered: (1) the
