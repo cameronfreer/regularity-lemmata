@@ -44,7 +44,8 @@ cells, via `preservesAndReflects_transport_three`:
 
 The moves only ever replace a vertex by another of the SAME coarse cell with the SAME
 relative local order, which is why the palettes — and hence the induced patterns — are
-unchanged.
+unchanged. Each target is checked THREE-WAY — the proxy-cell map is injective on it — not
+merely pairwise.
 
 ## Three sharpness tests
 
@@ -118,8 +119,6 @@ example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
     PreservesAndReflects P cpModel ![0, 6, 12] ↔
       PreservesAndReflects P cpModel ![0, 6, 12] := Iff.rfl
 
-example : cpProxy 0 ≠ cpProxy 6 ∨ cpCoarse 0 ≠ cpCoarse 6 := by decide
-
 -- Stratum 2: coordinates `0` and `1` share a coarse cell — and here a proxy cell too.
 -- Moving the second to `2` separates the proxies and preserves every palette.
 example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
@@ -141,14 +140,32 @@ example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
     PreservesAndReflects P cpModel ![0, 1, 2] ↔ PreservesAndReflects P cpModel ![0, 2, 4] :=
   preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)
 
--- Each target really does occupy three distinct proxy cells.
-example : (cpCoarse 0, cpProxy 0) ≠ (cpCoarse 2, cpProxy 2) ∧
-    (cpCoarse 0, cpProxy 0) ≠ (cpCoarse 6, cpProxy 6) ∧
-    (cpCoarse 2, cpProxy 2) ≠ (cpCoarse 6, cpProxy 6) := by decide
+-- **Every target really does occupy three distinct proxy cells**, checked three-way for
+-- each of them rather than pairwise: the proxy-cell map is injective on the triple.
+example :
+    Function.Injective (fun i : Fin 3 =>
+      let v := ![0, 6, 12] i
+      (cpCoarse v, cpProxy v)) := by decide
 
-example : (cpCoarse 0, cpProxy 0) ≠ (cpCoarse 2, cpProxy 2) ∧
-    (cpCoarse 0, cpProxy 0) ≠ (cpCoarse 4, cpProxy 4) ∧
-    (cpCoarse 2, cpProxy 2) ≠ (cpCoarse 4, cpProxy 4) := by decide
+example :
+    Function.Injective (fun i : Fin 3 =>
+      let v := ![0, 2, 6] i
+      (cpCoarse v, cpProxy v)) := by decide
+
+example :
+    Function.Injective (fun i : Fin 3 =>
+      let v := ![0, 6, 2] i
+      (cpCoarse v, cpProxy v)) := by decide
+
+example :
+    Function.Injective (fun i : Fin 3 =>
+      let v := ![6, 0, 2] i
+      (cpCoarse v, cpProxy v)) := by decide
+
+example :
+    Function.Injective (fun i : Fin 3 =>
+      let v := ![0, 2, 4] i
+      (cpCoarse v, cpProxy v)) := by decide
 
 /-! ### Sharpness -/
 
