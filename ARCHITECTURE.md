@@ -622,12 +622,7 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    configuration shown to violate it, three-cell necessity proved (any pattern occurring
    on the ground set forces `3 ≤ #Q.parts`), and satisfiability shown only on singleton
    cells. **The CONSTRUCTION remains open**: no cleaning is proved to achieve the
-   certificate, so `11B` stays closed. The route is not rejected; the sanctioned next probe
-   is the narrowly combinatorial orientation/profile lemma behind the monochromatic-triple
-   variant (three cells of equal vertex profile including loop data, a non-symmetric
-   two-way palette, canonical cell-pair orientation against the internal vertex order,
-   equality of the resulting three-vertex models) — Ramsey extraction only after that
-   lemma works, and no rounding or selection before it.
+   certificate, so `11B` stays closed. The route is not rejected.
 
    **Orientation/profile probe: POSITIVE on concrete configurations (2026-07-27,
    `Relational/OrientationProbe.lean`).** With a deliberately non-symmetric directed
@@ -638,9 +633,30 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    OPPOSITE tournament), and unequal loop data breaks it even under matched orientation.
    Consequence for the extraction: it must control vertex PROFILES, loops included, as
    well as palettes. This is evidence to continue with the monochromatic-triple variant,
-   **not** a proof — the general lemma over arbitrary palettes and cells with the actual
-   rounding is unproved, the exactly-two-in-one-cell stratum is untouched and still needs
-   clone/proxy cells, and `11B` stays closed.
+   **not** a proof.
+
+   **Transport lemma: PROVED (2026-07-27, PR #39, `Relational/BinaryPattern.lean`).**
+   `preservesAndReflects_transport` — two maps `f g : W → V` into the SAME model realize
+   the same patterns once they agree coordinatewise on vertex profiles and on pair palettes
+   at distinct indices — proved directly from
+   `preservesAndReflects_iff_profiles_palettes`, assuming NEITHER injectivity NOR any
+   symmetry of the palette (the theorem covers symmetric palettes too; non-symmetry is only
+   the adversarial instrument of the probe). `preservesAndReflects_transport_three` is the
+   `Fin 3` form in which only the three FORWARD pairs are exhibited, the reverse three
+   coming from `binaryPairPalette_swap`. The probe's headline is now a corollary quantified
+   over all patterns rather than a `decide` on one.
+
+   **Still open in ladder step 2**, and `11B` stays closed until they close: the
+   **clone/proxy gate** for the repeated-cell strata — model three proxy cells per coarse
+   cell with common profiles, directed off-diagonal palettes, and an oriented diagonal
+   palette orbit, proxy ranks taken from the local vertex order, and show every one of the
+   five placement strata transports to three distinct proxy cells via
+   `preservesAndReflects_transport_three` — and, only if that route is taken, the **Ramsey
+   extraction** producing three cells that agree on palettes AND profiles. The clone/proxy
+   gate is the one to attempt first: it is likelier to reshape the representative event
+   index, and if it succeeds it plausibly replaces the monochromatic-Ramsey route
+   altogether. If it fails, the separate repeated-cell original-copy lower bound is the
+   remaining route.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
