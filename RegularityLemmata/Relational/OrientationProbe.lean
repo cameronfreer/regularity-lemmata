@@ -40,13 +40,19 @@ DIRECTED binary symbol whose palette is deliberately NON-SYMMETRIC (`R x y` with
    cross-cell triple `(3,4,5)` induce the SAME `Fin 3` model — the transitive tournament in
    the non-symmetric palette. The orientation convention is therefore compatible, which is
    the step the monochromatic-triple variant needs.
-2. **Reversed orientation**: the cross-cell triple no longer induces that model. Aligning
-   the canonical cell order with the internal vertex order is load-bearing, not cosmetic.
+2. **Reversed orientation**: the cross-cell triple no longer induces that model — on the
+   fixed tuple `(3,4,5)` it induces the OPPOSITE tournament, a different three-vertex
+   model. Aligning the canonical cell order with the internal vertex order is load-bearing,
+   not cosmetic.
 3. **Differing loop data**: with matched orientation but unequal profiles the cross-cell
    triple again fails to induce the within-cell model. Profile equality across the three
    cells — loops included — is a genuine hypothesis of any monochromatic-triple argument,
    so the extraction that produces the three cells must control profiles as well as
    palettes.
+
+The headline hypotheses are pinned at the APIs a general theorem will quantify over:
+profile equality via `binaryVertexProfile` (for ALL vertices of the matched configuration),
+and palette non-symmetry via `binaryPairPalette` against `swapBinaryPairPalette`.
 
 ## What it does NOT establish
 
@@ -102,6 +108,10 @@ private abbrev tournament3 : FiniteRelModel (singleRelLang 2) (Fin 3) :=
 private abbrev tournament3Loops : FiniteRelModel (singleRelLang 2) (Fin 3) :=
   binModel fun a b => decide (a ≤ b)
 
+/-- The opposite tournament — the model the REVERSED configuration induces. -/
+private abbrev tournament3Opp : FiniteRelModel (singleRelLang 2) (Fin 3) :=
+  binModel fun a b => decide (b < a)
+
 /-! ### The palette is genuinely non-symmetric -/
 
 -- Without this the orientation question is vacuous: `R 0 1` holds and `R 1 0` does not.
@@ -109,7 +119,18 @@ example : tournament3.Holds (singleRelSymbol 2) ![0, 1] := by decide
 
 example : ¬ tournament3.Holds (singleRelSymbol 2) ![1, 0] := by decide
 
+-- The same fact at the PALETTE API the general theorem will use: the two-way palette is
+-- not fixed by the reversal law.
+example :
+    binaryPairPalette tournament3 0 1
+      ≠ swapBinaryPairPalette (binaryPairPalette tournament3 0 1) := by decide
+
 /-! ### 1. Matched orientation and equal profiles: the models agree -/
+
+-- The profiles are equal across ALL vertices of the matched configuration — the hypothesis
+-- the general theorem will carry, pinned at the profile API rather than left implicit.
+example : ∀ x y : Fin 6,
+    binaryVertexProfile probeMatched x = binaryVertexProfile probeMatched y := by decide
 
 -- The WITHIN-CELL triple `(0,1,2)` induces the transitive tournament…
 example : PreservesAndReflects tournament3 probeMatched ![0, 1, 2] := by decide
@@ -136,8 +157,18 @@ example : PreservesAndReflects tournament3 probeReversed ![0, 1, 2] := by decide
 example : ¬ PreservesAndReflects tournament3 probeReversed ![3, 4, 5] := by decide
 
 -- It induces the OPPOSITE tournament instead — the palette, not just the labelling, has
--- changed, which is exactly why a symmetric palette would have hidden the issue.
+-- changed, which is exactly why a symmetric palette would have hidden the issue. Stated on
+-- the FIXED tuple `(3,4,5)`, so the claim is about the model induced there and not about a
+-- relabelling.
+example : PreservesAndReflects tournament3Opp probeReversed ![3, 4, 5] := by decide
+
+-- Equivalently, by relabelling: the reversed configuration realizes the original
+-- tournament only in the reversed order.
 example : PreservesAndReflects tournament3 probeReversed ![5, 4, 3] := by decide
+
+-- And the two three-vertex models genuinely differ.
+example : binaryPairPalette tournament3 0 1 ≠ binaryPairPalette tournament3Opp 0 1 := by
+  decide
 
 /-! ### 3. Differing loop data: the agreement fails -/
 
