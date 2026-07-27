@@ -646,17 +646,39 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    coming from `binaryPairPalette_swap`. The probe's headline is now a corollary quantified
    over all patterns rather than a `decide` on one.
 
-   **Still open in ladder step 2**, and `11B` stays closed until they close: the
-   **clone/proxy gate** for the repeated-cell strata — model three proxy cells per coarse
-   cell with common profiles, directed off-diagonal palettes, and an oriented diagonal
-   palette orbit, proxy ranks taken from the local vertex order, and show every one of the
-   five placement strata transports to three distinct proxy cells via
-   `preservesAndReflects_transport_three` — and, only if that route is taken, the **Ramsey
-   extraction** producing three cells that agree on palettes AND profiles. The clone/proxy
-   gate is the one to attempt first: it is likelier to reshape the representative event
-   index, and if it succeeds it plausibly replaces the monochromatic-Ramsey route
-   altogether. If it fails, the separate repeated-cell original-copy lower bound is the
-   remaining route.
+   **Clone/proxy gate: POSITIVE on a concrete configuration (2026-07-27, PR #41,
+   `Relational/CloneProxyProbe.lean`).** With three coarse cells of six split into three
+   proxy cells of two, common profiles, an oriented diagonal palette orbit and a directed
+   off-diagonal palette (both proved non-symmetric), every one of the FIVE placement strata
+   transports to a triple in three distinct proxy cells via
+   `preservesAndReflects_transport_three`, each target checked three-way. Sharpness, all
+   permanent: two proxies do NOT suffice for the all-equal stratum (pigeonhole), one proxy
+   does NOT suffice for the two-in-one stratum, and an orientation-blind move is unsound for
+   an asymmetric palette. Three proxies per coarse cell are exactly enough, and the local
+   vertex order is what makes the moves sound.
+
+   This **provisionally displaces** the monochromatic-Ramsey variant — provisionally, and
+   only until the generic lemma and a real split are proved: the repeated-cell strata would
+   be handled by refinement rather than by extracting three cells that happen to agree, so
+   no Ramsey step would be needed. What it forces on the design, to be honoured wherever
+   representatives are eventually built:
+
+   - Distinct proxy pairs **include siblings sharing a coarse owner**. Proxy-distinctness
+     is not coarse-distinctness.
+   - Those **sibling pairs must enter the regularity/selection union bound**; they are
+     genuine events, not diagonal ones excluded by `C = D`.
+   - The three-way split needs a **multiplication-form size floor**, with explicit
+     small-cell handling — never natural-number division.
+   - **No selection tolerance may depend on the resulting proxy/fine complexity**, which is
+     the same acyclicity constraint that governs `supplierTolerance`.
+
+   **Still open in ladder step 2**, and `11B` stays closed until they close: generalizing
+   the five proxy moves into a lemma stated by coarse owner, proxy rank, and local order
+   (the next Lean unit, and only that); then, as a separate checkpoint, constructing the
+   partition and reconciling it with representative selection — including the size floors
+   the supplier provides. The **Ramsey extraction** stays recorded as the fallback variant
+   if the generic clone/proxy lemma fails, alongside the separate repeated-cell
+   original-copy lower bound. Rounding, cleaning, and `Recolor.lean` stay closed.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
