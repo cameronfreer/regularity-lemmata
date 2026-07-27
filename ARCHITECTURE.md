@@ -628,6 +628,19 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    two-way palette, canonical cell-pair orientation against the internal vertex order,
    equality of the resulting three-vertex models) — Ramsey extraction only after that
    lemma works, and no rounding or selection before it.
+
+   **Orientation/profile probe: POSITIVE on concrete configurations (2026-07-27,
+   `Relational/OrientationProbe.lean`).** With a deliberately non-symmetric directed
+   palette, a within-cell triple oriented by the internal vertex order and a cross-cell
+   triple oriented by the matching cell order induce the SAME three-vertex model. Two
+   adversarial variants confirm the hypotheses are load-bearing rather than cosmetic:
+   reversing the cell orientation breaks the match (the cross-cell triple then induces the
+   OPPOSITE tournament), and unequal loop data breaks it even under matched orientation.
+   Consequence for the extraction: it must control vertex PROFILES, loops included, as
+   well as palettes. This is evidence to continue with the monochromatic-triple variant,
+   **not** a proof — the general lemma over arbitrary palettes and cells with the actual
+   rounding is unproved, the exactly-two-in-one-cell stratum is untouched and still needs
+   clone/proxy cells, and `11B` stays closed.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
