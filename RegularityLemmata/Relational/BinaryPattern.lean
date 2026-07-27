@@ -17,12 +17,19 @@ not via the loose stored `arityBound`). Under it, for **any** `f`,
 (`preservesAndReflects_iff_profiles_palettes`): nullary compatibility, agreement of
 every vertex profile along `f`, and agreement of every pair palette on distinct
 indices. (Injectivity is the intended domain — supplied by
-`inducedEmbeddingCountOn`'s filter — but the equivalence needs it nowhere.) Every later pattern-specific count is then bookkeeping over the palette
-machinery rather than model theory.
+`inducedEmbeddingCountOn`'s filter — but the equivalence needs it nowhere.) Every later
+pattern-specific count is then bookkeeping over the palette machinery rather than model
+theory.
 
 `inducedEmbeddingCountOn P M A` counts induced embeddings landing in a prescribed box
 `A : W → Finset V`, with box monotonicity, automatic injectivity on disjoint boxes,
 and the vanishing under a nullary or profile mismatch.
+
+`preservesAndReflects_transport` reads the reduction the other way: two maps into the SAME
+model realize the same patterns once they agree coordinatewise on profiles and on
+distinct-index palettes. It assumes neither injectivity nor any symmetry of the palette.
+`preservesAndReflects_transport_three` is the `Fin 3` form in which only the three FORWARD
+pairs are exhibited, the reverse three coming from `binaryPairPalette_swap`.
 -/
 
 namespace RegularityLemmata
@@ -113,6 +120,59 @@ theorem preservesAndReflects_iff_profiles_palettes [AtMostBinary L]
     | (n + 3), R, _ =>
       haveI := isEmpty_relations_of_two_lt L (show 2 < n + 3 by omega)
       exact isEmptyElim R
+
+/-! ### Same-host transport
+
+Two maps into the SAME model realize the same patterns as soon as they agree
+coordinatewise on the data the reduction above sees: vertex profiles, and pair palettes at
+distinct indices. Neither injectivity nor any symmetry hypothesis is needed — the palette
+may be symmetric or not, and the statement is about agreement, not about the palette's
+shape. -/
+
+/-- **Same-host transport.** If `f` and `g` agree coordinatewise on vertex profiles and on
+pair palettes at distinct indices, they realize exactly the same patterns of `M`. Nullary
+compatibility does not mention the map, so it transfers unchanged. -/
+theorem preservesAndReflects_transport [AtMostBinary L]
+    {P : FiniteRelModel L W} {M : FiniteRelModel L V} {f g : W → V}
+    (hprof : ∀ i, binaryVertexProfile M (f i) = binaryVertexProfile M (g i))
+    (hpal : ∀ i j, i ≠ j →
+      binaryPairPalette M (f i) (f j) = binaryPairPalette M (g i) (g j)) :
+    PreservesAndReflects P M f ↔ PreservesAndReflects P M g := by
+  rw [preservesAndReflects_iff_profiles_palettes, preservesAndReflects_iff_profiles_palettes]
+  constructor
+  · rintro ⟨hn, hp, hq⟩
+    exact ⟨hn, fun i => (hp i).trans (hprof i),
+      fun i j hij => (hq i j hij).trans (hpal i j hij)⟩
+  · rintro ⟨hn, hp, hq⟩
+    exact ⟨hn, fun i => (hp i).trans (hprof i).symm,
+      fun i j hij => (hq i j hij).trans (hpal i j hij).symm⟩
+
+/-- **The three-vertex ordered corollary.** For a `Fin 3` index the six distinct-index
+palette hypotheses collapse to the three FORWARD pairs: the reversal law
+`binaryPairPalette_swap` supplies the other three. This is the form an ordered-orbit
+argument uses, where only `(0,1)`, `(0,2)`, `(1,2)` are exhibited. -/
+theorem preservesAndReflects_transport_three [AtMostBinary L]
+    {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} {f g : Fin 3 → V}
+    (hprof : ∀ i, binaryVertexProfile M (f i) = binaryVertexProfile M (g i))
+    (h01 : binaryPairPalette M (f 0) (f 1) = binaryPairPalette M (g 0) (g 1))
+    (h02 : binaryPairPalette M (f 0) (f 2) = binaryPairPalette M (g 0) (g 2))
+    (h12 : binaryPairPalette M (f 1) (f 2) = binaryPairPalette M (g 1) (g 2)) :
+    PreservesAndReflects P M f ↔ PreservesAndReflects P M g := by
+  refine preservesAndReflects_transport hprof ?_
+  have hswap : ∀ a b : Fin 3,
+      binaryPairPalette M (f a) (f b) = binaryPairPalette M (g a) (g b) →
+      binaryPairPalette M (f b) (f a) = binaryPairPalette M (g b) (g a) := by
+    intro a b h
+    rw [binaryPairPalette_swap M (f a) (f b), binaryPairPalette_swap M (g a) (g b), h]
+  intro i j hij
+  fin_cases i <;> fin_cases j <;> first
+    | exact absurd rfl hij
+    | exact h01
+    | exact h02
+    | exact h12
+    | exact hswap 0 1 h01
+    | exact hswap 0 2 h02
+    | exact hswap 1 2 h12
 
 /-! ### Box-restricted induced counts -/
 
@@ -205,6 +265,40 @@ example (P : FiniteRelModel (singleRelLang 2) (Fin 3))
       (∀ i j, i ≠ j →
         binaryPairPalette P i j = binaryPairPalette M (f i) (f j)) :=
   preservesAndReflects_iff_profiles_palettes
+
+/-! #### Same-host transport -/
+
+/-- A SYMMETRIC palette: `a ≠ b` in both directions. -/
+private abbrev symModel : FiniteRelModel (singleRelLang 2) (Fin 4) :=
+  binModel fun a b => decide (a ≠ b)
+
+/-- A NON-SYMMETRIC palette: the strict order, the adversarial case. -/
+private abbrev ordModel : FiniteRelModel (singleRelLang 2) (Fin 6) :=
+  binModel fun a b => decide (a < b)
+
+-- Transport applies to a SYMMETRIC palette: nothing in the lemma asks for asymmetry.
+example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
+    PreservesAndReflects P symModel ![0, 1, 2] ↔ PreservesAndReflects P symModel ![1, 2, 3] :=
+  preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)
+
+-- …and to a NON-SYMMETRIC one, where it reproduces the orientation probe's positive result
+-- (`Relational/OrientationProbe.lean`) for EVERY pattern at once, rather than one pattern
+-- at a time by `decide`.
+example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
+    PreservesAndReflects P ordModel ![0, 1, 2] ↔ PreservesAndReflects P ordModel ![3, 4, 5] :=
+  preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)
+
+-- The adversarial reversed orientation is excluded at the hypothesis: the forward palette
+-- disagrees, so transport does not apply — which is exactly the right failure mode.
+example :
+    binaryPairPalette ordModel (![0, 1, 2] 0) (![0, 1, 2] 1)
+      ≠ binaryPairPalette ordModel (![5, 4, 3] 0) (![5, 4, 3] 1) := by decide
+
+-- Transport needs no injectivity: a constant map transports against itself, and against
+-- any other map agreeing on profiles and (vacuously distinct-index) palettes.
+example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
+    PreservesAndReflects P symModel ![0, 0, 0] ↔ PreservesAndReflects P symModel ![1, 1, 1] :=
+  preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)
 
 end Tests
 
