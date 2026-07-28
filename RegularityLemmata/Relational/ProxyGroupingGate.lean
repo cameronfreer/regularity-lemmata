@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Graph.BadMass
+import RegularityLemmata.Graph.FamilyRegularity
 import RegularityLemmata.Partition.Equitable
 
 /-!
@@ -47,11 +48,27 @@ two disjoint cells.
 
 ## The consequence for the tolerance
 
-Grouping changes the event count, and the factor must be derived before any tolerance is
-chosen. With `3n` proxies instead of `n` coarse cells, the ordered distinct pairs go from
-`n(n−1)` to `3n(3n−1)` — at most `9` times as many (`card_ordered_pairs_grouped_le`). A
-selection tolerance is then chosen against `9n²`, and — as before — must not depend on the
-produced complexity.
+Grouping changes the event count, and the envelope must be derived before any tolerance is
+chosen. With `3n` proxies instead of `n` owners, the ordered distinct pairs are `3n(3n−1)`,
+which sits under a **`9n²` envelope** (`card_ordered_pairs_grouped_le`). That is an
+envelope, NOT a ninefold factor over the coarse count `n(n−1)`: the ratio to `n(n−1)`
+exceeds `9` for small `n` — at `n = 3` it is `72/6 = 12` — and only approaches `9` as `n`
+grows. A selection tolerance is chosen against `9n²`, and — as before — must not depend on
+the produced complexity.
+
+## Two prerequisites the grouping inherits
+
+* **Owner sizes.** Three cells of size `m` or `m+1` give `3m ≤ |owner| ≤ 3m + 3`, and the
+  intermediate values `3m+1`, `3m+2` do occur — mixed triples are the normal case, not an
+  edge case. The size floor must be stated in multiplication form against that range, never
+  as an exact `3m` or `3m+3`.
+* **Divisibility.** Grouping the cells of `Q` in threes needs `3 ∣ #Q.parts`, which the
+  family-regularity summit does NOT currently guarantee: it delivers `l ≤ #parts ≤ bound`,
+  and the reachable counts are the iterates of `familyStepBound` from the initial floor.
+  The likely acyclic fix is to seed the iteration at a multiple of three — since
+  `familyStepBound n = n · familyChunksPerPart n`, every step then preserves divisibility
+  (`three_dvd_familyStepBound`), so all reachable part counts stay divisible by `3`. This
+  is recorded as a prerequisite, not discharged here.
 
 **Nothing is constructed here.** No partition, no representatives, no rounding, no
 cleaning. The checkpoint's commit 1 should be re-specified as a grouping before it is
@@ -126,10 +143,11 @@ end GateP2
 
 /-! ### The event-count factor of grouping -/
 
-/-- **The grouping factor.** Three proxies per owner turn `n` coarse cells into `3n`
-proxies, so the ordered distinct pairs grow from `n(n−1)` to `3n(3n−1)` — at most nine
-times as many. The selection tolerance must be chosen against this count, and only after
-it is known. -/
+/-- **The grouping envelope.** Three proxies per owner turn `n` owners into `3n` proxies,
+whose ordered distinct pairs number `3n(3n−1)` — under a `9n²` envelope. This is an
+envelope on the proxy count itself, NOT a ninefold factor over the coarse count `n(n−1)`:
+that ratio exceeds `9` for small `n`. The selection tolerance is chosen against `9n²`, and
+only after this is known. -/
 theorem card_ordered_pairs_grouped_le (n : ℕ) :
     3 * n * (3 * n - 1) ≤ 9 * (n * n) := by
   cases n with
@@ -139,8 +157,8 @@ theorem card_ordered_pairs_grouped_le (n : ℕ) :
     rw [h]
     nlinarith
 
-/-- The growth is genuine, not slack: at `n` owners the proxy pair count already exceeds
-the coarse pair count by more than a factor of eight once `n ≥ 1`. -/
+/-- The proxy pair count dominates the coarse one, so the envelope is an increase and not
+a re-description of the same events. No factor is claimed here. -/
 theorem card_ordered_pairs_coarse_le (n : ℕ) : n * (n - 1) ≤ 3 * n * (3 * n - 1) := by
   cases n with
   | zero => simp
@@ -150,21 +168,55 @@ theorem card_ordered_pairs_coarse_le (n : ℕ) : n * (n - 1) ≤ 3 * n * (3 * n 
     rw [h, h2]
     exact Nat.mul_le_mul (by omega) (by omega)
 
+/-- **Divisibility is preserved by the step.** `familyStepBound n = n · familyChunksPerPart n`,
+so seeding the exact iteration at a multiple of three keeps every reachable part count
+divisible by three — the acyclic route to the `3 ∣ #Q.parts` prerequisite that grouping
+needs. Seeding is NOT done here. -/
+theorem three_dvd_familyStepBound {n : ℕ} (h : 3 ∣ n) : 3 ∣ familyStepBound n := by
+  rw [familyStepBound]
+  exact Dvd.dvd.mul_right h _
+
 /-! ### Tests -/
 
 section Tests
 
--- The factor at small owner counts, concretely: 3 owners give 9 proxies and 72 ordered
--- distinct proxy pairs against 6 coarse ones.
+-- At 3 owners: 9 proxies, 72 ordered distinct proxy pairs against 6 coarse ones — a ratio
+-- of 12, which is why the bound is stated as a `9n²` ENVELOPE and not as a ninefold factor
+-- over the coarse count.
 example : 3 * 3 * (3 * 3 - 1) = 72 := by decide
 
 example : 3 * (3 - 1) = 6 := by decide
 
+example : ¬ (3 * 3 * (3 * 3 - 1) ≤ 9 * (3 * (3 - 1))) := by decide
+
 example : 3 * 3 * (3 * 3 - 1) ≤ 9 * (3 * 3) := card_ordered_pairs_grouped_le 3
+
+-- Owner sizes from three `m`/`m+1` cells span the whole range `3m … 3m+3`; the
+-- intermediate values are ordinary mixed triples, so the size floor must be stated against
+-- the range rather than against an exact value.
+example (m : ℕ) (a b c : ℕ) (ha : m ≤ a) (ha' : a ≤ m + 1) (hb : m ≤ b) (hb' : b ≤ m + 1)
+    (hc : m ≤ c) (hc' : c ≤ m + 1) : 3 * m ≤ a + b + c ∧ a + b + c ≤ 3 * m + 3 := by
+  omega
+
+example (m : ℕ) : m + m + (m + 1) = 3 * m + 1 := by omega
 
 -- Two distinct cells of a concrete partition are an off-diagonal pair — the shape the
 -- grouping design relies on for sibling proxies.
 example : ({0, 1} : Finset (Fin 4)) ≠ {2, 3} := by decide
+
+-- Divisibility survives a step, and hence the whole iteration, once the seed has it.
+example : 3 ∣ familyStepBound 3 := three_dvd_familyStepBound ⟨1, rfl⟩
+
+example : 3 ∣ familyStepBound (familyStepBound 6) :=
+  three_dvd_familyStepBound (three_dvd_familyStepBound ⟨2, rfl⟩)
+
+-- The prerequisite is real: the ε-dependent initial floor is not divisible by three in
+-- general, so the seed has to be chosen, not hoped for.
+example : ¬ (3 ∣ familyInitialBound 100 (1 / 2 : ℝ) 2) := by
+  have h : familyInitialBound 100 (1 / 2 : ℝ) 2 = 3200 := by
+    rw [familyInitialBound]; norm_num
+  rw [h]
+  decide
 
 -- The degenerate endpoints behave: no owners, one owner.
 example : 3 * 0 * (3 * 0 - 1) = 0 := by decide
