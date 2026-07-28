@@ -85,6 +85,7 @@ import RegularityLemmata.Relational.Transversalization
 import RegularityLemmata.Relational.OrientationProbe
 import RegularityLemmata.Relational.CloneProxyProbe
 import RegularityLemmata.Relational.ProxyMove
+import RegularityLemmata.Relational.ProxyGroupingGate
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
 import RegularityLemmata.Relational.RepresentativeSelection
