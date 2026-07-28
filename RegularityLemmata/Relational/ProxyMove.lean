@@ -334,14 +334,35 @@ the second is empty. -/
 private abbrev twoOwnerModel : FiniteRelModel (singleRelLang 2) (Fin 4) :=
   binModel fun x y => decide ((x : ℕ) < 2 ∧ (y : ℕ) < 2 ∧ (x : ℕ) < (y : ℕ))
 
--- The two owners genuinely disagree on their diagonal palette, so a single global `d`
--- could not describe this model — which is why `d` is indexed by owner.
-example :
-    binaryPairPalette twoOwnerModel 0 1 ≠ binaryPairPalette twoOwnerModel 2 3 := by decide
+/-- Owners `{0,1}` and `{2,3}`. -/
+private abbrev twoOwner (v : Fin 4) : Fin 2 := if (v : ℕ) < 2 then 0 else 1
 
--- Each owner is internally consistent, which is what `within_forward` asks of it.
-example : binaryPairPalette twoOwnerModel 2 3 = binaryPairPalette twoOwnerModel 3 2 := by
-  decide
+/-- The local order, explicit. -/
+private abbrev twoOwnerOrder : LinearOrder (Fin 4) := inferInstance
+
+/-- Proxy rank inside each owner: one vertex per proxy, so the rank component of `ProxyLt`
+is what orients each owner's diagonal. -/
+private abbrev twoOwnerRank (v : Fin 4) : ℕ := (v : ℕ) % 2
+
+/-- The per-owner diagonal targets — DIFFERENT for the two owners. -/
+private abbrev twoOwnerDiag (o : Fin 2) : BinaryPairPalette (singleRelLang 2) :=
+  if o = 0 then binaryPairPalette twoOwnerModel 0 1
+  else binaryPairPalette twoOwnerModel 2 3
+
+-- The two owners genuinely disagree on their diagonal palette…
+example : twoOwnerDiag 0 ≠ twoOwnerDiag 1 := by decide
+
+-- …and the package is nevertheless SATISFIED, with `d` varying by owner. This is the
+-- test that a global `d` would fail: it instantiates the structure, not merely the
+-- inequality of two palettes.
+example :
+    IsOrderDeterminedProxyPalette
+      twoOwnerModel twoOwner twoOwnerOrder twoOwnerRank twoOwnerDiag := by
+  constructor <;> decide
+
+-- The supply shape is available here too, with one proxy rank per vertex inside an owner.
+example : ∀ x y : Fin 4, twoOwner x = twoOwner y → twoOwnerRank x < twoOwnerRank y →
+    ProxyLt twoOwnerOrder twoOwnerRank x y := by decide
 
 end Tests
 
