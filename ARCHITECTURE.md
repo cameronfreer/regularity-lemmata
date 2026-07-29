@@ -672,13 +672,58 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    - **No selection tolerance may depend on the resulting proxy/fine complexity**, which is
      the same acyclicity constraint that governs `supplierTolerance`.
 
-   **Still open in ladder step 2**, and `11B` stays closed until they close: generalizing
-   the five proxy moves into a lemma stated by coarse owner, proxy rank, and local order
-   (the next Lean unit, and only that); then, as a separate checkpoint, constructing the
-   partition and reconciling it with representative selection — including the size floors
-   the supplier provides. The **Ramsey extraction** stays recorded as the fallback variant
-   if the generic clone/proxy lemma fails, alongside the separate repeated-cell
-   original-copy lower bound. Rounding, cleaning, and `Recolor.lean` stay closed.
+   **The generic proxy move: PROVED (2026-07-27, PR #43, `Relational/ProxyMove.lean`).**
+   `IsOrderDeterminedProxyPalette M owner localOrder rank d` — profiles depending only on
+   the owner, cross-owner palettes only on the ordered owner pair, and within an owner the
+   palette being THAT OWNER's diagonal target `d (owner x)` forwards on the
+   proxy-lexicographic order `ProxyLt` (rank first, local vertex order inside a proxy; the
+   order is an explicit parameter, never an instance). Transport and supply are separate:
+   `preservesAndReflects_proxy_move` needs source injectivity but no proxy-distinctness,
+   and `exists_proxyDistinct_move` adds distinctness from `HasProxySupply`. No case
+   analysis on the five strata survives — they are the fibres of `owner ∘ f`, and a
+   predecessor count handles them uniformly, deriving "three proxies are exactly enough"
+   rather than assuming it.
+
+   **GROUPING IS FROZEN (2026-07-28 review, PR #44, `Relational/ProxyGroupingGate.lean`).**
+   Proxy cells are obtained by GROUPING cells of an already-regular equipartition into
+   owners of three — a coarse cell is the UNION of its three proxies — and never by
+   splitting a regular cell. Gate **G-P1**: splitting does not inherit sibling-pair
+   regularity (a one-cell partition is off-diagonally regular for free, yet a split of that
+   cell yields a sibling pair that is not `1/4`-uniform), and the diagonal-inclusive
+   fallback is refuted for arbitrary directed relations by G-U5's strict-order
+   counterexample — no bounded part count survives. Gate **G-P2**: under grouping a sibling
+   pair is a pair of DISTINCT cells of the regular partition, hence an ordinary off-diagonal
+   event needing no diagonal control.
+
+   Frozen with it:
+
+   - **Event envelope**: `3n` proxies have `3n(3n−1)` ordered distinct pairs, under a
+     `9n²` ENVELOPE — not a ninefold factor over the coarse `n(n−1)`, whose ratio exceeds
+     `9` for small `n`. The selection tolerance is chosen against `9n²` and still may not
+     depend on the produced complexity.
+   - **Owner sizes**: `3m ≤ |owner| ≤ 3m + 3` from three `m`/`m+1` cells, with `3m+1` and
+     `3m+2` ordinary for mixed triples. Size floors are stated in multiplication form
+     against that range, never as an exact value.
+   - **Divisibility prerequisite**: grouping in threes needs `3 ∣ #Q.parts`, which the
+     family-regularity summit does NOT supply. The acyclic fix is to seed the exact
+     iteration at a multiple of three; `three_dvd_familyStepBound` shows every step then
+     preserves divisibility, since `familyStepBound n = n · familyChunksPerPart n`.
+
+   **Profile homogenization is a LATER ROUNDING OBLIGATION, not a consequence of grouping.**
+   `IsOrderDeterminedProxyPalette.profile_of_owner` requires the three proxies of an owner
+   to share a vertex profile, loops included. Grouping three arbitrary cells of a regular
+   equipartition does not deliver that — regularity controls pair densities, not profiles.
+   The profile/loop cleaning layer must supply it, and until it does the transport package
+   is not instantiable on a grouped partition.
+
+   **Still open in ladder step 2**, and `11B` stays closed until they close: seeding the
+   iteration at a multiple of three and carrying divisibility through it; constructing the
+   owners from triples of equipartition cells with cover, disjointness and the union
+   cardinality bounds; and rebuilding representative selection over ordered distinct proxy
+   pairs against the `9n²` envelope. The **Ramsey extraction** stays recorded as the
+   fallback variant, alongside the separate repeated-cell original-copy lower bound.
+   Rounding, cleaning, and `Recolor.lean` stay closed until that construction/selection
+   checkpoint clears.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
