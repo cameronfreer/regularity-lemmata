@@ -14,6 +14,7 @@ import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.Equitable
+import RegularityLemmata.Partition.Grouping
 import RegularityLemmata.Partition.BlockEnergy
 import RegularityLemmata.Partition.Energy
 import RegularityLemmata.Partition.AlmostRefines
