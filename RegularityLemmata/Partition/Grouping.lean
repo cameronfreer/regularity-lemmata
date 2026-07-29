@@ -185,6 +185,18 @@ theorem card_groupUnion_triple_bounds {m : ℕ}
     3 * m ≤ (groupUnion Q g j).card ∧ (groupUnion Q g j).card ≤ 3 * m + 3 :=
   card_groupUnion_bounds hm hfib
 
+/-- **The bridge from divisibility to the owner labelling.** `3 ∣ #Q.parts` — which
+`Graph/TripleSeed.lean`'s seeded summit delivers — directly produces the owner count `k` and
+a labelling whose every fibre is exactly a triple of cells. Downstream selection consumes
+this, rather than recomposing the divisibility and the labelling itself. -/
+theorem exists_triple_grouping (h : 3 ∣ Q.parts.card) :
+    ∃ k, ∃ g : Finset α → ℕ, Q.parts.card = 3 * k ∧
+      (∀ C ∈ Q.parts, g C < k) ∧
+      ∀ j < k, (Q.parts.filter fun C => g C = j).card = 3 := by
+  obtain ⟨k, hk⟩ := h
+  obtain ⟨g, hglt, hgfib⟩ := exists_fibre_labelling 3 k Q.parts hk
+  exact ⟨k, g, hk, hglt, hgfib⟩
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -207,10 +219,26 @@ example (m : ℕ) : (m + 1) + (m + 1) + (m + 1) = 3 * m + 3 := by omega
 
 example (m : ℕ) : m + m + (m + 1) = 3 * m + 1 := by omega
 
--- Owners with distinct labels are disjoint even when one of them is empty (no cell
--- carries that label) — the degenerate case the cover statement has to tolerate.
-example (Q : Finpartition (Finset.univ : Finset (Fin 4))) (g : Finset (Fin 4) → ℕ) :
-    Disjoint (groupUnion Q g 0) (groupUnion Q g 1) := groupUnion_disjoint (by decide)
+-- **An unused label really does give an empty owner**, and disjointness still holds there
+-- — the degenerate case the cover statement has to tolerate. Shown with a CONSTANT
+-- labelling, so the emptiness is proved rather than assumed.
+example (Q : Finpartition (Finset.univ : Finset (Fin 4))) :
+    groupUnion Q (fun _ => 0) 1 = ∅ := by
+  have hfil : (Q.parts.filter fun C => (fun _ : Finset (Fin 4) => (0 : ℕ)) C = 1) = ∅ := by
+    refine Finset.filter_eq_empty_iff.mpr fun _ _ => ?_
+    simp
+  rw [groupUnion, hfil, Finset.biUnion_empty]
+
+example (Q : Finpartition (Finset.univ : Finset (Fin 4))) :
+    Disjoint (groupUnion Q (fun _ => 0) 0) (groupUnion Q (fun _ => 0) 1) :=
+  groupUnion_disjoint (by decide)
+
+-- The bridge, on a partition whose cell count is divisible by three.
+example (Q : Finpartition (Finset.univ : Finset (Fin 6))) (h : 3 ∣ Q.parts.card) :
+    ∃ k, ∃ g : Finset (Fin 6) → ℕ, Q.parts.card = 3 * k ∧
+      (∀ C ∈ Q.parts, g C < k) ∧
+      ∀ j < k, (Q.parts.filter fun C => g C = j).card = 3 :=
+  exists_triple_grouping h
 
 end Tests
 
