@@ -237,6 +237,14 @@ theorem le_familyStepBound (n : ℕ) : n ≤ familyStepBound n :=
   calc n = n * 1 := (mul_one n).symm
     _ ≤ n * familyChunksPerPart n := Nat.mul_le_mul (le_refl n) (familyChunksPerPart_pos n)
 
+/-- Divisibility by three is preserved by the step, since `familyStepBound n` is `n` times
+something. Seeding the exact iteration at a multiple of three therefore keeps every
+reachable part count divisible by three — the prerequisite of grouping cells into owners of
+three (`ARCHITECTURE.md`, route (b) ladder step 2). -/
+theorem three_dvd_familyStepBound {n : ℕ} (h : 3 ∣ n) : 3 ∣ familyStepBound n := by
+  rw [familyStepBound]
+  exact Dvd.dvd.mul_right h _
+
 theorem familyStepBound_mono {m n : ℕ} (h : m ≤ n) :
     familyStepBound m ≤ familyStepBound n :=
   Nat.mul_le_mul h (familyChunksPerPart_mono h)

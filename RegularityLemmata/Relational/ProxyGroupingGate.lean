@@ -168,14 +168,6 @@ theorem card_ordered_pairs_coarse_le (n : ℕ) : n * (n - 1) ≤ 3 * n * (3 * n 
     rw [h, h2]
     exact Nat.mul_le_mul (by omega) (by omega)
 
-/-- **Divisibility is preserved by the step.** `familyStepBound n = n · familyChunksPerPart n`,
-so seeding the exact iteration at a multiple of three keeps every reachable part count
-divisible by three — the acyclic route to the `3 ∣ #Q.parts` prerequisite that grouping
-needs. Seeding is NOT done here. -/
-theorem three_dvd_familyStepBound {n : ℕ} (h : 3 ∣ n) : 3 ∣ familyStepBound n := by
-  rw [familyStepBound]
-  exact Dvd.dvd.mul_right h _
-
 /-! ### Tests -/
 
 section Tests

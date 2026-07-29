@@ -35,6 +35,7 @@ import RegularityLemmata.Graph.EquitableChunk
 import RegularityLemmata.Graph.EquitableChunkApprox
 import RegularityLemmata.Graph.EquitableStep
 import RegularityLemmata.Graph.EquitableFamilyRegularity
+import RegularityLemmata.Graph.TripleSeed
 import RegularityLemmata.Graph.Regularity
 import RegularityLemmata.Graph.RegularityDiag
 import RegularityLemmata.Graph.Bridge
