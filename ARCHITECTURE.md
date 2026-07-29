@@ -716,14 +716,25 @@ no `Recolor.lean` and no cleaning until step 5 composes:
    The profile/loop cleaning layer must supply it, and until it does the transport package
    is not instantiable on a grouped partition.
 
-   **Still open in ladder step 2**, and `11B` stays closed until they close: seeding the
-   iteration at a multiple of three and carrying divisibility through it; constructing the
-   owners from triples of equipartition cells with cover, disjointness and the union
-   cardinality bounds; and rebuilding representative selection over ordered distinct proxy
-   pairs against the `9n²` envelope. The **Ramsey extraction** stays recorded as the
-   fallback variant, alongside the separate repeated-cell original-copy lower bound.
-   Rounding, cleaning, and `Recolor.lean` stay closed until that construction/selection
-   checkpoint clears.
+   **The divisibility prerequisite is DISCHARGED (2026-07-29, PR #46,
+   `Graph/TripleSeed.lean`).** `familyTripleSeed C ε l = 3·⌈(floor)/3⌉` rounds the
+   ε-dependent initial floor up to a multiple of three, at a cost of at most TWO extra
+   parts (`familyTripleSeed_le`) and still as a function of `(C, ε, l)` alone, so no
+   acyclicity is disturbed. `familyRegularity_iterate_dvd` carries `3 ∣ #P.parts` through
+   the iteration — each step multiplies the count by `familyChunksPerPart` — and
+   `exists_familyRegular_equipartition_triple` is the summit seeded that way, delivering an
+   equipartition that is family-regular with `l ≤ #parts ≤ familyRegularityBoundTriple K ε l`
+   AND `3 ∣ #parts`. The earlier `familyRegularity_iterate` and
+   `exists_familyRegular_equipartition` are deliberately unchanged, since the piece supplier
+   destructures the latter.
+
+   **Still open in ladder step 2**, and `11B` stays closed until they close: constructing
+   the owners from triples of equipartition cells with cover, disjointness and the union
+   cardinality bounds `3m ≤ |owner| ≤ 3m + 3`; and rebuilding representative selection over
+   ordered distinct proxy pairs against the `9n²` envelope. The **Ramsey extraction** stays
+   recorded as the fallback variant, alongside the separate repeated-cell original-copy
+   lower bound. Rounding, cleaning, and `Recolor.lean` stay closed until that
+   construction/selection checkpoint clears.
 3. *Off-diagonal representative selection*: ONE candidate fine cell `W C` per large
    coarse cell — **not** three role-indexed choices — with (i) `W C ⊆ C` and a linear
    size floor in multiplication form; (ii) `(W C, W D)` uniform for every palette for
