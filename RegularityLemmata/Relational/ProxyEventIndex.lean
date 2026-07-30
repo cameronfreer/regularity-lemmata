@@ -37,6 +37,21 @@ that is `3n(3n − 1)`, under the frozen **`9n²` envelope**
 (`card_proxyPairEvents_le_of_triple`), and with palettes a factor `K`
 (`card_proxyPaletteEvents_le`).
 
+## The size is an envelope, not a tolerance input (settled 2026-07-30)
+
+The `9n²·K` count bounds the index. It does **not** automatically multiply anything in the
+selection tolerance: the summit sums nonuniform mass over ALL proxy pairs first, bounded
+once per palette by the global bad mass, and likewise the deviant mass once per palette by
+`deviant_mass_le`. Only the palette count `K` multiplies those aggregates — the old role
+factor `6` disappears — and sibling pairs are covered automatically, being ordinary distinct
+proxy pairs inside the same per-palette aggregate sum. Deviation enters as an AGGREGATE
+COST, never as a forbidden per-event condition, and any residual `n²` dependence comes from
+the lower bound on candidate weights and proxy sizes rather than from counting events.
+
+The rework therefore proves the two aggregate reindex lemmas — nonuniform mass and deviant
+mass, each summed over proxy pairs and bounded once per palette — BEFORE choosing any
+constant.
+
 ## Not done here
 
 The selection summit itself is not rebuilt. `BinaryPaletteStrongDiagWitness.exists_representatives`
@@ -99,7 +114,8 @@ theorem card_proxyPairEvents_le_of_triple (Q : Finpartition s) {n : ℕ}
   | succ m => nlinarith [Nat.sub_le (3 * (m + 1) * (3 * (m + 1))) (3 * (m + 1))]
 
 /-- With palette colors the index carries a factor `K`, and the whole event count is under
-`9n²·K`. The tolerance is chosen against this, and only after it. -/
+`9n²·K`. This is the cardinality ENVELOPE. Whether it enters the selection tolerance is
+determined by the aggregate mass reindex in the summit, not by this count. -/
 theorem card_proxyPaletteEvents_le {L : FirstOrder.Language} [FiniteRelational L]
     (Q : Finpartition s) {n : ℕ} (hn : Q.parts.card = 3 * n) :
     (proxyPairEvents Q ×ˢ (Finset.univ : Finset (BinaryPairPalette L))).card
