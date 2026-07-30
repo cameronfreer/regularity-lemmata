@@ -91,6 +91,7 @@ import RegularityLemmata.Relational.ProxyGroupingGate
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
 import RegularityLemmata.Relational.RepresentativeSelection
+import RegularityLemmata.Relational.ProxyEventIndex
 import RegularityLemmata.Relational.PlacementStrata
 
 /-!
