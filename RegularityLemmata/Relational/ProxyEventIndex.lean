@@ -9,9 +9,8 @@ import RegularityLemmata.Partition.Grouping
 # Route (b) ladder step 2: the proxy-pair event index
 
 `ARCHITECTURE.md` route (b) ladder step 2 (grouping frozen 2026-07-28). Representative
-selection is to be rebuilt over ordered distinct PROXY pairs. This file supplies the new
-event index and derives its size — the step the frozen record requires **before** any
-tolerance is chosen — and nothing else.
+selection is to be rebuilt over ordered distinct PROXY pairs. This file supplies the index
+and derives its size, and nothing else.
 
 ## What changes
 
@@ -97,7 +96,7 @@ theorem notMem_proxyPairEvents_self {Q : Finpartition s} {A : Finset V} :
   rintro ⟨-, -, h⟩
   exact h rfl
 
-/-! ### The size, derived before any tolerance -/
+/-! ### The size -/
 
 theorem card_proxyPairEvents (Q : Finpartition s) :
     (proxyPairEvents Q).card = Q.parts.card * Q.parts.card - Q.parts.card :=
