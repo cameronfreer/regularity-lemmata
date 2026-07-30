@@ -15,7 +15,7 @@ that possible, and stops there: no channel routing, no constants, no summit.
 
 * `sum_proxyPair_nonuniform_le` — the nonuniform fine-fibre mass, summed over every ordered
   distinct proxy pair, is bounded ONCE by the diagonal-inclusive bad mass of the fine
-  partition. The point is disjointness: a fine cell lies in exactly one proxy, so distinct
+  partition. The point is disjointness: a fine cell lies in AT MOST one proxy, so distinct
   proxy pairs contribute disjoint sets of fine-cell pairs and the double sum collapses to a
   single sum over a subset of all fine pairs. No factor of the proxy-pair count appears.
 * `sum_proxyPair_deviant_le` — the `η`-deviant fine-fibre mass, summed over every ordered
@@ -40,7 +40,7 @@ variable {V : Type*} [DecidableEq V] {s : Finset V}
 /-! ### Disjointness of the proxy fibres -/
 
 /-- Distinct proxy pairs contribute DISJOINT sets of fine-cell pairs: a fine cell sits in
-exactly one proxy, so it cannot be a fibre member of two. This is what makes the aggregate
+at most one proxy, so it cannot be a fibre member of two. This is what makes the aggregate
 a single sum rather than a per-pair bound multiplied by the pair count.
 
 No refinement hypothesis is needed: the fibre filter `(· ⊆ pd.1)` already forces the
