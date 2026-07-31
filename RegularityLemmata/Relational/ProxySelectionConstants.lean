@@ -51,12 +51,13 @@ Every inequality here is local to a REALIZED proxy count. `proxySigma_le_half_of
 `proxyMu_le_of_parts` state them at `P = #Q.parts` so this is syntactic, not a convention.
 
 The tolerances are chosen for that `P`. Gate **G-H1**
-(`exists_realizedProxyCount_gt_globalDeviation`) records the consequence: since
-`proxyDeviationTolerance K P η τ` shrinks like `P ⁻²`, no positive `δ` fixed BEFORE the
-proxy partition is produced satisfies the requirement at every realized `P`. So these
-theorems do not compose with a globally fixed witness parameter, and the summit must either
-produce the witness after the proxy count is realized or use a `P`-free deviation
-requirement. Recorded, not discharged.
+(`exists_proxyCount_gt_globalDeviation`) records what that costs: since
+`proxyDeviationTolerance K P η τ` shrinks like `P ⁻²`, no positive `δ` meets the requirement
+UNIFORMLY over all positive proxy counts. The gate quantifies over arbitrary positive
+naturals, not over counts realized by a partition or by the pipeline, so it neither exhibits
+a produced `P` that violates a given `δ` nor rules out choosing `δ` from an a priori bound on
+`P`. What it shows is that Step 5 still lacks one of two things: an a priori bound on `P` (or
+an order of choice fixing `P` first), or a `P`-free deviation requirement.
 
 ## Step 5, not done here
 
@@ -125,6 +126,38 @@ theorem proxyFineTolerance_pos {K P : ℕ} (hK : 0 < K) (hP : 0 < P) :
   have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
   rw [proxyFineTolerance]
   positivity
+
+theorem proxyDeviationTolerance_pos {K P : ℕ} (hK : 0 < K) (hP : 0 < P) {η τ : ℝ}
+    (hη : 0 < η) (hτ : 0 < τ) : 0 < proxyDeviationTolerance K P η τ := by
+  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
+  have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
+  rw [proxyDeviationTolerance]
+  positivity
+
+omit [DecidableEq V] in
+/-- Both tolerances are antitone in the proxy count: more proxies is a stricter requirement,
+never a weaker one. -/
+theorem proxyFineTolerance_anti {K P P' : ℕ} (hK : 0 < K) (hP : 0 < P) (hPP : P ≤ P') :
+    proxyFineTolerance K P' ≤ proxyFineTolerance K P := by
+  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
+  have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
+  have hPP' : (P : ℝ) ≤ P' := by exact_mod_cast hPP
+  rw [proxyFineTolerance, proxyFineTolerance]
+  apply one_div_le_one_div_of_le (by positivity)
+  have hsq : (P : ℝ) ^ 2 ≤ (P' : ℝ) ^ 2 := by nlinarith [hPP', hP0.le]
+  linarith [mul_nonneg hK0.le (sub_nonneg.mpr hsq)]
+
+omit [DecidableEq V] in
+theorem proxyDeviationTolerance_anti {K P P' : ℕ} (hK : 0 < K) (hP : 0 < P) (hPP : P ≤ P')
+    {η τ : ℝ} (hτ : 0 ≤ τ) :
+    proxyDeviationTolerance K P' η τ ≤ proxyDeviationTolerance K P η τ := by
+  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
+  have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
+  have hPP' : (P : ℝ) ≤ P' := by exact_mod_cast hPP
+  have hsq : (P : ℝ) ^ 2 ≤ (P' : ℝ) ^ 2 := by nlinarith [hPP', hP0.le]
+  rw [proxyDeviationTolerance, proxyDeviationTolerance]
+  apply div_le_div_of_nonneg_left (by positivity) (by positivity)
+  linarith [mul_nonneg hK0.le (sub_nonneg.mpr hsq)]
 
 /-! ### The two budgets at those constants -/
 
@@ -201,19 +234,23 @@ theorem proxyMu_le_of_parts {K m : ℕ} {δ η τ : ℝ} (hK : 1 ≤ K) (hP : 1 
     (K : ℝ) * (δ / η ^ 2 * (s.card : ℝ) ^ 2) / ((m : ℝ) / 2) ^ 2 ≤ τ :=
   proxyMu_le hK hP hm hη hδ0 hδ (sq_card_le_of_proxy_size hm hM)
 
-/-! ### Gate G-H1 — no global deviation parameter serves every realized proxy count -/
+/-! ### Gate G-H1 — no global deviation parameter serves every proxy count -/
 
 omit [DecidableEq V] in
 /-- **Gate G-H1.** The deviation tolerance shrinks like `P ⁻²`, so for ANY positive `δ`
-fixed in advance there is a realized proxy count at which `δ` exceeds it. A witness
-parameter chosen before the proxy partition is produced therefore does NOT satisfy
-`proxyMu_le` in general: the two theorems above are local to their own `P`, and composing
-them with a globally fixed `δ` is not justified by anything proved here.
+there is a positive proxy count at which `δ` exceeds it. Hence no positive `δ` satisfies the
+`proxyMu_le` requirement UNIFORMLY over all positive proxy counts, and a `δ` fixed with no
+constraint on `P` is not justified by anything proved here.
 
-This is the hierarchy question the summit must resolve — by producing the witness after the
-proxy count is realized, or by a formulation whose deviation requirement is `P`-free. It is
-recorded, not discharged. -/
-theorem exists_realizedProxyCount_gt_globalDeviation (K : ℕ) (hK : 0 < K) {η τ δ : ℝ}
+**What this does not prove.** `P` here is an arbitrary positive natural, not one realized by
+a partition or by the pipeline. The gate therefore does not exhibit a produced proxy count
+that violates a given `δ`, and it does not rule out choosing `δ` from an a priori upper
+bound on `P`.
+
+What it does establish is what Step 5 still lacks: either an a priori bound on `P` (or an
+order of choice that fixes `P` first), or a deviation requirement that is `P`-free.
+Recorded, not discharged. -/
+theorem exists_proxyCount_gt_globalDeviation (K : ℕ) (hK : 0 < K) {η τ δ : ℝ}
     (hδ : 0 < δ) :
     ∃ P : ℕ, 0 < P ∧ proxyDeviationTolerance K P η τ < δ := by
   have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
@@ -263,24 +300,29 @@ example (K P : ℕ) : proxyFineTolerance K P = 1 / (32 * K * P ^ 2) := rfl
 example (K P : ℕ) (η τ : ℝ) :
     proxyDeviationTolerance K P η τ = η ^ 2 * τ / (16 * K * P ^ 2) := rfl
 
--- Both tolerances shrink as the proxy count grows, as they must: more proxies means a finer
+-- The fine tolerance shrinks as the proxy count grows: more proxies means a finer
 -- normalization, never a weaker requirement.
 example {K P P' : ℕ} (hK : 0 < K) (hP : 0 < P) (hPP : P ≤ P') :
-    proxyFineTolerance K P' ≤ proxyFineTolerance K P := by
-  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
-  have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
-  have hPP' : (P : ℝ) ≤ P' := by exact_mod_cast hPP
-  rw [proxyFineTolerance, proxyFineTolerance]
-  apply one_div_le_one_div_of_le (by positivity)
-  have hsq : (P : ℝ) ^ 2 ≤ (P' : ℝ) ^ 2 := by nlinarith [hPP', hP0.le]
-  linarith [mul_nonneg hK0.le (sub_nonneg.mpr hsq)]
+    proxyFineTolerance K P' ≤ proxyFineTolerance K P :=
+  proxyFineTolerance_anti hK hP hPP
 
--- Gate G-H1 in use: whatever positive deviation parameter is fixed in advance, some
--- realized proxy count needs a smaller one. So the local inequalities above do not compose
--- with a global witness, and the summit must order the two choices.
+-- Gate G-H1 in use: whatever positive deviation parameter is chosen, some positive proxy
+-- count needs a smaller one, so no `δ` serves uniformly over all proxy counts. The `P` it
+-- produces is an arbitrary positive natural, not one realized by a partition — hence the
+-- gate constrains what Step 5 must supply, not what any produced partition does.
 example (K : ℕ) (hK : 0 < K) (η τ : ℝ) {δ : ℝ} (hδ : 0 < δ) :
     ∃ P : ℕ, 0 < P ∧ proxyDeviationTolerance K P η τ < δ :=
-  exists_realizedProxyCount_gt_globalDeviation K hK hδ
+  exists_proxyCount_gt_globalDeviation K hK hδ
+
+-- Both tolerances are antitone in the proxy count, so the claim covers the deviation
+-- tolerance and not only the fine one.
+example {K P P' : ℕ} (hK : 0 < K) (hP : 0 < P) (hPP : P ≤ P') {η τ : ℝ} (hτ : 0 ≤ τ) :
+    proxyDeviationTolerance K P' η τ ≤ proxyDeviationTolerance K P η τ :=
+  proxyDeviationTolerance_anti hK hP hPP hτ
+
+example {K P : ℕ} (hK : 0 < K) (hP : 0 < P) {η τ : ℝ} (hη : 0 < η) (hτ : 0 < τ) :
+    0 < proxyDeviationTolerance K P η τ :=
+  proxyDeviationTolerance_pos hK hP hη hτ
 
 -- The inequalities are stated at the realized count, so the tolerance and the partition
 -- cannot silently drift apart.
