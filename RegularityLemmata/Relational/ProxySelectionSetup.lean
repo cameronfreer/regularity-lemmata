@@ -6,7 +6,7 @@ import RegularityLemmata.Relational.ProxyAggregateMass
 import RegularityLemmata.Finite.WeightedChoice
 
 /-!
-# Route (b) ladder step 2: weighted choice on proxy cells, and the forbidden-event budget
+# Route (b) ladder step 2: weighted choice on proxy cells, and the forbidden-event budgets
 
 `ARCHITECTURE.md` route (b) ladder step 2, final unit, **steps 1 and 2 of five**: the index
 and event types on which `Finite/WeightedChoice.lean` is instantiated, and the conversion of
@@ -22,9 +22,11 @@ with two distinct coordinates, which is exactly what this file supplies.
   representative fine cell inside every proxy.
 * `ProxyEvent Q` — the forbidden events: an ordered distinct proxy pair. **No palette
   component.** In `exists_piFinset_forall_not_mem_bad_cost_le` the event type occurs only in
-  `hbad`; the cost hypothesis `hexp` mentions `cost` alone. Palettes therefore enter through
-  the cost channel and must not be multiplied into the event index — doing so would inflate
-  the forbidden-event budget by the palette count for no reason.
+  `hbad`; the cost hypothesis `hexp` mentions `cost` alone. Palettes are NOT event
+  coordinates. They enter the forbidden channel through the UNION of the per-palette
+  nonuniform sets, and the cost channel through aggregate deviation. Multiplying them into
+  the event index would be a different and wasteful thing: it would carry the palette count
+  into the event cardinality rather than into the forbidden set.
 * `proxyEventFst`, `proxyEventSnd`, `proxyEvent_fst_ne_snd` — the two coordinates and the
   distinctness the machine demands. Sibling pairs are events like any other.
 * `proxyCandidates` — the candidate family, `repCandidates` of the fine partition inside
@@ -38,9 +40,19 @@ with two distinct coordinates, which is exactly what this file supplies.
   uniform floor `w₀ ≤ W j` turns the whole `hbad` left-hand side into
   `(aggregate mass) / w₀ ^ 2 * ∏_j W j`. **The event count does not appear** — each event
   contributes its own mass, never a copy of the total.
-* `sum_proxyEvent_nonuniform_mass_le` — that factorization instantiated on proxies, with the
-  aggregate supplied by `sum_proxyPair_nonuniform_le`. The resulting admissible `σ` is
-  `badMassDiagNum R ε F / w₀ ^ 2`, in which no `9n²` event-count multiplier occurs.
+* `sum_proxyEvent_nonuniform_mass_le` — that factorization instantiated on proxies for a
+  SINGLE relation, with the aggregate supplied by `sum_proxyPair_nonuniform_le`. The
+  resulting admissible `σ` is `badMassDiagNum R ε F / w₀ ^ 2`, in which no `9n²` event-count
+  multiplier occurs.
+* `sum_le_sum_of_exists_mem` — the union bound over colours: a set covered by finitely many
+  sets has mass at most the summed masses.
+* `sum_proxyEvent_paletteNonuniform_mass_le` — **the simultaneous budget**, which is what the
+  selection actually needs. The forbidden set `paletteNonuniformFinePairs` is the union over
+  palette colours of the per-palette nonuniform sets, and its budget is
+  `K * B / w₀ ^ 2` times the total weight, where `K = Fintype.card (BinaryPairPalette L)` and
+  `B` bounds each palette's bad mass. The factor `K` is necessary for SIMULTANEOUS palette
+  uniformity and comes from the union over colours; it is not an event-count factor, and no
+  `9n²` multiplier occurs here either.
 
 ## Steps 3–5, not done here
 
@@ -103,6 +115,30 @@ theorem sum_event_mass_le_of_weight_floor (t : ι → Finset β) (wt : β → �
         mul_le_mul_of_nonneg_left hbound hmass
     _ = (∑ p ∈ Bad e ∩ (t (i₁ e) ×ˢ t (i₂ e)), wt p.1 * wt p.2) / w₀ ^ 2 * ∏ j, W j := by
         ring
+
+/-- **The union bound over colours.** A set every element of which lies in at least one of
+finitely many sets has mass at most the summed masses. This is where a palette factor comes
+from when one forbidden condition must hold for EVERY colour simultaneously: the forbidden
+set is the union of the per-colour ones, not a product of the event index with the colours. -/
+theorem sum_le_sum_of_exists_mem {γ κ : Type*} [DecidableEq γ] [Fintype κ]
+    (S : Finset γ) (T : κ → Finset γ) (f : γ → ℝ) (hf : ∀ x, 0 ≤ f x)
+    (hcov : ∀ x ∈ S, ∃ k, x ∈ T k) :
+    ∑ x ∈ S, f x ≤ ∑ k, ∑ x ∈ T k, f x := by
+  classical
+  calc ∑ x ∈ S, f x
+      ≤ ∑ x ∈ S, ∑ k : κ, (if x ∈ T k then f x else 0) := by
+        refine Finset.sum_le_sum fun x hx => ?_
+        obtain ⟨k, hk⟩ := hcov x hx
+        have hterm : f x = (if x ∈ T k then f x else 0) := by rw [if_pos hk]
+        refine le_trans (le_of_eq hterm) (Finset.single_le_sum
+          (f := fun k => if x ∈ T k then f x else 0)
+          (fun k _ => by by_cases h : x ∈ T k <;> simp [h, hf x]) (Finset.mem_univ k))
+    _ = ∑ k : κ, ∑ x ∈ S, (if x ∈ T k then f x else 0) := Finset.sum_comm
+    _ ≤ ∑ k : κ, ∑ x ∈ T k, f x := by
+        refine Finset.sum_le_sum fun k _ => ?_
+        rw [Finset.sum_ite_mem]
+        exact Finset.sum_le_sum_of_subset_of_nonneg Finset.inter_subset_right
+          fun x _ _ => hf x
 
 end Factorization
 
@@ -241,6 +277,131 @@ theorem sum_proxyEvent_nonuniform_mass_le (R : V → V → Prop) [DecidableRel R
             (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card))
     _ ≤ badMassDiagNum R ε F := sum_proxyPair_nonuniform_le R F Q
 
+/-! ### The simultaneous forbidden budget over all palettes -/
+
+section Palettes
+
+variable {L : FirstOrder.Language} [FiniteRelational L]
+
+open Classical in
+/-- **The forbidden set for SIMULTANEOUS palette uniformity.** A fine pair is forbidden as
+soon as it fails `ε`-uniformity for SOME palette colour — the union of the per-colour
+forbidden sets. This is how palettes enter the forbidden channel: as a union inside `Bad`,
+never as a coordinate of the event index. -/
+noncomputable def paletteNonuniformFinePairs (M : FiniteRelModel L V) (ε : ℝ)
+    (F : Finpartition s) : Finset (Finset V × Finset V) :=
+  (F.parts ×ˢ F.parts).filter fun p =>
+    ∃ c : BinaryPairPalette L, ¬ IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε
+
+open Classical in
+/-- The union is covered colour by colour: every forbidden pair is forbidden for some
+specific colour. -/
+theorem exists_mem_nonuniformFinePairs {M : FiniteRelModel L V} {ε : ℝ} {F : Finpartition s}
+    {p : Finset V × Finset V} (hp : p ∈ paletteNonuniformFinePairs M ε F) :
+    ∃ c : BinaryPairPalette L, p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F := by
+  rw [paletteNonuniformFinePairs, Finset.mem_filter] at hp
+  obtain ⟨c, hc⟩ := hp.2
+  exact ⟨c, Finset.mem_filter.mpr ⟨hp.1, hc⟩⟩
+
+open Classical in
+/-- Conversely each colour's forbidden set sits inside the union, which is why the palette
+factor below cannot be avoided: simultaneous uniformity really does forbid every colour's
+bad pairs. -/
+theorem nonuniformFinePairs_subset_palette (M : FiniteRelModel L V) (ε : ℝ)
+    (F : Finpartition s) (c : BinaryPairPalette L) :
+    nonuniformFinePairs (HasBinaryPairPalette M c) ε F ⊆ paletteNonuniformFinePairs M ε F := by
+  intro p hp
+  rw [nonuniformFinePairs, Finset.mem_filter] at hp
+  exact Finset.mem_filter.mpr ⟨hp.1, ⟨c, hp.2⟩⟩
+
+open Classical in
+/-- **The simultaneous forbidden-event budget.** With `Bad e` the union over palette colours
+of the per-colour nonuniform pairs, the `hbad` left-hand side is at most `K * B / w₀ ^ 2`
+times the total selection weight, where `K = Fintype.card (BinaryPairPalette L)` and `B`
+bounds each colour's diagonal-inclusive bad mass. The factor `K` is necessary for
+SIMULTANEOUS palette uniformity and comes from the union over colours — it is not an
+event-count factor, and no `9n²` multiplier appears: the per-colour budget
+`sum_proxyEvent_nonuniform_mass_le` is applied once per colour and is itself event-count
+free. -/
+theorem sum_proxyEvent_paletteNonuniform_mass_le (M : FiniteRelModel L V) {ε : ℝ}
+    (F : Finpartition s) (q : ℕ) {w₀ : ℝ} (hw₀ : 0 < w₀)
+    (hW : ∀ C : ProxyIndex Q, w₀ ≤ ∑ A ∈ proxyCandidates (Q := Q) F q C, (A.card : ℝ))
+    {B : ℝ} (hB : ∀ c : BinaryPairPalette L,
+      badMassDiagNum (HasBinaryPairPalette M c) ε F ≤ B) :
+    ∑ e : ProxyEvent Q,
+        ∑ p ∈ paletteNonuniformFinePairs M ε F ∩
+            (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+              proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+          (p.1.card : ℝ) * p.2.card
+          * ∏ j ∈ (Finset.univ.erase (proxyEventFst e)).erase (proxyEventSnd e),
+              ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ)
+      ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * B / w₀ ^ 2
+        * ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) := by
+  classical
+  have hprod : (0 : ℝ) ≤ ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) :=
+    Finset.prod_nonneg fun j _ => Finset.sum_nonneg fun A _ => by positivity
+  -- Colour by colour: the union's mass is at most the summed per-colour masses.
+  have hstep : ∀ e : ProxyEvent Q,
+      ∑ p ∈ paletteNonuniformFinePairs M ε F ∩
+          (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+            proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+        ((p.1.card : ℝ) * p.2.card
+          * ∏ j ∈ (Finset.univ.erase (proxyEventFst e)).erase (proxyEventSnd e),
+              ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ))
+      ≤ ∑ c : BinaryPairPalette L,
+          ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+              (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+                proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+            ((p.1.card : ℝ) * p.2.card
+              * ∏ j ∈ (Finset.univ.erase (proxyEventFst e)).erase (proxyEventSnd e),
+                  ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ)) := by
+    intro e
+    refine sum_le_sum_of_exists_mem _
+      (fun c => nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+        (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+          proxyCandidates (Q := Q) F q (proxyEventSnd e))) _
+      (fun p => by positivity) (fun p hp => ?_)
+    rw [Finset.mem_inter] at hp
+    obtain ⟨c, hc⟩ := exists_mem_nonuniformFinePairs hp.1
+    exact ⟨c, Finset.mem_inter.mpr ⟨hc, hp.2⟩⟩
+  have hsum : ∑ _c : BinaryPairPalette L, B
+      ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * B := by
+    rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  calc ∑ e : ProxyEvent Q, ∑ p ∈ paletteNonuniformFinePairs M ε F ∩ _, _
+      ≤ ∑ e : ProxyEvent Q, ∑ c : BinaryPairPalette L,
+          ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+              (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+                proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+            ((p.1.card : ℝ) * p.2.card
+              * ∏ j ∈ (Finset.univ.erase (proxyEventFst e)).erase (proxyEventSnd e),
+                  ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ)) :=
+        Finset.sum_le_sum fun e _ => hstep e
+    _ = ∑ c : BinaryPairPalette L, ∑ e : ProxyEvent Q,
+          ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+              (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+                proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+            ((p.1.card : ℝ) * p.2.card
+              * ∏ j ∈ (Finset.univ.erase (proxyEventFst e)).erase (proxyEventSnd e),
+                  ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ)) := Finset.sum_comm
+    _ ≤ ∑ c : BinaryPairPalette L, badMassDiagNum (HasBinaryPairPalette M c) ε F / w₀ ^ 2
+          * ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) :=
+        Finset.sum_le_sum fun c _ =>
+          sum_proxyEvent_nonuniform_mass_le (HasBinaryPairPalette M c) F q hw₀ hW
+    _ ≤ ∑ _c : BinaryPairPalette L, B / w₀ ^ 2
+          * ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) :=
+        Finset.sum_le_sum fun c _ =>
+          mul_le_mul_of_nonneg_right
+            (div_le_div_of_nonneg_right (hB c) (by positivity)) hprod
+    _ = (∑ _c : BinaryPairPalette L, B) / w₀ ^ 2
+          * ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) := by
+        rw [← Finset.sum_mul, ← Finset.sum_div]
+    _ ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * B / w₀ ^ 2
+          * ∏ j, ∑ A ∈ proxyCandidates (Q := Q) F q j, (A.card : ℝ) :=
+        mul_le_mul_of_nonneg_right
+          (div_le_div_of_nonneg_right hsum (by positivity)) hprod
+
+end Palettes
+
 /-! ### Tests -/
 
 section Tests
@@ -259,6 +420,31 @@ example {A B : Finset V} (hA : A ∈ Q.parts) (hB : B ∈ Q.parts) (hAB : A ≠ 
 -- candidate notion.
 example (F : Finpartition s) (q : ℕ) (C : ProxyIndex Q) :
     proxyCandidates (Q := Q) F q C = repCandidates F q C.1 := rfl
+
+-- Every colour's forbidden set lies inside the union, which is why the palette factor `K`
+-- cannot be dropped: simultaneous uniformity forbids every colour's bad pairs at once.
+example {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V) (ε : ℝ)
+    (F : Finpartition s) (c : BinaryPairPalette L) :
+    nonuniformFinePairs (HasBinaryPairPalette M c) ε F ⊆ paletteNonuniformFinePairs M ε F :=
+  nonuniformFinePairs_subset_palette M ε F c
+
+-- …and the union is not everything: a pair uniform for EVERY colour is not forbidden, so
+-- the union really is the simultaneous condition and not a blanket exclusion.
+example {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V} {ε : ℝ}
+    {F : Finpartition s} {p : Finset V × Finset V}
+    (hp : ∀ c : BinaryPairPalette L, IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε) :
+    p ∉ paletteNonuniformFinePairs M ε F := by
+  classical
+  intro hmem
+  obtain ⟨c, hc⟩ := exists_mem_nonuniformFinePairs hmem
+  rw [nonuniformFinePairs, Finset.mem_filter] at hc
+  exact hc.2 (hp c)
+
+-- The union bound charges once per COLOUR and not once per anything else: with a single
+-- covering set the bound is the mass itself, so no cardinality factor is hidden in it.
+example {γ : Type*} [DecidableEq γ] (S : Finset γ) (f : γ → ℝ) (hf : ∀ x, 0 ≤ f x) :
+    ∑ x ∈ S, f x ≤ ∑ _k : Unit, ∑ x ∈ S, f x :=
+  sum_le_sum_of_exists_mem S (fun _ : Unit => S) f hf fun _ hx => ⟨(), hx⟩
 
 -- The factorization is genuinely event-count free: with an EMPTY forbidden family the
 -- budget is zero however many events there are.
