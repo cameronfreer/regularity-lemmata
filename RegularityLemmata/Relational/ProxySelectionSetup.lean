@@ -50,9 +50,11 @@ with two distinct coordinates, which is exactly what this file supplies.
   selection actually needs. The forbidden set `paletteNonuniformFinePairs` is the union over
   palette colours of the per-palette nonuniform sets, and its budget is
   `K * B / w₀ ^ 2` times the total weight, where `K = Fintype.card (BinaryPairPalette L)` and
-  `B` bounds each palette's bad mass. The factor `K` is necessary for SIMULTANEOUS palette
-  uniformity and comes from the union over colours; it is not an event-count factor, and no
-  `9n²` multiplier occurs here either.
+  `B` bounds each palette's bad mass. `K` is the union-bound factor obtained from the
+  per-palette estimates; it is not an event-count factor, and no `9n²` multiplier occurs
+  here either. Optimality of `K` is not claimed.
+* `notMem_paletteNonuniformFinePairs_iff` — what the summit consumes: weighted choice returns
+  `∉ Bad e`, and for a pair of fine cells that is equivalent to uniformity for EVERY colour.
 
 ## Steps 3–5, not done here
 
@@ -152,7 +154,8 @@ abbrev ProxyIndex (Q : Finpartition s) : Type _ := {C : Finset V // C ∈ Q.part
 
 /-- The forbidden events: an ordered DISTINCT proxy pair. Sibling pairs — two proxies of one
 owner — are events like any other, and there is deliberately no palette component: palettes
-enter only through the cost channel. -/
+are not event coordinates. They enter the forbidden channel through
+`paletteNonuniformFinePairs`, and the cost channel through aggregate deviation. -/
 abbrev ProxyEvent (Q : Finpartition s) : Type _ :=
   {pd : Finset V × Finset V // pd ∈ proxyPairEvents Q}
 
@@ -304,9 +307,9 @@ theorem exists_mem_nonuniformFinePairs {M : FiniteRelModel L V} {ε : ℝ} {F : 
   exact ⟨c, Finset.mem_filter.mpr ⟨hp.1, hc⟩⟩
 
 open Classical in
-/-- Conversely each colour's forbidden set sits inside the union, which is why the palette
-factor below cannot be avoided: simultaneous uniformity really does forbid every colour's
-bad pairs. -/
+/-- Conversely each colour's forbidden set sits inside the union. This is why simultaneous
+uniformity cannot be represented by one chosen colour's forbidden set; the theorem below
+charges the union using the factor `K`. It says nothing about whether `K` is optimal. -/
 theorem nonuniformFinePairs_subset_palette (M : FiniteRelModel L V) (ε : ℝ)
     (F : Finpartition s) (c : BinaryPairPalette L) :
     nonuniformFinePairs (HasBinaryPairPalette M c) ε F ⊆ paletteNonuniformFinePairs M ε F := by
@@ -315,14 +318,28 @@ theorem nonuniformFinePairs_subset_palette (M : FiniteRelModel L V) (ε : ℝ)
   exact Finset.mem_filter.mpr ⟨hp.1, ⟨c, hp.2⟩⟩
 
 open Classical in
+/-- **What weighted choice actually returns.** The machine delivers `∉ Bad e`, so the
+load-bearing direction is from NOT forbidden to uniformity for every colour. For a pair of
+fine cells the two are equivalent. -/
+theorem notMem_paletteNonuniformFinePairs_iff {M : FiniteRelModel L V} {ε : ℝ}
+    {F : Finpartition s} {p : Finset V × Finset V} (hp : p ∈ F.parts ×ˢ F.parts) :
+    p ∉ paletteNonuniformFinePairs M ε F ↔
+      ∀ c : BinaryPairPalette L, IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε := by
+  rw [paletteNonuniformFinePairs, Finset.mem_filter, not_and_or]
+  constructor
+  · rintro (h | h) c
+    · exact absurd hp h
+    · exact not_not.mp (fun hc => h ⟨c, hc⟩)
+  · exact fun h => Or.inr (fun ⟨c, hc⟩ => hc (h c))
+
+open Classical in
 /-- **The simultaneous forbidden-event budget.** With `Bad e` the union over palette colours
 of the per-colour nonuniform pairs, the `hbad` left-hand side is at most `K * B / w₀ ^ 2`
 times the total selection weight, where `K = Fintype.card (BinaryPairPalette L)` and `B`
-bounds each colour's diagonal-inclusive bad mass. The factor `K` is necessary for
-SIMULTANEOUS palette uniformity and comes from the union over colours — it is not an
-event-count factor, and no `9n²` multiplier appears: the per-colour budget
-`sum_proxyEvent_nonuniform_mass_le` is applied once per colour and is itself event-count
-free. -/
+bounds each colour's diagonal-inclusive bad mass. `K` is the UNION-BOUND factor obtained
+from the per-palette estimates — `sum_proxyEvent_nonuniform_mass_le` applied once per
+colour — and not an event-count factor; no `9n²` multiplier appears. Optimality of `K` is
+neither claimed nor proved. -/
 theorem sum_proxyEvent_paletteNonuniform_mass_le (M : FiniteRelModel L V) {ε : ℝ}
     (F : Finpartition s) (q : ℕ) {w₀ : ℝ} (hw₀ : 0 < w₀)
     (hW : ∀ C : ProxyIndex Q, w₀ ≤ ∑ A ∈ proxyCandidates (Q := Q) F q C, (A.card : ℝ))
@@ -421,24 +438,28 @@ example {A B : Finset V} (hA : A ∈ Q.parts) (hB : B ∈ Q.parts) (hAB : A ≠ 
 example (F : Finpartition s) (q : ℕ) (C : ProxyIndex Q) :
     proxyCandidates (Q := Q) F q C = repCandidates F q C.1 := rfl
 
--- Every colour's forbidden set lies inside the union, which is why the palette factor `K`
--- cannot be dropped: simultaneous uniformity forbids every colour's bad pairs at once.
+-- Every colour's forbidden set lies inside the union, so simultaneous uniformity cannot be
+-- represented by ONE chosen colour's forbidden set. Nothing here claims `K` is optimal.
 example {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V) (ε : ℝ)
     (F : Finpartition s) (c : BinaryPairPalette L) :
     nonuniformFinePairs (HasBinaryPairPalette M c) ε F ⊆ paletteNonuniformFinePairs M ε F :=
   nonuniformFinePairs_subset_palette M ε F c
 
--- …and the union is not everything: a pair uniform for EVERY colour is not forbidden, so
--- the union really is the simultaneous condition and not a blanket exclusion.
+-- **The direction the summit consumes**: weighted choice returns `∉ Bad e`, and that must
+-- yield uniformity for EVERY colour. This is the load-bearing half of the equivalence.
 example {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V} {ε : ℝ}
-    {F : Finpartition s} {p : Finset V × Finset V}
-    (hp : ∀ c : BinaryPairPalette L, IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε) :
-    p ∉ paletteNonuniformFinePairs M ε F := by
-  classical
-  intro hmem
-  obtain ⟨c, hc⟩ := exists_mem_nonuniformFinePairs hmem
-  rw [nonuniformFinePairs, Finset.mem_filter] at hc
-  exact hc.2 (hp c)
+    {F : Finpartition s} {p : Finset V × Finset V} (hp : p ∈ F.parts ×ˢ F.parts)
+    (hnot : p ∉ paletteNonuniformFinePairs M ε F) (c : BinaryPairPalette L) :
+    IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε :=
+  (notMem_paletteNonuniformFinePairs_iff hp).mp hnot c
+
+-- The converse half, so the union really is the simultaneous condition and not a blanket
+-- exclusion: a pair uniform for every colour is not forbidden.
+example {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V} {ε : ℝ}
+    {F : Finpartition s} {p : Finset V × Finset V} (hp : p ∈ F.parts ×ˢ F.parts)
+    (huni : ∀ c : BinaryPairPalette L, IsUniformPair (HasBinaryPairPalette M c) p.1 p.2 ε) :
+    p ∉ paletteNonuniformFinePairs M ε F :=
+  (notMem_paletteNonuniformFinePairs_iff hp).mpr huni
 
 -- The union bound charges once per COLOUR and not once per anything else: with a single
 -- covering set the bound is the mass itself, so no cardinality factor is hidden in it.
