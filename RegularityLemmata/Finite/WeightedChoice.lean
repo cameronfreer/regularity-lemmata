@@ -28,6 +28,10 @@ Selections are elements of `Fintype.piFinset t` for a candidate family
 * `exists_piFinset_forall_not_mem_bad` — the union bound: if the summed bad-event
   masses are strictly below the total weight, some selection avoids every bad event.
 
+The adapters that convert AGGREGATE mass estimates into these hypotheses live in the
+companion module `Finite/WeightedChoiceBudget.lean`: this file supplies the selection and
+expectation machinery, that one converts mass bounds into its inputs.
+
 The events carry two distinct coordinates each (`i₁ e ≠ i₂ e`); in the application
 the coordinates are (cell, role) pairs, so events over EQUAL cells with distinct roles
 are perfectly admissible — exactly the diagonal case the removal route needs.

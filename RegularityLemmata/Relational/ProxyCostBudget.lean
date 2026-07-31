@@ -27,11 +27,10 @@ distinct proxy pair AND per palette colour:
 
 ## The budget
 
-`sum_piFinset_weight_mul_eventCost` (`Finite/WeightedChoice.lean`, unchanged) turns the
-weighted expected cost into a sum of per-event rectangle masses times the omitted
-coordinate product. `sum_event_mass_le_of_weight_floor` then divides by the squared weight
-floor exactly as in the forbidden channel, and `sum_proxyDevEvent_mass_le` bounds the
-remaining aggregate by applying `sum_proxyPair_deviant_le` once per colour. The result is
+`sum_piFinset_weight_mul_eventCost_le_of_weight_floor` (`Finite/WeightedChoiceBudget.lean`) takes
+an aggregate event-mass bound straight to `hexp`: it composes the expected-cost identity with
+the weight-floor factorization used by the forbidden channel. `sum_proxyDevEvent_mass_le`
+supplies that aggregate by applying `sum_proxyPair_deviant_le` once per colour. The result is
 
 `expected_proxyDeviationCost_le` :  `μ = K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2`
 
@@ -62,11 +61,29 @@ abbrev ProxyDevEvent (Q : Finpartition s) (L : FirstOrder.Language) [FiniteRelat
     Type _ :=
   ProxyEvent Q × BinaryPairPalette L
 
-/-- The first coordinate of a cost event — inherited from its proxy pair. -/
+/-- The ordered proxy PAIR a cost event charges against. -/
+def proxyDevPair (e : ProxyDevEvent Q L) : Finset V × Finset V := proxyEventPair e.1
+
+/-- The COLOUR a cost event charges for. -/
+def proxyDevColor (e : ProxyDevEvent Q L) : BinaryPairPalette L := e.2
+
+/-- The first coordinate of a cost event — a proxy CELL, inherited from its proxy pair. -/
 def proxyDevFst (e : ProxyDevEvent Q L) : ProxyIndex Q := proxyEventFst e.1
 
 /-- The second coordinate of a cost event. -/
 def proxyDevSnd (e : ProxyDevEvent Q L) : ProxyIndex Q := proxyEventSnd e.1
+
+@[simp] theorem proxyDevPair_fst (e : ProxyDevEvent Q L) :
+    (proxyDevPair e).1 = (proxyDevFst e).1 := rfl
+
+@[simp] theorem proxyDevPair_snd (e : ProxyDevEvent Q L) :
+    (proxyDevPair e).2 = (proxyDevSnd e).1 := rfl
+
+@[simp] theorem proxyDevPair_mk (e₁ : ProxyEvent Q) (c : BinaryPairPalette L) :
+    proxyDevPair (Q := Q) (e₁, c) = proxyEventPair e₁ := rfl
+
+@[simp] theorem proxyDevColor_mk (e₁ : ProxyEvent Q) (c : BinaryPairPalette L) :
+    proxyDevColor (Q := Q) (e₁, c) = c := rfl
 
 /-- The two coordinates of a cost event are distinct, the colour playing no part. -/
 theorem proxyDev_fst_ne_snd (e : ProxyDevEvent Q L) : proxyDevFst e ≠ proxyDevSnd e :=
@@ -90,7 +107,8 @@ two chosen representatives deviate by more than `η` from their proxy pair. -/
 noncomputable def proxyDeviationCost (M : FiniteRelModel L V) (η : ℝ) (F : Finpartition s)
     (Q : Finpartition s) (g : ProxyIndex Q → Finset V) : ℝ :=
   ∑ e : ProxyDevEvent Q L,
-    if (g (proxyDevFst e), g (proxyDevSnd e)) ∈ proxyDeviantFinePairs M e.2 η F e.1.1
+    if (g (proxyDevFst e), g (proxyDevSnd e)) ∈
+        proxyDeviantFinePairs M (proxyDevColor e) η F (proxyDevPair e)
       then (1 : ℝ) else 0
 
 /-- The `hcost` input: the cost is nonnegative. -/
@@ -112,7 +130,7 @@ number of proxy pairs multiplies nothing. -/
 theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P₀) (q : ℕ)
     {η : ℝ} (hη : 0 < η) :
     ∑ e : ProxyDevEvent w.coarse L,
-        ∑ p ∈ proxyDeviantFinePairs M e.2 η w.fine e.1.1 ∩
+        ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩
             (proxyCandidates (Q := w.coarse) w.fine q (proxyDevFst e) ×ˢ
               proxyCandidates (Q := w.coarse) w.fine q (proxyDevSnd e)),
           ((p.1.card : ℝ) * p.2.card)
@@ -120,27 +138,27 @@ theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P
   classical
   -- Each cost event's mass sits inside its own proxy pair's deviant fine-fibre mass.
   have hsub : ∀ e : ProxyDevEvent w.coarse L,
-      ∑ p ∈ proxyDeviantFinePairs M e.2 η w.fine e.1.1 ∩
+      ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩
           (proxyCandidates (Q := w.coarse) w.fine q (proxyDevFst e) ×ˢ
             proxyCandidates (Q := w.coarse) w.fine q (proxyDevSnd e)),
         ((p.1.card : ℝ) * p.2.card)
-        ≤ ∑ p ∈ ((w.fine.parts.filter (· ⊆ e.1.1.1)) ×ˢ
-            (w.fine.parts.filter (· ⊆ e.1.1.2))).filter
-          (fun p => η < |pairDensity (HasBinaryPairPalette M e.2) p.1 p.2
-            - pairDensity (HasBinaryPairPalette M e.2) e.1.1.1 e.1.1.2|),
+        ≤ ∑ p ∈ ((w.fine.parts.filter (· ⊆ (proxyDevPair e).1)) ×ˢ
+            (w.fine.parts.filter (· ⊆ (proxyDevPair e).2))).filter
+          (fun p => η < |pairDensity (HasBinaryPairPalette M (proxyDevColor e)) p.1 p.2
+            - pairDensity (HasBinaryPairPalette M (proxyDevColor e))
+                (proxyDevPair e).1 (proxyDevPair e).2|),
           ((p.1.card : ℝ) * p.2.card) := by
     intro e
-    refine Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_) (fun p _ _ => by positivity)
-    rw [Finset.mem_inter, Finset.mem_product, proxyDeviantFinePairs, Finset.mem_filter] at hp
-    rw [Finset.mem_filter, Finset.mem_product]
-    exact ⟨⟨proxyCandidates_subset_fibre w.fine q (proxyDevFst e) hp.2.1,
-      proxyCandidates_subset_fibre w.fine q (proxyDevSnd e) hp.2.2⟩, hp.1.2⟩
-  calc ∑ e : ProxyDevEvent w.coarse L, ∑ p ∈ proxyDeviantFinePairs M e.2 η w.fine e.1.1 ∩ _, _
+    rw [proxyDeviantFinePairs]
+    exact sum_candidateMass_le_fibreMass w.fine q _ (proxyDevFst e) (proxyDevSnd e)
+  calc ∑ e : ProxyDevEvent w.coarse L,
+        ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩ _, _
       ≤ ∑ e : ProxyDevEvent w.coarse L,
-          ∑ p ∈ ((w.fine.parts.filter (· ⊆ e.1.1.1)) ×ˢ
-              (w.fine.parts.filter (· ⊆ e.1.1.2))).filter
-            (fun p => η < |pairDensity (HasBinaryPairPalette M e.2) p.1 p.2
-              - pairDensity (HasBinaryPairPalette M e.2) e.1.1.1 e.1.1.2|),
+          ∑ p ∈ ((w.fine.parts.filter (· ⊆ (proxyDevPair e).1)) ×ˢ
+              (w.fine.parts.filter (· ⊆ (proxyDevPair e).2))).filter
+            (fun p => η < |pairDensity (HasBinaryPairPalette M (proxyDevColor e)) p.1 p.2
+              - pairDensity (HasBinaryPairPalette M (proxyDevColor e))
+                (proxyDevPair e).1 (proxyDevPair e).2|),
             ((p.1.card : ℝ) * p.2.card) := Finset.sum_le_sum fun e _ => hsub e
     _ = ∑ c : BinaryPairPalette L, ∑ e₁ : ProxyEvent w.coarse,
           ∑ p ∈ ((w.fine.parts.filter (· ⊆ e₁.1.1)) ×ˢ
@@ -167,38 +185,28 @@ theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P
 open Classical in
 /-- **Step 3: the `hexp` input.** The weighted expected deviation cost is at most
 `K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2` times the total selection weight. The route is the same
-as in the forbidden channel: the expected-cost identity of `Finite/WeightedChoice.lean`
-turns the expectation into per-event rectangle masses, the weight floor divides by `w₀ ^ 2`,
-and the remaining aggregate is bounded by `sum_proxyPair_deviant_le` ONCE PER PALETTE. Only
+as in the forbidden channel: `sum_piFinset_weight_mul_eventCost_le_of_weight_floor`
+(`Finite/WeightedChoiceBudget.lean`) composes the expected-cost identity with the same
+weight-floor factorization, and `sum_proxyDevEvent_mass_le` supplies the aggregate by
+applying `sum_proxyPair_deviant_le` ONCE PER PALETTE. Only
 the palette multiplicity `K` is paid — never the event-cardinality envelope, and no `9n²`
 multiplier appears. -/
 theorem expected_proxyDeviationCost_le (w : BinaryPaletteStrongDiagWitness M sch δ P₀)
     (q : ℕ) {η w₀ : ℝ} (hη : 0 < η) (hw₀ : 0 < w₀)
     (hW : ∀ C : ProxyIndex w.coarse,
-      w₀ ≤ ∑ A ∈ proxyCandidates (Q := w.coarse) w.fine q C, (A.card : ℝ)) :
+      w₀ ≤ proxyCandidateWeight (Q := w.coarse) w.fine q C) :
     ∑ g ∈ Fintype.piFinset (proxyCandidates (Q := w.coarse) w.fine q),
         (∏ j, ((g j).card : ℝ)) * proxyDeviationCost M η w.fine w.coarse g
       ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * (δ / η ^ 2 * (s.card : ℝ) ^ 2) / w₀ ^ 2
-        * ∏ j, ∑ A ∈ proxyCandidates (Q := w.coarse) w.fine q j, (A.card : ℝ) := by
+        * proxyTotalCandidateWeight w.fine q w.coarse := by
   classical
-  have hprod : (0 : ℝ) ≤ ∏ j, ∑ A ∈ proxyCandidates (Q := w.coarse) w.fine q j, (A.card : ℝ) :=
-    Finset.prod_nonneg fun j _ => Finset.sum_nonneg fun A _ => by positivity
-  -- The expected cost is the summed per-event rectangle masses (WeightedChoice, unchanged).
-  have hid := sum_piFinset_weight_mul_eventCost
-    (t := proxyCandidates (Q := w.coarse) w.fine q) (wt := fun A => (A.card : ℝ))
-    proxyDevFst proxyDevSnd proxyDev_fst_ne_snd
-    (fun e : ProxyDevEvent w.coarse L => proxyDeviantFinePairs M e.2 η w.fine e.1.1)
-    (fun _ => (1 : ℝ))
-  simp only [proxyDeviationCost, one_mul] at hid ⊢
-  rw [hid]
-  -- The weight floor divides by `w₀ ^ 2`, exactly as in the forbidden channel.
-  refine le_trans (sum_event_mass_le_of_weight_floor
+  simp only [proxyDeviationCost, proxyTotalCandidateWeight, proxyCandidateWeight]
+  exact sum_piFinset_weight_mul_eventCost_le_of_weight_floor
     (proxyCandidates (Q := w.coarse) w.fine q) (fun A => (A.card : ℝ))
     (fun A => by positivity) proxyDevFst proxyDevSnd proxyDev_fst_ne_snd
-    (fun e : ProxyDevEvent w.coarse L => proxyDeviantFinePairs M e.2 η w.fine e.1.1)
-    hw₀ hW) ?_
-  exact mul_le_mul_of_nonneg_right
-    (div_le_div_of_nonneg_right (sum_proxyDevEvent_mass_le w q hη) (by positivity)) hprod
+    (fun e : ProxyDevEvent w.coarse L =>
+      proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e))
+    hw₀ hW (sum_proxyDevEvent_mass_le w q hη)
 
 /-! ### Tests -/
 
@@ -219,11 +227,18 @@ example (e₁ : ProxyEvent Q) (c c' : BinaryPairPalette L) :
       ∧ proxyDevSnd (Q := Q) (e₁, c) = proxyDevSnd (Q := Q) (e₁, c') :=
   ⟨rfl, rfl⟩
 
+-- The cost-event projections separate the proxy pair from the colour, so `e.1.1` never has
+-- to be read as a pair and `e.2` never as a cell.
+example (e₁ : ProxyEvent Q) (c : BinaryPairPalette L) :
+    proxyDevPair (Q := Q) (e₁, c) = proxyEventPair e₁ ∧ proxyDevColor (Q := Q) (e₁, c) = c := by
+  simp
+
 -- A selection whose representatives never deviate costs nothing, however many proxy pairs
 -- and colours there are: the cost counts incidences, not events.
 example (M : FiniteRelModel L V) (η : ℝ) (F Q : Finpartition s) (g : ProxyIndex Q → Finset V)
     (hg : ∀ e : ProxyDevEvent Q L,
-      (g (proxyDevFst e), g (proxyDevSnd e)) ∉ proxyDeviantFinePairs M e.2 η F e.1.1) :
+      (g (proxyDevFst e), g (proxyDevSnd e)) ∉
+        proxyDeviantFinePairs M (proxyDevColor e) η F (proxyDevPair e)) :
     proxyDeviationCost M η F Q g = 0 := by
   classical
   refine Finset.sum_eq_zero fun e _ => ?_
