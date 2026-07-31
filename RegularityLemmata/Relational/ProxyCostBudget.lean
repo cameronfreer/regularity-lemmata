@@ -27,7 +27,7 @@ distinct proxy pair AND per palette colour:
 
 ## The budget
 
-`sum_piFinset_weight_mul_eventCost_le_of_weight_floor` (`Finite/WeightedChoice.lean`) takes
+`sum_piFinset_weight_mul_eventCost_le_of_weight_floor` (`Finite/WeightedChoiceBudget.lean`) takes
 an aggregate event-mass bound straight to `hexp`: it composes the expected-cost identity with
 the weight-floor factorization used by the forbidden channel. `sum_proxyDevEvent_mass_le`
 supplies that aggregate by applying `sum_proxyPair_deviant_le` once per colour. The result is
@@ -185,9 +185,10 @@ theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P
 open Classical in
 /-- **Step 3: the `hexp` input.** The weighted expected deviation cost is at most
 `K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2` times the total selection weight. The route is the same
-as in the forbidden channel: the expected-cost identity of `Finite/WeightedChoice.lean`
-turns the expectation into per-event rectangle masses, the weight floor divides by `w₀ ^ 2`,
-and the remaining aggregate is bounded by `sum_proxyPair_deviant_le` ONCE PER PALETTE. Only
+as in the forbidden channel: `sum_piFinset_weight_mul_eventCost_le_of_weight_floor`
+(`Finite/WeightedChoiceBudget.lean`) composes the expected-cost identity with the same
+weight-floor factorization, and `sum_proxyDevEvent_mass_le` supplies the aggregate by
+applying `sum_proxyPair_deviant_le` ONCE PER PALETTE. Only
 the palette multiplicity `K` is paid — never the event-cardinality envelope, and no `9n²`
 multiplier appears. -/
 theorem expected_proxyDeviationCost_le (w : BinaryPaletteStrongDiagWitness M sch δ P₀)

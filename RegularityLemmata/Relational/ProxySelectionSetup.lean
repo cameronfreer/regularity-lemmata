@@ -3,7 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.ProxyAggregateMass
-import RegularityLemmata.Finite.WeightedChoice
+import RegularityLemmata.Finite.WeightedChoiceBudget
 
 /-!
 # Route (b) ladder step 2: weighted choice on proxy cells, and the forbidden-event budgets
@@ -13,8 +13,11 @@ and event types on which `Finite/WeightedChoice.lean` is instantiated, and the c
 the aggregate nonuniform mass into that machine's forbidden-event hypothesis. The cost
 budget, the constants and the summit are steps 3–5 and are NOT here.
 
-`Finite/WeightedChoice.lean` is untouched: it is already indexed by an abstract event type
-with two distinct coordinates, which is exactly what this file supplies.
+The machine is already indexed by an abstract event type with two distinct coordinates,
+which is exactly what this file supplies. It is split across two generic modules:
+`Finite/WeightedChoice.lean` for the selection and expectation machinery, and
+`Finite/WeightedChoiceBudget.lean` for the adapters that convert aggregate mass estimates
+into its hypotheses. Neither mentions a partition, a relation or a palette.
 
 ## Step 1 — the instantiation
 
@@ -35,7 +38,7 @@ with two distinct coordinates, which is exactly what this file supplies.
 
 ## Step 2 — the forbidden-event budget
 
-* `sum_event_mass_le_of_weight_floor` (`Finite/WeightedChoice.lean`) — the generic
+* `sum_event_mass_le_of_weight_floor` (`Finite/WeightedChoiceBudget.lean`) — the generic
   factorization: a uniform floor `w₀ ≤ W j` turns the whole `hbad` left-hand side into
   `(aggregate mass) / w₀ ^ 2 * ∏_j W j`. **The event count does not appear** — each event
   contributes its own mass, never a copy of the total.
@@ -49,7 +52,7 @@ with two distinct coordinates, which is exactly what this file supplies.
 * `sum_proxyEvent_paletteNonuniform_mass_le` — **the simultaneous budget**, which is what the
   selection actually needs. The forbidden set `paletteNonuniformFinePairs` is the union over
   palette colours of the per-palette nonuniform sets — charged with `sum_le_sum_of_exists_mem`,
-  the union bound in `Finite/WeightedChoice.lean` — and its budget is
+  the union bound in `Finite/WeightedChoiceBudget.lean` — and its budget is
   `K * B / w₀ ^ 2` times the total weight, where `K = Fintype.card (BinaryPairPalette L)` and
   `B` bounds each palette's bad mass. `K` is the union-bound factor obtained from the
   per-palette estimates; it is not an event-count factor, and no `9n²` multiplier occurs
@@ -465,18 +468,6 @@ example {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V} 
 example {γ : Type*} [DecidableEq γ] (S : Finset γ) (f : γ → ℝ) (hf : ∀ x, 0 ≤ f x) :
     ∑ x ∈ S, f x ≤ ∑ _k : Unit, ∑ x ∈ S, f x :=
   sum_le_sum_of_exists_mem S (fun _ : Unit => S) f hf fun _ hx => ⟨(), hx⟩
-
--- The factorization is genuinely event-count free: with an EMPTY forbidden family the
--- budget is zero however many events there are.
-example {ι β : Type*} [Fintype ι] [DecidableEq ι] [DecidableEq β] {E : Type*} [Fintype E]
-    (t : ι → Finset β) (i₁ i₂ : E → ι) (hne : ∀ e, i₁ e ≠ i₂ e) {w₀ : ℝ} (hw₀ : 0 < w₀)
-    (hW : ∀ j, w₀ ≤ ∑ _ ∈ t j, (1 : ℝ)) :
-    ∑ e : E, ∑ _ ∈ (∅ : Finset (β × β)) ∩ (t (i₁ e) ×ˢ t (i₂ e)), (1 : ℝ) * 1
-        * ∏ j ∈ (Finset.univ.erase (i₁ e)).erase (i₂ e), ∑ _ ∈ t j, (1 : ℝ)
-      ≤ (∑ e : E, ∑ _ ∈ (∅ : Finset (β × β)) ∩ (t (i₁ e) ×ˢ t (i₂ e)), (1 : ℝ) * 1) / w₀ ^ 2
-        * ∏ j, ∑ _ ∈ t j, (1 : ℝ) :=
-  sum_event_mass_le_of_weight_floor t (fun _ => 1) (fun _ => zero_le_one) i₁ i₂ hne
-    (fun _ => ∅) hw₀ hW
 
 end Tests
 
