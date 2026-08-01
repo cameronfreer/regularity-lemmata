@@ -189,6 +189,15 @@ theorem sum_proxyEvent_nonuniformMass_le {ε : ℝ} (F : Finpartition s) (q : �
             (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card))
     _ ≤ badMassDiagNum R ε F := sum_proxyPair_nonuniform_le R F Q
 
+/-- The `hcost` input for the per-relation charge. -/
+theorem proxyNormalizedNonuniformCost_nonneg (ε : ℝ) (F : Finpartition s) (Q : Finpartition s)
+    (g : ProxyIndex Q → Finset V) : 0 ≤ proxyNormalizedNonuniformCost R ε F Q g := by
+  classical
+  refine Finset.sum_nonneg fun e _ => ?_
+  split
+  · exact proxyPairMassWeight_nonneg s _
+  · exact le_refl 0
+
 open Classical in
 /-- **Branch B, surviving.** Charging nonuniformity by the proxy pair's normalized mass makes
 its budget `4 * ε` — no proxy count, no size floor. The cancellation is the same
@@ -245,6 +254,15 @@ noncomputable def proxyNormalizedPaletteCost (ε : ℝ) (F : Finpartition s) (Q 
   ∑ e : ProxyEvent Q,
     if (g (proxyEventFst e), g (proxyEventSnd e)) ∈ paletteNonuniformFinePairs M ε F
       then proxyPairMassWeight s (proxyEventPair e) else 0
+
+/-- The `hcost` input for the relational charge. -/
+theorem proxyNormalizedPaletteCost_nonneg (ε : ℝ) (F : Finpartition s) (Q : Finpartition s)
+    (g : ProxyIndex Q → Finset V) : 0 ≤ proxyNormalizedPaletteCost M ε F Q g := by
+  classical
+  refine Finset.sum_nonneg fun e _ => ?_
+  split
+  · exact proxyPairMassWeight_nonneg s _
+  · exact le_refl 0
 
 open Classical in
 /-- The aggregate palette-nonuniform candidate mass: the union over colours is charged once
@@ -369,14 +387,16 @@ example {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V) 
       ≤ 4 * (Fintype.card (BinaryPairPalette L) : ℝ) * ε * proxyTotalCandidateWeight F q Q :=
   expected_proxyNormalizedPaletteCost_le M hFQ hq hε hB
 
--- Branch B's charge is nonnegative, which is `hcost`.
+-- Both branch-B charges are nonnegative, which is `hcost` for the eventual weighted-choice
+-- call. Named, not inline, since that call will need them by name.
 example (R : V → V → Prop) [DecidableRel R] (ε : ℝ) (F : Finpartition s)
-    (g : ProxyIndex Q → Finset V) : 0 ≤ proxyNormalizedNonuniformCost R ε F Q g := by
-  classical
-  refine Finset.sum_nonneg fun e _ => ?_
-  split
-  · exact proxyPairMassWeight_nonneg s _
-  · exact le_refl 0
+    (g : ProxyIndex Q → Finset V) : 0 ≤ proxyNormalizedNonuniformCost R ε F Q g :=
+  proxyNormalizedNonuniformCost_nonneg R ε F Q g
+
+example {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V) (ε : ℝ)
+    (F : Finpartition s) (g : ProxyIndex Q → Finset V) :
+    0 ≤ proxyNormalizedPaletteCost M ε F Q g :=
+  proxyNormalizedPaletteCost_nonneg M ε F Q g
 
 -- Branch B's budget mentions neither a proxy count nor a size floor: `4 * ε` alone.
 example (R : V → V → Prop) [DecidableRel R] {ε : ℝ} {F : Finpartition s} (hFQ : F ≤ Q)
