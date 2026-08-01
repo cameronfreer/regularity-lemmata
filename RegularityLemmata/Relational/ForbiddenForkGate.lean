@@ -34,16 +34,27 @@ partition regular at a tolerance shrinking like `#s ⁻²`, which no regularity 
 bounded complexity requires a tolerance fixed independently of the host.
 
 A unique profile is not exotic: one vertex distinguished by its loop data suffices, and
-nothing in the construction prevents it. Branch A therefore cannot be repaired by choosing a
-better producer; it is the equipartition-plus-profile-refinement combination that fails.
+`uniqueProfileVertex` exhibits such a model concretely. Branch A therefore cannot be repaired
+by choosing a better producer; it is the combination that fails.
 
-## Branch B survives, at `4 * ε`
+**Scope of the refutation.** What is refuted is the conjunction of three things: an EXACT
+equipartition, refining the profile partition, with HOST-INDEPENDENT complexity. Drop any one
+and the argument says nothing — an approximate size balance, a coarse partition not tied to
+profiles, or an admittedly host-dependent part count are all outside it.
+
+## Branch B survives
 
 Charging a nonuniform selected pair its proxy pair's normalized mass — exactly the device
-that made the deviation budget `P`-free — gives
-`expected_proxyNormalizedNonuniformCost_le` :  `μ = 4 * ε`,
-with no proxy count and no size floor, via the same coordinatewise cancellation
-(`massWeight_mul_mass_le_of_candidates`) and the aggregate `sum_proxyPair_nonuniform_le`.
+that made the deviation budget `P`-free — keeps the proxy count and the size floor out of the
+budget, via the same coordinatewise cancellation (`massWeight_mul_mass_le_of_candidates`).
+
+* `expected_proxyNormalizedNonuniformCost_le` : `μ = 4 * ε` — **the per-relation lemma**, for
+  a single relation `R`, from the aggregate `sum_proxyPair_nonuniform_le`.
+* `expected_proxyNormalizedPaletteCost_le` : `μ = 4 * K * ε` — **the relational branch-B
+  gate**, which is what the forbidden condition actually is: SIMULTANEOUS palette regularity.
+  The forbidden family is `paletteNonuniformFinePairs`, the union over colours, and the
+  factor `K = Fintype.card (BinaryPairPalette L)` is the union-bound multiplicity, as in the
+  step-2 budget. Still no proxy count and no size floor.
 
 What changes is the CONCLUSION available to the summit. Nonuniformity would no longer be
 excluded outright; it would be bounded in normalized mass, so the summit must be restated to
@@ -220,6 +231,112 @@ theorem expected_proxyNormalizedNonuniformCost_le {ε : ℝ} {F : Finpartition s
 
 end BranchB
 
+/-! ### Branch B for the real forbidden condition: simultaneous palette regularity -/
+
+section BranchBPalette
+
+variable {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V)
+
+open Classical in
+/-- The normalized SIMULTANEOUS-uniformity cost: a proxy pair is charged its normalized mass
+as soon as its two selected representatives fail uniformity for SOME palette colour. -/
+noncomputable def proxyNormalizedPaletteCost (ε : ℝ) (F : Finpartition s) (Q : Finpartition s)
+    (g : ProxyIndex Q → Finset V) : ℝ :=
+  ∑ e : ProxyEvent Q,
+    if (g (proxyEventFst e), g (proxyEventSnd e)) ∈ paletteNonuniformFinePairs M ε F
+      then proxyPairMassWeight s (proxyEventPair e) else 0
+
+open Classical in
+/-- The aggregate palette-nonuniform candidate mass: the union over colours is charged once
+per colour, so the bound is `K` times a single colour's bad mass — the union-bound
+multiplicity, not an event count. -/
+theorem sum_proxyEvent_paletteNonuniformMass_le {ε B : ℝ} (F : Finpartition s) (q : ℕ)
+    (Q : Finpartition s)
+    (hB : ∀ c : BinaryPairPalette L, badMassDiagNum (HasBinaryPairPalette M c) ε F ≤ B) :
+    ∑ e : ProxyEvent Q, ∑ p ∈ paletteNonuniformFinePairs M ε F ∩
+        (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+          proxyCandidates (Q := Q) F q (proxyEventSnd e)), ((p.1.card : ℝ) * p.2.card)
+      ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * B := by
+  classical
+  have hstep : ∀ e : ProxyEvent Q,
+      ∑ p ∈ paletteNonuniformFinePairs M ε F ∩
+          (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+            proxyCandidates (Q := Q) F q (proxyEventSnd e)), ((p.1.card : ℝ) * p.2.card)
+        ≤ ∑ c : BinaryPairPalette L,
+            ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+              (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+                proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+              ((p.1.card : ℝ) * p.2.card) := by
+    intro e
+    refine sum_le_sum_of_exists_mem _
+      (fun c => nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+        (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+          proxyCandidates (Q := Q) F q (proxyEventSnd e))) _
+      (fun p => by positivity) (fun p hp => ?_)
+    rw [Finset.mem_inter] at hp
+    obtain ⟨c, hc⟩ := exists_mem_nonuniformFinePairs hp.1
+    exact ⟨c, Finset.mem_inter.mpr ⟨hc, hp.2⟩⟩
+  calc ∑ e : ProxyEvent Q, ∑ p ∈ paletteNonuniformFinePairs M ε F ∩ _,
+        ((p.1.card : ℝ) * p.2.card)
+      ≤ ∑ e : ProxyEvent Q, ∑ c : BinaryPairPalette L,
+          ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+            (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+              proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+            ((p.1.card : ℝ) * p.2.card) := Finset.sum_le_sum fun e _ => hstep e
+    _ = ∑ c : BinaryPairPalette L, ∑ e : ProxyEvent Q,
+          ∑ p ∈ nonuniformFinePairs (HasBinaryPairPalette M c) ε F ∩
+            (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
+              proxyCandidates (Q := Q) F q (proxyEventSnd e)),
+            ((p.1.card : ℝ) * p.2.card) := Finset.sum_comm
+    _ ≤ ∑ _c : BinaryPairPalette L, B := Finset.sum_le_sum fun c _ =>
+        (sum_proxyEvent_nonuniformMass_le (HasBinaryPairPalette M c) F q Q).trans (hB c)
+    _ = (Fintype.card (BinaryPairPalette L) : ℝ) * B := by
+        rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+
+open Classical in
+/-- **The relational branch-B gate.** For SIMULTANEOUS palette uniformity — the forbidden
+condition the summit actually needs — the normalized charge has budget `4 * K * ε`. No proxy
+count and no size floor; `K` is the union-bound multiplicity over colours. -/
+theorem expected_proxyNormalizedPaletteCost_le {ε : ℝ} {F : Finpartition s} (hFQ : F ≤ Q)
+    {q : ℕ} (hq : F.parts.card ≤ q) (hε : 0 ≤ ε)
+    (hB : ∀ c : BinaryPairPalette L,
+      badMassDiagNum (HasBinaryPairPalette M c) ε F ≤ ε * (s.card : ℝ) ^ 2) :
+    ∑ g ∈ Fintype.piFinset (proxyCandidates (Q := Q) F q),
+        (∏ j, ((g j).card : ℝ)) * proxyNormalizedPaletteCost M ε F Q g
+      ≤ 4 * (Fintype.card (BinaryPairPalette L) : ℝ) * ε
+        * proxyTotalCandidateWeight F q Q := by
+  classical
+  set t := proxyCandidates (Q := Q) F q with ht
+  set mass : ProxyEvent Q → ℝ := fun e =>
+    ∑ p ∈ paletteNonuniformFinePairs M ε F ∩ (t (proxyEventFst e) ×ˢ t (proxyEventSnd e)),
+      ((p.1.card : ℝ) * p.2.card) with hmass
+  have htotal : (0 : ℝ) ≤ proxyTotalCandidateWeight F q Q :=
+    proxyTotalCandidateWeight_nonneg F q
+  have hstep := sum_piFinset_weight_mul_eventCost_le t (fun A => (A.card : ℝ))
+    (fun A => by positivity) proxyEventFst proxyEventSnd proxyEvent_fst_ne_snd
+    (fun _ : ProxyEvent Q => paletteNonuniformFinePairs M ε F)
+    (fun e => proxyPairMassWeight s (proxyEventPair e))
+    (fun e => 4 * mass e / (s.card : ℝ) ^ 2)
+    (fun e => by
+      rw [proxyPairMassWeight]
+      exact massWeight_mul_mass_le_of_candidates hFQ hq _ (proxyEventFst e) (proxyEventSnd e))
+  refine le_trans (le_of_eq ?_) (le_trans hstep ?_)
+  · simp only [proxyNormalizedPaletteCost, ht]
+  refine mul_le_mul_of_nonneg_right ?_ htotal
+  have hrw : ∑ e : ProxyEvent Q, 4 * mass e / (s.card : ℝ) ^ 2
+      = 4 * (∑ e : ProxyEvent Q, mass e) / (s.card : ℝ) ^ 2 := by
+    rw [← Finset.sum_div, ← Finset.mul_sum]
+  rw [hrw]
+  rcases eq_or_ne ((s.card : ℝ) ^ 2) 0 with h0 | h0
+  · rw [h0, div_zero]
+    positivity
+  · have hpos : (0 : ℝ) < (s.card : ℝ) ^ 2 := lt_of_le_of_ne (by positivity) (Ne.symm h0)
+    rw [div_le_iff₀ hpos]
+    have haggr := sum_proxyEvent_paletteNonuniformMass_le M F q Q hB
+    nlinarith [haggr]
+
+end BranchBPalette
+
 /-! ### Tests -/
 
 section Tests
@@ -242,6 +359,16 @@ example {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V}
     s.card ≤ 2 * Q.parts.card :=
   card_le_two_mul_card_parts_of_unique_profile hQ hQP hv huniq
 
+-- Branch B's palette charge — the one the summit actually needs — is `4 * K * ε`.
+example {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V) {ε : ℝ}
+    {F : Finpartition s} (hFQ : F ≤ Q) {q : ℕ} (hq : F.parts.card ≤ q) (hε : 0 ≤ ε)
+    (hB : ∀ c : BinaryPairPalette L,
+      badMassDiagNum (HasBinaryPairPalette M c) ε F ≤ ε * (s.card : ℝ) ^ 2) :
+    ∑ g ∈ Fintype.piFinset (proxyCandidates (Q := Q) F q),
+        (∏ j, ((g j).card : ℝ)) * proxyNormalizedPaletteCost M ε F Q g
+      ≤ 4 * (Fintype.card (BinaryPairPalette L) : ℝ) * ε * proxyTotalCandidateWeight F q Q :=
+  expected_proxyNormalizedPaletteCost_le M hFQ hq hε hB
+
 -- Branch B's charge is nonnegative, which is `hcost`.
 example (R : V → V → Prop) [DecidableRel R] (ε : ℝ) (F : Finpartition s)
     (g : ProxyIndex Q → Finset V) : 0 ≤ proxyNormalizedNonuniformCost R ε F Q g := by
@@ -259,6 +386,45 @@ example (R : V → V → Prop) [DecidableRel R] {ε : ℝ} {F : Finpartition s} 
         (∏ j, ((g j).card : ℝ)) * proxyNormalizedNonuniformCost R ε F Q g
       ≤ 4 * ε * proxyTotalCandidateWeight F q Q :=
   expected_proxyNormalizedNonuniformCost_le R hFQ hq hε hB
+
+/-! #### The unique-profile hypothesis, exhibited -/
+
+section UniqueProfileExample
+
+open FiniteRelModel
+
+/-- A one-binary-symbol model from a Boolean relation. -/
+private def binModel {W : Type*} (p : W → W → Bool) :
+    FiniteRelModel (singleRelLang 2) W :=
+  ⟨fun {n} _ x =>
+    if h : n = 2 then p (x (Fin.cast h.symm 0)) (x (Fin.cast h.symm 1)) else false⟩
+
+/-- Three vertices, a loop at `0` and nothing else: `0`'s profile is shared with no other
+vertex, while `1` and `2` share theirs. -/
+private abbrev loopMarked : FiniteRelModel (singleRelLang 2) (Fin 3) :=
+  binModel fun x y => decide (x = 0 ∧ y = 0)
+
+-- The loop data really does distinguish `0`, and really does NOT distinguish `1` from `2`,
+-- so the hypothesis is about one vertex rather than about a degenerate model.
+example : binaryVertexProfile loopMarked 0 ≠ binaryVertexProfile loopMarked 1 := by decide
+
+example : binaryVertexProfile loopMarked 1 = binaryVertexProfile loopMarked 2 := by decide
+
+/-- **The unique-profile hypothesis, satisfied concretely.** Vertex `0` is distinguished by
+its loop data alone. -/
+theorem uniqueProfileVertex :
+    ∀ b ∈ (Finset.univ : Finset (Fin 3)),
+      binaryVertexProfile loopMarked 0 = binaryVertexProfile loopMarked b → b = 0 := by
+  decide
+
+-- …and branch A's collapse instantiated at it: any exact equipartition of this host that
+-- refines the profile partition has at least half as many parts as the host has vertices.
+example (Q : Finpartition (Finset.univ : Finset (Fin 3))) (hQ : Q.IsEquipartition)
+    (hQP : Q ≤ binaryProfilePartition loopMarked Finset.univ) :
+    (Finset.univ : Finset (Fin 3)).card ≤ 2 * Q.parts.card :=
+  card_le_two_mul_card_parts_of_unique_profile hQ hQP (Finset.mem_univ 0) uniqueProfileVertex
+
+end UniqueProfileExample
 
 end Tests
 
