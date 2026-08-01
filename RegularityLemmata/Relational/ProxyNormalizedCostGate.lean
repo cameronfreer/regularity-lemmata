@@ -88,6 +88,34 @@ theorem proxyNormalizedDeviationCost_nonneg (M : FiniteRelModel L V) (η : ℝ)
 
 /-! ### The `P`-free budget -/
 
+/-- **Coordinatewise cancellation, in general.** At an event's own two coordinates the
+half-mass theorem gives `W_C ≥ #C / 2` and `W_D ≥ #D / 2`, so the event weight
+`#C * #D / #s ^ 2` is absorbed by `4 * W_C * W_D / #s ^ 2`. No common floor and no proxy
+size enter, and the forbidden family is arbitrary — the same cancellation serves any charge
+that is weighted by the proxy pair's own mass. -/
+theorem massWeight_mul_mass_le_of_candidates {F : Finpartition s} (hFQ : F ≤ Q) {q : ℕ}
+    (hq : F.parts.card ≤ q) (Bad : Finset (Finset V × Finset V)) (C D : ProxyIndex Q) :
+    (C.1.card : ℝ) * D.1.card / (s.card : ℝ) ^ 2
+        * ∑ p ∈ Bad ∩ (proxyCandidates (Q := Q) F q C ×ˢ proxyCandidates (Q := Q) F q D),
+            ((p.1.card : ℝ) * p.2.card)
+      ≤ 4 * (∑ p ∈ Bad ∩ (proxyCandidates (Q := Q) F q C ×ˢ proxyCandidates (Q := Q) F q D),
+              ((p.1.card : ℝ) * p.2.card)) / (s.card : ℝ) ^ 2
+        * (proxyCandidateWeight (Q := Q) F q C * proxyCandidateWeight (Q := Q) F q D) := by
+  classical
+  set mass := ∑ p ∈ Bad ∩ (proxyCandidates (Q := Q) F q C ×ˢ proxyCandidates (Q := Q) F q D),
+      ((p.1.card : ℝ) * p.2.card) with hmassdef
+  have hmass : 0 ≤ mass := Finset.sum_nonneg fun p _ => by positivity
+  have hW1 := half_card_le_proxyCandidateWeight hFQ hq C
+  have hW2 := half_card_le_proxyCandidateWeight hFQ hq D
+  have hC : (0 : ℝ) ≤ (C.1.card : ℝ) := by positivity
+  have hD : (0 : ℝ) ≤ (D.1.card : ℝ) := by positivity
+  have hkey : (C.1.card : ℝ) * (D.1.card : ℝ)
+      ≤ 4 * (proxyCandidateWeight (Q := Q) F q C * proxyCandidateWeight (Q := Q) F q D) := by
+    nlinarith [hW1, hW2, hC, hD]
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div]
+  refine div_le_div_of_nonneg_right ?_ (by positivity)
+  nlinarith [hkey, hmass]
+
 open Classical in
 /-- **Coordinatewise cancellation.** At the event's own two coordinates the half-mass theorem
 gives `W_C ≥ #C / 2` and `W_D ≥ #D / 2`, so the event weight `#C * #D / #s ^ 2` is absorbed
@@ -106,28 +134,8 @@ theorem proxyPairMassWeight_mul_mass_le (w : BinaryPaletteStrongDiagWitness M sc
         * (proxyCandidateWeight (Q := w.coarse) w.fine q (proxyDevFst e)
             * proxyCandidateWeight (Q := w.coarse) w.fine q (proxyDevSnd e)) := by
   classical
-  set mass := ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩
-      (proxyCandidates (Q := w.coarse) w.fine q (proxyDevFst e) ×ˢ
-        proxyCandidates (Q := w.coarse) w.fine q (proxyDevSnd e)),
-      ((p.1.card : ℝ) * p.2.card) with hmassdef
-  have hmass : 0 ≤ mass := Finset.sum_nonneg fun p _ => by positivity
-  have hW1 := half_card_le_proxyCandidateWeight w.fine_le hq (proxyDevFst e)
-  have hW2 := half_card_le_proxyCandidateWeight w.fine_le hq (proxyDevSnd e)
-  have hC : (0 : ℝ) ≤ ((proxyDevFst e).1.card : ℝ) := by positivity
-  have hD : (0 : ℝ) ≤ ((proxyDevSnd e).1.card : ℝ) := by positivity
-  have hkey : ((proxyDevFst e).1.card : ℝ) * ((proxyDevSnd e).1.card : ℝ)
-      ≤ 4 * (proxyCandidateWeight (Q := w.coarse) w.fine q (proxyDevFst e)
-        * proxyCandidateWeight (Q := w.coarse) w.fine q (proxyDevSnd e)) := by
-    nlinarith [hW1, hW2, hC, hD]
   rw [proxyPairMassWeight]
-  show ((proxyDevPair e).1.card : ℝ) * ((proxyDevPair e).2.card : ℝ) / (s.card : ℝ) ^ 2
-      * mass ≤ _
-  -- No case split on an empty host is needed: the inequality is divided by `#s ^ 2`, and
-  -- division by zero sends both sides to zero.
-  rw [div_mul_eq_mul_div, div_mul_eq_mul_div]
-  refine div_le_div_of_nonneg_right ?_ (by positivity)
-  show ((proxyDevFst e).1.card : ℝ) * ((proxyDevSnd e).1.card : ℝ) * mass ≤ _
-  nlinarith [hkey, hmass]
+  exact massWeight_mul_mass_le_of_candidates w.fine_le hq _ (proxyDevFst e) (proxyDevSnd e)
 
 open Classical in
 /-- **The `P`-free cost budget.** Charging each deviant incidence its proxy pair's normalized
