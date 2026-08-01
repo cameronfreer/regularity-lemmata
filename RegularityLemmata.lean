@@ -98,6 +98,7 @@ import RegularityLemmata.Relational.ProxySelectionSetup
 import RegularityLemmata.Relational.ProxyCostBudget
 import RegularityLemmata.Relational.ProxySelectionConstants
 import RegularityLemmata.Relational.ProxyHierarchyBridge
+import RegularityLemmata.Relational.ProxyNormalizedCostGate
 import RegularityLemmata.Relational.PlacementStrata
 
 /-!
