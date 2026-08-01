@@ -29,13 +29,18 @@ Nothing here assembles weighted choice, and nothing here is the summit.
 
 ## What the investigation found
 
-**Positive, for the forbidden channel.** `ErrorSchedule` is a FUNCTION evaluated at the
+**Positive: fine-tolerance scheduling.** `ErrorSchedule` is a FUNCTION evaluated at the
 realized coarse count (`fine_diagRegular : IsBinaryPaletteDiagRegular M (E coarse.parts.card)
-fine`). Instantiating it at `proxyFineSchedule K` therefore delivers fine regularity at
-`proxyFineTolerance K w.coarse.parts.card` with **no a priori bound needed** — the schedule
-is fixed in advance, the count is realized afterwards, and the two meet by evaluation
-(`fine_diagRegular_proxyFineSchedule`). The `P`-dependence of the fine tolerance is not a
-hierarchy problem at all.
+fine`). Instantiating it at `proxyFineSchedule K` therefore delivers fine regularity at the
+fine tolerance for the witness's own coarse count, with **no a priori bound needed** — the
+schedule is fixed in advance, the count is realized afterwards, and the two meet by
+evaluation (`fine_diagRegular_proxyFineSchedule`, whose tolerance is at `max P 1`;
+`fine_diagRegular_proxyFineSchedule_of_pos` states it at `P` itself once the coarse partition
+is nonempty). So the `P`-dependence of the fine TOLERANCE is not a hierarchy problem.
+
+This is scheduling only, and does not discharge the forbidden budget. That budget still needs
+the count bound and the `m`/`m + 1` size hypotheses, which are exactly what G-H2a says are
+unavailable for `w.coarse`.
 
 **Negative, for the deviation parameter — hard stop.** `δ` is a scalar, not a schedule, and
 two obstructions stand between it and an a priori bound:
@@ -59,6 +64,12 @@ available from the current construction, and G-H2b says it will not come from sh
 Step 5 stays closed. The live alternative is the one G-H1 named second: a deviation
 requirement that is `P`-free, which means changing what the cost channel charges rather than
 bounding `P`. That is a design question, not packaging, and is not decided here.
+
+**A `P`-free cost would close only half of this.** It removes the `P`-dependence from the
+COST side. The forbidden side is untouched: `hbad` still needs a count bound and the
+equitability facts G-H2a denies. So Step 5 remains blocked afterwards, on either producing an
+equitable large-cell witness coarse partition or redesigning how nonuniform selected pairs
+are handled.
 -/
 
 namespace RegularityLemmata
@@ -112,13 +123,27 @@ variable {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V}
   {P₀ : Finpartition s}
 
 /-- **The schedule meets the realized count by evaluation.** A witness built against
-`proxyFineSchedule K` has its fine partition diagonal-inclusively palette-regular at exactly
-the fine tolerance for its own realized coarse count. No bound on that count is used. -/
+`proxyFineSchedule K` has its fine partition diagonal-inclusively palette-regular at the fine
+tolerance for its own realized coarse count — literally at `max P 1`, the schedule's
+`ℕ`-clamped argument, since `ErrorSchedule` demands positivity at every input including `0`.
+No bound on that count is used. See `fine_diagRegular_proxyFineSchedule_of_pos` for the
+unclamped form. -/
 theorem fine_diagRegular_proxyFineSchedule {K : ℕ} (hK : 0 < K)
     (w : BinaryPaletteStrongDiagWitness M (proxyFineSchedule K hK) δ P₀) :
     IsBinaryPaletteDiagRegular M
       (proxyFineTolerance K (max w.coarse.parts.card 1)) w.fine :=
   w.fine_diagRegular
+
+/-- The unclamped form: once the coarse partition has at least one part — which it does
+whenever the host is nonempty — the tolerance is `proxyFineTolerance K w.coarse.parts.card`
+on the nose. -/
+theorem fine_diagRegular_proxyFineSchedule_of_pos {K : ℕ} (hK : 0 < K)
+    (w : BinaryPaletteStrongDiagWitness M (proxyFineSchedule K hK) δ P₀)
+    (hpos : 0 < w.coarse.parts.card) :
+    IsBinaryPaletteDiagRegular M (proxyFineTolerance K w.coarse.parts.card) w.fine := by
+  have h : max w.coarse.parts.card 1 = w.coarse.parts.card := max_eq_left hpos
+  have := w.fine_diagRegular
+  rwa [proxyFineSchedule_apply, h] at this
 
 /-! ### Gate G-H2a — refinement does not bound part counts -/
 
@@ -160,6 +185,18 @@ example (K : ℕ) (ρ : ℝ) (l : ℕ) : proxyCountBound K ρ l = familyRegulari
 -- what `ErrorSchedule` demands.
 example {K : ℕ} (hK : 0 < K) (P : ℕ) : 0 < proxyFineSchedule K hK P :=
   (proxyFineSchedule K hK).pos P
+
+-- The scheduled tolerance is the clamped one in general, and the unclamped one exactly
+-- when the coarse partition is nonempty.
+example {K : ℕ} (hK : 0 < K)
+    (w : BinaryPaletteStrongDiagWitness M (proxyFineSchedule K hK) δ P₀)
+    (hpos : 0 < w.coarse.parts.card) :
+    IsBinaryPaletteDiagRegular M (proxyFineTolerance K w.coarse.parts.card) w.fine :=
+  fine_diagRegular_proxyFineSchedule_of_pos hK w hpos
+
+-- The clamp is not vacuous: at a zero count the schedule reads its value at `1`.
+example {K : ℕ} (hK : 0 < K) :
+    proxyFineSchedule K hK 0 = proxyFineTolerance K 1 := by simp
 
 -- G-H2b at a concrete pair: halving the deviation parameter cannot shrink the bound.
 example (E : ErrorSchedule) (n₀ : ℕ) :
