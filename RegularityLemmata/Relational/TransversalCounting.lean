@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.BinaryStrong
 import RegularityLemmata.Relational.ThreeVertexCounting
+import RegularityLemmata.Finite.WeightedChoiceBudget
 
 /-!
 # Transversal induced-count substrate
@@ -393,6 +394,48 @@ theorem selectedPairTripleMass_one_two_le {Q : Finpartition s}
   refine le_of_eq (Finset.sum_congr rfl fun p _ => ?_)
   dsimp only
   rw [← Finset.mul_sum, sum_card_parts_cast]
+
+/-- **The three-coordinate union.** Triples having ANY of their three coordinate pairs in `D`
+carry volume at most three times the `D`-pair mass times `|s|`. The factor is the number of
+coordinate pairs in a triple; nothing about cells or events enters. Palette-, proxy- and
+regularity-free counting infrastructure. -/
+theorem selectedPairTripleMass_any_le {Q : Finpartition s}
+    {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts) :
+    ∑ T ∈ (transversalCellTriples Q).filter
+        (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ 3 * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+  classical
+  set f : (Fin 3 → Finset V) → ℝ := fun T => ((T 0).card * (T 1).card * (T 2).card : ℝ)
+    with hf
+  set S₀ := (transversalCellTriples Q).filter (fun T => (T 0, T 1) ∈ D) with hS₀
+  set S₁ := (transversalCellTriples Q).filter (fun T => (T 0, T 2) ∈ D) with hS₁
+  set S₂ := (transversalCellTriples Q).filter (fun T => (T 1, T 2) ∈ D) with hS₂
+  have hone : ∀ k : Fin 3,
+      ∑ T ∈ ![S₀, S₁, S₂] k, f T ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+    intro k
+    fin_cases k
+    · exact selectedPairTripleMass_zero_one_le hD
+    · exact selectedPairTripleMass_zero_two_le hD
+    · exact selectedPairTripleMass_one_two_le hD
+  have hcov : ∀ T ∈ (transversalCellTriples Q).filter
+      (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
+      ∃ k : Fin 3, T ∈ ![S₀, S₁, S₂] k := by
+    intro T hT
+    rw [Finset.mem_filter] at hT
+    rcases hT.2 with h | h | h
+    · exact ⟨0, show T ∈ S₀ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
+    · exact ⟨1, show T ∈ S₁ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
+    · exact ⟨2, show T ∈ S₂ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
+  refine le_trans (sum_le_sum_of_exists_mem _ (fun k : Fin 3 => ![S₀, S₁, S₂] k) f
+    (fun T => by positivity) hcov) ?_
+  calc ∑ k : Fin 3, ∑ T ∈ ![S₀, S₁, S₂] k, f T
+      ≤ ∑ _k : Fin 3, (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card :=
+        Finset.sum_le_sum fun k _ => hone k
+    _ = 3 * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        push_cast
+        ring
 
 /-! ### Tests and adversarial examples -/
 

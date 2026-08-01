@@ -26,11 +26,12 @@ question this file answers is what that weakening costs the three-vertex count.
    `selectedPairTripleMass_zero_two_le`, `selectedPairTripleMass_one_two_le`
    (`Relational/TransversalCounting.lean`) each bound a one-coordinate-pair-restricted triple
    mass by the pair mass times `#s`.
-4. `badTripleVolume_le` — the three-coordinate union bound: if the selected nonuniform pair
-   mass is at most `β * #s ^ 2`, the triples with ANY bad coordinate pair carry volume at
-   most `3 * β * #s ^ 3`. The union over the three coordinate pairs is charged by
-   `sum_le_sum_of_exists_mem` (`Finite/WeightedChoiceBudget.lean`), so the factor is three —
-   the number of coordinate pairs in a triple — and nothing else.
+4. The three-coordinate union is `selectedPairTripleMass_any_le`, which lives with the rest
+   of the counting infrastructure in `Relational/TransversalCounting.lean` and mentions no
+   palette, proxy or regularity: triples with ANY coordinate pair in `D` carry volume at most
+   `3 * (D-pair mass) * #s`. `badTripleVolume_le` is its short NORMALIZED corollary, giving
+   `3 * β * #s ^ 3` from a pair mass at most `β * #s ^ 2`. The factor three is the number of
+   coordinate pairs in a triple and nothing else.
 
 ## The combined constant
 
@@ -41,8 +42,11 @@ single cost, and `expected_proxyCombinedCost_le` gives its budget as
 
 `4 * K * ε + 4 * K * δ / η ^ 2`
 
-**undoubled** — not the `2 ×` of the conditioned form. That is the constant branch B has to
-live with, and it is what this file pins.
+**undoubled** — not the `2 ×` of the conditioned form. `exists_piFinset_cost_le`
+(`Finite/WeightedChoice.lean`) makes that formal without dummy event arguments: it consumes
+a positive total weight and an expected-cost bound and returns a selection at cost at most
+`μ`, being the conditioned theorem at `E := Empty`, `σ := 0`. That is the constant branch B
+has to live with, and it is what this file pins.
 
 ## What is NOT done here
 
@@ -79,19 +83,6 @@ theorem selectedPaletteNonuniformPairs_subset (ε : ℝ) (F : Finpartition s)
   have := mem_proxyPairEvents.mp e.2
   exact Finset.mem_product.mpr ⟨this.1, this.2.1⟩
 
-theorem proxyEventPair_injective : Function.Injective (proxyEventPair (Q := Q)) :=
-  fun _ _ h => Subtype.ext h
-
-/-- A host of size zero has no parts, hence no proxy events. -/
-theorem parts_eq_empty_of_card_eq_zero (hs : s.card = 0) : Q.parts = ∅ := by
-  classical
-  rw [Finset.card_eq_zero] at hs
-  refine Finset.eq_empty_of_forall_notMem fun A hA => ?_
-  obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts hA
-  have hxs : x ∈ s := Q.subset hA hx
-  rw [hs] at hxs
-  exact absurd hxs (Finset.notMem_empty x)
-
 open Classical in
 /-- **The charge and the raw mass are the same quantity.** The selected palette-nonuniform
 pairs carry raw mass exactly `#s ^ 2` times the normalized charge, so a cost bound on the
@@ -108,8 +99,12 @@ theorem sum_selectedPaletteNonuniformPairs_mass (ε : ℝ) (F : Finpartition s)
   rw [proxyPairMassWeight]
   rcases Nat.eq_zero_or_pos s.card with hs | hs
   · -- No parts, hence no events: the index set is empty and `e` cannot exist.
-    exact absurd (mem_proxyPairEvents.mp e.2).1
-      (by rw [parts_eq_empty_of_card_eq_zero hs]; exact Finset.notMem_empty _)
+    refine absurd (mem_proxyPairEvents.mp e.2).1 ?_
+    have hQ : Q.parts = ∅ := by
+      rw [Finpartition.parts_eq_empty_iff]
+      exact Finset.card_eq_zero.mp hs
+    rw [hQ]
+    exact Finset.notMem_empty _
   · have hpos : (0 : ℝ) < (s.card : ℝ) ^ 2 := by
       have : (0 : ℝ) < (s.card : ℝ) := by exact_mod_cast hs
       positivity
@@ -128,45 +123,11 @@ theorem badTripleVolume_le {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.par
         (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
         ((T 0).card * (T 1).card * (T 2).card : ℝ)
       ≤ 3 * β * (s.card : ℝ) ^ 3 := by
-  classical
-  set f : (Fin 3 → Finset V) → ℝ := fun T => ((T 0).card * (T 1).card * (T 2).card : ℝ)
-    with hf
-  set S₀ := (transversalCellTriples Q).filter (fun T => (T 0, T 1) ∈ D) with hS₀
-  set S₁ := (transversalCellTriples Q).filter (fun T => (T 0, T 2) ∈ D) with hS₁
-  set S₂ := (transversalCellTriples Q).filter (fun T => (T 1, T 2) ∈ D) with hS₂
+  refine (selectedPairTripleMass_any_le hD).trans ?_
   have hs0 : (0 : ℝ) ≤ (s.card : ℝ) := by positivity
-  -- Each coordinate pair contributes at most `β * #s ^ 3`, by the EXISTING lifting.
-  have hone : ∀ k : Fin 3, ∑ T ∈ ![S₀, S₁, S₂] k, f T ≤ β * (s.card : ℝ) ^ 3 := by
-    intro k
-    have hlift : ∑ T ∈ ![S₀, S₁, S₂] k, f T
-        ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card := by
-      fin_cases k
-      · exact selectedPairTripleMass_zero_one_le hD
-      · exact selectedPairTripleMass_zero_two_le hD
-      · exact selectedPairTripleMass_one_two_le hD
-    refine hlift.trans ?_
-    calc (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card
-        ≤ (β * (s.card : ℝ) ^ 2) * s.card := mul_le_mul_of_nonneg_right hβ hs0
-      _ = β * (s.card : ℝ) ^ 3 := by ring
-  -- Every triple with a bad coordinate pair lies in one of the three sets.
-  have hcov : ∀ T ∈ (transversalCellTriples Q).filter
-      (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
-      ∃ k : Fin 3, T ∈ ![S₀, S₁, S₂] k := by
-    intro T hT
-    rw [Finset.mem_filter] at hT
-    rcases hT.2 with h | h | h
-    · exact ⟨0, show T ∈ S₀ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
-    · exact ⟨1, show T ∈ S₁ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
-    · exact ⟨2, show T ∈ S₂ from Finset.mem_filter.mpr ⟨hT.1, h⟩⟩
-  -- The union over the three coordinate pairs, charged once each.
-  refine le_trans (sum_le_sum_of_exists_mem _ (fun k : Fin 3 => ![S₀, S₁, S₂] k) f
-    (fun T => by positivity) hcov) ?_
-  calc ∑ k : Fin 3, ∑ T ∈ ![S₀, S₁, S₂] k, f T
-      ≤ ∑ _k : Fin 3, β * (s.card : ℝ) ^ 3 := Finset.sum_le_sum fun k _ => hone k
-    _ = 3 * β * (s.card : ℝ) ^ 3 := by
-        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-        push_cast
-        ring
+  calc 3 * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card
+      ≤ 3 * (β * (s.card : ℝ) ^ 2) * s.card := by nlinarith [hβ, hs0]
+    _ = 3 * β * (s.card : ℝ) ^ 3 := by ring
 
 /-! ### The undoubled combined cost -/
 
@@ -222,6 +183,24 @@ example (ε : ℝ) (F : Finpartition s) (g : ProxyIndex Q → Finset V) :
 -- The bad-triple factor is three because a triple has three coordinate pairs — not because
 -- of any count of cells or events.
 example : Fintype.card (Fin 3) = 3 := by decide
+
+-- The raw union theorem is palette-, proxy- and regularity-free, and `badTripleVolume_le` is
+-- its normalized corollary.
+example {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts) :
+    ∑ T ∈ (transversalCellTriples Q).filter
+        (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ 3 * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * s.card :=
+  selectedPairTripleMass_any_le hD
+
+-- The undoubled constant is formally reachable: no forbidden events, no conditioning factor,
+-- and no dummy event arguments at the call site.
+example {ι β : Type*} [Fintype ι] [DecidableEq ι] [DecidableEq β] (t : ι → Finset β)
+    (wt : β → ℝ) (hwt : ∀ x, 0 ≤ wt x) (cost : (ι → β) → ℝ) (hcost : ∀ g, 0 ≤ cost g)
+    {μ : ℝ} (hWpos : 0 < ∏ j, ∑ x ∈ t j, wt x)
+    (hexp : ∑ g ∈ Fintype.piFinset t, (∏ j, wt (g j)) * cost g ≤ μ * ∏ j, ∑ x ∈ t j, wt x) :
+    ∃ g ∈ Fintype.piFinset t, cost g ≤ μ :=
+  exists_piFinset_cost_le t wt hwt cost hcost hWpos hexp
 
 -- A vanishing charge gives no bad triples at all, so the bound degrades gracefully.
 example {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts)

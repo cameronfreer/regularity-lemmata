@@ -109,6 +109,11 @@ def proxyEventSnd (e : ProxyEvent Q) : ProxyIndex Q :=
 @[simp] theorem proxyEventPair_mem (e : ProxyEvent Q) :
     proxyEventPair e ∈ proxyPairEvents Q := e.2
 
+/-- An event IS its proxy pair, so the projection is injective — structural API for the
+event representation, used whenever events are summed as pairs. -/
+theorem proxyEventPair_injective : Function.Injective (proxyEventPair (Q := Q)) :=
+  fun _ _ h => Subtype.ext h
+
 /-- **The two coordinates are distinct** — the hypothesis `WeightedChoice` demands of an
 event index, and the reason self-pairs are excluded from `proxyPairEvents`. -/
 theorem proxyEvent_fst_ne_snd (e : ProxyEvent Q) : proxyEventFst e ≠ proxyEventSnd e := by
