@@ -101,6 +101,7 @@ import RegularityLemmata.Relational.ProxyHierarchyBridge
 import RegularityLemmata.Relational.ProxyNormalizedCostGate
 import RegularityLemmata.Relational.ForbiddenForkGate
 import RegularityLemmata.Relational.WeakenedCountingGate
+import RegularityLemmata.Relational.GenericTripleEstimate
 import RegularityLemmata.Relational.PlacementStrata
 
 /-!
