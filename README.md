@@ -1,76 +1,68 @@
 # RegularityLemmata
 
+[![CI](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml)
+
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on [mathlib](https://github.com/leanprover-community/mathlib4).
 
-The organizing question is quantitative: when a large finite structure is partitioned so
-that most pairs of parts look random, what can be counted, approximated, or removed — and
-with which explicit constants. Every summit here carries its bounds in its statement rather
-than hiding them behind an existential.
+## Purpose
 
-## What is here
+When a large finite structure is partitioned so that most pairs of parts look random, what
+can be counted, approximated, or removed — and with which explicit constants? This library
+develops that machinery for graphs, hypergraphs, and finite relational structures. Bounds
+are carried in the statements rather than hidden behind existentials, so a summit can be
+instantiated and its constants inspected.
 
-The library is organized by namespace, and each module's docstring is the record of what
-that module establishes.
+## What the library provides
 
-| Namespace | Covers |
+| Area | Public capability |
 | --- | --- |
-| `RegularityLemmata.Finite` | Heterogeneous tuple boxes, injective tuple counting and collision bounds; densities over finite supports with a fixed zero-on-empty convention; edit sets and normalized edit distance; abstract weighted selection with forbidden-event and cost channels; multicolor Ramsey and independent-set tools. |
-| `RegularityLemmata.Partition` | Machinery over mathlib's `Finpartition`: part unions, equitable splitting and grouping, mass-weighted block energy with refinement monotonicity, quantitative almost-refinement. |
-| `RegularityLemmata.Graph` | Directed pair regularity and the energy-increment ladder; Szemerédi-style summits with explicit host-independent bounds; equitable regularity for a finite family of relations; a piece supplier producing large regular sub-partitions. |
-| `RegularityLemmata.Hypergraph` | Uniform and colored hypergraphs, polyads and disc regularity, and the weak and edited triadic regularization precursors built on the Rödl–Schacht index and polyad test surfaces. |
-| `RegularityLemmata.Relational` | A computable Boolean-valued layer over mathlib's `FirstOrder.Language`: finite models with a mathlib-structure bridge, transport, relation counts and densities, a per-symbol edit calculus; two-way pair palettes and vertex profiles; simultaneous palette regularity; counting through three vertices; and the transversal-counting and representative-selection machinery for the removal route. |
+| **Finite foundations** | Tuple boxes, injective counts, densities, edits, partitions, equitable refinements, weighted energy, abstract weighted selection. |
+| **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
+| **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
+| **Relational structures** | Computable finite relational models, transports, counts, edits, graph and hypergraph adapters, binary-palette regularity, three-vertex induced counting. |
 
-`ARCHITECTURE.md` is the canonical record of design decisions, frozen constants, and the
-current state of work in progress. `PROVENANCE.md` records which published arguments
-materially informed which proofs.
+## Current theorem boundary
 
-## What is not here
+- Binary relational regularity and counting are restricted to **arity at most two** and
+  patterns on **`Fin 3`**.
+- There is **no general relational induced-removal theorem** yet.
+- The triadic approximation is a **precursor**, not a formalization of the full
+  Rödl–Schacht theorem.
+- General fixed-pattern counting, higher relational arities, and general hypergraph removal
+  are **outside the current API**.
 
-Stated plainly, because the boundary matters more than the inventory:
+Refuted routes are not deleted. They are kept in the tree as named **gates** — modules whose
+theorems are machine-checked counterexamples and impossibility statements — so that a closed
+question cannot be quietly reopened, and so that an interface's shape can be traced to the
+obstruction that forced it.
 
-- **No relational removal lemma.** The relational layer counts; it does not yet remove.
-  Removal is deferred to its own phase with its own statement freeze.
-- **The triadic layer is a precursor**, not a formalization of the full Rödl–Schacht
-  regularity method.
-- **Pre-1.0.** Statements pass a review gate before their API freezes, but names and
-  signatures may still change. Pin a tag or revision.
+## Where to start
 
-## Conventions
-
-See [`ARCHITECTURE.md`](ARCHITECTURE.md). The three that shape every signature: raw counts
-live in `ℕ` and normalized densities and errors in `ℝ`; densities are zero on an empty
-denominator, with positivity required explicitly only where it is genuinely needed; and
-partition energy is mass-weighted and diagonal-inclusive, because that is the
-refinement-monotone quantity.
-
-## How the library is developed
-
-Statements are frozen only after a review-and-falsification pass, and a refuted route is
-not deleted — it is kept in the tree as a named **gate**: a module whose theorems are the
-machine-checked counterexamples and impossibility statements that ruled the route out.
-Several modules exist for no other purpose. Reading them is the fastest way to learn why
-an interface has the shape it does, and they are what stops a closed question from being
-quietly reopened.
-
-Committed code contains no `sorry` and no custom axioms; `scripts/check.sh` enforces this,
-along with an axiom audit of every declaration in the library namespace, and CI runs the
-same script. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the per-unit cadence.
+| Module | For |
+| --- | --- |
+| `RegularityLemmata.Finite.*` | Counting, density, and edit substrate. |
+| `RegularityLemmata.Partition.*` | `Finpartition` machinery and weighted energy. |
+| `RegularityLemmata.Graph.Regularity` | The graph regularity summit. |
+| `RegularityLemmata.Graph.EquitableFamilyRegularity` | Simultaneous regularity for a finite family of relations. |
+| `RegularityLemmata.Hypergraph.TriadCleanup` | Triadic approximation. |
+| `RegularityLemmata.Relational.Language` | The finite relational substrate. |
+| `RegularityLemmata.Relational.BinaryRegularity` | Palette regularity. |
+| `RegularityLemmata.Relational.BinaryStrongCounting` | Counting through three vertices. |
 
 ## Using as a dependency
-
-Add to your `lakefile.toml` (your project's toolchain should match this library's
-`lean-toolchain`):
 
 ```toml
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "main"
+rev = "v0.1.0"
 ```
 
-Then `import RegularityLemmata` (or individual modules such as
-`RegularityLemmata.Relational.GraphCounting`).
+Pin a tag. `main` is the development branch and its API moves between tags.
+
+Then `import RegularityLemmata`, or an individual module such as
+`RegularityLemmata.Relational.GraphCounting`.
 
 ## Building
 
@@ -80,43 +72,25 @@ lake build
 bash scripts/check.sh
 ```
 
-Toolchain: `leanprover/lean4:v4.32.0` with mathlib `v4.32.0`.
+Your project's toolchain should match this library's — see
+[`lean-toolchain`](lean-toolchain) and [`lake-manifest.json`](lake-manifest.json) for the
+pinned Lean and mathlib versions.
 
-## References
+CI enforces the repository's proof and axiom policies on every commit.
 
-Sources that materially informed the development. This is a reading list for the
-mathematics, not a claim that any of these papers is formalized in full; `PROVENANCE.md`
-records the per-unit correspondence.
+## Project documentation
 
-- E. Szemerédi, *Regular partitions of graphs*, Problèmes combinatoires et théorie des
-  graphes (Colloq. Internat. CNRS, Univ. Orsay, 1976), 1978.
-- A. Frieze and R. Kannan, *Quick approximation to matrices and applications*,
-  Combinatorica 19 (1999).
-- W. T. Gowers, *Hypergraph regularity and the multidimensional Szemerédi theorem*,
-  Ann. of Math. 166 (2007).
-- V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa, *The hypergraph regularity
-  method and its applications*, Proc. Natl. Acad. Sci. USA 102 (2005).
-- T. Tao, *A variant of the hypergraph removal lemma*, J. Combin. Theory Ser. A 113 (2006).
-- V. Rödl and J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random
-  Structures Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma
-  for regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006)
-  (the `(δ, d, r)` polyad regularity form).
-- V. Rödl and M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
-  Combin. Probab. Comput. 16 (2007).
-- F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
-  Algorithms 1 (1990) (discrepancy quasirandomness).
-- Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
-  (the mathlib development this library builds on — see
-  `Mathlib.Combinatorics.SimpleGraph.Regularity.*`).
-- C. Edmonds, A. Koutsoukou-Argyraki, L. C. Paulson, *Szemerédi's Regularity Lemma*,
-  Archive of Formal Proofs (an independent machine-checked energy-boost proof).
-- N. Alon and A. Shapira, *Testing subgraphs in directed graphs*, J. Comput. System
-  Sci. 69 (2004) (directed regularity).
-- Y. Zhao, *Graph Theory and Additive Combinatorics*, MIT lecture notes / CUP 2023
-  (the energy-increment presentation followed by the directed development here).
-- A. Schrijver, *Szemerédi's regularity lemma*, CWI notes (the mass-weighted local
-  quantity `e(A,B)²/(|A||B|)` behind `blockEnergy`).
+| File | Contents |
+| --- | --- |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
+| [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
+| [`SECURITY.md`](SECURITY.md) | Reporting policy. |
+| [`CITATION.cff`](CITATION.cff) | How to cite this library. |
 
-## License
+## Stability and license
+
+Pre-1.0. Statements pass a review-and-falsification gate before their API freezes, but
+names and signatures may still change between tags.
 
 Apache License 2.0 — see [`LICENSE`](LICENSE).
