@@ -48,6 +48,20 @@ sorry warnings in the build log; and an axiom audit of every declaration in the 
 namespace (standard axioms only: `propext`, `Classical.choice`, `Quot.sound`). CI runs
 the same script.
 
+## Documentation
+
+Three files, three triggers. Keeping them separate is what stops all three from staling:
+
+- **`README.md`** — update only when the **user-facing capability boundary** changes: a new
+  public capability, or a change to what the library does not yet claim. Not for individual
+  theorems, and never a development chronology.
+- **`ARCHITECTURE.md`** — update when a **design invariant** changes: a policy, a frozen
+  constant, a module dependency direction, or the supported theorem boundary.
+- **`PROVENANCE.md`** — update when an **intellectual dependency or adaptation claim**
+  changes: a new antecedent, or a change in what is borrowed versus what is not.
+
+Per-module detail belongs in module docstrings, which are the record for their own module.
+
 ## Conventions
 
 See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the frozen design conventions (type and

@@ -1,72 +1,81 @@
 # RegularityLemmata
 
+[![CI](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml)
+
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on [mathlib](https://github.com/leanprover-community/mathlib4).
 
-## Scope
+**Status:** pre-1.0 research library. Committed code carries no placeholders and no custom
+axioms; CI enforces that on every commit.
 
-The first release concerns **finite combinatorial regularity**, developed in layers:
+## Purpose
 
-1. **Finite tuple and counting substrate** — heterogeneous tuple boxes `Fin j → Finset V`,
-   injective tuple counting, falling factorials, collision bounds, coordinate deletion and
-   lower faces.
-2. **Density and edit calculus** — densities over finite supports with an explicit
-   zero-on-empty-denominator convention, edit sets, and normalized edit distance.
-3. **Partitions and weighted energy** — machinery over mathlib's `Finpartition`:
-   part-union lemmas, equitable splitting, mass-weighted block energy with refinement
-   monotonicity, and a quantitative almost-refinement predicate.
-4. **Graph regularity ladder** (subsequent releases) — directed pair regularity, bridges
-   to mathlib's Szemerédi regularity lemma, finite weak (Frieze–Kannan) regularity,
-   and strong regularity with counting.
-5. **Hypergraph vocabulary and local complex counting** — uniform and colored
-   hypergraphs, polyads and disc regularity, and the weak and edited triadic
-   regularization summits.
-6. **Finite relational structures** — a computable Boolean-valued layer over mathlib's
-   `FirstOrder.Language`: a finite-relational typeclass, finite models with an explicit
-   mathlib-structure bridge, transport (pullback, restriction, relabeling), separated
-   ordered and injective relation counts and densities, a per-symbol-primitive edit
-   calculus with a frozen aggregate weighting, homomorphism and induced-embedding
-   counts, and adapters for simple graphs, uniform hypergraphs, and colored
-   hypergraphs.
-7. **Finite-palette binary relational regularity** — a directed binary adaptation of
-   the graph regularity and strong-regularity machinery over the relational
-   substrate: two-way pair palettes and vertex profiles, simultaneous palette
-   regularity with a host-independent bound, a weak refinement summit, and a strong
-   palette witness with a per-color handoff to the graph strong-witness API.
-8. **Binary-palette counting through three vertices** — exact two-vertex palette
-   counts, a directed regular-degree calculus feeding directed path and triangle
-   counting, induced three-vertex relational counts, a global strong-counting
-   theorem consuming the strong palette witness (with explicit regularity,
-   density-shift, and diagonal-cell error terms), and graph bridges recovering
-   edge, path, triangle, and induced three-vertex simple-graph counts. Counting
-   only: this layer contains **no relational removal theorem** — removal is
-   deferred to a later phase with its own statement freeze.
+When a large finite structure is partitioned so that most pairs of parts look random, what
+can be counted, approximated, or removed — and with which explicit constants? This library
+develops that machinery for graphs, hypergraphs, and finite relational structures. Bounds
+are carried in the statements rather than hidden behind existentials, so a summit can be
+instantiated and its constants inspected.
 
-## Conventions
+## What the library provides
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md). Highlights: raw counts live in `ℕ`, normalized
-densities and errors in `ℝ`; densities are zero on an empty denominator, with positivity
-required explicitly in substantive theorems; committed code contains no `sorry` and no
-custom axioms (enforced by `scripts/check.sh` in CI).
+| Area | Public capability |
+| --- | --- |
+| **Finite foundations** | Tuple boxes, injective counts, densities, edits, partitions, equitable refinements, weighted energy, abstract weighted selection. |
+| **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
+| **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
+| **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting. |
+| **Adapters** | Bridges to mathlib's `SimpleGraph` and to this library's uniform and colored hypergraphs, so an existing structure can enter the machinery without being re-encoded. |
+
+## Current theorem boundary
+
+- The relational substrate supports **arbitrary finite relational languages** and exact
+  finite-model counts. The **regularity** and regularity-based **counting** layers currently
+  assume **arity at most two**, and the quantitative induced-counting theorem treats patterns
+  on **`Fin 3`**.
+- There is **no general relational induced-removal theorem** yet.
+- The triadic approximation is a **precursor**, not a formalization of the full
+  Rödl–Schacht theorem.
+- Regularity-based counting estimates for **general fixed patterns**, higher relational
+  arities, and general hypergraph removal are **outside the current API**.
+
+Counterexamples and impossibility results that constrain the API are retained as named
+**gate** modules. This keeps rejected interfaces machine-checkable and prevents closed
+questions from being reopened silently.
+
+## Proved summits
+
+The declarations to reach for, and the module each lives in. A summit's constants are visible
+in its statement.
+
+| Summit | Declaration | Module |
+| --- | --- | --- |
+| Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
+| Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
+| Large equal-size regular pieces | `exists_pieceFamily` | `Graph.PieceSchedule` |
+| Boundedly-colored pair coloring with small bad mass | `exists_goodColoring` | `Hypergraph.TriadIncrement` |
+| Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
+| Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
+| Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
+
+For the substrate rather than the summits: `RegularityLemmata.Finite.Tuple`,
+`RegularityLemmata.Finite.Injective` and `RegularityLemmata.Finite.Density` for counting,
+densities and edits; `RegularityLemmata.Partition.Basic` and
+`RegularityLemmata.Partition.BlockEnergy` for partitions and weighted energy;
+`RegularityLemmata.Relational.Language` for the finite relational layer.
 
 ## Using as a dependency
-
-Add to your `lakefile.toml` (your project's toolchain should match this library's
-`lean-toolchain`):
 
 ```toml
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "main"
+rev = "v0.1.0"
 ```
 
-Then `import RegularityLemmata` (or individual modules such as
-`RegularityLemmata.Relational.GraphCounting`).
+Pin a tag. `main` is the development branch and its API moves between tags.
 
-**Stability:** this library is pre-1.0. Statements pass a review-and-falsification
-gate before their API freezes, but names and signatures may still change between
-releases; pin a tag or revision.
+Then `import RegularityLemmata`, or an individual module such as
+`RegularityLemmata.Relational.GraphCounting`.
 
 ## Building
 
@@ -76,47 +85,25 @@ lake build
 bash scripts/check.sh
 ```
 
-Toolchain: `leanprover/lean4:v4.32.0` with mathlib `v4.32.0`.
+Your project's toolchain should match this library's — see
+[`lean-toolchain`](lean-toolchain) and [`lake-manifest.json`](lake-manifest.json) for the
+pinned Lean and mathlib versions.
 
-The triadic development now includes the weak and edited regularization summits:
-every 3-uniform hypergraph admits a boundedly-colored pair coloring with small bad
-mass (`exists_goodColoring`), and a deletion-only approximation within `δ·|V|³`
-ordered edits that is locally disc-regular at every polyad key
-(`exists_triadic_regular_approximation`) — precursors built on the Rödl–Schacht
-index and polyad test surfaces.
+CI enforces the repository's proof and axiom policies on every commit.
 
-## References
+## Project documentation
 
-- E. Szemerédi, *Regular partitions of graphs*, Problèmes combinatoires et théorie des
-  graphes (Colloq. Internat. CNRS, Univ. Orsay, 1976), 1978.
-- A. Frieze and R. Kannan, *Quick approximation to matrices and applications*,
-  Combinatorica 19 (1999).
-- W. T. Gowers, *Hypergraph regularity and the multidimensional Szemerédi theorem*,
-  Ann. of Math. 166 (2007).
-- V. Rödl, B. Nagle, J. Skokan, M. Schacht, Y. Kohayakawa, *The hypergraph regularity
-  method and its applications*, Proc. Natl. Acad. Sci. USA 102 (2005).
-- T. Tao, *A variant of the hypergraph removal lemma*, J. Combin. Theory Ser. A 113 (2006).
-- V. Rödl and J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random
-  Structures Algorithms 25 (2004); B. Nagle, V. Rödl, M. Schacht, *The counting lemma
-  for regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006)
-  (the `(δ, d, r)` polyad regularity form).
-- V. Rödl and M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
-  Combin. Probab. Comput. 16 (2007) (the triadic phase builds a precursor using
-  their index and polyad test surfaces, not a formalization of the full theorem).
-- F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
-  Algorithms 1 (1990) (discrepancy quasirandomness).
-- Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
-  (the mathlib development this library builds on — see
-  `Mathlib.Combinatorics.SimpleGraph.Regularity.*`).
-- C. Edmonds, A. Koutsoukou-Argyraki, L. C. Paulson, *Szemerédi's Regularity Lemma*,
-  Archive of Formal Proofs (an independent machine-checked energy-boost proof).
-- N. Alon and A. Shapira, *Testing subgraphs in directed graphs*, J. Comput. System
-  Sci. 69 (2004) (directed regularity).
-- Y. Zhao, *Graph Theory and Additive Combinatorics*, MIT lecture notes / CUP 2023
-  (the energy-increment presentation followed by the directed development here).
-- A. Schrijver, *Szemerédi's regularity lemma*, CWI notes (the mass-weighted local
-  quantity `e(A,B)²/(|A||B|)` behind `blockEnergy`).
+| File | Contents |
+| --- | --- |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
+| [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
+| [`SECURITY.md`](SECURITY.md) | Reporting policy. |
+| [`CITATION.cff`](CITATION.cff) | How to cite this library. |
 
-## License
+## Stability and license
+
+Statements pass a review-and-falsification gate before their API freezes, but names and
+signatures may still change between tags. Pin a tag.
 
 Apache License 2.0 — see [`LICENSE`](LICENSE).
