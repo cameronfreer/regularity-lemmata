@@ -3,51 +3,59 @@
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on [mathlib](https://github.com/leanprover-community/mathlib4).
 
-## Scope
+The organizing question is quantitative: when a large finite structure is partitioned so
+that most pairs of parts look random, what can be counted, approximated, or removed — and
+with which explicit constants. Every summit here carries its bounds in its statement rather
+than hiding them behind an existential.
 
-The first release concerns **finite combinatorial regularity**, developed in layers:
+## What is here
 
-1. **Finite tuple and counting substrate** — heterogeneous tuple boxes `Fin j → Finset V`,
-   injective tuple counting, falling factorials, collision bounds, coordinate deletion and
-   lower faces.
-2. **Density and edit calculus** — densities over finite supports with an explicit
-   zero-on-empty-denominator convention, edit sets, and normalized edit distance.
-3. **Partitions and weighted energy** — machinery over mathlib's `Finpartition`:
-   part-union lemmas, equitable splitting, mass-weighted block energy with refinement
-   monotonicity, and a quantitative almost-refinement predicate.
-4. **Graph regularity ladder** (subsequent releases) — directed pair regularity, bridges
-   to mathlib's Szemerédi regularity lemma, finite weak (Frieze–Kannan) regularity,
-   and strong regularity with counting.
-5. **Hypergraph vocabulary and local complex counting** — uniform and colored
-   hypergraphs, polyads and disc regularity, and the weak and edited triadic
-   regularization summits.
-6. **Finite relational structures** — a computable Boolean-valued layer over mathlib's
-   `FirstOrder.Language`: a finite-relational typeclass, finite models with an explicit
-   mathlib-structure bridge, transport (pullback, restriction, relabeling), separated
-   ordered and injective relation counts and densities, a per-symbol-primitive edit
-   calculus with a frozen aggregate weighting, homomorphism and induced-embedding
-   counts, and adapters for simple graphs, uniform hypergraphs, and colored
-   hypergraphs.
-7. **Finite-palette binary relational regularity** — a directed binary adaptation of
-   the graph regularity and strong-regularity machinery over the relational
-   substrate: two-way pair palettes and vertex profiles, simultaneous palette
-   regularity with a host-independent bound, a weak refinement summit, and a strong
-   palette witness with a per-color handoff to the graph strong-witness API.
-8. **Binary-palette counting through three vertices** — exact two-vertex palette
-   counts, a directed regular-degree calculus feeding directed path and triangle
-   counting, induced three-vertex relational counts, a global strong-counting
-   theorem consuming the strong palette witness (with explicit regularity,
-   density-shift, and diagonal-cell error terms), and graph bridges recovering
-   edge, path, triangle, and induced three-vertex simple-graph counts. Counting
-   only: this layer contains **no relational removal theorem** — removal is
-   deferred to a later phase with its own statement freeze.
+The library is organized by namespace, and each module's docstring is the record of what
+that module establishes.
+
+| Namespace | Covers |
+| --- | --- |
+| `RegularityLemmata.Finite` | Heterogeneous tuple boxes, injective tuple counting and collision bounds; densities over finite supports with a fixed zero-on-empty convention; edit sets and normalized edit distance; abstract weighted selection with forbidden-event and cost channels; multicolor Ramsey and independent-set tools. |
+| `RegularityLemmata.Partition` | Machinery over mathlib's `Finpartition`: part unions, equitable splitting and grouping, mass-weighted block energy with refinement monotonicity, quantitative almost-refinement. |
+| `RegularityLemmata.Graph` | Directed pair regularity and the energy-increment ladder; Szemerédi-style summits with explicit host-independent bounds; equitable regularity for a finite family of relations; a piece supplier producing large regular sub-partitions. |
+| `RegularityLemmata.Hypergraph` | Uniform and colored hypergraphs, polyads and disc regularity, and the weak and edited triadic regularization precursors built on the Rödl–Schacht index and polyad test surfaces. |
+| `RegularityLemmata.Relational` | A computable Boolean-valued layer over mathlib's `FirstOrder.Language`: finite models with a mathlib-structure bridge, transport, relation counts and densities, a per-symbol edit calculus; two-way pair palettes and vertex profiles; simultaneous palette regularity; counting through three vertices; and the transversal-counting and representative-selection machinery for the removal route. |
+
+`ARCHITECTURE.md` is the canonical record of design decisions, frozen constants, and the
+current state of work in progress. `PROVENANCE.md` records which published arguments
+materially informed which proofs.
+
+## What is not here
+
+Stated plainly, because the boundary matters more than the inventory:
+
+- **No relational removal lemma.** The relational layer counts; it does not yet remove.
+  Removal is deferred to its own phase with its own statement freeze.
+- **The triadic layer is a precursor**, not a formalization of the full Rödl–Schacht
+  regularity method.
+- **Pre-1.0.** Statements pass a review gate before their API freezes, but names and
+  signatures may still change. Pin a tag or revision.
 
 ## Conventions
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md). Highlights: raw counts live in `ℕ`, normalized
-densities and errors in `ℝ`; densities are zero on an empty denominator, with positivity
-required explicitly in substantive theorems; committed code contains no `sorry` and no
-custom axioms (enforced by `scripts/check.sh` in CI).
+See [`ARCHITECTURE.md`](ARCHITECTURE.md). The three that shape every signature: raw counts
+live in `ℕ` and normalized densities and errors in `ℝ`; densities are zero on an empty
+denominator, with positivity required explicitly only where it is genuinely needed; and
+partition energy is mass-weighted and diagonal-inclusive, because that is the
+refinement-monotone quantity.
+
+## How the library is developed
+
+Statements are frozen only after a review-and-falsification pass, and a refuted route is
+not deleted — it is kept in the tree as a named **gate**: a module whose theorems are the
+machine-checked counterexamples and impossibility statements that ruled the route out.
+Several modules exist for no other purpose. Reading them is the fastest way to learn why
+an interface has the shape it does, and they are what stops a closed question from being
+quietly reopened.
+
+Committed code contains no `sorry` and no custom axioms; `scripts/check.sh` enforces this,
+along with an axiom audit of every declaration in the library namespace, and CI runs the
+same script. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the per-unit cadence.
 
 ## Using as a dependency
 
@@ -64,10 +72,6 @@ rev = "main"
 Then `import RegularityLemmata` (or individual modules such as
 `RegularityLemmata.Relational.GraphCounting`).
 
-**Stability:** this library is pre-1.0. Statements pass a review-and-falsification
-gate before their API freezes, but names and signatures may still change between
-releases; pin a tag or revision.
-
 ## Building
 
 ```bash
@@ -78,14 +82,11 @@ bash scripts/check.sh
 
 Toolchain: `leanprover/lean4:v4.32.0` with mathlib `v4.32.0`.
 
-The triadic development now includes the weak and edited regularization summits:
-every 3-uniform hypergraph admits a boundedly-colored pair coloring with small bad
-mass (`exists_goodColoring`), and a deletion-only approximation within `δ·|V|³`
-ordered edits that is locally disc-regular at every polyad key
-(`exists_triadic_regular_approximation`) — precursors built on the Rödl–Schacht
-index and polyad test surfaces.
-
 ## References
+
+Sources that materially informed the development. This is a reading list for the
+mathematics, not a claim that any of these papers is formalized in full; `PROVENANCE.md`
+records the per-unit correspondence.
 
 - E. Szemerédi, *Regular partitions of graphs*, Problèmes combinatoires et théorie des
   graphes (Colloq. Internat. CNRS, Univ. Orsay, 1976), 1978.
@@ -101,8 +102,7 @@ index and polyad test surfaces.
   for regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006)
   (the `(δ, d, r)` polyad regularity form).
 - V. Rödl and M. Schacht, *Regular partitions of hypergraphs: Regularity lemmas*,
-  Combin. Probab. Comput. 16 (2007) (the triadic phase builds a precursor using
-  their index and polyad test surfaces, not a formalization of the full theorem).
+  Combin. Probab. Comput. 16 (2007).
 - F. R. K. Chung and R. L. Graham, *Quasi-random hypergraphs*, Random Structures
   Algorithms 1 (1990) (discrepancy quasirandomness).
 - Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity Lemma in Lean*, ITP 2022
