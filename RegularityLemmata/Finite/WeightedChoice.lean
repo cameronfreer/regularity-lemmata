@@ -403,6 +403,22 @@ theorem exists_piFinset_forall_not_mem_bad_cost_le {E : Type*} [Fintype E]
     rw [← mul_assoc, div_mul_cancel₀ _ (ne_of_gt hσ')]
   linarith
 
+/-- **Cost only, no forbidden events.** When nothing is forbidden the conditioning factor
+disappears: a weighted expected cost at most `μ` times the total weight is achieved by some
+selection at cost at most `μ`, UNDOUBLED. Derived from the conditioned form at `E := Empty`
+and `σ := 0`, so no dummy event arguments are needed at the call site. -/
+theorem exists_piFinset_cost_le (t : ι → Finset β) (wt : β → ℝ) (hwt : ∀ x, 0 ≤ wt x)
+    (cost : (ι → β) → ℝ) (hcost : ∀ g, 0 ≤ cost g) {μ : ℝ}
+    (hWpos : 0 < ∏ j, ∑ x ∈ t j, wt x)
+    (hexp : ∑ g ∈ Fintype.piFinset t, (∏ j, wt (g j)) * cost g
+        ≤ μ * ∏ j, ∑ x ∈ t j, wt x) :
+    ∃ g ∈ Fintype.piFinset t, cost g ≤ μ := by
+  classical
+  obtain ⟨g, hg, -, hcostg⟩ := exists_piFinset_forall_not_mem_bad_cost_le (E := Empty) t wt hwt
+    Empty.elim Empty.elim (fun e => e.elim) Empty.elim cost hcost (σ := 0) (μ := μ)
+    (by norm_num) hWpos (by simp) hexp
+  exact ⟨g, hg, by simpa using hcostg⟩
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
