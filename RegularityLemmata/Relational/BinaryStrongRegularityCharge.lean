@@ -81,14 +81,6 @@ noncomputable def requiredPaletteProduct (P : FiniteRelModel L (Fin 3)) (M : Fin
     pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (T 0) (T 2) *
     pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2)
 
-/-- The box volume. -/
-def cellTripleVolume (T : Fin 3 → Finset V) : ℝ :=
-  (T 0).card * (T 1).card * (T 2).card
-
-omit [DecidableEq V] in
-theorem cellTripleVolume_nonneg (T : Fin 3 → Finset V) : 0 ≤ cellTripleVolume T := by
-  rw [cellTripleVolume]; positivity
-
 omit [DecidableEq V] in
 theorem requiredPaletteProduct_nonneg (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
     (T : Fin 3 → Finset V) : 0 ≤ requiredPaletteProduct P M T := by
@@ -152,16 +144,6 @@ theorem coarseInducedEstimate_eq_sum_refinement (hQP : Q ≤ Pc) :
 
 /-! ### The regularity charge -/
 
-/-- Crude box bound: an induced count never exceeds the box volume. -/
-theorem inducedEmbeddingCountOn_le_cellTripleVolume (P : FiniteRelModel L (Fin 3))
-    (M : FiniteRelModel L V) (W : Fin 3 → Finset V) :
-    (inducedEmbeddingCountOn P M W : ℝ) ≤ cellTripleVolume W := by
-  rw [inducedEmbeddingCountOn, cellTripleVolume]
-  have hle : ((Fintype.piFinset W).filter
-      (fun f => Function.Injective f ∧ PreservesAndReflects P M f)).card
-      ≤ (W 0).card * (W 1).card * (W 2).card :=
-    (Finset.card_filter_le _ _).trans_eq (by rw [Fintype.card_piFinset, Fin.prod_univ_three])
-  exact_mod_cast hle
 
 /-- The total fine volume over profile-matching coarse triples is at most `|s|³`. -/
 theorem sum_matching_refinement_volume_le_cube (hQP : Q ≤ Pc) :

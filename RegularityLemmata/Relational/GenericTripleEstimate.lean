@@ -3,7 +3,6 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.WeakenedCountingGate
-import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 
 /-!
 # Route (b) ladder step 2: the generic triple estimate
@@ -31,8 +30,8 @@ The four ingredients stay separate, and each is used exactly once:
   that pair's own palette. This is all `D` is asked to do.
 * **Profile matching** comes from the triple lying in `MatchesThreeProfiles`, which is where
   `coarseInducedEstimate` already sums; non-matching triples contribute nothing to either
-  side (`inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles`, using `Q ≤` the profile
-  partition). It is NOT read off `D`.
+  side (`transversalInducedCount_eq_sum_matching`, generic profile-elimination infrastructure
+  living with the rest of the counting substrate). It is NOT read off `D`.
 * **Transversality** supplies pairwise disjointness (`transversalCellTriples_disjoint`).
 * **Good triples** consume `abs_inducedEmbeddingCountOn_three_sub_le` — the `7 * ε` estimate.
 * **Bad triples** consume only the crude bound: both the count and the density product lie in
@@ -53,28 +52,6 @@ open FirstOrder
 variable {V : Type*} [DecidableEq V] {s : Finset V} {Q : Finpartition s}
   {L : FirstOrder.Language} [FiniteRelational L] [AtMostBinary L]
   {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
-
-/-! ### Both sides live on profile-matching triples -/
-
-/-- The transversal count is carried by the profile-matching triples: the others contribute
-nothing, which is what lets both sides be compared triple by triple. -/
-theorem transversalInducedCount_eq_sum_matching (hQ : Q ≤ binaryProfilePartition M s) :
-    (transversalInducedCount P M Q : ℝ)
-      = ∑ T ∈ (transversalCellTriples Q).filter (MatchesThreeProfiles P M),
-          (inducedEmbeddingCountOn P M T : ℝ) := by
-  classical
-  rw [transversalInducedCount]
-  push_cast
-  rw [← Finset.sum_filter_add_sum_filter_not (transversalCellTriples Q)
-    (MatchesThreeProfiles P M) (fun T => (inducedEmbeddingCountOn P M T : ℝ))]
-  have hzero : ∑ T ∈ (transversalCellTriples Q).filter
-      (fun T => ¬ MatchesThreeProfiles P M T), (inducedEmbeddingCountOn P M T : ℝ) = 0 := by
-    refine Finset.sum_eq_zero fun T hT => ?_
-    rw [Finset.mem_filter] at hT
-    rw [inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles hQ
-      (transversalCellTriples_cell_mem hT.1) hT.2]
-    norm_num
-  rw [hzero, add_zero]
 
 /-! ### The crude bound on a single triple -/
 

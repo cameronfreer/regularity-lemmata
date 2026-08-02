@@ -286,6 +286,51 @@ theorem coarseInducedEstimate_le_cube (Q : Finpartition s) :
     _ ≤ 1 * ((T 0).card * (T 1).card * (T 2).card) := mul_le_mul_of_nonneg_right hd hv
     _ = (T 0).card * (T 1).card * (T 2).card := by ring
 
+/-! ### The box volume and the crude box bound -/
+
+/-- The box volume. -/
+def cellTripleVolume (T : Fin 3 → Finset V) : ℝ :=
+  (T 0).card * (T 1).card * (T 2).card
+
+omit [DecidableEq V] in
+theorem cellTripleVolume_nonneg (T : Fin 3 → Finset V) : 0 ≤ cellTripleVolume T := by
+  rw [cellTripleVolume]; positivity
+
+/-- Crude box bound: an induced count never exceeds the box volume. -/
+theorem inducedEmbeddingCountOn_le_cellTripleVolume (P : FiniteRelModel L (Fin 3))
+    (M : FiniteRelModel L V) (W : Fin 3 → Finset V) :
+    (inducedEmbeddingCountOn P M W : ℝ) ≤ cellTripleVolume W := by
+  rw [inducedEmbeddingCountOn, cellTripleVolume]
+  have hle : ((Fintype.piFinset W).filter
+      (fun f => Function.Injective f ∧ PreservesAndReflects P M f)).card
+      ≤ (W 0).card * (W 1).card * (W 2).card :=
+    (Finset.card_filter_le _ _).trans_eq (by rw [Fintype.card_piFinset, Fin.prod_univ_three])
+  exact_mod_cast hle
+
+/-! ### Profile elimination -/
+
+/-- **The transversal count is carried by the profile-matching triples.** The others
+contribute nothing, which is what lets a count and a density estimate be compared triple by
+triple. Generic profile-elimination infrastructure. -/
+theorem transversalInducedCount_eq_sum_matching [AtMostBinary L]
+    (hQ : Q ≤ binaryProfilePartition M s) :
+    (transversalInducedCount P M Q : ℝ)
+      = ∑ T ∈ (transversalCellTriples Q).filter (MatchesThreeProfiles P M),
+          (inducedEmbeddingCountOn P M T : ℝ) := by
+  classical
+  rw [transversalInducedCount]
+  push_cast
+  rw [← Finset.sum_filter_add_sum_filter_not (transversalCellTriples Q)
+    (MatchesThreeProfiles P M) (fun T => (inducedEmbeddingCountOn P M T : ℝ))]
+  have hzero : ∑ T ∈ (transversalCellTriples Q).filter
+      (fun T => ¬ MatchesThreeProfiles P M T), (inducedEmbeddingCountOn P M T : ℝ) = 0 := by
+    refine Finset.sum_eq_zero fun T hT => ?_
+    rw [Finset.mem_filter] at hT
+    rw [inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles hQ
+      (transversalCellTriples_cell_mem hT.1) hT.2]
+    norm_num
+  rw [hzero, add_zero]
+
 /-! ### Pair-to-triple lifting -/
 
 /-- **Lift a selected `(0,1)`-pair family to transversal triples.** The mass of transversal
