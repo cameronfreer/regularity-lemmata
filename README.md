@@ -96,6 +96,7 @@ CI enforces the repository's proof and axiom policies on every commit.
 | File | Contents |
 | --- | --- |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
+| [`docs/design/`](docs/design/) | Design documents for work that is not yet a theorem, including its permanent obstruction gates. |
 | [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
 | [`SECURITY.md`](SECURITY.md) | Reporting policy. |
