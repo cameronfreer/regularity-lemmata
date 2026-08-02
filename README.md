@@ -5,6 +5,9 @@
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on [mathlib](https://github.com/leanprover-community/mathlib4).
 
+**Status:** pre-1.0 research library. Committed code carries no placeholders and no custom
+axioms; CI enforces that on every commit.
+
 ## Purpose
 
 When a large finite structure is partitioned so that most pairs of parts look random, what
@@ -20,35 +23,45 @@ instantiated and its constants inspected.
 | **Finite foundations** | Tuple boxes, injective counts, densities, edits, partitions, equitable refinements, weighted energy, abstract weighted selection. |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
 | **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
-| **Relational structures** | Computable finite relational models, transports, counts, edits, graph and hypergraph adapters, binary-palette regularity, three-vertex induced counting. |
+| **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting. |
+| **Adapters** | Bridges to mathlib's `SimpleGraph` and to this library's uniform and colored hypergraphs, so an existing structure can enter the machinery without being re-encoded. |
 
 ## Current theorem boundary
 
-- Binary relational regularity and counting are restricted to **arity at most two** and
-  patterns on **`Fin 3`**.
+- The relational substrate supports **arbitrary finite relational languages** and exact
+  finite-model counts. The **regularity** and regularity-based **counting** layers currently
+  assume **arity at most two**, and the quantitative induced-counting theorem treats patterns
+  on **`Fin 3`**.
 - There is **no general relational induced-removal theorem** yet.
 - The triadic approximation is a **precursor**, not a formalization of the full
   Rödl–Schacht theorem.
-- General fixed-pattern counting, higher relational arities, and general hypergraph removal
-  are **outside the current API**.
+- Regularity-based counting estimates for **general fixed patterns**, higher relational
+  arities, and general hypergraph removal are **outside the current API**.
 
-Refuted routes are not deleted. They are kept in the tree as named **gates** — modules whose
-theorems are machine-checked counterexamples and impossibility statements — so that a closed
-question cannot be quietly reopened, and so that an interface's shape can be traced to the
-obstruction that forced it.
+Counterexamples and impossibility results that constrain the API are retained as named
+**gate** modules. This keeps rejected interfaces machine-checkable and prevents closed
+questions from being reopened silently.
 
-## Where to start
+## Proved summits
 
-| Module | For |
-| --- | --- |
-| `RegularityLemmata.Finite.*` | Counting, density, and edit substrate. |
-| `RegularityLemmata.Partition.*` | `Finpartition` machinery and weighted energy. |
-| `RegularityLemmata.Graph.Regularity` | The graph regularity summit. |
-| `RegularityLemmata.Graph.EquitableFamilyRegularity` | Simultaneous regularity for a finite family of relations. |
-| `RegularityLemmata.Hypergraph.TriadCleanup` | Triadic approximation. |
-| `RegularityLemmata.Relational.Language` | The finite relational substrate. |
-| `RegularityLemmata.Relational.BinaryRegularity` | Palette regularity. |
-| `RegularityLemmata.Relational.BinaryStrongCounting` | Counting through three vertices. |
+The declarations to reach for, and the module each lives in. A summit's constants are visible
+in its statement.
+
+| Summit | Declaration | Module |
+| --- | --- | --- |
+| Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
+| Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
+| Large equal-size regular pieces | `exists_pieceFamily` | `Graph.PieceSchedule` |
+| Boundedly-colored pair coloring with small bad mass | `exists_goodColoring` | `Hypergraph.TriadIncrement` |
+| Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
+| Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
+| Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
+
+For the substrate rather than the summits: `RegularityLemmata.Finite.Tuple`,
+`RegularityLemmata.Finite.Injective` and `RegularityLemmata.Finite.Density` for counting,
+densities and edits; `RegularityLemmata.Partition.Basic` and
+`RegularityLemmata.Partition.BlockEnergy` for partitions and weighted energy;
+`RegularityLemmata.Relational.Language` for the finite relational layer.
 
 ## Using as a dependency
 
@@ -90,7 +103,7 @@ CI enforces the repository's proof and axiom policies on every commit.
 
 ## Stability and license
 
-Pre-1.0. Statements pass a review-and-falsification gate before their API freezes, but
-names and signatures may still change between tags.
+Statements pass a review-and-falsification gate before their API freezes, but names and
+signatures may still change between tags. Pin a tag.
 
 Apache License 2.0 — see [`LICENSE`](LICENSE).

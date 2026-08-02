@@ -111,9 +111,10 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   supplier summit), over this repository's own equitable finite-family regularity engine
   rather than a cylinder lemma. Also the density bucketing and Ramsey extraction
   (`Finite/DensityBuckets.lean`, `Finite/MulticolorRamsey.lean`), the union density estimates
-  (`Graph/UnionCenter.lean`, `Graph/UniformSlicing.lean`), and the Lemma 3.2
-  representative-selection ARCHITECTURE — one representative per coarse cell, chosen by a
-  weighted union bound with a conditioned cost channel.
+  (`Graph/UnionCenter.lean`, `Graph/UniformSlicing.lean`, `Graph/UniformUnion.lean` — whose
+  union theorem is valid in itself, independently of the directed application G-U5 refutes),
+  and the Lemma 3.2 general weighted representative-selection and candidate-mass
+  architecture.
 
   **Refuted for directed relations.** The survey's Lemma 3.6 composition concludes that the
   union of pairwise-regular pieces with close densities is SELF-regular. That step is false
@@ -121,10 +122,11 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   machine-checked refutation. The self-regular-subset route is closed here; it is not merely
   unformalized.
 
-  **Redesigned.** In its place the induced-removal route uses transversal counting with
-  separately charged diagonal cells, and a proxy partition obtained by GROUPING the cells of
-  an already-regular equipartition rather than splitting them. That redesign is this
-  repository's, not the survey's, and it carries its own permanent gates.
+  **Redesigned.** In its place the current design pursues transversal counting with
+  separately charged diagonal cells, over a proxy partition obtained by grouping the cells of
+  an already-regular equipartition rather than splitting them. That design is this
+  repository's, not the survey's; it carries its own permanent gates, and it has not yet
+  composed into a theorem.
 
   **Not formalized.** Induced removal itself. Also not formalized: their strong cylinder
   regularity lemma (Lemma 3.5), the quantitative bounds of Lemmas 3.6–3.9, Lemma 3.7's
