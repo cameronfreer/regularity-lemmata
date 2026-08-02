@@ -108,8 +108,9 @@ count of events or cells.
 
 ## 5. Permanent obstruction gates
 
-Each is a module of machine-checked counterexamples. They are what stops a closed question
-from being reopened.
+Each is retained in the library as a machine-checked example, counterexample, or limitation
+— several share a module, one is positive, and one records what it does not prove. They are
+what stops a closed question from being reopened.
 
 | Gate | Obstruction |
 | --- | --- |

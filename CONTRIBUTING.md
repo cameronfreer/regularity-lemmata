@@ -50,7 +50,7 @@ the same script.
 
 ## Documentation
 
-Three files, three triggers. Keeping them separate is what stops all three from staling:
+Four surfaces, four triggers. Keeping them separate is what stops any of them from staling:
 
 - **`README.md`** — update only when the **user-facing capability boundary** changes: a new
   public capability, or a change to what the library does not yet claim. Not for individual

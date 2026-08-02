@@ -67,8 +67,14 @@ These conventions are frozen. Changes require an explicit owner decision recorde
 Dependencies run one way, and a module may not import from a layer above it:
 
 ```
-Finite  →  Partition  →  Graph  →  { Hypergraph , Relational }
+Finite  →  Partition  →  Graph
+Finite  →  Hypergraph
+{ Graph , Hypergraph }  →  Relational
 ```
+
+`Graph` and `Hypergraph` are independent of each other; `Relational` sits above both, since
+its adapters and counting bridges consume the hypergraph vocabulary as well as the graph
+regularity machinery.
 
 `Finite` holds the counting, density, edit, and abstract-selection substrate and imports
 only mathlib. Generic machinery discovered while building an upper layer belongs at the
@@ -174,15 +180,16 @@ correlation, direction correlation, loop/profile sensitivity) are permanent.
 
 ## Frozen public constants
 
-Constants that appear in public signatures, and therefore cannot change without breaking
-callers:
+Selected quantitative choices intentionally frozen by the public API. This table is
+**curated, not exhaustive**: many derived counting coefficients also appear in statements
+without being design commitments. Changing anything listed here breaks callers.
 
 | Constant | Value | Role |
 | --- | --- | --- |
 | `familyChunkThreshold` | `100` | Chunk-count threshold in the equitable increment. |
 | `familyChunkDensityError` | `ε / 2` | Density error charged to chunking. |
-| `familyRetainedFraction` | `1 / 5` | Retained witness fraction. |
-| one-step family gain | `ε⁵ / 5` | Energy gained per bad pair. |
+| `familyRetainedFraction` | `1 / 5` | Fraction of the exact-refinement energy gain retained by the equitable increment. |
+| one-step family gain | `ε⁵ / 5` | Global family-energy gain per nonregular refinement step. |
 | `familyFuel` | `⌈5K / ε⁵⌉₊` | Iteration fuel for the family summit. |
 | `familyStepBound` | `n · familyChunksPerPart n` | Part-count recurrence; preserves divisibility by three. |
 | `supplierTolerance` | `min (τ/2) (1 / (64(K+1)t))` | Piece-supplier tolerance, derived from its Markov requirement. |
