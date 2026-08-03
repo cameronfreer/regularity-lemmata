@@ -21,9 +21,10 @@ apart:
 * `g C` is the box actually counted.
 
 `D` is a set of **cell** pairs, its mass is **cell**-weighted, and its uniformity hypothesis
-is about the **boxes** `(g A, g B)`. That is exactly the shape a set of selected pairs has:
-its elements are proxy pairs, while membership records a failure on their representative
-boxes.
+is about the **boxes** `(g A, g B)` and is asked only of **distinct** cells. That is exactly
+the shape a set of selected pairs has: its elements are proxy pairs — never diagonal — while
+membership records a failure on their representative boxes. Distinctness at the point of use
+comes from `transversalCellTriples_ne`.
 
 Nothing here needs the boxes to cover the host. A representative box can be a `1/(2q)`
 fraction of its cell, so a covering charge would be of order `#s ^ 3` and useless; instead
@@ -112,9 +113,9 @@ theorem abs_count_sub_densityProduct_le_volume (T : Fin 3 → Finset V) :
 /-- The count over REPRESENTATIVE boxes: proxy cells index the triples and supply
 disjointness and mass accounting, while the box actually counted at a cell `C` is `g C ⊆ C`.
 Every copy counted is a genuine copy in the host. -/
-noncomputable def representativeInducedCount (P : FiniteRelModel L (Fin 3))
-    (M : FiniteRelModel L V) (Q : Finpartition s) (g : Finset V → Finset V) : ℝ :=
-  ∑ T ∈ transversalCellTriples Q, (inducedEmbeddingCountOn P M (fun i => g (T i)) : ℝ)
+def representativeInducedCount (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (Q : Finpartition s) (g : Finset V → Finset V) : ℕ :=
+  ∑ T ∈ transversalCellTriples Q, inducedEmbeddingCountOn P M (fun i => g (T i))
 
 open Classical in
 /-- The matching-triple density estimate on the same boxes. -/
@@ -131,12 +132,14 @@ open Classical in
 /-- Both sides live on the triples whose REPRESENTATIVE boxes match profiles. -/
 theorem representativeInducedCount_eq_sum_matching (hQ : Q ≤ binaryProfilePartition M s)
     {g : Finset V → Finset V} (hg : ∀ C ∈ Q.parts, g C ⊆ C) :
-    representativeInducedCount P M Q g
+    (representativeInducedCount P M Q g : ℝ)
       = ∑ T ∈ (transversalCellTriples Q).filter
           (fun T => MatchesThreeProfiles P M (fun i => g (T i))),
           (inducedEmbeddingCountOn P M (fun i => g (T i)) : ℝ) := by
   classical
-  rw [representativeInducedCount, ← Finset.sum_filter_add_sum_filter_not
+  rw [representativeInducedCount]
+  push_cast
+  rw [← Finset.sum_filter_add_sum_filter_not
     (transversalCellTriples Q) (fun T => MatchesThreeProfiles P M (fun i => g (T i)))
     (fun T => (inducedEmbeddingCountOn P M (fun i => g (T i)) : ℝ))]
   have hzero : ∑ T ∈ (transversalCellTriples Q).filter
@@ -149,6 +152,15 @@ theorem representativeInducedCount_eq_sum_matching (hQ : Q ≤ binaryProfilePart
       (fun i => hg _ (transversalCellTriples_cell_mem hT.1 i)) hT.2]
     norm_num
   rw [hzero, add_zero]
+
+@[simp] theorem representativeInducedCount_id (P : FiniteRelModel L (Fin 3))
+    (M : FiniteRelModel L V) (Q : Finpartition s) :
+    representativeInducedCount P M Q (fun C => C) = transversalInducedCount P M Q := rfl
+
+open Classical in
+@[simp] theorem representativeInducedEstimate_id (P : FiniteRelModel L (Fin 3))
+    (M : FiniteRelModel L V) (Q : Finpartition s) :
+    representativeInducedEstimate P M Q (fun C => C) = coarseInducedEstimate P M Q := rfl
 
 /-! ### The indexed-box estimate -/
 
@@ -164,16 +176,16 @@ theorem abs_representativeInducedCount_sub_estimate_le
     {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts)
     {ε β : ℝ} (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
     (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
-    (hD01 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD01 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (g A) (g B) ε →
         (A, B) ∈ D)
-    (hD02 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD02 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (g A) (g B) ε →
         (A, B) ∈ D)
-    (hD12 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD12 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (g A) (g B) ε →
         (A, B) ∈ D) :
-    |representativeInducedCount P M Q g - representativeInducedEstimate P M Q g|
+    |(representativeInducedCount P M Q g : ℝ) - representativeInducedEstimate P M Q g|
       ≤ (7 * ε + 3 * β) * (s.card : ℝ) ^ 3 := by
   classical
   set S := (transversalCellTriples Q).filter
@@ -186,8 +198,8 @@ theorem abs_representativeInducedCount_sub_estimate_le
           * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (g (T 0)) (g (T 2))
           * pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (g (T 1)) (g (T 2))
           * (g (T 0)).card * (g (T 1)).card * (g (T 2)).card with hf
-  have hdiff : representativeInducedCount P M Q g - representativeInducedEstimate P M Q g
-      = ∑ T ∈ S, f T := by
+  have hdiff : (representativeInducedCount P M Q g : ℝ)
+        - representativeInducedEstimate P M Q g = ∑ T ∈ S, f T := by
     rw [representativeInducedCount_eq_sum_matching hQ hg, representativeInducedEstimate, hS,
       hf, ← Finset.sum_sub_distrib]
   -- Representative volume never exceeds proxy volume.
@@ -233,15 +245,18 @@ theorem abs_representativeInducedCount_sub_estimate_le
       have h01 : IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 1))
           (g (T 0)) (g (T 1)) ε := by
         by_contra hcon
-        exact hTgood.1 (hD01 _ (hmem 0) _ (hmem 1) hcon)
+        exact hTgood.1 (hD01 _ (hmem 0) _ (hmem 1)
+          (transversalCellTriples_ne hTtrans (by decide : (0 : Fin 3) ≠ 1)) hcon)
       have h02 : IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 2))
           (g (T 0)) (g (T 2)) ε := by
         by_contra hcon
-        exact hTgood.2.1 (hD02 _ (hmem 0) _ (hmem 2) hcon)
+        exact hTgood.2.1 (hD02 _ (hmem 0) _ (hmem 2)
+          (transversalCellTriples_ne hTtrans (by decide : (0 : Fin 3) ≠ 2)) hcon)
       have h12 : IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 1 2))
           (g (T 1)) (g (T 2)) ε := by
         by_contra hcon
-        exact hTgood.2.2 (hD12 _ (hmem 1) _ (hmem 2) hcon)
+        exact hTgood.2.2 (hD12 _ (hmem 1) _ (hmem 2)
+          (transversalCellTriples_ne hTtrans (by decide : (1 : Fin 3) ≠ 2)) hcon)
       have hmain := abs_inducedEmbeddingCountOn_three_sub_le
         (A := g (T 0)) (B := g (T 1)) (C := g (T 2)) hnull
         (hTmatch 0) (hTmatch 1) (hTmatch 2)
@@ -285,35 +300,50 @@ theorem abs_transversalInducedCount_sub_coarseInducedEstimate_le
     |(transversalInducedCount P M Q : ℝ) - coarseInducedEstimate P M Q|
       ≤ (7 * ε + 3 * β) * (s.card : ℝ) ^ 3 := by
   have h := abs_representativeInducedCount_sub_estimate_le (g := fun C => C) hQ hnull
-    (fun C _ => le_refl C) hD hε0 hε1 hmass hD01 hD02 hD12
-  simp only [representativeInducedCount, representativeInducedEstimate] at h
-  rw [transversalInducedCount, coarseInducedEstimate]
-  push_cast
-  exact h
+    (fun C _ => le_refl C) hD hε0 hε1 hmass
+    (fun A hA B hB _ hcon => hD01 A hA B hB hcon)
+    (fun A hA B hB _ hcon => hD02 A hA B hB hcon)
+    (fun A hA B hB _ hcon => hD12 A hA B hB hcon)
+  rwa [representativeInducedCount_id, representativeInducedEstimate_id] at h
 
 /-! ### Tests -/
 
 section Tests
 
--- The box map may shrink strictly: nothing here asks the boxes to cover the host, which is
--- what makes a selection admissible as a box map.
+-- The box map may shrink strictly, and `D` never needs a diagonal pair: the uniformity
+-- hypotheses are asked only of DISTINCT cells. So a nonuniform diagonal box `(g A, g A)` is
+-- no obstacle, which is what makes a set of proxy-pair events admissible as `D`.
 example (hQ : Q ≤ binaryProfilePartition M s) (hnull : NullaryCompatible P M)
     {g : Finset V → Finset V} (hg : ∀ C ∈ Q.parts, g C ⊆ C)
     {D : Finset (Finset V × Finset V)} (hD : D ⊆ Q.parts ×ˢ Q.parts)
     {ε β : ℝ} (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1)
     (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
-    (hD01 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD01 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (g A) (g B) ε →
         (A, B) ∈ D)
-    (hD02 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD02 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 0 2)) (g A) (g B) ε →
         (A, B) ∈ D)
-    (hD12 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts,
+    (hD12 : ∀ A ∈ Q.parts, ∀ B ∈ Q.parts, A ≠ B →
       ¬ IsUniformPair (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (g A) (g B) ε →
-        (A, B) ∈ D) :
-    |representativeInducedCount P M Q g - representativeInducedEstimate P M Q g|
+        (A, B) ∈ D)
+    -- a diagonal box may fail uniformity, and `D` still need not contain `(A, A)`
+    {A : Finset V} (hA : A ∈ Q.parts) (hdiag : ¬ IsUniformPair
+      (HasBinaryPairPalette M (binaryPairPalette P 0 1)) (g A) (g A) ε)
+    (hnotmem : (A, A) ∉ D) :
+    |(representativeInducedCount P M Q g : ℝ) - representativeInducedEstimate P M Q g|
       ≤ (7 * ε + 3 * β) * (s.card : ℝ) ^ 3 :=
   abs_representativeInducedCount_sub_estimate_le hQ hnull hg hD hε0 hε1 hmass hD01 hD02 hD12
+
+-- The identity box map recovers the partition notions definitionally.
+example (Q : Finpartition s) :
+    representativeInducedCount P M Q (fun C => C) = transversalInducedCount P M Q :=
+  representativeInducedCount_id P M Q
+
+-- The raw count is a natural number, as the type policy requires; the cast appears only in
+-- the analytic statement.
+example (Q : Finpartition s) (g : Finset V → Finset V) :
+    representativeInducedCount P M Q g = representativeInducedCount P M Q g := rfl
 
 -- The crude bound holds on every triple, with no uniformity hypothesis at all — which is
 -- what makes it the right estimate for a bad triple.
