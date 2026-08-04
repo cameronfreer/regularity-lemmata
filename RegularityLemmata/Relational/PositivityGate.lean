@@ -32,30 +32,31 @@ whether that margin can be met.
 
   `(2q)³ · (7ε + 12Kε + 12Kδ/η²) < ρ³ · α³`.
 
-## Gate G-Q1 — the margin is not satisfiable in the current order
+## Gate G-Q1 — a conditional limitation on the margin
 
-`q` bounds the FINE partition's part count, and the fine partition is produced AT the
-tolerance `ε` that appears in the margin. Shrinking `ε` to buy the inequality enlarges the
-fine partition, hence `q`, and `q` enters cubed.
+`margin_fails_of_inverse_linear_q` shows that **if** the `q` used satisfies `c/ε ≤ q` for a
+positive constant, the margin's left-hand side is at least `56c³/ε²` and so exceeds any fixed
+`ρ³α³` once `ε` is small: for such a `q`, shrinking `ε` makes the margin worse, not better.
+That is the shape of gate G-H2b, now on `q`.
 
-`margin_fails_of_inverse_linear_q` makes this precise without needing the exact growth rate:
-**any** dependence with `c/ε ≤ q` for a positive constant `c` — inverse-linear, already far
-weaker than the tower the regularity iteration actually gives — forces the left-hand side to
-be at least `56c³/ε²`, which exceeds any fixed `ρ³α³` once `ε` is small. Shrinking `ε` makes
-the margin worse, not better.
+**What this does NOT show.** `q` is an UPPER bound — the candidate API asks only
+`#F.parts ≤ q` — so a rapidly growing majorant does not force the smallest usable `q` to grow
+at all. A trivial relation stays regular at constant part count for every tolerance. The gate
+therefore rules out the conservative instantiation in which `q` is taken to be the regularity
+iteration's a priori majorant; it does not show that any PRODUCED fine partition has
+inverse-linear complexity, and it does not close the route.
 
-This is the same shape as gate G-H2b, now on `q` rather than on the coarse count: the
-parameter that must shrink to buy the estimate is the parameter that enlarges the quantity it
-is fighting.
+Like G-H1, this is a limitation stated for a hypothesis, not a refutation of the construction.
 
-**Consequence.** The route does not close by choosing parameters in the current order.
-Step 5 stays closed, and the `ProxyIndex Q → Finset V → Finset V` adapter is NOT built —
-building it would polish a route whose stop condition has not been met.
+**Consequence, as a design choice rather than a forced one.** The `ProxyIndex Q → Finset V →
+Finset V` adapter is deferred: with the conservative instantiation ruled out, the margin has
+no known way to be met, and building the adapter would develop a route whose stop condition
+is unresolved. Step 5 stays closed.
 
-What is not claimed: that no route closes. The gate constrains the ORDER of choice. Escapes
-that remain open are a `ρ` or `α` improving with `q` fast enough to absorb `q³`, a count
-bounded below without passing through the density estimate, or an error term not proportional
-to `#s³`.
+Escapes that remain open: use the REALIZED part count rather than the a priori majorant, or a
+sharper candidate-size guarantee than `#C ≤ 2q·#(g C)`; a `ρ` or `α` improving with `q` fast
+enough to absorb `q³`; a lower bound on the count not routed through the density estimate; or
+an error term not proportional to `#s³`.
 -/
 
 namespace RegularityLemmata
@@ -191,14 +192,17 @@ theorem positivityMargin_of_combined_cost {ρ α q ε β K δ η : ℝ} (hq0 : 0
 
 /-! ### Gate G-Q1 — the margin worsens as the tolerance shrinks -/
 
-/-- **Gate G-Q1.** `q` bounds the fine partition's part count, and that partition is produced
-at the tolerance `ε` appearing in the margin. Any dependence at least inverse-linear —
-`c/ε ≤ q` for a positive constant — already forces the margin's left-hand side above
-`56c³/ε²`, which exceeds any fixed `ρ³α³` once `ε` is small. Shrinking `ε` to buy the
-inequality makes it worse.
+/-- **Gate G-Q1.** A conditional limitation. IF the `q` in use satisfies `c/ε ≤ q` for a
+positive constant, the margin's left-hand side is at least `56c³/ε²` and exceeds any fixed
+`ρ³α³` once `ε` is small — so for such a `q`, shrinking `ε` to buy the inequality makes it
+worse. The hypothesis is deliberately weak, so the conclusion does not rest on an exact
+growth rate.
 
-The regularity iteration gives a far stronger dependence than inverse-linear, so this is a
-weak hypothesis, deliberately: the obstruction does not rest on the exact growth rate. -/
+**It does not show that the construction must use such a `q`.** The candidate API asks only
+`#F.parts ≤ q`, an UPPER bound, and a rapidly growing majorant does not force the smallest
+usable `q` to grow: a trivial relation stays regular at constant part count. What is ruled
+out is the conservative instantiation of `q` by the regularity iteration's a priori
+majorant. -/
 theorem margin_fails_of_inverse_linear_q {c ε q ρ α β : ℝ} (hc : 0 < c) (hε : 0 < ε)
     (hβ0 : 0 ≤ β) (hq : c / ε ≤ q)
     (hsmall : ρ ^ 3 * α ^ 3 * ε ^ 2 ≤ 56 * c ^ 3) :
@@ -237,15 +241,16 @@ example {ρ α q ε β : ℝ} (h : (2 * q) ^ 3 * (7 * ε + 3 * β) < ρ ^ 3 * α
     (2 * q) ^ 3 * (7 * ε + 3 * β) < ρ ^ 3 * α ^ 3 := h
 
 -- G-Q1 at a concrete instance: with `q = 1/ε` and unit floors, the margin already fails once
--- `ε ≤ 1`, so no smaller tolerance can rescue it.
+-- `ε ≤ 1`, so for THAT `q` no smaller tolerance rescues it.
 example {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) :
     ¬ ((2 * (1 / ε)) ^ 3 * (7 * ε + 3 * 0) < 1 ^ 3 * 1 ^ 3) := by
   refine margin_fails_of_inverse_linear_q (c := 1) one_pos hε (le_refl 0) (le_refl _) ?_
   have hsq : ε ^ 2 ≤ 1 := by nlinarith [hε.le, hε1]
   nlinarith [hsq]
 
--- The gate constrains the ORDER of choice, not the existence of a route: at a `q` that does
--- NOT grow with `ε`, the same margin is satisfiable.
+-- The hypothesis is doing the work, and it is not automatic: at a `q` that does not grow
+-- with `ε` the same margin is satisfiable, which is why the gate rules out an
+-- instantiation rather than the route.
 example : (2 * (1 : ℝ)) ^ 3 * (7 * (1 / 1000 : ℝ) + 3 * 0) < (1 : ℝ) ^ 3 * 1 ^ 3 := by
   norm_num
 
