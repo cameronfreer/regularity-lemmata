@@ -129,7 +129,7 @@ what stops a closed question from being reopened.
 | **G-H1** | The `P`-dependent deviation requirement admits no positive parameter that works uniformly over all proxy counts. Stated for arbitrary positive counts, not for counts realized by a partition; it therefore constrains what the construction must supply, and does not by itself exhibit a produced counterexample. |
 | **G-H2a** | A partition refining another can have strictly more parts, so seeding a witness at a bounded equipartition transports neither its count bound nor its equitability. |
 | **G-H2b** | The only coarse-count bound the witness producer offers is antitone in the deviation parameter, so deriving that parameter from a target bound and then demanding the produced count respect it moves both sides the same way. |
-| **G-Q1** | A conditional limitation on the positivity margin `(2q)³·(7ε + 3β) < ρ³α³`. If the `q` in use satisfies `c/ε ≤ q`, the left side is at least `56c³/ε²` and shrinking `ε` makes the margin worse — the shape of G-H2b, now on `q`. It does **not** show the construction must use such a `q`: the candidate API asks only `#F.parts ≤ q`, an upper bound, and a trivial relation stays regular at constant part count. What is ruled out is instantiating `q` by the iteration's a priori majorant. |
+| **G-Q1** | A conditional limitation on the positivity margin `(2q)³·(7ε + 3β) < ρ³α³`. If the `q` in use satisfies `c/ε ≤ q`, the left side is at least `56c³/ε²` and shrinking `ε` makes the margin worse — the shape of G-H2b, now on `q`. It does **not** show the construction must use such a `q`: the candidate API asks only `#F.parts ≤ q`, an upper bound, and a trivial relation stays regular at constant part count. It applies to any `q` known to satisfy an inverse-linear lower bound; no such bound is proved here for the iteration's a priori majorant. |
 | **Branch A** | An exact equipartition refining the profile partition collapses as soon as one vertex has a unique profile: its class is a singleton, so every part has size at most two and the part count is linear in the host, forcing a fine tolerance of order `|s|⁻²`. A unique profile is generic — one vertex distinguished by its loop data suffices — so the combination of exact equipartition, profile refinement, and host-independent complexity is unavailable. |
 
 ## 6. Open certificates
@@ -149,8 +149,10 @@ what stops a closed question from being reopened.
   the a priori majorant, or a candidate-size guarantee sharper than `|C| ≤ 2q·|g C|`; a
   representative-density floor `ρ` or proxy-size floor `α` improving with `q` fast enough to
   absorb `q³`; a lower bound on the count not routed through the density estimate; or an
-  error term not proportional to `|s|³`. G-Q1 rules out only the conservative instantiation
-  of `q`, so this is an open obligation rather than a closed obstruction.
+  error term not proportional to `|s|³`. G-Q1 constrains only a `q` with a known inverse-linear
+  lower bound, so this is an open obligation rather than a closed obstruction. Supplying such
+  a bound for the a priori majorant — under whatever conditions it needs, a nonempty partition
+  and `0 < ε ≤ 1` among them — would sharpen the gate; it is not proved here.
 
 ## 7. Explicit non-goals
 

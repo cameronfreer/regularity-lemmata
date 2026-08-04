@@ -42,16 +42,16 @@ That is the shape of gate G-H2b, now on `q`.
 **What this does NOT show.** `q` is an UPPER bound — the candidate API asks only
 `#F.parts ≤ q` — so a rapidly growing majorant does not force the smallest usable `q` to grow
 at all. A trivial relation stays regular at constant part count for every tolerance. The gate
-therefore rules out the conservative instantiation in which `q` is taken to be the regularity
-iteration's a priori majorant; it does not show that any PRODUCED fine partition has
+applies to any `q` KNOWN to satisfy an inverse-linear lower bound in `ε`; whether the
+regularity iteration's a priori majorant satisfies one is not proved here, and no bridge to it
+exists in this library. The gate does not show that any PRODUCED fine partition has
 inverse-linear complexity, and it does not close the route.
 
 Like G-H1, this is a limitation stated for a hypothesis, not a refutation of the construction.
 
 **Consequence, as a design choice rather than a forced one.** The `ProxyIndex Q → Finset V →
-Finset V` adapter is deferred: with the conservative instantiation ruled out, the margin has
-no known way to be met, and building the adapter would develop a route whose stop condition
-is unresolved. Step 5 stays closed.
+Finset V` adapter is deferred: the margin has no known way to be met, and building the adapter
+would develop a route whose stop condition is unresolved. Step 5 stays closed.
 
 Escapes that remain open: use the REALIZED part count rather than the a priori majorant, or a
 sharper candidate-size guarantee than `#C ≤ 2q·#(g C)`; a `ρ` or `α` improving with `q` fast
@@ -200,9 +200,9 @@ growth rate.
 
 **It does not show that the construction must use such a `q`.** The candidate API asks only
 `#F.parts ≤ q`, an UPPER bound, and a rapidly growing majorant does not force the smallest
-usable `q` to grow: a trivial relation stays regular at constant part count. What is ruled
-out is the conservative instantiation of `q` by the regularity iteration's a priori
-majorant. -/
+usable `q` to grow: a trivial relation stays regular at constant part count. This applies to
+any `q` known to satisfy an inverse-linear lower bound; no lemma here establishes one for the
+regularity iteration's a priori majorant. -/
 theorem margin_fails_of_inverse_linear_q {c ε q ρ α β : ℝ} (hc : 0 < c) (hε : 0 < ε)
     (hβ0 : 0 ≤ β) (hq : c / ε ≤ q)
     (hsmall : ρ ^ 3 * α ^ 3 * ε ^ 2 ≤ 56 * c ^ 3) :
