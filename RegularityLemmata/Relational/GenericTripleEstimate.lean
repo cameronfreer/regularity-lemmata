@@ -341,9 +341,10 @@ example (Q : Finpartition s) :
   representativeInducedCount_id P M Q
 
 -- The raw count is a natural number, as the type policy requires; the cast appears only in
--- the analytic statement.
-example (Q : Finpartition s) (g : Finset V → Finset V) :
-    representativeInducedCount P M Q g = representativeInducedCount P M Q g := rfl
+-- the analytic statement. Stated as an ascription, since an equation would hold at any
+-- return type.
+example (Q : Finpartition s) (g : Finset V → Finset V) : ℕ :=
+  representativeInducedCount P M Q g
 
 -- The crude bound holds on every triple, with no uniformity hypothesis at all — which is
 -- what makes it the right estimate for a bad triple.
