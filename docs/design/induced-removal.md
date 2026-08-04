@@ -80,9 +80,13 @@ Available from the library, with constants visible in their statements:
   cost-only form whose conclusion carries no conditioning factor.
 - Aggregate mass reindexings over proxy pairs — nonuniform and deviant — each charged once,
   with no event-count multiplier.
-- The generic triple estimate: with a bad-pair set `D` covering every failure of the three
-  required palette-uniformity conditions and carrying pair mass at most `β·|s|²`, the
-  transversal count differs from the coarse density estimate by at most `(7ε + 3β)·|s|³`.
+- The **indexed-box triple estimate**: cells of a partition index the triples and carry the
+  disjointness and the mass accounting, while the box counted at a cell `C` is any `g C ⊆ C`.
+  With a bad-pair set `D` of **cell** pairs covering every failure of the three required
+  palette-uniformity conditions **on the boxes**, asked only of distinct cells, and carrying
+  cell-weighted pair mass at most `β·|s|²`, the representative count differs from its density
+  estimate by at most `(7ε + 3β)·|s|³`. No covering hypothesis is needed: a box may be a
+  small fraction of its cell. The partition estimate is the case `g C = C`.
 
 ## 4. Current construction
 
