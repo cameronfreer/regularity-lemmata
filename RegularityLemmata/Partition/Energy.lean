@@ -20,9 +20,17 @@ weighting by mass) is NOT refinement-monotone. Worked example over `s = {0,1,2}`
 are `1,0,0,0`, uniform mean `1/4`; refining to singletons gives nine densities
 `1,0,…,0`, uniform mean `1/9 < 1/4`. The mass-weighted energy instead moves from
 `1/9 ≤ 1/9` (it is `1·1·1/9 = 1/9` in both cases, consistent with monotonicity).
-Mathlib's `Finpartition.energy` is the uniform, `ℚ`-valued, off-diagonal variant used
-for equipartitions; it is deliberately not the primary notion here, and the comparison
-belongs to the graph-ladder bridge where both sides speak `SimpleGraph`.
+That example uses the *diagonal-inclusive* uniform mean. Mathlib's `Finpartition.energy`
+is the uniform, `ℚ`-valued, **off-diagonal** variant used for equipartitions, so it needs
+its own witness — now proved, on a common instance, in
+`RegularityLemmata.MathlibEnergyCounterexample` (`Graph/Bridge.lean`, where both sides
+speak `SimpleGraph`): on six vertices split `2 + 4` with the complete bipartite graph
+between the coarse cells, refining into `2 + 2 + 2` **decreases** mathlib's energy from
+`1/2` to `4/9` (`mathlibEnergy_fine_lt_coarse`) while the mass-weighted `energy` here is
+unchanged at `4/9` (`weightedEnergy_eq`), as `energy_mono` requires. Mathlib's
+normalization is not a defect there — it is calibrated for equipartitions inside the
+increment loop — but it cannot serve as the potential function for refinement arguments
+over arbitrary partitions, which is why this file forks.
 -/
 
 namespace RegularityLemmata
