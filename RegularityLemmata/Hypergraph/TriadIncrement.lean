@@ -27,6 +27,14 @@ identity `cutRefineProj_comp`) with the strict local gain
 `δ³ · badTriadMass > δ⁴`. This is the index-increment step of the iteration toward
 the weak regularization summit, following V. Rödl, M. Schacht, *Regular partitions
 of hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16 (2007).
+
+The iteration is **refinement-preserving**. Each round is a `cutRefine`, hence a
+`ColoringRefines` step (`coloringRefines_cutRefine`), and the projections compose
+along the induction, so the summit is exported in seeded form
+(`exists_goodColoring_refining`): from an arbitrary starting coloring `κ₀`, an output
+that still refines it. That is what lets the summit be inserted into a hierarchy,
+where `κ₀` already encodes a constructed lower level; `exists_goodColoring` is the
+trivial-seed specialization.
 -/
 
 namespace RegularityLemmata
@@ -134,18 +142,23 @@ theorem le_triadRegularityBound (t K : ℕ) : K ≤ triadRegularityBound t K := 
     calc K = K * 1 := (mul_one K).symm
       _ ≤ K * 2 ^ (K ^ 3 * 3) := Nat.mul_le_mul_left K (Nat.one_le_two_pow)
 
-/-- **The existential fuel theorem**: once the remaining energy budget is below
-`t · δ⁴`, some coloring with at most `triadRegularityBound t K` colors has bad mass
-at most `δ`. Each failing round strictly gains `δ⁴` of energy and multiplies the
-colors by at most one `cutBound 2` step. -/
-theorem exists_goodColoring_of_fuel {H : UniformHypergraph 3 α} {δ : ℝ} (hδ : 0 < δ)
-    (t : ℕ) (K : ℕ) (κ : RSet 2 α → Fin K)
+/-- **The existential fuel theorem, refinement-preserving**: once the remaining energy
+budget is below `t · δ⁴`, some coloring with at most `triadRegularityBound t K` colors
+**refines the one it started from** and has bad mass at most `δ`.
+
+Every round is a `cutRefine`, hence a refinement (`coloringRefines_cutRefine`); the
+projections compose along the induction by `ColoringRefines.trans`. Preserving the
+projection is what makes the summit usable when `κ` already encodes structure — a
+prescribed vertex partition, a family of pair graphs, or a lower level of a complex. -/
+theorem exists_goodColoring_of_fuel_refining {H : UniformHypergraph 3 α} {δ : ℝ}
+    (hδ : 0 < δ) (t : ℕ) (K : ℕ) (κ : RSet 2 α → Fin K)
     (hbudget : 1 - polyadEnergy κ (triadObs H) ≤ (t : ℝ) * δ ^ 4) :
     ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
-      K' ≤ triadRegularityBound t K ∧ badTriadMass H κ' δ ≤ δ := by
+      K' ≤ triadRegularityBound t K ∧ ColoringRefines κ' κ ∧
+        badTriadMass H κ' δ ≤ δ := by
   induction t generalizing K κ with
   | zero =>
-    refine ⟨K, κ, le_refl _, ?_⟩
+    refine ⟨K, κ, le_refl _, ColoringRefines.refl κ, ?_⟩
     by_contra hbad
     rw [not_le] at hbad
     have hgain := polyadEnergy_cutRefine_gain hδ hbad
@@ -156,12 +169,28 @@ theorem exists_goodColoring_of_fuel {H : UniformHypergraph 3 α} {δ : ℝ} (hδ
     linarith
   | succ t ih =>
     by_cases hgood : badTriadMass H κ δ ≤ δ
-    · exact ⟨K, κ, le_triadRegularityBound (t + 1) K, hgood⟩
+    · exact ⟨K, κ, le_triadRegularityBound (t + 1) K, ColoringRefines.refl κ, hgood⟩
     · rw [not_le] at hgood
       have hgain := polyadEnergy_cutRefine_gain hδ hgood
-      refine ih (cutBound 2 K) (cutRefine κ (badWitnessFamily H κ δ)) ?_
-      rw [Nat.cast_succ] at hbudget
-      linarith
+      obtain ⟨K', κ', hcard, href, hbad⟩ :=
+        ih (cutBound 2 K) (cutRefine κ (badWitnessFamily H κ δ)) (by
+          rw [Nat.cast_succ] at hbudget
+          linarith)
+      exact ⟨K', κ', hcard, href.trans (coloringRefines_cutRefine κ _), hbad⟩
+
+/-- **The existential fuel theorem**: once the remaining energy budget is below
+`t · δ⁴`, some coloring with at most `triadRegularityBound t K` colors has bad mass
+at most `δ`. Each failing round strictly gains `δ⁴` of energy and multiplies the
+colors by at most one `cutBound 2` step. The refinement-forgetting form of
+`exists_goodColoring_of_fuel_refining`. -/
+theorem exists_goodColoring_of_fuel {H : UniformHypergraph 3 α} {δ : ℝ} (hδ : 0 < δ)
+    (t : ℕ) (K : ℕ) (κ : RSet 2 α → Fin K)
+    (hbudget : 1 - polyadEnergy κ (triadObs H) ≤ (t : ℝ) * δ ^ 4) :
+    ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
+      K' ≤ triadRegularityBound t K ∧ badTriadMass H κ' δ ≤ δ := by
+  obtain ⟨K', κ', hcard, _, hbad⟩ :=
+    exists_goodColoring_of_fuel_refining hδ t K κ hbudget
+  exact ⟨K', κ', hcard, hbad⟩
 
 /-- The iteration fuel: `⌈1/δ⁴⌉₊` rounds suffice from any starting energy. -/
 noncomputable def triadFuel (δ : ℝ) : ℕ := ⌈1 / δ ^ 4⌉₊
@@ -170,22 +199,46 @@ noncomputable def triadFuel (δ : ℝ) : ℕ := ⌈1 / δ ^ 4⌉₊
 `cutBound 2`, starting from the trivial `1`-coloring. -/
 noncomputable def triadBound (δ : ℝ) : ℕ := triadRegularityBound (triadFuel δ) 1
 
+/-- The fuel budget is available from **any** seed coloring: the polyad energy is
+nonnegative and `triadFuel δ` rounds already exhaust a budget of `1`. -/
+theorem one_sub_polyadEnergy_le_triadFuel_mul (H : UniformHypergraph 3 α) {K₀ : ℕ}
+    (κ₀ : RSet 2 α → Fin K₀) {δ : ℝ} (hδ : 0 < δ) :
+    1 - polyadEnergy κ₀ (triadObs H) ≤ (triadFuel δ : ℝ) * δ ^ 4 := by
+  have hE := polyadEnergy_nonneg κ₀ (triadObs H)
+  have hδ4 : (0 : ℝ) < δ ^ 4 := by positivity
+  have hceil : 1 / δ ^ 4 ≤ (triadFuel δ : ℝ) := Nat.le_ceil _
+  calc 1 - polyadEnergy κ₀ (triadObs H)
+      ≤ 1 := by linarith
+    _ = (1 / δ ^ 4) * δ ^ 4 := by field_simp
+    _ ≤ (triadFuel δ : ℝ) * δ ^ 4 := mul_le_mul_of_nonneg_right hceil hδ4.le
+
+/-- **The seeded weak triadic regularization summit**: from an arbitrary starting pair
+coloring `κ₀`, a coloring that **refines** it, has at most
+`triadRegularityBound (triadFuel δ) K₀` colors, and whose bad keys carry at most a `δ`
+fraction of the ordered triple mass.
+
+This is the form required to insert the summit into a hierarchy: `κ₀` may already
+represent a constructed lower level, and `ColoringRefines` guarantees it survives.
+`exists_goodColoring` is the trivial-seed specialization. -/
+theorem exists_goodColoring_refining (H : UniformHypergraph 3 α) {K₀ : ℕ}
+    (κ₀ : RSet 2 α → Fin K₀) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
+      K' ≤ triadRegularityBound (triadFuel δ) K₀ ∧ ColoringRefines κ' κ₀ ∧
+        badTriadMass H κ' δ ≤ δ :=
+  exists_goodColoring_of_fuel_refining hδ (triadFuel δ) K₀ κ₀
+    (one_sub_polyadEnergy_le_triadFuel_mul H κ₀ hδ)
+
 /-- **The weak triadic regularization summit**: every 3-uniform hypergraph admits a
 pair coloring with at most `triadBound δ` colors whose bad keys carry at most a `δ`
 fraction of the ordered triple mass. A precursor to, not a formalization of, the
 Rödl–Schacht regular-partition theorem (see the module docstring and the design
-freeze). -/
+freeze). The trivial-seed specialization of `exists_goodColoring_refining`. -/
 theorem exists_goodColoring (H : UniformHypergraph 3 α) {δ : ℝ} (hδ : 0 < δ) :
     ∃ (K' : ℕ) (κ' : RSet 2 α → Fin K'),
       K' ≤ triadBound δ ∧ badTriadMass H κ' δ ≤ δ := by
-  refine exists_goodColoring_of_fuel hδ (triadFuel δ) 1 (fun _ => 0) ?_
-  have hE := polyadEnergy_nonneg (fun _ : RSet 2 α => (0 : Fin 1)) (triadObs H)
-  have hδ4 : (0 : ℝ) < δ ^ 4 := by positivity
-  have hceil : 1 / δ ^ 4 ≤ (triadFuel δ : ℝ) := Nat.le_ceil _
-  calc 1 - polyadEnergy (fun _ : RSet 2 α => (0 : Fin 1)) (triadObs H)
-      ≤ 1 := by linarith
-    _ = (1 / δ ^ 4) * δ ^ 4 := by field_simp
-    _ ≤ (triadFuel δ : ℝ) * δ ^ 4 := mul_le_mul_of_nonneg_right hceil hδ4.le
+  obtain ⟨K', κ', hcard, _, hbad⟩ :=
+    exists_goodColoring_refining H (fun _ : RSet 2 α => (0 : Fin 1)) hδ
+  exact ⟨K', κ', hcard, hbad⟩
 
 /-! ### Tests and adversarial examples -/
 
