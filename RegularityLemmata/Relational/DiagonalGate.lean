@@ -26,6 +26,12 @@ global strong-counting corollary adds the `3·m·|s|²` diagonal charge to the s
 
 This file is independent of `AtMostBinary` until the final combination with the strong-counting
 summit; the factor `3` is derived, not assumed.
+
+The diagonal charge is proved **generically** (`sum_nontransversal_weight_le`): it constrains any
+real weight dominated by the cell-triple volume, so it serves the actual and the predicted side
+alike. The induced count is one specialization
+(`sum_nontransversal_inducedEmbeddingCountOn_le`); "volume times a factor `≤ 1`", the shape of
+every step estimate, is another (`sum_nontransversal_volume_mul_le`).
 -/
 
 namespace RegularityLemmata
@@ -214,12 +220,20 @@ private theorem sum_collision_one_two_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.ca
     · rw [(Finset.mem_filter.mp hT).2]; ring
   rw [hre]; exact sum_sq_mul_card_le hm
 
-/-- **Derived diagonal bound.** When every cell of `Q` has cardinality at most `m`, the
-nontransversal induced count is at most `3·m·|s|²` — three collision events, each `≤ m·|s|²`. -/
-theorem sum_nontransversal_inducedEmbeddingCountOn_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
-    ((∑ T ∈ nontransversalCellTriples Q, inducedEmbeddingCountOn P M T : ℕ) : ℝ)
-      ≤ 3 * m * (s.card : ℝ) ^ 2 := by
-  rw [Nat.cast_sum]
+/-- **Generic diagonal bound.** The `3·m·|s|²` estimate is a statement about *volume*, not about
+induced counts: any real weight dominated by the cell-triple volume on the nontransversal triples
+obeys it. Three collision events, each contributing at most `m·|s|²`.
+
+Domination is the only hypothesis — nonnegativity of the weight is never used, since the bound is
+one-sided. Consumers supply their own domination lemma: `inducedEmbeddingCountOn` does so via
+`inducedEmbeddingCountOn_le_cellTripleVolume` (see
+`sum_nontransversal_inducedEmbeddingCountOn_le`), and any *predicted*/expected mass qualifies as
+soon as it is shown to be at most the box volume — which is immediate for a volume times a product
+of densities in `[0, 1]`. -/
+theorem sum_nontransversal_weight_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m)
+    (weight : (Fin 3 → Finset V) → ℝ)
+    (hw : ∀ T ∈ nontransversalCellTriples Q, weight T ≤ cellTripleVolume T) :
+    ∑ T ∈ nontransversalCellTriples Q, weight T ≤ 3 * m * (s.card : ℝ) ^ 2 := by
   have hpt : ∀ T : Fin 3 → Finset V,
       (if ¬ Function.Injective T then cellTripleVolume T else 0)
       ≤ (if T 0 = T 1 then cellTripleVolume T else 0)
@@ -240,9 +254,9 @@ theorem sum_nontransversal_inducedEmbeddingCountOn_le {m : ℕ} (hm : ∀ C ∈ 
       · rw [if_pos h01]; linarith
       · rw [if_pos h02]; linarith
       · rw [if_pos h12]; linarith
-  calc ∑ T ∈ nontransversalCellTriples Q, (inducedEmbeddingCountOn P M T : ℝ)
+  calc ∑ T ∈ nontransversalCellTriples Q, weight T
       ≤ ∑ T ∈ nontransversalCellTriples Q, cellTripleVolume T :=
-        Finset.sum_le_sum fun T _ => inducedEmbeddingCountOn_le_cellTripleVolume P M T
+        Finset.sum_le_sum hw
     _ = ∑ T ∈ Fintype.piFinset fun _ : Fin 3 => Q.parts,
           (if ¬ Function.Injective T then cellTripleVolume T else 0) := by
         rw [nontransversalCellTriples, Finset.sum_filter]
@@ -264,6 +278,34 @@ theorem sum_nontransversal_inducedEmbeddingCountOn_le {m : ℕ} (hm : ∀ C ∈ 
         exact add_le_add (add_le_add (sum_collision_zero_one_le hm) (sum_collision_zero_two_le hm))
           (sum_collision_one_two_le hm)
     _ = 3 * m * (s.card : ℝ) ^ 2 := by ring
+
+/-- **Derived diagonal bound.** When every cell of `Q` has cardinality at most `m`, the
+nontransversal induced count is at most `3·m·|s|²`. One specialization of
+`sum_nontransversal_weight_le`. -/
+theorem sum_nontransversal_inducedEmbeddingCountOn_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    ((∑ T ∈ nontransversalCellTriples Q, inducedEmbeddingCountOn P M T : ℕ) : ℝ)
+      ≤ 3 * m * (s.card : ℝ) ^ 2 := by
+  rw [Nat.cast_sum]
+  exact sum_nontransversal_weight_le hm _
+    fun T _ => inducedEmbeddingCountOn_le_cellTripleVolume P M T
+
+/-- **Predicted-side diagonal bound.** A *predicted* mass of the shape "box volume times a factor
+at most `1`" — the shape of every step estimate, where the factor is a product of densities — is
+dominated by the volume, hence obeys the same `3·m·|s|²` charge.
+
+This is the second specialization of `sum_nontransversal_weight_le`, and it settles the predicted
+side generically: no counting definition, palette, or route structure is needed, only that the
+density factor is at most one. Nonnegativity of the factor is not required, the bound being
+one-sided. -/
+theorem sum_nontransversal_volume_mul_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m)
+    (factor : (Fin 3 → Finset V) → ℝ) (hf : ∀ T, factor T ≤ 1) :
+    ∑ T ∈ nontransversalCellTriples Q, cellTripleVolume T * factor T
+      ≤ 3 * m * (s.card : ℝ) ^ 2 :=
+  sum_nontransversal_weight_le hm _ fun T _ =>
+    calc cellTripleVolume T * factor T
+        ≤ cellTripleVolume T * 1 :=
+          mul_le_mul_of_nonneg_left (hf T) (cellTripleVolume_nonneg T)
+      _ = cellTripleVolume T := mul_one _
 
 /-! ### The global strong-counting corollary -/
 
