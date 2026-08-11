@@ -103,6 +103,35 @@ theorem cutRefineProj_comp (κ : RSet j α → Fin K)
   funext e
   rw [cutRefine, cutRefineProj, Equiv.symm_apply_apply]
 
+/-! ### Coloring refinement -/
+
+/-- `κ'` **refines** `κ` when `κ` factors through it: some merge map `π` recovers the old
+coloring, so every `κ'`-class sits inside a `κ`-class. This is the coloring-level counterpart of
+`Finpartition.le`, and it is what a regularization iteration must preserve for its output to be
+usable over a prescribed lower structure. -/
+def ColoringRefines {K' : ℕ} (κ' : RSet j α → Fin K') (κ : RSet j α → Fin K) : Prop :=
+  ∃ π : Fin K' → Fin K, π ∘ κ' = κ
+
+omit [Fintype α] [DecidableEq α] in
+@[refl] theorem ColoringRefines.refl (κ : RSet j α → Fin K) : ColoringRefines κ κ :=
+  ⟨id, rfl⟩
+
+omit [Fintype α] [DecidableEq α] in
+theorem ColoringRefines.trans {K' K'' : ℕ} {κ'' : RSet j α → Fin K''}
+    {κ' : RSet j α → Fin K'} {κ : RSet j α → Fin K}
+    (h₂ : ColoringRefines κ'' κ') (h₁ : ColoringRefines κ' κ) : ColoringRefines κ'' κ := by
+  obtain ⟨π₂, hπ₂⟩ := h₂
+  obtain ⟨π₁, hπ₁⟩ := h₁
+  exact ⟨π₁ ∘ π₂, by rw [Function.comp_assoc, hπ₂, hπ₁]⟩
+
+omit [Fintype α] in
+/-- **The one-step refinement witness**: `cutRefineProj` exhibits every simultaneous cut as a
+refinement of the coloring it cut. -/
+theorem coloringRefines_cutRefine (κ : RSet j α → Fin K)
+    (W : (Fin (j + 1) → Fin K) → Fin (j + 1) → Finset (RSet j α)) :
+    ColoringRefines (cutRefine κ W) κ :=
+  ⟨cutRefineProj, cutRefineProj_comp κ W⟩
+
 omit [Fintype α] in
 /-- The refined color records exactly the face-family memberships. -/
 theorem cutRefineBit_cutRefine (κ : RSet j α → Fin K)
