@@ -32,6 +32,7 @@ import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.BadMassDiag
 import RegularityLemmata.Graph.FamilyRegularity
+import RegularityLemmata.Graph.FamilyRefinement
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.EquitableChunk
 import RegularityLemmata.Graph.EquitableChunkApprox
