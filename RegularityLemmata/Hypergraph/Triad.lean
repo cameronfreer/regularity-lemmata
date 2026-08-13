@@ -2,7 +2,7 @@
 Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
-import RegularityLemmata.Hypergraph.PolyadRegularity
+import RegularityLemmata.Hypergraph.PolyadIncrement
 
 /-!
 # Realized triads: mass identities and the block density/edit calculus
@@ -23,6 +23,11 @@ the ordered edit mass is `6 · editCount`, proved, never assumed
 (`card_editTriples`), and block densities of two hypergraphs differ by at most the
 block density of their symmetric difference (`abs_blockDensity_sub_le`) — the
 density/edit bridge consumed by the repair step.
+
+The bad-key layer at the end of the file is the triadic **specialization** of the
+arity-generic layer of `Hypergraph/PolyadIncrement.lean`, at `j = 2` and
+`obs = triadObs H`; the mass identities and the edit calculus above are the genuinely
+triadic content, and they are not consumed by the increment.
 -/
 
 namespace RegularityLemmata
@@ -189,87 +194,98 @@ theorem sum_blockRealizedCount_symmDiff (H G : UniformHypergraph 3 α)
       = 6 * editCount H G :=
   sum_blockRealizedCount (H.symmDiff G) κ
 
-/-! ### Bad keys and their mass -/
+/-! ### Bad keys and their mass
+
+The triadic instance of the arity-generic bad-key layer of
+`Hypergraph/PolyadIncrement.lean`, at `j = 2` and `obs = triadObs H`. Each `_def` lemma
+records the triadic normal form of a definition — `Fin 3`, `|V|³` — which is what the
+rewriting downstream consumes. -/
 
 /-- A **bad key**: `H` fails local disc regularity at the block's own density
 (`IsLocalDiscRegular`, the canonical Phase 7 predicate). -/
 def IsBadTriad (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ)
     (key : Fin 3 → Fin K) : Prop :=
-  ¬ IsLocalDiscRegular κ (triadObs H) key δ
+  IsBadPolyad κ (triadObs H) δ key
+
+theorem isBadTriad_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ)
+    (key : Fin 3 → Fin K) :
+    IsBadTriad H κ δ key ↔ ¬ IsLocalDiscRegular κ (triadObs H) key δ :=
+  Iff.rfl
 
 /-- Unrealized keys are never bad (for `0 ≤ δ`). -/
 theorem not_isBadTriad_of_empty_block {H : UniformHypergraph 3 α}
     {κ : RSet 2 α → Fin K} {δ : ℝ} {key : Fin 3 → Fin K}
     (h : polyadBlock κ key = ∅) (hδ : 0 ≤ δ) : ¬ IsBadTriad H κ δ key :=
-  not_not_intro (isLocalDiscRegular_of_empty_block h hδ)
+  not_isBadPolyad_of_empty_block h hδ
 
 /-- **Permutation closure of bad keys**: the observable is set-level, so all ordered
 presentations of an unordered triad go bad together. -/
 theorem isBadTriad_comp_perm_iff (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) (key : Fin 3 → Fin K) (σ : Equiv.Perm (Fin 3)) :
     IsBadTriad H κ δ (key ∘ ⇑σ⁻¹) ↔ IsBadTriad H κ δ key :=
-  not_congr (isLocalDiscRegular_comp_perm_iff σ fun w => triadObs_comp_perm H w σ)
+  isBadPolyad_comp_perm_iff κ δ key σ fun w => triadObs_comp_perm H w σ
 
-open Classical in
 /-- The (ordered, diagonal-free) mass carried by the bad keys. -/
 noncomputable def badTriadMassNum (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : ℝ :=
-  ∑ key ∈ Finset.univ.filter (fun key => IsBadTriad H κ δ key),
-    ((polyadBlock κ key).card : ℝ)
+  badPolyadMassNum κ (triadObs H) δ
+
+open Classical in
+theorem badTriadMassNum_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
+    badTriadMassNum H κ δ
+      = ∑ key ∈ Finset.univ.filter (fun key => IsBadTriad H κ δ key),
+          ((polyadBlock κ key).card : ℝ) :=
+  rfl
 
 /-- Normalized bad mass, per the frozen `|V|³` convention (guard-free on `V = ∅`). -/
 noncomputable def badTriadMass (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : ℝ :=
-  badTriadMassNum H κ δ / (Fintype.card α : ℝ) ^ 3
+  badPolyadMass κ (triadObs H) δ
+
+theorem badTriadMass_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
+    badTriadMass H κ δ = badTriadMassNum H κ δ / (Fintype.card α : ℝ) ^ 3 :=
+  rfl
 
 theorem badTriadMassNum_nonneg (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : 0 ≤ badTriadMassNum H κ δ :=
-  Finset.sum_nonneg fun _ _ => Nat.cast_nonneg _
+  badPolyadMassNum_nonneg κ (triadObs H) δ
 
 theorem badTriadMass_nonneg (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : 0 ≤ badTriadMass H κ δ :=
-  div_nonneg (badTriadMassNum_nonneg H κ δ) (by positivity)
+  badPolyadMass_nonneg κ (triadObs H) δ
 
 /-- The bad mass is at most the total injective mass. -/
 theorem badTriadMassNum_le_count (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
-    (δ : ℝ) : badTriadMassNum H κ δ ≤ (injectiveTupleCount α 3 : ℝ) := by
-  classical
-  refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
-    fun _ _ _ => Nat.cast_nonneg _) (le_of_eq ?_)
-  rw [← Nat.cast_sum]
-  exact_mod_cast sum_card_polyadBlock κ
+    (δ : ℝ) : badTriadMassNum H κ δ ≤ (injectiveTupleCount α 3 : ℝ) :=
+  badPolyadMassNum_le_count κ (triadObs H) δ
 
 theorem badTriadMass_le_one (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
-    (δ : ℝ) : badTriadMass H κ δ ≤ 1 := by
-  rw [badTriadMass]
-  rcases Nat.eq_zero_or_pos (Fintype.card α) with hcard | hcard
-  · rw [hcard]
-    norm_num
-  · rw [div_le_one (by positivity)]
-    refine le_trans (badTriadMassNum_le_count H κ δ) ?_
-    exact_mod_cast injectiveTupleCount_le_pow (α := α) 3
+    (δ : ℝ) : badTriadMass H κ δ ≤ 1 :=
+  badPolyadMass_le_one κ (triadObs H) δ
 
-open Classical in
 /-- The exceptional tuple set: all ordered triples living in a bad block. -/
 noncomputable def badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : Finset (Fin 3 → α) :=
-  (Finset.univ.filter fun key => IsBadTriad H κ δ key).biUnion (polyadBlock κ)
+  badPolyadTuples κ (triadObs H) δ
+
+open Classical in
+theorem badTriadTuples_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
+    badTriadTuples H κ δ
+      = (Finset.univ.filter fun key => IsBadTriad H κ δ key).biUnion (polyadBlock κ) :=
+  rfl
 
 open Classical in
 theorem card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) :
     (badTriadTuples H κ δ).card
       = ∑ key ∈ Finset.univ.filter (fun key => IsBadTriad H κ δ key),
-          (polyadBlock κ key).card := by
-  classical
-  rw [badTriadTuples]
-  exact Finset.card_biUnion fun key _ key' _ h => polyadBlock_disjoint h
+          (polyadBlock κ key).card :=
+  card_badPolyadTuples κ (triadObs H) δ
 
 theorem cast_card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) :
-    ((badTriadTuples H κ δ).card : ℝ) = badTriadMassNum H κ δ := by
-  classical
-  rw [card_badTriadTuples, badTriadMassNum, Nat.cast_sum]
+    ((badTriadTuples H κ δ).card : ℝ) = badTriadMassNum H κ δ :=
+  cast_card_badPolyadTuples κ (triadObs H) δ
 
 /-! ### Tests and adversarial examples -/
 
@@ -326,11 +342,11 @@ example :
   have hgood : ∀ key : Fin 3 → Fin 1,
       ¬ IsBadTriad (empty 3 (Fin 3)) (fun _ => (0 : Fin 1)) (1 / 2) key := by
     intro key
-    rw [IsBadTriad, not_not]
+    rw [isBadTriad_def, not_not]
     intro P _
     rw [hobs, hobs, sub_zero, abs_zero]
     norm_num
-  rw [badTriadMass, badTriadMassNum,
+  rw [badTriadMass_def, badTriadMassNum_def,
     Finset.filter_false_of_mem fun key _ => hgood key, Finset.sum_empty, zero_div]
 
 -- Permutation closure of bad keys, as a statement-level test.
