@@ -25,6 +25,11 @@ library's calculus. See Y. Dillies and B. Mehta, *Formalising Szemerédi's Regul
 Lemma in Lean*, ITP 2022, for the underlying development. Triangle counting/removal
 bridges live in `Graph/RemovalBridge.lean`.
 
+`MathlibEnergyCounterexample` settles why the library forks the energy notion:
+mathlib's uniform **off-diagonal** `Finpartition.energy` is *not* refinement-monotone,
+while `RegularityLemmata.energy` (mass-weighted, diagonal-inclusive) is. Both are
+computed on one witness, so the contrast is exhibited rather than argued.
+
 The section's own theorem, `exists_regular_refinement_and_almostRefining_equipartition`,
 produces **two** partitions: an `ε`-regular exact refinement `Q ≤ P₀`, and a separate
 equipartition `E` almost-refining both `Q` and `P₀` — the combination Phase 3's
@@ -263,6 +268,138 @@ theorem exists_regular_refinement_and_almostRefining_equipartition_ceil
   calc (B : ℝ) = ε * ((B : ℝ) / ε) := by field_simp
     _ ≤ ε * ⌈(B : ℝ) / ε⌉₊ :=
         mul_le_mul_of_nonneg_left (Nat.le_ceil _) hε.le
+
+/-! ### Mathlib's off-diagonal energy is not refinement-monotone
+
+The library's `energy` is the mass-weighted mean of squared densities over **all** ordered
+part pairs (diagonal included); mathlib's `Finpartition.energy` is the *uniform* mean over the
+**off-diagonal** pairs, divided by `#parts ^ 2`. Only the first is monotone under refinement.
+
+The witness below is the smallest natural one. Six vertices split `2 + 4`; the graph is complete
+between the two coarse cells and empty inside each. Refining the size-`4` cell into `2 + 2`
+leaves the mass-weighted energy exactly unchanged (consistent with `energy_mono`), while
+mathlib's energy **falls** from `1/2` to `4/9`: the refinement creates a new off-diagonal pair
+`(B₁, B₂)` of density `0`, and the uniform normalization `#parts ^ 2` grows from `4` to `9`
+faster than the numerator grows from `2` to `4`.
+
+This is the concrete justification for the library's weighted-energy fork. Mathlib's normalization
+is not a defect there — it is calibrated for equipartitions inside the increment loop, where the
+part count is controlled — but it cannot serve as the potential function for refinement arguments
+over arbitrary partitions. -/
+
+namespace MathlibEnergyCounterexample
+
+/-- The size-`2` coarse cell. -/
+def cellA : Finset (Fin 6) := {0, 1}
+
+/-- The size-`4` coarse cell, split below into `cellB₁ ∪ cellB₂`. -/
+def cellB : Finset (Fin 6) := {2, 3, 4, 5}
+
+/-- First half of the refined cell. -/
+def cellB₁ : Finset (Fin 6) := {2, 3}
+
+/-- Second half of the refined cell. -/
+def cellB₂ : Finset (Fin 6) := {4, 5}
+
+/-- The coarse partition, of shape `2 + 4`. -/
+def coarse : Finpartition (Finset.univ : Finset (Fin 6)) where
+  parts := {cellA, cellB}
+  supIndep := by decide
+  sup_parts := by decide
+  bot_notMem := by decide
+
+/-- The refinement, of shape `2 + 2 + 2`. -/
+def fine : Finpartition (Finset.univ : Finset (Fin 6)) where
+  parts := {cellA, cellB₁, cellB₂}
+  supIndep := by decide
+  sup_parts := by decide
+  bot_notMem := by decide
+
+/-- Adjacency: complete between `cellA` and its complement, empty inside each side. -/
+def Adj (a b : Fin 6) : Prop := (a ∈ cellA ∧ b ∉ cellA) ∨ (a ∉ cellA ∧ b ∈ cellA)
+
+instance : DecidableRel Adj := fun _ _ => inferInstanceAs (Decidable (_ ∨ _))
+
+/-- The complete bipartite graph between the two coarse cells. -/
+def graph : SimpleGraph (Fin 6) where
+  Adj := Adj
+  symm := ⟨by decide⟩
+  loopless := ⟨by decide⟩
+
+instance : DecidableRel graph.Adj := inferInstanceAs (DecidableRel Adj)
+
+theorem fine_le_coarse : fine ≤ coarse := by
+  intro b hb
+  have hcases : b = cellA ∨ b = cellB₁ ∨ b = cellB₂ := by
+    simpa [fine, Finset.mem_insert] using hb
+  rcases hcases with rfl | rfl | rfl
+  · exact ⟨cellA, by simp [coarse], le_rfl⟩
+  · exact ⟨cellB, by simp [coarse], by decide⟩
+  · exact ⟨cellB, by simp [coarse], by decide⟩
+
+theorem mathlibEnergy_coarse : coarse.energy graph = 1 / 2 := by decide +kernel
+
+theorem mathlibEnergy_fine : fine.energy graph = 4 / 9 := by decide +kernel
+
+/-- **The counterexample.** Refining strictly *decreases* mathlib's uniform off-diagonal
+energy. -/
+theorem mathlibEnergy_fine_lt_coarse : fine.energy graph < coarse.energy graph := by
+  rw [mathlibEnergy_coarse, mathlibEnergy_fine]
+  norm_num
+
+theorem energyNum_coarse : energyNum graph.Adj coarse = 16 := by
+  rw [energyNum, show coarse.parts ×ˢ coarse.parts =
+    {(cellA, cellA), (cellA, cellB), (cellB, cellA), (cellB, cellB)} from by decide]
+  rw [Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_insert (by decide), Finset.sum_singleton]
+  simp only [blockEnergy_eq_count_sq_div]
+  rw [show pairCount graph.Adj cellA cellA = 0 from by decide,
+    show pairCount graph.Adj cellA cellB = 8 from by decide,
+    show pairCount graph.Adj cellB cellA = 8 from by decide,
+    show pairCount graph.Adj cellB cellB = 0 from by decide,
+    show cellA.card = 2 from by decide, show cellB.card = 4 from by decide]
+  norm_num
+
+theorem energyNum_fine : energyNum graph.Adj fine = 16 := by
+  rw [energyNum, show fine.parts ×ˢ fine.parts =
+    {(cellA, cellA), (cellA, cellB₁), (cellA, cellB₂), (cellB₁, cellA), (cellB₁, cellB₁),
+     (cellB₁, cellB₂), (cellB₂, cellA), (cellB₂, cellB₁), (cellB₂, cellB₂)} from by decide]
+  rw [Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_insert (by decide), Finset.sum_insert (by decide), Finset.sum_singleton]
+  simp only [blockEnergy_eq_count_sq_div]
+  rw [show pairCount graph.Adj cellA cellA = 0 from by decide,
+    show pairCount graph.Adj cellA cellB₁ = 4 from by decide,
+    show pairCount graph.Adj cellA cellB₂ = 4 from by decide,
+    show pairCount graph.Adj cellB₁ cellA = 4 from by decide,
+    show pairCount graph.Adj cellB₁ cellB₁ = 0 from by decide,
+    show pairCount graph.Adj cellB₁ cellB₂ = 0 from by decide,
+    show pairCount graph.Adj cellB₂ cellA = 4 from by decide,
+    show pairCount graph.Adj cellB₂ cellB₁ = 0 from by decide,
+    show pairCount graph.Adj cellB₂ cellB₂ = 0 from by decide,
+    show cellA.card = 2 from by decide, show cellB₁.card = 2 from by decide,
+    show cellB₂.card = 2 from by decide]
+  norm_num
+
+theorem card_univ_fin6 : ((Finset.univ : Finset (Fin 6)).card : ℝ) = 6 := by
+  rw [show (Finset.univ : Finset (Fin 6)).card = 6 from by decide]
+  norm_num
+
+/-- **The contrast.** On the very same data the mass-weighted energy is unchanged — as
+`energy_mono` requires, since `fine ≤ coarse`. -/
+theorem weightedEnergy_eq : energy graph.Adj coarse = energy graph.Adj fine := by
+  rw [energy, energy, energyNum_coarse, energyNum_fine]
+
+theorem weightedEnergy_coarse : energy graph.Adj coarse = 4 / 9 := by
+  rw [energy, energyNum_coarse, card_univ_fin6]
+  norm_num
+
+theorem weightedEnergy_fine : energy graph.Adj fine = 4 / 9 := by
+  rw [energy, energyNum_fine, card_univ_fin6]
+  norm_num
+
+end MathlibEnergyCounterexample
 
 /-! ### Tests and adversarial examples -/
 

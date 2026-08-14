@@ -177,6 +177,14 @@ correlation, direction correlation, loop/profile sensitivity) are permanent.
   `Σ_{key ∈ E} |polyadBlock κ key| / |V|³`.
 - Deletion-only edits are made well-defined across all six ordered presentations of an
   unordered triple by permutation closure of the badness predicate.
+- **The increment is arity-generic.** Bad keys, bad mass, the chosen witness family, the
+  `δ⁴` energy increment, the `cutBound j` iteration and the seeded summit are stated for a
+  coloring of `j`-sets and an arbitrary decidable observable on ordered `(j+1)`-tuples
+  (`Hypergraph/PolyadIncrement.lean`), normalized by `|V|^{j+1}`; the triadic layer is the
+  `j = 2`, `obs = triadObs H` instance. Permutation invariance is a hypothesis where it is
+  needed, not a standing assumption — only the closure lemma requires it. What is genuinely
+  triadic is the realization identity, the mass identity and the edit calculus of
+  `Hypergraph/Triad.lean`, and none of it is consumed by the increment.
 
 ## Frozen public constants
 
@@ -194,7 +202,7 @@ without being design commitments. Changing anything listed here breaks callers.
 | `familyStepBound` | `n · familyChunksPerPart n` | Part-count recurrence; preserves divisibility by three. |
 | `supplierTolerance` | `min (τ/2) (1 / (64(K+1)t))` | Piece-supplier tolerance, derived from its Markov requirement. |
 | `supplierParts`, `supplierRetention` | `4t`, `t / (2B)` | Piece-supplier output shape. |
-| `triadFuel` | `⌈1/δ⁴⌉₊` | Triadic iteration fuel. |
+| `polyadFuel` | `⌈1/δ⁴⌉₊` | Regularization iteration fuel at every arity (`triadFuel` is the triadic alias). |
 
 ## Supported theorem boundary
 

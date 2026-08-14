@@ -12,6 +12,11 @@ a partition with at most `4^(⌈1/ε²⌉ + 1)` parts whose stepped approximatio
 `ε·|s|²` of the true count on **every** rectangle — diagonal pairs handled
 automatically, with the expected single-exponential bound.
 
+The iteration starts from an arbitrary partition, so the theorem is exported in **seeded** form
+too (`frieze_kannan_refining`): from any seed `P₀`, a refinement `P ≤ P₀` with the same rectangle
+guarantee and a part bound multiplicative in `#P₀.parts`. That is the form downstream layers need
+when the seed carries structure to preserve; `frieze_kannan` is its `⊤` specialization.
+
 The proof is the direct energy-increment iteration: if some rectangle `(A, B)` has
 discrepancy exceeding `ε·|s|²`, refine every part by `A` and by `B`
 (`refineByCuts`, at most `4·#P` parts) and gain `ε²` of energy
@@ -385,24 +390,44 @@ theorem fk_iterate (hε : 0 < ε) :
         _ ≤ (4 * P.parts.card) * 4 ^ t := Nat.mul_le_mul_right _ hP'card
         _ = P.parts.card * 4 ^ (t + 1) := by ring
 
+/-- The round budget is available from **any** starting partition: the energy is nonnegative and
+`⌈1/ε²⌉₊ + 1` rounds already exhaust a budget of `1`. This is why the iteration needs no hypothesis
+on its seed. -/
+theorem one_sub_rounds_mul_sq_le_energy (P : Finpartition s) (hε : 0 < ε) :
+    1 - ((⌈1 / ε ^ 2⌉₊ + 1 : ℕ) : ℝ) * ε ^ 2 ≤ energy R P := by
+  have h0 : (0 : ℝ) ≤ energy R P := energy_nonneg R
+  have hε2 : (0 : ℝ) < ε ^ 2 := by positivity
+  have ht : (1 : ℝ) ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 := by
+    calc (1 : ℝ) = 1 / ε ^ 2 * ε ^ 2 := by field_simp
+      _ ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 :=
+          mul_le_mul_of_nonneg_right (Nat.le_ceil _) hε2.le
+  push_cast
+  nlinarith
+
+/-- **Seeded Frieze–Kannan weak regularity.** From an arbitrary seed partition `P₀`, a
+**refinement** `P ≤ P₀` whose stepped approximation is within `ε·|s|²` of the true count on every
+rectangle, with a part bound multiplicative in the seed's.
+
+This is the form `fk_iterate` actually proves: the iteration starts anywhere, each round refines,
+and the budget (`one_sub_rounds_mul_sq_le_energy`) is seed-independent. `frieze_kannan` is the
+`⊤` specialization. The refinement conclusion is what downstream layers need when the seed carries
+structure to be preserved — a vertex partition, a colour class family, or a lower level of a
+complex. -/
+theorem frieze_kannan_refining (P₀ : Finpartition s) (hε : 0 < ε) :
+    ∃ P : Finpartition s, P ≤ P₀ ∧
+      P.parts.card ≤ P₀.parts.card * 4 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
+      ∀ A ⊆ s, ∀ B ⊆ s,
+        |(pairCount R A B : ℝ) - steppedCount R P A B| ≤ ε * (s.card : ℝ) ^ 2 :=
+  fk_iterate R hε (⌈1 / ε ^ 2⌉₊ + 1) P₀ (one_sub_rounds_mul_sq_le_energy R P₀ hε)
+
 /-- **Finite Frieze–Kannan weak regularity.** Every relation admits a partition with
 at most `4^(⌈1/ε²⌉ + 1)` parts whose stepped approximation is within `ε·|s|²` of the
-true count on every rectangle. -/
+true count on every rectangle. The `⊤`-seeded specialization of `frieze_kannan_refining`. -/
 theorem frieze_kannan (hε : 0 < ε) :
     ∃ P : Finpartition s, P.parts.card ≤ 4 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
       ∀ A ⊆ s, ∀ B ⊆ s,
         |(pairCount R A B : ℝ) - steppedCount R P A B| ≤ ε * (s.card : ℝ) ^ 2 := by
-  have hbudget : 1 - ((⌈1 / ε ^ 2⌉₊ + 1 : ℕ) : ℝ) * ε ^ 2 ≤ energy R (⊤ : Finpartition s) := by
-    have h0 : (0 : ℝ) ≤ energy R (⊤ : Finpartition s) := energy_nonneg R
-    have hε2 : (0 : ℝ) < ε ^ 2 := by positivity
-    have ht : (1 : ℝ) ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 := by
-      calc (1 : ℝ) = 1 / ε ^ 2 * ε ^ 2 := by field_simp
-        _ ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 :=
-            mul_le_mul_of_nonneg_right (Nat.le_ceil _) hε2.le
-    push_cast
-    nlinarith
-  obtain ⟨Q, _, hQcard, hQreg⟩ :=
-    fk_iterate R hε (⌈1 / ε ^ 2⌉₊ + 1) (⊤ : Finpartition s) hbudget
+  obtain ⟨Q, _, hQcard, hQreg⟩ := frieze_kannan_refining R (⊤ : Finpartition s) hε
   refine ⟨Q, ?_, hQreg⟩
   calc Q.parts.card ≤ (⊤ : Finpartition s).parts.card * 4 ^ (⌈1 / ε ^ 2⌉₊ + 1) := hQcard
     _ ≤ 1 * 4 ^ (⌈1 / ε ^ 2⌉₊ + 1) :=
@@ -436,5 +461,39 @@ example :
           - steppedCount (fun a b : Fin 3 => a < b) P A B|
           ≤ 1 / 2 * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ 2 :=
   frieze_kannan _ (by norm_num)
+
+/-- A genuinely nontrivial seed on `Fin 3`: neither `⊤` (one part) nor `⊥` (three). -/
+private def testSeed : Finpartition (Finset.univ : Finset (Fin 3)) where
+  parts := {{0}, {1, 2}}
+  supIndep := by decide
+  sup_parts := by decide
+  bot_notMem := by decide
+
+example : testSeed.parts.card = 2 := by decide
+
+-- Seeded FK from that nontrivial seed: the output really refines it, and the part
+-- bound is multiplicative in the seed's part count.
+example :
+    ∃ P : Finpartition (Finset.univ : Finset (Fin 3)),
+      P ≤ testSeed ∧
+      P.parts.card ≤ testSeed.parts.card * 4 ^ (⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ + 1) ∧
+      ∀ A ⊆ (Finset.univ : Finset (Fin 3)), ∀ B ⊆ Finset.univ,
+        |(pairCount (fun a b : Fin 3 => a < b) A B : ℝ)
+          - steppedCount (fun a b : Fin 3 => a < b) P A B|
+          ≤ 1 / 2 * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ 2 :=
+  frieze_kannan_refining _ testSeed (by norm_num)
+
+-- Endpoint: the `⊥` seed forces the discrete partition, where the bound is vacuous but
+-- the refinement conclusion still holds.
+example :
+    ∃ P : Finpartition (Finset.univ : Finset (Fin 3)),
+      P ≤ (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) ∧
+      P.parts.card ≤ (⊥ : Finpartition (Finset.univ : Finset (Fin 3))).parts.card
+        * 4 ^ (⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ + 1) ∧
+      ∀ A ⊆ (Finset.univ : Finset (Fin 3)), ∀ B ⊆ Finset.univ,
+        |(pairCount (fun a b : Fin 3 => a < b) A B : ℝ)
+          - steppedCount (fun a b : Fin 3 => a < b) P A B|
+          ≤ 1 / 2 * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ 2 :=
+  frieze_kannan_refining _ ⊥ (by norm_num)
 
 end RegularityLemmata

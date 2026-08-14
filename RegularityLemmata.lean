@@ -32,6 +32,7 @@ import RegularityLemmata.Graph.Increment
 import RegularityLemmata.Graph.BadMass
 import RegularityLemmata.Graph.BadMassDiag
 import RegularityLemmata.Graph.FamilyRegularity
+import RegularityLemmata.Graph.FamilyRefinement
 import RegularityLemmata.Graph.Atomise
 import RegularityLemmata.Graph.EquitableChunk
 import RegularityLemmata.Graph.EquitableChunkApprox
@@ -54,9 +55,10 @@ import RegularityLemmata.Hypergraph.Colored
 import RegularityLemmata.Hypergraph.Copies
 import RegularityLemmata.Hypergraph.Polyad
 import RegularityLemmata.Hypergraph.PolyadRegularity
-import RegularityLemmata.Hypergraph.Triad
 import RegularityLemmata.Hypergraph.PolyadEnergy
 import RegularityLemmata.Hypergraph.PolyadWitness
+import RegularityLemmata.Hypergraph.PolyadIncrement
+import RegularityLemmata.Hypergraph.Triad
 import RegularityLemmata.Hypergraph.TriadIncrement
 import RegularityLemmata.Hypergraph.TriadCleanup
 import RegularityLemmata.Relational.Language
