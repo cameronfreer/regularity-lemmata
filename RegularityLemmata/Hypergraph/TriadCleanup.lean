@@ -164,7 +164,7 @@ theorem editTriples_subset_badTriadTuples (H : UniformHypergraph 3 α)
   intro v hv
   rw [Finset.mem_filter, mem_injectiveTuples] at hv
   obtain ⟨hinj, hdis⟩ := hv
-  rw [badTriadTuples, Finset.mem_biUnion]
+  rw [badTriadTuples_def, Finset.mem_biUnion]
   refine ⟨polyadKey κ hinj, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩,
     mem_polyadBlock_polyadKey κ hinj⟩
   by_contra hgood
@@ -201,12 +201,12 @@ theorem badTriadMassNum_le_of_mass_le {H : UniformHypergraph 3 α}
       intro hv
       have hpos : 0 < Fintype.card α := Fintype.card_pos_iff.mpr ⟨v 0⟩
       omega
-    rw [badTriadMassNum]
+    rw [badTriadMassNum_def]
     rw [Finset.sum_congr rfl fun key _ => by rw [hempty key, Nat.cast_zero]]
     rw [Finset.sum_const, smul_zero, h0]
     norm_num
   · have hV : (0 : ℝ) < (Fintype.card α : ℝ) ^ 3 := by positivity
-    rw [badTriadMass, div_le_iff₀ hV] at h
+    rw [badTriadMass_def, div_le_iff₀ hV] at h
     exact h
 
 /-! ### The edited summit -/
