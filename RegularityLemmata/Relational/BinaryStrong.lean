@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.BinaryRegularity
 import RegularityLemmata.Graph.Strong
+import RegularityLemmata.Graph.FamilyStrong
 
 /-!
 # Strong binary-palette witnesses
@@ -136,30 +137,18 @@ theorem exists_binaryPaletteStrongWitness (M : FiniteRelModel L V) (E : ErrorSch
 
 /-! ### The per-color handoff -/
 
-/-- The aggregate palette-energy gap bounds every single color's gap (each per-color
-increment is nonnegative under refinement). -/
+/-- The aggregate palette-energy gap bounds every single color's gap. The palette colors
+are the index type, and the other colors' energies are individually monotone under
+refinement, so they cancel — the generic summand descent of
+`RegularityLemmata.summand_le_add_of_sum_le_add`, at `ι = BinaryPairPalette L`. -/
 theorem energy_le_of_binaryPaletteEnergy_gap (M : FiniteRelModel L V)
     {fine coarse : Finpartition s} (hfc : fine ≤ coarse)
     (hgap : binaryPaletteEnergy M fine ≤ binaryPaletteEnergy M coarse + δ)
     (c : BinaryPairPalette L) :
     energy (HasBinaryPairPalette M c) fine
-      ≤ energy (HasBinaryPairPalette M c) coarse + δ := by
-  have hnn : ∀ c' ∈ (Finset.univ : Finset (BinaryPairPalette L)),
-      0 ≤ energy (HasBinaryPairPalette M c') fine
-        - energy (HasBinaryPairPalette M c') coarse :=
-    fun c' _ => sub_nonneg.mpr (energy_mono _ hfc)
-  have hsingle : energy (HasBinaryPairPalette M c) fine
-        - energy (HasBinaryPairPalette M c) coarse
-      ≤ ∑ c' : BinaryPairPalette L,
-          (energy (HasBinaryPairPalette M c') fine
-            - energy (HasBinaryPairPalette M c') coarse) :=
-    Finset.single_le_sum hnn (Finset.mem_univ c)
-  have hsum : binaryPaletteEnergy M fine - binaryPaletteEnergy M coarse
-      = ∑ c' : BinaryPairPalette L,
-          (energy (HasBinaryPairPalette M c') fine
-            - energy (HasBinaryPairPalette M c') coarse) := by
-    rw [binaryPaletteEnergy, binaryPaletteEnergy, ← Finset.sum_sub_distrib]
-  linarith
+      ≤ energy (HasBinaryPairPalette M c) coarse + δ :=
+  summand_le_add_of_sum_le_add (fun c' => energy_mono (HasBinaryPairPalette M c') hfc)
+    hgap c
 
 /-- **The per-color handoff.** Each palette color yields an ordinary strong
 witness. -/

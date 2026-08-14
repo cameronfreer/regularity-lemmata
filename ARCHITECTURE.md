@@ -199,6 +199,7 @@ without being design commitments. Changing anything listed here breaks callers.
 | `familyRetainedFraction` | `1 / 5` | Fraction of the exact-refinement energy gain retained by the equitable increment. |
 | one-step family gain | `ε⁵ / 5` | Global family-energy gain per nonregular refinement step. |
 | `familyFuel` | `⌈5K / ε⁵⌉₊` | Iteration fuel for the family summit. |
+| family strong fuel | `⌈K / δ⌉₊` | Restarts in the family energy-gap iteration; linear in the family size because the family-energy ceiling is `K`, not `1`. |
 | `familyStepBound` | `n · familyChunksPerPart n` | Part-count recurrence; preserves divisibility by three. |
 | `supplierTolerance` | `min (τ/2) (1 / (64(K+1)t))` | Piece-supplier tolerance, derived from its Markov requirement. |
 | `supplierParts`, `supplierRetention` | `4t`, `t / (2B)` | Piece-supplier output shape. |
