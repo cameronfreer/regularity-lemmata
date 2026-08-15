@@ -47,6 +47,7 @@ import RegularityLemmata.Graph.CutNorm
 import RegularityLemmata.Graph.FriezeKannan
 import RegularityLemmata.Graph.Strong
 import RegularityLemmata.Graph.FamilyStrong
+import RegularityLemmata.Graph.StrongTypicality
 import RegularityLemmata.Graph.RegularDegree
 import RegularityLemmata.Graph.RepeatedCellCounting
 import RegularityLemmata.Graph.PathCounting
