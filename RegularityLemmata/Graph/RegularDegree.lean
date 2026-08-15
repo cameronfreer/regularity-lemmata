@@ -114,35 +114,14 @@ theorem lt_pairDensity_of_forall_lt (hT : T.Nonempty) {c : ℝ}
 
 /-! ### Transpose transport -/
 
-/-- The transposed (incoming) relation. -/
-def swapRel (R : α → α → Prop) : α → α → Prop := fun a b => R b a
-
-instance (R : α → α → Prop) [DecidableRel R] : DecidableRel (swapRel R) :=
-  fun a b => inferInstanceAs (Decidable (R b a))
-
-theorem pairCount_swapRel (A B : Finset α) :
-    pairCount (swapRel R) B A = pairCount R A B := by
-  rw [pairCount, pairCount]
-  refine Finset.card_bij' (fun p _ => (p.2, p.1)) (fun p _ => (p.2, p.1))
-    (fun p hp => ?_) (fun p hp => ?_) (fun p _ => rfl) (fun p _ => rfl)
-  · rw [Finset.mem_filter, Finset.mem_product] at hp ⊢
-    exact ⟨⟨hp.1.2, hp.1.1⟩, hp.2⟩
-  · rw [Finset.mem_filter, Finset.mem_product] at hp ⊢
-    exact ⟨⟨hp.1.2, hp.1.1⟩, hp.2⟩
-
-theorem pairDensity_swapRel (A B : Finset α) :
-    pairDensity (swapRel R) B A = pairDensity R A B := by
-  rw [pairDensity_eq_count_div, pairDensity_eq_count_div, pairCount_swapRel]; ring
-
-/-- Uniformity transports to the transpose. -/
+/-- Uniformity transports to the transpose. `swapRel` and its count/density transport now
+live in `Finite/PairDensity.lean`, stated for genuinely heterogeneous carriers; only the
+uniformity statement belongs at this layer. -/
 theorem isUniformPair_swapRel (hunif : IsUniformPair R A B ε) :
     IsUniformPair (swapRel R) B A ε := by
   intro B' hB' A' hA' hBc hAc
   rw [pairDensity_swapRel, pairDensity_swapRel]
   exact hunif hA' hB' hAc hBc
-
-omit [DecidableRel R] in
-@[simp] theorem swapRel_swapRel : swapRel (swapRel R) = R := rfl
 
 theorem isUniformPair_swapRel_iff :
     IsUniformPair (swapRel R) B A ε ↔ IsUniformPair R A B ε :=

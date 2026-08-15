@@ -13,6 +13,7 @@ import RegularityLemmata.Finite.DensityBuckets
 import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.PairDensity
+import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.Equitable
 import RegularityLemmata.Partition.Grouping
