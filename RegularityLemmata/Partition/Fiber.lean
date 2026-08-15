@@ -101,7 +101,7 @@ def fiberPartition (C : Finset α) (D : Finset β) : Finpartition C :=
 theorem fiberPartition_parts (C : Finset α) (D : Finset β) :
     (fiberPartition R C D).parts
       = C.image fun a => C.filter fun b => fiberType R D a = fiberType R D b := by
-  simp [fiberPartition, Finpartition.ofSetSetoid_parts, fiberSetoid]
+  rfl
 
 /-- Members of one part share their fiber type. -/
 theorem fiberType_eq_of_mem_part {C : Finset α} {D : Finset β} {t : Finset α}

@@ -73,7 +73,7 @@ theorem hasBinaryPairPalette_adjPalette_iff (G : SimpleGraph V) [DecidableRel G.
   · intro h
     funext R
     cases R
-    rw [binaryPairPalette, adjPalette, rel_ofSimpleGraph_adj, rel_ofSimpleGraph_adj]
+    simp only [binaryPairPalette, adjPalette, rel_ofSimpleGraph_adj]
     exact Prod.ext (decide_eq_true h) (decide_eq_true h.symm)
 
 /-- **Adjacency as a relation is the all-adjacent palette.** -/
@@ -95,7 +95,7 @@ theorem hasBinaryPairPalette_nonadjPalette_iff (G : SimpleGraph V) [DecidableRel
   · intro h
     funext R
     cases R
-    rw [binaryPairPalette, nonadjPalette, rel_ofSimpleGraph_adj, rel_ofSimpleGraph_adj]
+    simp only [binaryPairPalette, nonadjPalette, rel_ofSimpleGraph_adj]
     exact Prod.ext (decide_eq_false h) (decide_eq_false fun h' => h h'.symm)
 
 /-- **Nonadjacency as a relation is the all-nonadjacent palette.** -/

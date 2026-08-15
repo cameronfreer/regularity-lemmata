@@ -184,14 +184,14 @@ correspondence carried by the two equivalences rather than by a cast. -/
 theorem swap_glue (σ : CoordinateSplit n) (xL : ∀ i : σ.swap.Left, V i.1)
     (xR : ∀ i : σ.swap.Right, V i.1) :
     σ.swap.glue xL xR
-      = σ.glue (fun i => xR ((σ.swapRightEquiv).symm i)) (fun i => xL ((σ.swapLeftEquiv).symm i)) := by
+      = σ.glue (fun i => xR ⟨i.1, fun h => (mem_right_iff.mp h) i.2⟩)
+          (fun i => xL ⟨i.1, mem_right_iff.mpr i.2⟩) := by
   funext i
   by_cases hi : i ∈ σ.left
   · rw [glue_apply_left hi,
       glue_apply_right (show i ∉ σ.swap.left from fun h => (mem_right_iff.mp h) hi)]
-    rfl
-  · rw [glue_apply_right hi, glue_apply_left (show i ∈ σ.swap.left from mem_right_iff.mpr hi)]
-    rfl
+  · rw [glue_apply_right hi,
+      glue_apply_left (show i ∈ σ.swap.left from mem_right_iff.mpr hi)]
 
 /-! ### Reindexing
 
@@ -256,15 +256,14 @@ theorem restrictRight_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n))
 reassembled tuple. -/
 theorem glue_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n))
     (xL : ∀ i : σ.Left, V i.1) (xR : ∀ i : σ.Right, V i.1) :
-    (σ.reindex π).glue (V := fun i => V (π i)) (fun i => xL (σ.reindexLeftEquiv π i))
-        (fun i => xR (σ.reindexRightEquiv π i))
+    (σ.reindex π).glue (V := fun i => V (π i))
+        (fun i => xL ⟨π i.1, mem_reindex_left.mp i.2⟩)
+        (fun i => xR ⟨π i.1, fun h => i.2 (mem_reindex_left.mpr h)⟩)
       = fun i => σ.glue xL xR (π i) := by
   funext i
   by_cases hi : π i ∈ σ.left
   · rw [glue_apply_left (mem_reindex_left.mpr hi), glue_apply_left hi]
-    rfl
   · rw [glue_apply_right (fun h => hi (mem_reindex_left.mp h)), glue_apply_right hi]
-    rfl
 
 /-! ### Split relations -/
 
