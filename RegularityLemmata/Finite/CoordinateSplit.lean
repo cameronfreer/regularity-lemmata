@@ -275,19 +275,67 @@ def splitRel (σ : CoordinateSplit n) (R : (∀ i, V i) → Prop) :
 @[simp] theorem splitRel_apply (R : (∀ i, V i) → Prop) (xL : ∀ i : σ.Left, V i.1)
     (xR : ∀ i : σ.Right, V i.1) : σ.splitRel R xL xR ↔ R (σ.glue xL xR) := Iff.rfl
 
-/-- Naturality of `splitRel` under reindexing. -/
+/-- **Transport of a relation along a permutation.** The relation on transported tuples that
+corresponds to `R`, obtained by moving the tuple back along Mathlib's dependent Pi
+equivalence. The equivalence is what handles the dependent carrier indices explicitly. -/
+def reindexRel (π : Equiv.Perm (Fin n)) (R : (∀ i, V i) → Prop) :
+    (∀ i, V (π i)) → Prop :=
+  fun y => R (Equiv.piCongrLeft V π y)
+
+@[simp] theorem reindexRel_apply (π : Equiv.Perm (Fin n)) (R : (∀ i, V i) → Prop)
+    (y : ∀ i, V (π i)) : reindexRel π R y ↔ R (Equiv.piCongrLeft V π y) := Iff.rfl
+
+/-- Transporting a tuple and then the relation recovers the original test. -/
+theorem reindexRel_comp (π : Equiv.Perm (Fin n)) (R : (∀ i, V i) → Prop)
+    (x : ∀ i, V i) : reindexRel π R (fun i => x (π i)) ↔ R x := by
+  rw [reindexRel, show (fun i => x (π i)) = (Equiv.piCongrLeft V π).symm x from rfl,
+    Equiv.apply_symm_apply]
+
+/-- **Naturality of `splitRel` under reindexing.** The relation genuinely consumes the
+transported tuple — `reindexRel π R` is a relation on `∀ i, V (π i)`, not a constant — so
+this is a transport statement rather than a tautology. -/
 theorem splitRel_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n))
     (R : (∀ i, V i) → Prop) (xL : ∀ i : σ.Left, V i.1) (xR : ∀ i : σ.Right, V i.1) :
-    (σ.reindex π).splitRel (V := fun i => V (π i)) (fun y => R (fun i => σ.glue xL xR i))
-        (fun i => xL (σ.reindexLeftEquiv π i)) (fun i => xR (σ.reindexRightEquiv π i))
-      ↔ R (σ.glue xL xR) := Iff.rfl
+    (σ.reindex π).splitRel (V := fun i => V (π i)) (reindexRel π R)
+        (fun i => xL ⟨π i.1, mem_reindex_left.mp i.2⟩)
+        (fun i => xR ⟨π i.1, fun h => i.2 (mem_reindex_left.mpr h)⟩)
+      ↔ σ.splitRel R xL xR := by
+  rw [splitRel_apply, splitRel_apply, glue_reindex]
+  exact reindexRel_comp π R (σ.glue xL xR)
+
+/-! ### Properness under the structural operations -/
+
+theorem swap_right (σ : CoordinateSplit n) : σ.swap.right = σ.left := by
+  ext i
+  simp [swap, right]
+
+/-- Properness is symmetric in the two sides. -/
+theorem swap_isProper (σ : CoordinateSplit n) : σ.swap.IsProper ↔ σ.IsProper := by
+  rw [IsProper, IsProper, swap_left, swap_right]
+  exact and_comm
+
+/-- Reindexing preserves properness: it permutes the coordinates without merging sides. -/
+theorem reindex_isProper (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n)) :
+    (σ.reindex π).IsProper ↔ σ.IsProper := by
+  rw [IsProper, IsProper]
+  constructor
+  · rintro ⟨⟨i, hi⟩, ⟨j, hj⟩⟩
+    exact ⟨⟨π i, mem_reindex_left.mp hi⟩,
+      ⟨π j, mem_right_iff.mpr fun h => (mem_right_iff.mp hj) (mem_reindex_left.mpr h)⟩⟩
+  · rintro ⟨⟨i, hi⟩, ⟨j, hj⟩⟩
+    refine ⟨⟨π.symm i, mem_reindex_left.mpr ?_⟩, ⟨π.symm j, mem_right_iff.mpr ?_⟩⟩
+    · rwa [Equiv.apply_symm_apply]
+    · intro h
+      have := mem_reindex_left.mp h
+      rw [Equiv.apply_symm_apply] at this
+      exact (mem_right_iff.mp hj) this
 
 /-! ### One versus rest -/
 
 /-- The split isolating a single coordinate. -/
 def singleton (i : Fin n) : CoordinateSplit n := ⟨{i}⟩
 
-@[simp] theorem mem_singleton_left {i j : Fin n} : j ∈ (singleton i).left ↔ j = i := by
+@[simp] theorem mem_singleton_left {i j : Fin n} : j ∈ ((singleton i : CoordinateSplit n)).left ↔ j = i := by
   rw [singleton, Finset.mem_singleton]
 
 /-- A relation on tuples, viewed as a relation between the value at one coordinate and the
@@ -301,6 +349,42 @@ def oneVsRest (R : (∀ i, V i) → Prop) (i : Fin n) :
 theorem oneVsRest_apply (R : (∀ i, V i) → Prop) (i : Fin n) (v : V i)
     (rest : ∀ j : {j : Fin n // j ≠ i}, V j.1) :
     oneVsRest R i v rest ↔ R (fun j => if h : j = i then h ▸ v else rest ⟨j, h⟩) := Iff.rfl
+
+/-- A singleton split is proper exactly when some other coordinate exists. -/
+theorem singleton_isProper (i : Fin n) : (singleton i).IsProper ↔ ∃ j, j ≠ i := by
+  rw [IsProper]
+  constructor
+  · rintro ⟨-, j, hj⟩
+    exact ⟨j, fun h => (mem_right_iff.mp hj) (mem_singleton_left.mpr h)⟩
+  · rintro ⟨j, hj⟩
+    exact ⟨⟨i, mem_singleton_left.mpr rfl⟩,
+      ⟨j, mem_right_iff.mpr fun h => hj (mem_singleton_left.mp h)⟩⟩
+
+/-! ### Singleton index equivalences -/
+
+/-- The chosen side of a singleton split is a point. -/
+def singletonLeftEquiv (i : Fin n) : (singleton i).Left ≃ PUnit.{1} where
+  toFun _ := PUnit.unit
+  invFun _ := ⟨i, mem_singleton_left.mpr rfl⟩
+  left_inv j := Subtype.ext (mem_singleton_left.mp j.2).symm
+  right_inv _ := rfl
+
+@[simp] theorem singletonLeftEquiv_symm_val (i : Fin n) (u : PUnit.{1}) :
+    ((singletonLeftEquiv i).symm u).1 = i := rfl
+
+/-- The complementary side of a singleton split is the other coordinates. Cast-free: the
+underlying value is unchanged. -/
+def singletonRightEquiv (i : Fin n) : (singleton i).Right ≃ {j : Fin n // j ≠ i} where
+  toFun j := ⟨j.1, fun h => j.2 (mem_singleton_left.mpr h)⟩
+  invFun j := ⟨j.1, fun h => j.2 (mem_singleton_left.mp h)⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+@[simp] theorem singletonRightEquiv_val (i : Fin n) (j : (singleton i).Right) :
+    (singletonRightEquiv i j).1 = j.1 := rfl
+
+@[simp] theorem singletonRightEquiv_symm_val (i : Fin n) (j : {j : Fin n // j ≠ i}) :
+    ((singletonRightEquiv i).symm j).1 = j.1 := rfl
 
 /-! ### Injectivity across a split
 
@@ -450,6 +534,35 @@ example :
     have ha1 : a.1 = 1 := by omega
     have hb1 : b.1 = 1 := by omega
     rw [ha1, hb1]
+
+-- **`reindexRel π R` genuinely consumes its tuple.** A coordinate-sensitive relation stays
+-- coordinate-sensitive after transport: at the swap of `0` and `1`, the transported relation
+-- reads the tuple's entries, so it is not constant.
+example :
+    ¬ ∀ y : (∀ i : Fin 2, (fun _ : Fin 2 => Fin 4) ((Equiv.swap 0 1) i)),
+        CoordinateSplit.reindexRel (V := fun _ : Fin 2 => Fin 4) (Equiv.swap 0 1)
+          (fun x => x 0 = 0) y := by
+  intro h
+  have := h (fun _ => 1)
+  rw [CoordinateSplit.reindexRel] at this
+  simp [Equiv.piCongrLeft] at this
+
+-- Properness transports: reindexing permutes coordinates without merging the two sides.
+example (σ : CoordinateSplit 3) (π : Equiv.Perm (Fin 3)) :
+    (σ.reindex π).IsProper ↔ σ.IsProper := CoordinateSplit.reindex_isProper σ π
+
+-- …and is symmetric under exchanging the sides.
+example (σ : CoordinateSplit 3) : σ.swap.IsProper ↔ σ.IsProper :=
+  CoordinateSplit.swap_isProper σ
+
+-- A singleton split of `Fin 3` is proper; of `Fin 1` it is not.
+example : (CoordinateSplit.singleton (0 : Fin 3)).IsProper :=
+  (CoordinateSplit.singleton_isProper 0).mpr ⟨1, by decide⟩
+
+example : ¬ (CoordinateSplit.singleton (0 : Fin 1)).IsProper := by
+  rw [CoordinateSplit.singleton_isProper]
+  rintro ⟨j, hj⟩
+  exact hj (Subsingleton.elim j 0)
 
 -- `oneVsRest` at each coordinate of `Fin 3`, at a dependent family.
 example (R : (∀ i, W i) → Prop) (v : W 0) (rest : ∀ j : {j : Fin 3 // j ≠ 0}, W j.1) :
