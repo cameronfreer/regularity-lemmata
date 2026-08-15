@@ -100,7 +100,6 @@ theorem editDistance_le_sum_chain {m : ℕ}
       _ = ∑ i : Fin (m + 1), editDistance (Rs i.castSucc) (Rs i.succ) A := by
           rw [Fin.sum_univ_castSucc]
           simp only [Fin.succ_castSucc, Fin.succ_last, Nat.succ_eq_add_one]
-          congr!
 
 /-- Diagonal control on the full box: the edit distance splits into its injective part
 plus at most the collision count. -/
