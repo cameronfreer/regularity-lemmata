@@ -12,7 +12,10 @@ import RegularityLemmata.Finite.MulticolorRamsey
 import RegularityLemmata.Finite.DensityBuckets
 import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Finite.Weight
+import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.PairDensity
+import RegularityLemmata.Finite.RelationKernel
 import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.Equitable
