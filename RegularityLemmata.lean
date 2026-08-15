@@ -13,6 +13,7 @@ import RegularityLemmata.Finite.DensityBuckets
 import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.Weight
+import RegularityLemmata.Finite.CoordinateSplit
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Finite.RelationKernel
