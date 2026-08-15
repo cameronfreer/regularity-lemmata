@@ -65,6 +65,19 @@ theorem energyNum_le_sq : energyNum R P ≤ (s.card : ℝ) ^ 2 := by
 theorem energy_nonneg : 0 ≤ energy R P :=
   div_nonneg (energyNum_nonneg R) (by positivity)
 
+/-- **The all-host normalization identity**: the un-normalized energy is the normalized one
+scaled by `|s|²`, with **no** nonemptiness hypothesis. On the empty ground set both sides
+are `0` — the partition has no parts, so `energyNum` is an empty sum, and the guard-free
+convention makes `energy = 0/0 = 0` — so the identity survives the degenerate case that the
+naive `div_mul_cancel₀` route excludes. -/
+theorem energyNum_eq_energy_mul : energyNum R P = energy R P * (s.card : ℝ) ^ 2 := by
+  rcases eq_or_ne ((s.card : ℝ)) 0 with h | h
+  · have hsq : (s.card : ℝ) ^ 2 = 0 := by rw [h]; ring
+    have hz : energyNum R P = 0 :=
+      le_antisymm (hsq ▸ energyNum_le_sq R) (energyNum_nonneg R)
+    rw [hz, hsq, mul_zero]
+  · rw [energy, div_mul_cancel₀ _ (pow_ne_zero 2 h)]
+
 /-- Holds for ALL `s`: on the empty ground set the energy is `0 / 0 = 0`. -/
 theorem energy_le_one : energy R P ≤ 1 := by
   unfold energy
