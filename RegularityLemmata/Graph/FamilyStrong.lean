@@ -29,8 +29,12 @@ The consumer API extracts a single relation from the bundle. `energy_le_of_famil
 is the component gap: a family-energy gap of `δ` across a refinement gives each component a
 gap of `δ`, because the other `K − 1` summands are individually monotone and cancel.
 `FamilyStrongWitness.toStrongWitness` packages that into the single-relation
-`StrongWitness`, and `FamilyStrongWitness.deviant_mass_le` states the per-relation
-conclusion in its quantitative form.
+`StrongWitness`. Two per-relation conclusions follow and are kept distinct:
+`fine_badMass_le` is the regularity field at one component (bad mass within the schedule's
+tolerance), while `deviant_mass_le` is the exceptional-mass consequence — density shifts
+from the coarse parent exceeding `η` carry mass at most `(δ/η²)·|s|²`, matching
+`StrongWitness.deviant_mass_le` with **no factor of `K`**, since each component receives the
+full gap `δ`.
 
 `BinaryPaletteStrongWitness` (`Relational/BinaryStrong.lean`) is **not** an instance of
 this: palette colors partition every ordered pair, so its energy ceiling is `1` and its
@@ -58,7 +62,7 @@ This is the shared content of every "aggregate gap bounds each component's gap" 
 the library: the family energy over `Fin K` here, and the palette energy over
 `BinaryPairPalette L` in `Relational/BinaryStrong.lean`. It is stated for an arbitrary
 finite index type because neither consumer needs anything more. -/
-theorem summand_le_add_of_sum_le_add {ι : Type*} [Fintype ι] [DecidableEq ι]
+theorem summand_le_add_of_sum_le_add {ι : Type*} [Fintype ι]
     {f g : ι → ℝ} (hmono : ∀ i, g i ≤ f i) {δ : ℝ}
     (h : ∑ i, f i ≤ ∑ i, g i + δ) (i : ι) : f i ≤ g i + δ := by
   classical
@@ -271,35 +275,72 @@ def toStrongWitness (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) :
 @[simp] theorem toStrongWitness_fine (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) :
     (w.toStrongWitness k).fine = w.fine := rfl
 
-/-- **The quantitative per-relation conclusion**: for each relation, the fine partition's
+/-- **The per-relation regularity conclusion**: for each relation, the fine partition's
 normalized bad mass is within the tolerance chosen against the coarse complexity. This is
-what a counting consumer reads off the witness. -/
-theorem deviant_mass_le (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) :
+the regularity field read off one component; it is *not* the exceptional-mass bound — see
+`deviant_mass_le` for that. -/
+theorem fine_badMass_le (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) :
     badMass (Rk k) (E w.coarse.parts.card) w.fine ≤ E w.coarse.parts.card :=
   w.fine_regular k
+
+/-- **Exceptional-mass (Markov) consequence, per relation.** For each relation, the mass of
+refined rectangles whose density shifts from their coarse parent by more than `η` is at
+most `(δ/η²)·|s|²` — the same bound `StrongWitness.deviant_mass_le` gives, with no factor of
+`K`, because `component_energy_gap` hands each relation the full gap `δ`. -/
+theorem deviant_mass_le (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) {η : ℝ}
+    (hη : 0 < η) :
+    ∑ pd ∈ w.coarse.parts ×ˢ w.coarse.parts,
+      ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+          (fun p => η < |pairDensity (Rk k) p.1 p.2 - pairDensity (Rk k) pd.1 pd.2|),
+        ((p.1.card : ℝ) * p.2.card)
+      ≤ δ / η ^ 2 * (s.card : ℝ) ^ 2 :=
+  StrongWitness.deviant_mass_le (R := Rk k) (w.toStrongWitness k) hη
 
 end FamilyStrongWitness
 
 /-! ### Endpoints -/
 
-/-- **The empty-family endpoint.** With no relations the family energy is `0 = K`, so the
-first round already stops: the witness is the seed against its own regular refinement, and
-no restart occurs. -/
-theorem exists_familyStrongWitness_zero (Rk : Fin 0 → α → α → Prop)
-    [∀ k, DecidableRel (Rk k)] (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ)
-    (P₀ : Finpartition s) :
-    ∃ w : FamilyStrongWitness Rk E δ P₀,
-      w.coarse.parts.card ≤ (familyMonoStepBound E 0)^[⌈(0 : ℝ) / δ⌉₊] P₀.parts.card :=
-  (exists_familyStrongWitness Rk E hδ P₀).imp fun _ h => by simpa using h.1
+/-- **The empty-family endpoint.** With no relations there is nothing to regularize, so the
+seed is already its own witness: `coarse = fine = P₀`, no refinement and no restart. This
+pins "stops immediately" as an explicit witness rather than as the zero-fuel case of the
+general bound. -/
+def familyStrongWitness_zero (Rk : Fin 0 → α → α → Prop) [∀ k, DecidableRel (Rk k)]
+    (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ) (P₀ : Finpartition s) :
+    FamilyStrongWitness Rk E δ P₀ where
+  coarse := P₀
+  fine := P₀
+  coarse_le := le_rfl
+  fine_le := le_rfl
+  fine_regular := isFamilyRegular_zero Rk
+  energy_gap := by linarith
 
-/-- **The singleton endpoint.** One relation recovers the single-relation strong shape, via
-the projection. -/
+@[simp] theorem familyStrongWitness_zero_coarse (Rk : Fin 0 → α → α → Prop)
+    [∀ k, DecidableRel (Rk k)] (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ)
+    (P₀ : Finpartition s) : (familyStrongWitness_zero Rk E hδ P₀).coarse = P₀ := rfl
+
+@[simp] theorem familyStrongWitness_zero_fine (Rk : Fin 0 → α → α → Prop)
+    [∀ k, DecidableRel (Rk k)] (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ)
+    (P₀ : Finpartition s) : (familyStrongWitness_zero Rk E hδ P₀).fine = P₀ := rfl
+
+/-- The singleton family's step bound is literally the single-relation one: at `K = 1` the
+fuel `⌈K/E(j)⁵⌉` of each round is `⌈1/E(j)⁵⌉`. -/
+theorem familyMonoStepBound_one (E : ErrorSchedule) :
+    familyMonoStepBound E 1 = monoStepBound E := by
+  funext m
+  rw [familyMonoStepBound, monoStepBound]
+  exact Finset.sup_congr rfl fun j _ => by rw [Nat.cast_one]
+
+/-- **The singleton endpoint.** One relation recovers the single-relation strong shape
+exactly: the projected witness satisfies the *ordinary* `monoStepBound` coarse and fine
+bounds of `exists_strongWitness`, not merely a family-shaped analogue of them. -/
 theorem exists_familyStrongWitness_single (R : α → α → Prop) [DecidableRel R]
     (E : ErrorSchedule) {δ : ℝ} (hδ : 0 < δ) (P₀ : Finpartition s) :
     ∃ w : StrongWitness R E δ P₀,
-      w.coarse.parts.card ≤ (familyMonoStepBound E 1)^[⌈(1 : ℝ) / δ⌉₊] P₀.parts.card := by
-  obtain ⟨w, hc, -⟩ := exists_familyStrongWitness (fun _ : Fin 1 => R) E hδ P₀
-  exact ⟨w.toStrongWitness 0, by simpa using hc⟩
+      w.coarse.parts.card ≤ (monoStepBound E)^[⌈(1 : ℝ) / δ⌉₊] P₀.parts.card ∧
+      w.fine.parts.card ≤ (monoStepBound E)^[⌈(1 : ℝ) / δ⌉₊ + 1] P₀.parts.card := by
+  obtain ⟨w, hc, hf⟩ := exists_familyStrongWitness (fun _ : Fin 1 => R) E hδ P₀
+  rw [familyMonoStepBound_one] at hc hf
+  exact ⟨w.toStrongWitness 0, by simpa using hc, by simpa using hf⟩
 
 /-! ### Tests and adversarial examples -/
 
@@ -334,6 +375,25 @@ example (P₀ : Finpartition ({0, 1, 2} : Finset (Fin 3))) :
         ≤ (familyMonoStepBound ⟨fun _ => 1 / 2, fun _ => by norm_num⟩ 2)^[⌈(2 : ℝ) / (1 / 2)⌉₊]
             P₀.parts.card :=
   (exists_familyStrongWitness _ _ (by norm_num) P₀).imp fun _ h => h.1
+
+-- The empty-family witness really is the seed on both sides — no refinement happens.
+example (Rk : Fin 0 → α → α → Prop) [∀ k, DecidableRel (Rk k)] (E : ErrorSchedule) {δ : ℝ}
+    (hδ : 0 < δ) (P₀ : Finpartition s) :
+    (familyStrongWitness_zero Rk E hδ P₀).coarse = P₀ ∧
+      (familyStrongWitness_zero Rk E hδ P₀).fine = P₀ :=
+  ⟨rfl, rfl⟩
+
+-- The exceptional-mass bound carries no `K`: each relation gets `δ/η²·|s|²`, the same
+-- constant a single-relation strong witness gives.
+example {K : ℕ} (Rk : Fin K → α → α → Prop) [∀ k, DecidableRel (Rk k)] (E : ErrorSchedule)
+    {δ : ℝ} {P₀ : Finpartition s} (w : FamilyStrongWitness Rk E δ P₀) (k : Fin K) {η : ℝ}
+    (hη : 0 < η) :
+    ∑ pd ∈ w.coarse.parts ×ˢ w.coarse.parts,
+      ∑ p ∈ ((w.fine.parts.filter (· ⊆ pd.1)) ×ˢ (w.fine.parts.filter (· ⊆ pd.2))).filter
+          (fun p => η < |pairDensity (Rk k) p.1 p.2 - pairDensity (Rk k) pd.1 pd.2|),
+        ((p.1.card : ℝ) * p.2.card)
+      ≤ δ / η ^ 2 * (s.card : ℝ) ^ 2 :=
+  w.deviant_mass_le k hη
 
 -- The component gap is not vacuous slack: a family gap of `δ` really does bound each
 -- summand's gap by `δ`, not by `K·δ`.
