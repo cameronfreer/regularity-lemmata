@@ -195,6 +195,84 @@ theorem abs_rectError_le_two_mul [DecidableEq X] [DecidableEq Y] (P : Finpartiti
     _ ≤ ε + ε := add_le_add h1 h2
     _ = 2 * ε := by ring
 
+/-! ### Transpose transport
+
+Design-freeze convention 7: `op` exchanges every left/right construction. The discrepancy
+statement goes through `rectCutDiscrepancy_le_iff` in both directions rather than through
+the two `sup'` index sets directly. -/
+
+/-- `op` exchanges the two sides of the rectangle error, together with the partitions and
+the test rectangle. -/
+theorem rectError_op [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y) (wX : X → ℝ)
+    (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) (S : Finset X) (T : Finset Y) :
+    rectError f.op wY wX Q P T S = rectError f wX wY P Q S T := by
+  rw [rectError, rectError, rectSum_op, steppedRectSum_op]
+
+/-- …and of the cut discrepancy. -/
+theorem rectCutDiscrepancy_op [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) :
+    rectCutDiscrepancy f.op wY wX Q P = rectCutDiscrepancy f wX wY P Q := by
+  refine le_antisymm ?_ ?_
+  · rw [rectCutDiscrepancy_le_iff]
+    intro T hT S hS
+    rw [rectError_op]
+    exact rectCutDiscrepancy_le_iff.mp le_rfl S hS T hT
+  · rw [rectCutDiscrepancy_le_iff]
+    intro S hS T hT
+    rw [← rectError_op]
+    exact rectCutDiscrepancy_le_iff.mp le_rfl T hT S hS
+
+/-! ### Positive rescaling of a carrier weight
+
+Design-freeze convention 6: rescaling a carrier weight by `c > 0` scales the **raw**
+discrepancy by exactly `c`.
+
+Positivity is what makes the proof uniform, in two places: `rectAverage_smul_weight_left`
+needs `c ≠ 0`, and `|c| = c` is what carries the factor through the absolute value. It is
+**not** that the identity fails at `c = 0` — there both sides vanish, since zero left
+weights force zero rectangle sums, zero cell masses, and hence `0 / 0 = 0` averages. That
+degenerate case simply wants a different argument, and no consumer has asked for it;
+`0 < c` is the public contract until one does. -/
+
+theorem rectError_smul_weight_left [DecidableEq X] [DecidableEq Y] {c : ℝ} (hc : 0 < c)
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A)
+    (Q : Finpartition B) (S : Finset X) (T : Finset Y) :
+    rectError f (fun x => c * wX x) wY P Q S T = c * rectError f wX wY P Q S T := by
+  have hstep : steppedRectSum f (fun x => c * wX x) wY P Q S T
+      = c * steppedRectSum f wX wY P Q S T := by
+    rw [steppedRectSum, steppedRectSum, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun C _ => ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun D _ => ?_
+    rw [rectAverage_smul_weight_left (ne_of_gt hc), finsetMass_smul]
+    ring
+  rw [rectError, rectError, rectSum_smul_weight_left, hstep, mul_sub]
+
+/-- **The raw discrepancy scales with the carrier weight.** -/
+theorem rectCutDiscrepancy_smul_weight_left [DecidableEq X] [DecidableEq Y] {c : ℝ}
+    (hc : 0 < c) (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A)
+    (Q : Finpartition B) :
+    rectCutDiscrepancy f (fun x => c * wX x) wY P Q
+      = c * rectCutDiscrepancy f wX wY P Q := by
+  refine le_antisymm ?_ ?_
+  · rw [rectCutDiscrepancy_le_iff]
+    intro S hS T hT
+    rw [rectError_smul_weight_left hc, abs_mul, abs_of_pos hc]
+    exact mul_le_mul_of_nonneg_left (rectCutDiscrepancy_le_iff.mp le_rfl S hS T hT) hc.le
+  · have hdisc : rectCutDiscrepancy f wX wY P Q
+        ≤ rectCutDiscrepancy f (fun x => c * wX x) wY P Q / c := by
+      rw [rectCutDiscrepancy_le_iff]
+      intro S hS T hT
+      rw [le_div_iff₀ hc, mul_comm]
+      have h := rectCutDiscrepancy_le_iff.mp
+        (le_rfl (a := rectCutDiscrepancy f (fun x => c * wX x) wY P Q)) S hS T hT
+      rwa [rectError_smul_weight_left hc, abs_mul, abs_of_pos hc] at h
+    calc c * rectCutDiscrepancy f wX wY P Q
+        ≤ c * (rectCutDiscrepancy f (fun x => c * wX x) wY P Q / c) :=
+          mul_le_mul_of_nonneg_left hdisc hc.le
+      _ = rectCutDiscrepancy f (fun x => c * wX x) wY P Q := by
+          field_simp
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -237,6 +315,19 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
     rectError f (fun _ => (0 : ℝ)) cR P Q Finset.univ Finset.univ = 0 :=
   rectError_self P Q (fun _ _ => le_rfl) hcR
+
+-- **`op` transport of the discrepancy**, between genuinely different carriers.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
+    rectCutDiscrepancy f.op cR cL Q P = rectCutDiscrepancy f cL cR P Q :=
+  rectCutDiscrepancy_op f cL cR P Q
+
+-- **Positive rescaling** scales the raw discrepancy by exactly the same factor.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
+    rectCutDiscrepancy f (fun x => 5 * cL x) cR P Q
+      = 5 * rectCutDiscrepancy f cL cR P Q :=
+  rectCutDiscrepancy_smul_weight_left (by norm_num) f cL cR P Q
 
 -- The discrepancy is never negative, and the empty rectangle is always a legal test.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
