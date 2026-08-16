@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.RectKernel
 
 /-!
@@ -88,6 +89,20 @@ theorem rectCutDiscrepancy_nonneg [DecidableEq X] [DecidableEq Y] (P : Finpartit
   have h : |rectError f wX wY P Q ∅ ∅| ≤ rectCutDiscrepancy f wX wY P Q :=
     Finset.le_sup' (fun p => |rectError f wX wY P Q p.1 p.2|) hmem
   exact le_trans (abs_nonneg _) h
+
+/-! ### Reindexing a weighted point sum by cells
+
+The weighted corollary of `sum_over_parts`. It is **purely algebraic**: no nonnegativity of
+the weights and no positive-mass hypothesis. Those enter only where an average is cancelled
+or an inequality is proved, never here. -/
+
+/-- A weighted sum whose coefficient depends on the containing cell reindexes to a sum over
+cells against the traces' masses. -/
+theorem sum_part_mul_weight [DecidableEq X] (P : Finpartition A) (S : Finset X) (hS : S ⊆ A)
+    (w : X → ℝ) (c : Finset X → ℝ) :
+    ∑ x ∈ S, c (P.part x) * w x = ∑ C ∈ P.parts, c C * finsetMass w (S ∩ C) := by
+  rw [sum_over_parts P (S := S) hS (fun C x => c C * w x)]
+  exact Finset.sum_congr rfl fun C _ => by rw [finsetMass, Finset.mul_sum]
 
 /-! ### Relative cell-mass coefficients
 
@@ -315,6 +330,15 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
     rectError f (fun _ => (0 : ℝ)) cR P Q Finset.univ Finset.univ = 0 :=
   rectError_self P Q (fun _ _ => le_rfl) hcR
+
+-- **The cell reindexing needs no sign hypothesis.** Signed weights that cancel to zero
+-- total mass, where every average-level statement in this file would need nonnegativity.
+example (P : Finpartition (Finset.univ : Finset (Fin 2))) (S : Finset (Fin 2))
+    (c : Finset (Fin 2) → ℝ) :
+    ∑ x ∈ S, c (P.part x) * (if x = 0 then (1 : ℝ) else -1)
+      = ∑ C ∈ P.parts, c C * finsetMass (fun x : Fin 2 => if x = 0 then (1 : ℝ) else -1)
+          (S ∩ C) :=
+  sum_part_mul_weight P S (Finset.subset_univ S) _ c
 
 -- **`op` transport of the discrepancy**, between genuinely different carriers.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
