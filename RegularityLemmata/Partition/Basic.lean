@@ -277,7 +277,7 @@ theorem parts_refinementOnPart {P Q : Finpartition s} (hQ : Q ≤ P) {C : Finset
 
 /-- A partition refines itself trivially: the only `P`-part contained in a `P`-part `C`
 is `C`. This is what collapses one side of a two-sided refinement variance. -/
-theorem filter_subset_self_eq_singleton {P : Finpartition s} {C : Finset α}
+theorem parts_filter_subset_eq_singleton {P : Finpartition s} {C : Finset α}
     (hC : C ∈ P.parts) : P.parts.filter (· ⊆ C) = {C} := by
   ext E
   simp only [Finset.mem_filter, Finset.mem_singleton]

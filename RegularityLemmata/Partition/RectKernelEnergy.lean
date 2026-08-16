@@ -321,7 +321,7 @@ theorem rectRefinementVarianceNum_right_self [DecidableEq X] [DecidableEq Y]
   classical
   refine Finset.sum_congr rfl fun pd hpd => ?_
   rw [Finset.mem_product] at hpd
-  rw [filter_subset_self_eq_singleton hpd.2, Finset.sum_product]
+  rw [parts_filter_subset_eq_singleton hpd.2, Finset.sum_product]
   exact Finset.sum_congr rfl fun C' _ => Finset.sum_singleton _ _
 
 /-- `op` exchanges the two sides of the refinement variance, together with both partition
