@@ -34,7 +34,8 @@ zero-instance test at the end of the file pins this contract.
   the *sparse* disjunct — never the dense one (unless `ε ≥ 1`). This is why every restriction
   lemma below is guard-free downstairs but has to case on emptiness in its dense branch.
 * **Empty index.** Over an empty index type the box is the singleton containing the empty
-  tuple, so density is `0` or `1` and every cell is `0`-homogeneous.
+  tuple, so density is `0` or `1` and every cell is `0`-homogeneous. The `n`-box perturbation
+  bound degenerates to `0 * γ = 0`, correctly: there is nothing to perturb.
 * **Degenerate tolerance.** No sign condition is imposed on `ε` in the definition. At `ε < 0`
   the predicate is simply strong; the lemmas that need `0 ≤ ε` say so.
 
@@ -44,6 +45,18 @@ zero-instance test at the end of the file pins this contract.
   the library's dependency direction, exactly as recorded in `HomogeneousPair`.
 * No monotonicity of `tupleDensity` under box inclusion — it is false, and only the *count* is
   monotone (`tupleCount_mono`).
+* The `n = 2` growth transfer `IsHomogeneousPair.transfer_of_grow`, which lives above this
+  layer, is **not** restated here and **not** migrated: only the density-level perturbation
+  bound is generalized.
+
+## Placement of the `n`-box perturbation bound
+
+`abs_tupleDensity_sub_le_of_grow` and its telescoping ingredient live in this file rather than
+in `Finite/Density.lean` or `Finite/HomogeneousPair.lean`. Imports stay honest either way — the
+bound needs nothing beyond `Density` — but its only consumer is
+`IsHomogeneousCell.of_abs_tupleDensity_sub_le` directly below it, and `HomogeneousPair.lean` is
+about `pairDensity`, a different (heterogeneous, two-carrier) object that the `n`-ary bound
+does not specialize to on the nose.
 -/
 
 namespace RegularityLemmata
@@ -225,6 +238,154 @@ theorem IsHomogeneousCell.restrict {ρ : ι → ℝ} (h : IsHomogeneousCell R A 
       rw [tupleDensity_neg (Fintype.piFinset_nonempty.mp hne)] at hnotd
       linarith
 
+/-! ### `n`-box density perturbation
+
+Growing every coordinate of a box by a relative factor at most `1 + γ` moves the tuple density
+by at most `(Fintype.card ι) * γ`. The constant is **exactly the arity**, and it is first-order
+sharp: the honest bound is `1 - (1 + γ)⁻ⁿ`, and `n * γ` is its tangent at `γ = 0`.
+
+The route is a one-coordinate-at-a-time telescoping of the product of side lengths — each
+coordinate contributes one factor of `γ` against the *larger* box — packaged as
+`prod_sub_prod_le_card_mul_of_le`. -/
+
+omit [Fintype ι] in
+/-- **Telescoping product comparison.** If every `b i` is nonnegative, below `p i`, and within a
+factor `1 + γ` of it, then the two products differ by at most `|s| · γ` times the larger one.
+
+The proof deletes one coordinate at a time; each deletion costs a single factor of `γ` against
+the larger product, which is where the linear-in-arity constant comes from. -/
+theorem prod_sub_prod_le_card_mul_of_le {s : Finset ι} {b p : ι → ℝ} {γ : ℝ} (hγ : 0 ≤ γ)
+    (hb : ∀ i ∈ s, 0 ≤ b i) (hbp : ∀ i ∈ s, b i ≤ p i)
+    (hgrow : ∀ i ∈ s, p i ≤ (1 + γ) * b i) :
+    (∏ i ∈ s, p i) - ∏ i ∈ s, b i ≤ (s.card : ℝ) * γ * ∏ i ∈ s, p i := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert a s ha ih =>
+    have hb' : ∀ i ∈ s, 0 ≤ b i := fun i hi ↦ hb i (Finset.mem_insert_of_mem hi)
+    have hbp' : ∀ i ∈ s, b i ≤ p i := fun i hi ↦ hbp i (Finset.mem_insert_of_mem hi)
+    have hgrow' : ∀ i ∈ s, p i ≤ (1 + γ) * b i := fun i hi ↦ hgrow i (Finset.mem_insert_of_mem hi)
+    have hrec := ih hb' hbp' hgrow'
+    have hBs : (0 : ℝ) ≤ ∏ i ∈ s, b i := Finset.prod_nonneg hb'
+    have hPs : (0 : ℝ) ≤ ∏ i ∈ s, p i :=
+      Finset.prod_nonneg fun i hi ↦ (hb' i hi).trans (hbp' i hi)
+    have hba : 0 ≤ b a := hb a (Finset.mem_insert_self a s)
+    have hbpa : b a ≤ p a := hbp a (Finset.mem_insert_self a s)
+    have hga : p a ≤ (1 + γ) * b a := hgrow a (Finset.mem_insert_self a s)
+    rw [Finset.prod_insert ha, Finset.prod_insert ha, Finset.card_insert_of_notMem ha]
+    push_cast
+    -- `p a · P - b a · B = (p a - b a) · P + b a · (P - B)`, and each summand costs one `γ`.
+    nlinarith [mul_nonneg hba hPs, mul_le_mul_of_nonneg_left hrec hba,
+      mul_le_mul_of_nonneg_right (sub_nonneg.mpr hbpa) hPs,
+      mul_nonneg (mul_nonneg (sub_nonneg.mpr hbpa) hγ) hPs,
+      mul_nonneg (mul_nonneg (Nat.cast_nonneg (α := ℝ) s.card) hγ) hPs,
+      mul_nonneg hγ hPs]
+
+/-- The mass of the larger box exceeds that of the smaller one by at most `n · γ` times the
+larger mass, where `n = Fintype.card ι`. -/
+theorem prod_card_sub_le_of_grow [DecidableEq ι] {γ : ℝ} (hγ : 0 ≤ γ) (hA : ∀ i, A' i ⊆ A i)
+    (hgrow : ∀ i, ((A i).card : ℝ) ≤ (1 + γ) * ((A' i).card : ℝ)) :
+    (∏ i, ((A i).card : ℝ)) - ∏ i, ((A' i).card : ℝ)
+      ≤ (Fintype.card ι : ℝ) * γ * ∏ i, ((A i).card : ℝ) :=
+  prod_sub_prod_le_card_mul_of_le hγ (fun _ _ ↦ Nat.cast_nonneg _)
+    (fun i _ ↦ Nat.cast_le.mpr (Finset.card_le_card (hA i))) fun i _ ↦ hgrow i
+
+/-- **`n`-box density perturbation.** If `A'` sits inside `A` coordinatewise and every side of
+`A` is at most a factor `1 + γ` longer than the corresponding side of `A'`, then the two tuple
+densities differ by at most `(Fintype.card ι) * γ`.
+
+The constant `c(n) = n` is the arity itself — no auxiliary named constant is needed. It is
+first-order sharp: the exact bound produced by the argument is `1 - (1 + γ)⁻ⁿ ≤ n · γ`.
+
+Guard-free: if some side of `A'` is empty then the growth hypothesis forces the corresponding
+side of `A` to be empty too, both densities are `0`, and the bound reads `0 ≤ n · γ`. -/
+theorem abs_tupleDensity_sub_le_of_grow [DecidableEq ι] [DecidablePred R] {γ : ℝ} (hγ : 0 ≤ γ)
+    (hA : ∀ i, A' i ⊆ A i) (hgrow : ∀ i, ((A i).card : ℝ) ≤ (1 + γ) * ((A' i).card : ℝ)) :
+    |tupleDensity R A - tupleDensity R A'| ≤ (Fintype.card ι : ℝ) * γ := by
+  classical
+  have hn0 : (0 : ℝ) ≤ (Fintype.card ι : ℝ) := Nat.cast_nonneg _
+  have hmA' : (0 : ℝ) ≤ ∏ i, ((A' i).card : ℝ) := Finset.prod_nonneg fun i _ ↦ Nat.cast_nonneg _
+  rcases eq_or_lt_of_le hmA' with hzero | hpos
+  · -- Some side of `A'` is empty; the growth hypothesis empties the same side of `A`.
+    obtain ⟨i, -, hi⟩ := Finset.prod_eq_zero_iff.mp hzero.symm
+    have hi' : (A' i).card = 0 := by exact_mod_cast hi
+    have hAi : (A i).card = 0 := by
+      have := hgrow i
+      rw [hi] at this
+      have h0 : ((A i).card : ℝ) ≤ 0 := by linarith
+      exact_mod_cast le_antisymm h0 (Nat.cast_nonneg _)
+    rw [tupleDensity_eq_zero_of_side_empty (R := R) (Finset.card_eq_zero.mp hAi),
+      tupleDensity_eq_zero_of_side_empty (R := R) (Finset.card_eq_zero.mp hi')]
+    simpa using mul_nonneg hn0 hγ
+  · have hmAle : (∏ i, ((A' i).card : ℝ)) ≤ ∏ i, ((A i).card : ℝ) :=
+      Finset.prod_le_prod (fun i _ ↦ Nat.cast_nonneg _)
+        fun i _ ↦ Nat.cast_le.mpr (Finset.card_le_card (hA i))
+    have hposA : (0 : ℝ) < ∏ i, ((A i).card : ℝ) := lt_of_lt_of_le hpos hmAle
+    have htel := prod_card_sub_le_of_grow (A := A) (A' := A') hγ hA hgrow
+    -- Counts: monotone, at most the box, and short of the larger count by at most the gap.
+    have hmono : (tupleCount R A' : ℝ) ≤ (tupleCount R A : ℝ) :=
+      Nat.cast_le.mpr (tupleCount_mono hA)
+    have hsmall : (tupleCount R A' : ℝ) ≤ ∏ i, ((A' i).card : ℝ) := by
+      have := tupleCount_le_card (R := R) (A := A')
+      rw [Fintype.card_piFinset] at this
+      exact_mod_cast this
+    have hgap : (tupleCount R A : ℝ) + ∏ i, ((A' i).card : ℝ)
+        ≤ (tupleCount R A' : ℝ) + ∏ i, ((A i).card : ℝ) := by
+      have hnat : tupleCount R A + (Fintype.piFinset A').card
+          ≤ tupleCount R A' + (Fintype.piFinset A).card := by
+        have hsub : Fintype.piFinset A' ⊆ Fintype.piFinset A := Fintype.piFinset_subset _ _ hA
+        have hcover : (Fintype.piFinset A).filter R
+            ⊆ ((Fintype.piFinset A').filter R) ∪ (Fintype.piFinset A \ Fintype.piFinset A') := by
+          intro x hx
+          rw [Finset.mem_filter] at hx
+          by_cases hxa : x ∈ Fintype.piFinset A'
+          · exact Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨hxa, hx.2⟩)
+          · exact Finset.mem_union_right _ (Finset.mem_sdiff.mpr ⟨hx.1, hxa⟩)
+        have h1 : tupleCount R A
+            ≤ tupleCount R A' + (Fintype.piFinset A \ Fintype.piFinset A').card :=
+          le_trans (Finset.card_le_card hcover) (Finset.card_union_le _ _)
+        have h2 : (Fintype.piFinset A \ Fintype.piFinset A').card + (Fintype.piFinset A').card
+            = (Fintype.piFinset A).card := Finset.card_sdiff_add_card_eq_card hsub
+        omega
+      have hcA : ((Fintype.piFinset A).card : ℝ) = ∏ i, ((A i).card : ℝ) := by
+        rw [Fintype.card_piFinset, Nat.cast_prod]
+      have hcA' : ((Fintype.piFinset A').card : ℝ) = ∏ i, ((A' i).card : ℝ) := by
+        rw [Fintype.card_piFinset, Nat.cast_prod]
+      have := (Nat.cast_le (α := ℝ)).mpr hnat
+      push_cast at this
+      rw [hcA, hcA'] at this
+      linarith
+    have hN0 : (0 : ℝ) ≤ (tupleCount R A' : ℝ) := Nat.cast_nonneg _
+    rw [tupleDensity_eq_count_div, tupleDensity_eq_count_div, Fintype.card_piFinset,
+      Fintype.card_piFinset, Nat.cast_prod, Nat.cast_prod, abs_sub_le_iff]
+    constructor
+    · rw [div_sub_div _ _ hposA.ne' hpos.ne', div_le_iff₀ (mul_pos hposA hpos)]
+      nlinarith [mul_le_mul_of_nonneg_right htel hmA',
+        mul_nonneg (sub_nonneg.mpr hmAle) hN0]
+    · rw [div_sub_div _ _ hpos.ne' hposA.ne', div_le_iff₀ (mul_pos hpos hposA)]
+      nlinarith [mul_le_mul_of_nonneg_left htel hmA',
+        mul_le_mul_of_nonneg_right (sub_nonneg.mpr hmAle) (sub_nonneg.mpr hsmall)]
+
+/-- Homogeneity is stable under density perturbation: if two cells have densities within `γ`,
+homogeneity of one at `ε` gives homogeneity of the other at `ε + γ`. -/
+theorem IsHomogeneousCell.of_abs_tupleDensity_sub_le [DecidableEq ι] [DecidablePred R] {γ : ℝ}
+    (h : IsHomogeneousCell R A' ε)
+    (hclose : |tupleDensity R A - tupleDensity R A'| ≤ γ) :
+    IsHomogeneousCell R A (ε + γ) := by
+  rw [isHomogeneousCell_def] at h ⊢
+  rw [abs_le] at hclose
+  rcases h with h | h
+  · exact Or.inl (by linarith [hclose.2])
+  · exact Or.inr (by linarith [hclose.1])
+
+/-- The packaged transfer: homogeneity of a subcell moves to the cell that grew each coordinate
+by a factor at most `1 + γ`, at tolerance `ε + n · γ`. -/
+theorem IsHomogeneousCell.of_grow [DecidableEq ι] [DecidablePred R] {γ : ℝ} (hγ : 0 ≤ γ)
+    (h : IsHomogeneousCell R A' ε) (hA : ∀ i, A' i ⊆ A i)
+    (hgrow : ∀ i, ((A i).card : ℝ) ≤ (1 + γ) * ((A' i).card : ℝ)) :
+    IsHomogeneousCell R A (ε + (Fintype.card ι : ℝ) * γ) :=
+  h.of_abs_tupleDensity_sub_le (abs_tupleDensity_sub_le_of_grow hγ hA hgrow)
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -316,6 +477,46 @@ example (h : IsHomogeneousCell (fun x : Fin 2 → Fin 3 => x 0 = x 1) (fun _ => 
     IsHomogeneousCell (fun x : Fin 2 → Fin 3 => x 0 = x 1) A'
       ((1 / 3) / ∏ _i : Fin 2, (1 / 2 : ℝ)) :=
   h.restrict (by norm_num) (fun _ => by norm_num) hA hcard
+
+-- **`γ = 0`**: the growth hypothesis forces equal side lengths, and the perturbation bound
+-- degenerates to `0` — the densities must then be literally equal, which must still typecheck.
+example :
+    |tupleDensity (fun x : Fin 2 → Fin 2 => x 0 = x 1) (fun _ => Finset.univ)
+        - tupleDensity (fun x : Fin 2 → Fin 2 => x 0 = x 1) (fun _ => Finset.univ)|
+      ≤ (Fintype.card (Fin 2) : ℝ) * 0 :=
+  abs_tupleDensity_sub_le_of_grow (R := fun x : Fin 2 → Fin 2 => x 0 = x 1)
+    (A := fun _ => Finset.univ) (A' := fun _ => Finset.univ) le_rfl
+    (fun _ => Finset.subset_univ _) fun _ => by norm_num
+
+-- **Degenerate index in the perturbation bound**: over an empty index type the constant is
+-- `Fintype.card Empty = 0`, so the bound asserts equality — and it holds, both boxes being the
+-- singleton containing the empty tuple.
+example (γ : ℝ) (hγ : 0 ≤ γ) :
+    |tupleDensity (fun _ : Empty → Fin 3 => True) (fun _ => Finset.univ)
+        - tupleDensity (fun _ : Empty → Fin 3 => True) (fun _ => Finset.univ)|
+      ≤ (Fintype.card Empty : ℝ) * γ :=
+  abs_tupleDensity_sub_le_of_grow (R := fun _ : Empty → Fin 3 => True)
+    (A := fun _ => Finset.univ) (A' := fun _ => Finset.univ) hγ
+    (fun i => i.elim) fun i => i.elim
+
+-- **Adversarial, documented**: at `γ = 1` (each side may double) the arity-`2` bound is `2`,
+-- vacuously large — two densities differ by at most `1`. The theorem must nevertheless apply
+-- at this extreme; only for `γ < 1 / n` is the bound informative.
+example :
+    |tupleDensity (fun x : Fin 2 → Fin 2 => x 0 = x 1) (fun _ => Finset.univ)
+        - tupleDensity (fun x : Fin 2 → Fin 2 => x 0 = x 1) (fun _ => ({0} : Finset (Fin 2)))|
+      ≤ (Fintype.card (Fin 2) : ℝ) * 1 :=
+  abs_tupleDensity_sub_le_of_grow (R := fun x : Fin 2 → Fin 2 => x 0 = x 1)
+    (A := fun _ => Finset.univ) (A' := fun _ => ({0} : Finset (Fin 2))) zero_le_one
+    (fun _ => Finset.subset_univ _) fun _ => by norm_num
+
+-- The telescoping product estimate on its own, at a concrete two-coordinate instance:
+-- sides `2 ↦ 3` grow by a factor `1 + 1/2`, and `9 - 4 = 5 ≤ 2 * (1/2) * 9 = 9`.
+example :
+    (∏ _i : Fin 2, (3 : ℝ)) - ∏ _i : Fin 2, (2 : ℝ)
+      ≤ ((Finset.univ : Finset (Fin 2)).card : ℝ) * (1 / 2) * ∏ _i : Fin 2, (3 : ℝ) :=
+  prod_sub_prod_le_card_mul_of_le (by norm_num) (fun _ _ => by norm_num)
+    (fun _ _ => by norm_num) fun _ _ => by norm_num
 
 end Tests
 
