@@ -84,6 +84,15 @@ definition or proof is cited publicly, in the relevant file docstring and here.
   A. Koutsoukou-Argyraki, L. C. Paulson) — an independent machine-checked antecedent
   of the energy-boost argument (`Graph/Increment.lean`).
 
+### The balanced-slicing stack
+
+The fourteen files of the `Partition/` sampling stack (hypergeometric tails by exact binomial
+moments, equal-block permutation encoding, simultaneous prefix-block sampling, geometric
+conversion, threshold lemmas, `SliceCert`, balanced slicing, leftover/chunk absorption, and the
+homogeneity perturbation lemmas) were transplanted, with renames and convention adaptation, from
+the author's private `stable-hypergraph-regularity` repository (Apache-2.0, sole-author), where
+they were developed as stability-neutral infrastructure. No third-party source text is involved.
+
 ## Publications
 
 - E. Szemerédi, *Regular partitions of graphs*, Colloq. Internat. CNRS 260, 1978.
