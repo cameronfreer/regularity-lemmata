@@ -104,6 +104,51 @@ theorem sum_part_mul_weight [DecidableEq X] (P : Finpartition A) (S : Finset X) 
   rw [sum_over_parts P (S := S) hS (fun C x => c C * w x)]
   exact Finset.sum_congr rfl fun C _ => by rw [finsetMass, Finset.mul_sum]
 
+/-! ### The residual kernel
+
+The kernel `f` minus its own stepped value: at `(x, y)` the prediction subtracted is the
+average over the cell pair containing `x` and `y`.
+
+**Outside-support convention.** `Finpartition.part` returns `∅` off the carrier, and an
+empty rectangle has average `0`, so the residual **equals `f`** outside `A ×ˢ B`. That is a
+clean convention rather than a defect, but it means every substantive statement below is
+**carrier-local**: the tower and error identities all quantify over test rectangles
+`S ⊆ A`, `T ⊆ B`.
+
+**Where hypotheses begin.** The residual-to-error bridge is pure algebra — it needs neither
+nonnegative weights nor positive masses, only `S ⊆ A` and `T ⊆ B`. Conditional-expectation
+behaviour, in particular the tower identity, is where nonnegativity genuinely enters: with
+signed weights a cell can have zero total mass while a trace inside it has nonzero mass, and
+the zero-cell argument breaks. -/
+
+/-- The kernel minus its own stepped prediction, pointwise. -/
+noncomputable def rectResidual [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) : RectKernel X Y :=
+  fun x y => f x y - rectAverage f wX wY (P.part x) (Q.part y)
+
+/-- The defining equation. Deliberately **not** `@[simp]`: unconditional unfolding turns
+every rectangle sum into `part`-indexed averages, which is exactly what
+`rectSum_rectResidual_eq_rectError` exists to avoid. -/
+theorem rectResidual_apply [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) (x : X) (y : Y) :
+    rectResidual f wX wY P Q x y
+      = f x y - rectAverage f wX wY (P.part x) (Q.part y) := rfl
+
+/-- Off the left carrier the residual is `f` itself: `P.part x = ∅`, and an empty rectangle
+has average `0`. -/
+@[simp] theorem rectResidual_of_notMem_left [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {x : X} (hx : x ∉ A) (y : Y) : rectResidual f wX wY P Q x y = f x y := by
+  rw [rectResidual_apply, P.part_eq_empty.mpr hx, rectAverage,
+    rectSum_empty_left, zero_div, sub_zero]
+
+/-- …and off the right carrier likewise. -/
+@[simp] theorem rectResidual_of_notMem_right [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    (x : X) {y : Y} (hy : y ∉ B) : rectResidual f wX wY P Q x y = f x y := by
+  rw [rectResidual_apply, Q.part_eq_empty.mpr hy, rectAverage,
+    rectSum_empty_right, zero_div, sub_zero]
+
 /-! ### Relative cell-mass coefficients
 
 The bridge from the stepped prediction to a bilinear form: the coefficients are the
@@ -330,6 +375,13 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
     rectError f (fun _ => (0 : ℝ)) cR P Q Finset.univ Finset.univ = 0 :=
   rectError_self P Q (fun _ _ => le_rfl) hcR
+
+-- **Outside the carrier the residual is `f` itself.** `P.part 1 = ∅` because `1 ∉ {0}`, and
+-- an empty rectangle has average `0` — the outside-support convention, made concrete.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition ({0} : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) (y : Fin 3) :
+    rectResidual f cL cR P Q 1 y = f 1 y :=
+  rectResidual_of_notMem_left f cL cR P Q (by decide) y
 
 -- **The cell reindexing needs no sign hypothesis.** Signed weights that cancel to zero
 -- total mass, where every average-level statement in this file would need nonnegativity.
