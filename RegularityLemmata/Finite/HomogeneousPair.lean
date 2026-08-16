@@ -14,6 +14,13 @@ extremes: almost no related pairs, or almost all of them. Carriers are heterogen
 The argument order is `R A B ε`, matching `IsUniformPair` rather than putting the tolerance
 first — homogeneity is a property *of a rectangle*, parametrized by a tolerance.
 
+**The predicate is instance-free.** `IsHomogeneousPair` elaborates for an arbitrary
+`R : α → β → Prop` with no decidability, `DecidableEq`, or `Fintype` assumptions: the
+decidability instance that `pairDensity` requires is supplied classically *inside* the
+definition. Any ambient instance gives the same proposition — that is `isHomogeneousPair_def`,
+which is also the interface every proof below uses (no proof unfolds the classical instance
+directly). The zero-instance test at the end of the file pins this contract.
+
 Three symmetries hold unconditionally, including on empty rectangles: monotonicity in `ε`,
 invariance under transposing to `swapRel R`, and invariance under complementing `R`. The
 last is worth noting: on an empty rectangle `R` and its complement both have density `0`, so
@@ -33,19 +40,30 @@ if a consumer needs it.
 
 namespace RegularityLemmata
 
-variable {α β : Type*} {R : α → β → Prop} [DecidableRel R]
+variable {α β : Type*} {R : α → β → Prop}
 variable {A A' : Finset α} {B B' : Finset β} {ε ε' : ℝ}
 
 /-- The rectangle `A ×ˢ B` is `ε`-homogeneous for `R`: its density is within `ε` of `0` or
-of `1`. -/
-def IsHomogeneousPair (R : α → β → Prop) [DecidableRel R] (A : Finset α) (B : Finset β)
-    (ε : ℝ) : Prop :=
+of `1`. Instance-free: the decidability that `pairDensity` needs is supplied classically
+inside; read the definition through `isHomogeneousPair_def` under any ambient instance. -/
+def IsHomogeneousPair (R : α → β → Prop) (A : Finset α) (B : Finset β) (ε : ℝ) : Prop :=
+  letI : DecidableRel R := fun a b => Classical.dec (R a b)
   pairDensity R A B ≤ ε ∨ 1 - ε ≤ pairDensity R A B
+
+/-- The definitional reading, valid over **any** ambient decidability instance: the
+classical instance inside `IsHomogeneousPair` is propositionally irrelevant. -/
+theorem isHomogeneousPair_def [inst : DecidableRel R] :
+    IsHomogeneousPair R A B ε ↔ pairDensity R A B ≤ ε ∨ 1 - ε ≤ pairDensity R A B := by
+  unfold IsHomogeneousPair
+  rw [show (fun a b => Classical.dec (R a b) : DecidableRel R) = inst from
+    funext fun a => funext fun b => Subsingleton.elim _ _]
 
 /-! ### Unconditional symmetries -/
 
 theorem IsHomogeneousPair.mono (h : IsHomogeneousPair R A B ε) (hε : ε ≤ ε') :
     IsHomogeneousPair R A B ε' := by
+  classical
+  rw [isHomogeneousPair_def] at h ⊢
   rcases h with h | h
   · exact Or.inl (h.trans hε)
   · exact Or.inr (by linarith)
@@ -53,7 +71,8 @@ theorem IsHomogeneousPair.mono (h : IsHomogeneousPair R A B ε) (hε : ε ≤ ε
 /-- Transposing swaps the carriers and preserves homogeneity. -/
 theorem isHomogeneousPair_swapRel_iff :
     IsHomogeneousPair (swapRel R) B A ε ↔ IsHomogeneousPair R A B ε := by
-  rw [IsHomogeneousPair, IsHomogeneousPair, pairDensity_swapRel]
+  classical
+  rw [isHomogeneousPair_def, isHomogeneousPair_def, pairDensity_swapRel]
 
 /-- Complementing the relation preserves homogeneity — **including on empty rectangles**,
 where `pairDensity_not` is unavailable because both densities are `0`. There the two sides
@@ -61,15 +80,16 @@ are literally the same proposition; on a nonempty rectangle they exchange the tw
 disjuncts. -/
 theorem isHomogeneousPair_not_iff :
     IsHomogeneousPair (fun a b => ¬ R a b) A B ε ↔ IsHomogeneousPair R A B ε := by
+  classical
   rcases A.eq_empty_or_nonempty with hA | hA
   · subst hA
-    rw [IsHomogeneousPair, IsHomogeneousPair, pairDensity_empty_left,
+    rw [isHomogeneousPair_def, isHomogeneousPair_def, pairDensity_empty_left,
       pairDensity_empty_left]
   · rcases B.eq_empty_or_nonempty with hB | hB
     · subst hB
-      rw [IsHomogeneousPair, IsHomogeneousPair, pairDensity_empty_right,
+      rw [isHomogeneousPair_def, isHomogeneousPair_def, pairDensity_empty_right,
         pairDensity_empty_right]
-    · rw [IsHomogeneousPair, IsHomogeneousPair, pairDensity_not hA hB]
+    · rw [isHomogeneousPair_def, isHomogeneousPair_def, pairDensity_not hA hB]
       constructor
       · rintro (h | h)
         · exact Or.inr (by linarith)
@@ -128,6 +148,8 @@ subrectangle. (An empty subrectangle lands in the first disjunct, since its dens
 -/
 theorem IsHomogeneousPair.subset_zero (h : IsHomogeneousPair R A B 0)
     (hA : A' ⊆ A) (hB : B' ⊆ B) : IsHomogeneousPair R A' B' 0 := by
+  classical
+  rw [isHomogeneousPair_def] at h ⊢
   have hmass : (0 : ℝ) ≤ (A.card : ℝ) * B.card := by positivity
   rcases h with h | h
   · -- No related pairs upstairs, hence none downstairs.
@@ -179,6 +201,8 @@ theorem IsHomogeneousPair.restrict {ρA ρB : ℝ} (h : IsHomogeneousPair R A B 
     (hε : 0 ≤ ε) (hρA : 0 < ρA) (hρB : 0 < ρB) (hA : A' ⊆ A) (hB : B' ⊆ B)
     (hAc : ρA * (A.card : ℝ) ≤ (A'.card : ℝ)) (hBc : ρB * (B.card : ℝ) ≤ (B'.card : ℝ)) :
     IsHomogeneousPair R A' B' (ε / (ρA * ρB)) := by
+  classical
+  rw [isHomogeneousPair_def] at h ⊢
   rcases h with h | h
   · left
     exact pairDensity_restrict_le hε hρA hρB hA hB hAc hBc
@@ -210,10 +234,17 @@ theorem IsHomogeneousPair.restrict {ρA ρB : ℝ} (h : IsHomogeneousPair R A B 
 
 section Tests
 
+-- **Zero-instance smoke test**: the public statement elaborates for an arbitrary relation
+-- with no `Fintype`, `DecidableEq`, or decidability assumptions whatsoever. This example is
+-- the frozen contract; do not add instances to make a change to the definition compile.
+example {X Y : Type*} (R : X → Y → Prop) (ε : ℝ) (A : Finset X) (B : Finset Y) : Prop :=
+  IsHomogeneousPair R A B ε
+
 -- `a ≤ b` on `Fin 2 → Fin 3` has density `5/6`, so it is `1/6`-homogeneous (dense side) and
 -- not `1/12`-homogeneous.
 example : IsHomogeneousPair (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val)
     Finset.univ Finset.univ (1 / 6) := by
+  rw [isHomogeneousPair_def]
   right
   rw [show pairDensity (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val)
       Finset.univ Finset.univ = 5 / 6 from by
@@ -230,9 +261,11 @@ example (A' : Finset (Fin 2)) (B' : Finset (Fin 3)) :
     IsHomogeneousPair (fun (_ : Fin 2) (_ : Fin 3) => False) A' B' 0 :=
   IsHomogeneousPair.subset_zero
     (A := Finset.univ) (B := Finset.univ)
-    (Or.inl (by rw [pairDensity_eq_count_div, show
-      pairCount (fun (_ : Fin 2) (_ : Fin 3) => False) Finset.univ Finset.univ = 0 from by
-        decide]; simp))
+    (isHomogeneousPair_def.mpr (Or.inl (by
+      rw [pairDensity_eq_count_div, show
+        pairCount (fun (_ : Fin 2) (_ : Fin 3) => False) Finset.univ Finset.univ = 0 from by
+          decide]
+      simp)))
     (Finset.subset_univ _) (Finset.subset_univ _)
 
 -- **A concrete quantitative restriction**: halving each side degrades the tolerance by 4.

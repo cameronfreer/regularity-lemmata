@@ -232,6 +232,66 @@ theorem le_pairCount_of_le_pairDensity {c : ℝ} (h : c ≤ pairDensity R A B) :
     show c * (A.card : ℝ) * B.card = c * ((A.card : ℝ) * B.card) from by ring]
   exact mul_le_mul_of_nonneg_right h (by positivity)
 
+/-! ### Rows, columns, and singleton normalizations
+
+The fiberwise readings of the pair count: summing row counts (left element fixed) or column
+counts (right element fixed). Singleton rectangles normalize a column or row to a plain
+filtered cardinality, which is how per-element densities enter aggregation arguments. -/
+
+/-- The pair count as a sum of row counts (left element fixed). -/
+theorem pairCount_eq_sum_left :
+    pairCount R A B = ∑ x ∈ A, (B.filter fun y => R x y).card := by
+  rw [pairCount, Finset.card_filter, Finset.sum_product]
+  exact Finset.sum_congr rfl fun x _ => (Finset.card_filter _ _).symm
+
+/-- The pair count as a sum of column counts (right element fixed). -/
+theorem pairCount_eq_sum_right :
+    pairCount R A B = ∑ y ∈ B, (A.filter fun x => R x y).card := by
+  rw [pairCount, Finset.card_filter, Finset.sum_product_right]
+  exact Finset.sum_congr rfl fun y _ => (Finset.card_filter _ _).symm
+
+/-- A single-column rectangle counts one filtered fiber. -/
+@[simp] theorem pairCount_singleton_right (y : β) :
+    pairCount R A {y} = (A.filter fun x => R x y).card := by
+  rw [pairCount_eq_sum_right, Finset.sum_singleton]
+
+/-- A single-row rectangle counts one filtered fiber. -/
+@[simp] theorem pairCount_singleton_left (x : α) :
+    pairCount R {x} B = (B.filter fun y => R x y).card := by
+  rw [pairCount_eq_sum_left, Finset.sum_singleton]
+
+/-- Density on a single-column rectangle is the fiber's density in `A`. -/
+theorem pairDensity_singleton_right (y : β) :
+    pairDensity R A {y} = ((A.filter fun x => R x y).card : ℝ) / A.card := by
+  rw [pairDensity_eq_count_div, pairCount_singleton_right]
+  simp
+
+/-- Density on a single-row rectangle is the fiber's density in `B`. -/
+theorem pairDensity_singleton_left (x : α) :
+    pairDensity R {x} B = ((B.filter fun y => R x y).card : ℝ) / B.card := by
+  rw [pairDensity_eq_count_div, pairCount_singleton_left]
+  simp
+
+/-! ### Congruence
+
+Counts and densities depend only on the restriction of the relation to the rectangle. In
+particular (taking `S := R` with a second instance) they do not depend on the decidability
+instance. -/
+
+/-- The pair count depends only on the restriction of `R` to `A ×ˢ B`. -/
+theorem pairCount_congr {S : α → β → Prop} [DecidableRel S]
+    (h : ∀ x ∈ A, ∀ y ∈ B, (R x y ↔ S x y)) : pairCount R A B = pairCount S A B := by
+  rw [pairCount, pairCount]
+  refine congrArg Finset.card (Finset.filter_congr ?_)
+  rintro ⟨x, y⟩ hp
+  rw [Finset.mem_product] at hp
+  exact h x hp.1 y hp.2
+
+/-- The pair density depends only on the restriction of `R` to `A ×ˢ B`. -/
+theorem pairDensity_congr {S : α → β → Prop} [DecidableRel S]
+    (h : ∀ x ∈ A, ∀ y ∈ B, (R x y ↔ S x y)) : pairDensity R A B = pairDensity S A B := by
+  rw [pairDensity_eq_count_div, pairDensity_eq_count_div, pairCount_congr h]
+
 /-! ### The opposite relation
 
 Transposing swaps the carriers, so this is where the heterogeneous statement is genuinely
@@ -312,6 +372,62 @@ theorem pairDensity_not (hA : A.Nonempty) (hB : B.Nonempty) :
   have h := pairDensity_add_not (R := R) hA hB
   linarith
 
+/-! ### Columnwise aggregation
+
+A uniform bound on every single-column density aggregates to the same bound on the whole
+rectangle. Empty-set behavior is explicit and asymmetric: the upper bound needs `0 ≤ c`
+(a degenerate rectangle has density `0`), and the lower bound needs a nonempty right side
+(with no columns there is nothing to aggregate, while the rectangle's density is `0`; see
+the adversarial test). Row versions follow by transposing along `pairDensity_swapRel`. -/
+
+/-- **Upper aggregation.** A uniform upper bound on every column density bounds the
+rectangle's density. `0 ≤ c` covers the degenerate rectangles, whose density is `0`. -/
+theorem pairDensity_le_of_forall_singleton_le {c : ℝ} (hc : 0 ≤ c)
+    (h : ∀ y ∈ B, pairDensity R A {y} ≤ c) : pairDensity R A B ≤ c := by
+  have hcount : (pairCount R A B : ℝ) ≤ c * ((A.card : ℝ) * B.card) := by
+    rw [pairCount_eq_sum_right, Nat.cast_sum]
+    have hcol : ∀ y ∈ B, ((A.filter fun x => R x y).card : ℝ) ≤ c * (A.card : ℝ) := by
+      intro y hy
+      have hle := pairCount_le_of_pairDensity_le (h y hy)
+      rw [pairCount_singleton_right] at hle
+      simpa using hle
+    calc ∑ y ∈ B, ((A.filter fun x => R x y).card : ℝ)
+        ≤ ∑ _y ∈ B, c * (A.card : ℝ) := Finset.sum_le_sum hcol
+      _ = c * ((A.card : ℝ) * B.card) := by rw [Finset.sum_const, nsmul_eq_mul]; ring
+  rw [pairDensity_eq_count_div]
+  rcases eq_or_lt_of_le (by positivity : (0 : ℝ) ≤ (A.card : ℝ) * B.card) with hm | hm
+  · rw [← hm, div_zero]
+    exact hc
+  · rw [div_le_iff₀ hm]
+    linarith
+
+/-- **Lower aggregation.** A uniform lower bound on every column density bounds the
+rectangle's density from below. The right side must be nonempty: with no columns the
+hypothesis is vacuous while the rectangle's density is `0`. An empty left side needs no
+hypothesis — there the columns themselves force `c ≤ 0`. -/
+theorem le_pairDensity_of_forall_le_singleton {c : ℝ} (hB : B.Nonempty)
+    (h : ∀ y ∈ B, c ≤ pairDensity R A {y}) : c ≤ pairDensity R A B := by
+  rcases A.eq_empty_or_nonempty with hA | hA
+  · obtain ⟨y, hy⟩ := hB
+    have hy0 := h y hy
+    rw [hA, pairDensity_empty_left] at hy0
+    rw [hA, pairDensity_empty_left]
+    exact hy0
+  · have hcount : c * ((A.card : ℝ) * B.card) ≤ (pairCount R A B : ℝ) := by
+      rw [pairCount_eq_sum_right, Nat.cast_sum]
+      have hcol : ∀ y ∈ B, c * (A.card : ℝ) ≤ ((A.filter fun x => R x y).card : ℝ) := by
+        intro y hy
+        have hle := le_pairCount_of_le_pairDensity (h y hy)
+        rw [pairCount_singleton_right] at hle
+        simpa using hle
+      calc c * ((A.card : ℝ) * B.card)
+          = ∑ _y ∈ B, c * (A.card : ℝ) := by rw [Finset.sum_const, nsmul_eq_mul]; ring
+        _ ≤ ∑ y ∈ B, ((A.filter fun x => R x y).card : ℝ) := Finset.sum_le_sum hcol
+    have hApos : (0 : ℝ) < (A.card : ℝ) := by exact_mod_cast Finset.card_pos.mpr hA
+    have hBpos : (0 : ℝ) < (B.card : ℝ) := by exact_mod_cast Finset.card_pos.mpr hB
+    rw [pairDensity_eq_count_div, le_div_iff₀ (by positivity)]
+    linarith
+
 /-! ### Tests and adversarial examples -/
 
 -- The strict-order relation on `Fin 3` relates 3 of the 9 pairs.
@@ -377,5 +493,29 @@ example :
     pairDensity (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val) ∅ Finset.univ = 0 ∧
       pairDensity (fun (a : Fin 2) (b : Fin 3) => ¬ (a.val ≤ b.val)) ∅ Finset.univ = 0 :=
   ⟨pairDensity_empty_left _ _, pairDensity_empty_left _ _⟩
+
+-- Row and column readings agree with the raw count at rectangular carriers: 5 = 3+2 = 1+2+2.
+example : pairCount (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val) Finset.univ Finset.univ
+    = ∑ x ∈ (Finset.univ : Finset (Fin 2)),
+        ((Finset.univ : Finset (Fin 3)).filter fun y => x.val ≤ y.val).card := by decide
+
+example : pairCount (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val) Finset.univ Finset.univ
+    = ∑ y ∈ (Finset.univ : Finset (Fin 3)),
+        ((Finset.univ : Finset (Fin 2)).filter fun x => x.val ≤ y.val).card := by decide
+
+-- A singleton column: the fiber of `b = 0` in `Fin 2` has one element.
+example : pairCount (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val)
+    Finset.univ {0} = 1 := by decide
+
+-- Congruence: two definitionally different but extensionally equal relations count alike.
+example : pairCount (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val) Finset.univ Finset.univ
+    = pairCount (fun (a : Fin 2) (b : Fin 3) => ¬ b.val < a.val) Finset.univ Finset.univ :=
+  pairCount_congr fun _ _ _ _ => by omega
+
+-- NOTE (adversarial, documented): the lower aggregation genuinely needs `B.Nonempty`. With
+-- no columns every column bound holds vacuously, yet the rectangle's density is `0`.
+example : ¬ ((1 : ℝ) ≤ pairDensity (fun a b : Fin 2 => a = b) Finset.univ ∅) := by
+  rw [pairDensity_empty_right]
+  norm_num
 
 end RegularityLemmata
