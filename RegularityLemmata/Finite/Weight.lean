@@ -100,6 +100,38 @@ theorem exists_pos_of_finsetMass_pos (hw : ∀ x ∈ A, 0 ≤ w x) (h : 0 < fins
   exact absurd h (not_lt.mpr (le_of_eq (finsetMass_eq_zero_of_forall_eq_zero fun x hx =>
     le_antisymm (hcon x hx) (hw x hx))))
 
+/-! ### Relative mass
+
+The fraction of a cell's mass carried by a test set. These are exactly the `[0,1]`
+coefficients that the bilinear domination lemma of `Finite/Inequalities.lean` consumes, so
+the `≤ 1` bound must hold with **no** positive-mass hypothesis. -/
+
+/-- The relative mass of `S` inside the cell `C`, guard-free: `0` on a zero-mass cell. -/
+noncomputable def relMass [DecidableEq X] (w : X → ℝ) (S C : Finset X) : ℝ :=
+  finsetMass w (S ∩ C) / finsetMass w C
+
+theorem relMass_nonneg [DecidableEq X] {C : Finset X} (hw : ∀ x ∈ C, 0 ≤ w x)
+    (S : Finset X) : 0 ≤ relMass w S C :=
+  div_nonneg (finsetMass_nonneg fun x hx => hw x (Finset.mem_of_mem_inter_right hx))
+    (finsetMass_nonneg hw)
+
+/-- **Guard-free `≤ 1`.** On a zero-mass cell the quotient is `0/0 = 0`, so no positivity
+hypothesis is needed — which is what lets the contraction argument avoid a positive-mass
+side condition on every cell. -/
+theorem relMass_le_one [DecidableEq X] {C : Finset X} (hw : ∀ x ∈ C, 0 ≤ w x)
+    (S : Finset X) : relMass w S C ≤ 1 := by
+  rcases eq_or_lt_of_le (finsetMass_nonneg hw) with h | h
+  · rw [relMass, ← h, div_zero]
+    norm_num
+  · rw [relMass, div_le_one h]
+    exact finsetMass_mono hw Finset.inter_subset_right
+
+/-- At the full cell the relative mass is `1` — unless the cell has zero mass, where it is
+`0`. Both cases are correct; neither needs a guard. -/
+theorem relMass_self_of_pos [DecidableEq X] {C : Finset X} (h : 0 < finsetMass w C) :
+    relMass w C C = 1 := by
+  rw [relMass, Finset.inter_self, div_self (ne_of_gt h)]
+
 /-! ### Tests -/
 
 section Tests

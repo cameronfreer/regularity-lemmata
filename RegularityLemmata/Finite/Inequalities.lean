@@ -130,7 +130,127 @@ theorem abs_mul_mul_sub_mul_mul_le {a b c a' b' c' : ℝ}
     linarith
   linarith [hstep, h1, h2, h3]
 
+/-! ### Bilinear domination by 0/1 rectangles
+
+A `[0,1]`-weighted bilinear combination of a matrix's entries is bounded by the largest
+**0/1** combination — that is, by the sup over genuine sub-rectangles. Stated abstractly
+here because the hypotheses mention only a real matrix and two coefficient vectors.
+
+This is the load-bearing step behind contraction of a stepped rectangle sum, where the
+coefficients are relative cell masses. Note the constant: the bound is `ε`, **not** `2ε` —
+no extreme-point machinery is needed, because `cᵢ * yᵢ ≤ max yᵢ 0` holds pointwise. -/
+
+/-- A `[0,1]`-weighted sum is dominated by the sum over its nonnegative part — the 0/1
+choice `cᵢ = 1 ↔ 0 ≤ yᵢ`. -/
+theorem sum_mul_le_sum_filter_nonneg {ι : Type*} [DecidableEq ι] {c : ι → ℝ} (I : Finset ι)
+    (hc0 : ∀ i ∈ I, 0 ≤ c i) (hc1 : ∀ i ∈ I, c i ≤ 1) (y : ι → ℝ) :
+    ∑ i ∈ I, c i * y i ≤ ∑ i ∈ I.filter (fun i => 0 ≤ y i), y i := by
+  classical
+  calc ∑ i ∈ I, c i * y i
+      ≤ ∑ i ∈ I, max (y i) 0 := by
+        refine Finset.sum_le_sum fun i hi => ?_
+        rcases le_or_gt 0 (y i) with h | h
+        · calc c i * y i ≤ 1 * y i := mul_le_mul_of_nonneg_right (hc1 i hi) h
+            _ = y i := one_mul _
+            _ ≤ max (y i) 0 := le_max_left _ _
+        · calc c i * y i ≤ 0 := mul_nonpos_of_nonneg_of_nonpos (hc0 i hi) h.le
+            _ ≤ max (y i) 0 := le_max_right _ _
+    _ = ∑ i ∈ I.filter (fun i => 0 ≤ y i), y i := by
+        rw [Finset.sum_filter]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        by_cases h : 0 ≤ y i
+        · simp [h]
+        · simp [h, max_eq_right (not_le.mp h).le]
+
+/-- The mirror bound, with the 0/1 choice `cᵢ = 1 ↔ yᵢ < 0`. -/
+theorem sum_filter_neg_le_sum_mul {ι : Type*} [DecidableEq ι] {c : ι → ℝ} (I : Finset ι)
+    (hc0 : ∀ i ∈ I, 0 ≤ c i) (hc1 : ∀ i ∈ I, c i ≤ 1) (y : ι → ℝ) :
+    ∑ i ∈ I.filter (fun i => y i < 0), y i ≤ ∑ i ∈ I, c i * y i := by
+  classical
+  calc ∑ i ∈ I.filter (fun i => y i < 0), y i
+      = ∑ i ∈ I, min (y i) 0 := by
+        rw [Finset.sum_filter]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        by_cases h : y i < 0
+        · simp [h, min_eq_left h.le]
+        · simp [h, min_eq_right (not_lt.mp h)]
+    _ ≤ ∑ i ∈ I, c i * y i := by
+        refine Finset.sum_le_sum fun i hi => ?_
+        rcases le_or_gt 0 (y i) with h | h
+        · calc min (y i) 0 ≤ 0 := min_le_right _ _
+            _ ≤ c i * y i := mul_nonneg (hc0 i hi) h
+        · calc min (y i) 0 = y i := min_eq_left h.le
+            _ = 1 * y i := (one_mul _).symm
+            _ ≤ c i * y i := mul_le_mul_of_nonpos_right (hc1 i hi) h.le
+
+/-- **Bilinear domination, at constant `1`.** If every sub-rectangle sum of `x` is within
+`ε`, then so is every `[0,1]`-weighted bilinear combination.
+
+The `1` here is what keeps the downstream common-refinement constant at `2` rather than
+`4`: contraction is free, and the only factor of two comes from a triangle inequality. -/
+theorem abs_sum_bilinear_le {ι κ : Type*} [DecidableEq ι] [DecidableEq κ] {c : ι → ℝ}
+    {d : κ → ℝ} (I : Finset ι) (J : Finset κ)
+    (hc0 : ∀ i ∈ I, 0 ≤ c i) (hc1 : ∀ i ∈ I, c i ≤ 1)
+    (hd0 : ∀ j ∈ J, 0 ≤ d j) (hd1 : ∀ j ∈ J, d j ≤ 1) (x : ι → κ → ℝ) {ε : ℝ}
+    (hrect : ∀ I' ⊆ I, ∀ J' ⊆ J, |∑ i ∈ I', ∑ j ∈ J', x i j| ≤ ε) :
+    |∑ i ∈ I, c i * ∑ j ∈ J, d j * x i j| ≤ ε := by
+  classical
+  have hswap : ∀ I' ⊆ I, ∑ i ∈ I', (∑ j ∈ J, d j * x i j)
+      = ∑ j ∈ J, d j * (∑ i ∈ I', x i j) := by
+    intro I' _
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun j _ => by rw [Finset.mul_sum]
+  set y : ι → ℝ := fun i => ∑ j ∈ J, d j * x i j with hy
+  refine abs_le.mpr ⟨?_, ?_⟩
+  · -- Lower bound: choose the negative parts on both sides.
+    set I' : Finset ι := I.filter (fun i => y i < 0) with hI'
+    have hI'sub : I' ⊆ I := Finset.filter_subset _ _
+    have h1 : ∑ i ∈ I', y i ≤ ∑ i ∈ I, c i * y i :=
+      sum_filter_neg_le_sum_mul I hc0 hc1 y
+    set z : κ → ℝ := fun j => ∑ i ∈ I', x i j with hz
+    set J' : Finset κ := J.filter (fun j => z j < 0) with hJ'
+    have h2 : ∑ j ∈ J', z j ≤ ∑ j ∈ J, d j * z j :=
+      sum_filter_neg_le_sum_mul J hd0 hd1 z
+    have h3 : ∑ i ∈ I', y i = ∑ j ∈ J, d j * z j := by rw [hy, hswap I' hI'sub]
+    have h4 : ∑ j ∈ J', z j = ∑ i ∈ I', ∑ j ∈ J', x i j := by
+      rw [hz]; exact (Finset.sum_comm).symm
+    have h5 : -ε ≤ ∑ i ∈ I', ∑ j ∈ J', x i j :=
+      (abs_le.mp (hrect I' hI'sub J' (Finset.filter_subset _ _))).1
+    linarith [h1, h2, h3 ▸ h2, h4 ▸ h5]
+  · -- Upper bound: choose the nonnegative parts on both sides.
+    set I' : Finset ι := I.filter (fun i => 0 ≤ y i) with hI'
+    have hI'sub : I' ⊆ I := Finset.filter_subset _ _
+    have h1 : ∑ i ∈ I, c i * y i ≤ ∑ i ∈ I', y i :=
+      sum_mul_le_sum_filter_nonneg I hc0 hc1 y
+    set z : κ → ℝ := fun j => ∑ i ∈ I', x i j with hz
+    set J' : Finset κ := J.filter (fun j => 0 ≤ z j) with hJ'
+    have h2 : ∑ j ∈ J, d j * z j ≤ ∑ j ∈ J', z j :=
+      sum_mul_le_sum_filter_nonneg J hd0 hd1 z
+    have h3 : ∑ i ∈ I', y i = ∑ j ∈ J, d j * z j := by rw [hy, hswap I' hI'sub]
+    have h4 : ∑ j ∈ J', z j = ∑ i ∈ I', ∑ j ∈ J', x i j := by
+      rw [hz]; exact (Finset.sum_comm).symm
+    have h5 : ∑ i ∈ I', ∑ j ∈ J', x i j ≤ ε :=
+      (abs_le.mp (hrect I' hI'sub J' (Finset.filter_subset _ _))).2
+    linarith [h1, h2, h3, h4 ▸ h5]
+
 /-! ### Tests and adversarial examples -/
+
+-- **Contraction is not vacuous**: at all-ones coefficients the bilinear sum *is* a
+-- rectangle sum, so the bound is attained rather than merely implied.
+example {ι κ : Type*} [DecidableEq ι] [DecidableEq κ] (I : Finset ι) (J : Finset κ)
+    (x : ι → κ → ℝ) {ε : ℝ}
+    (hrect : ∀ I' ⊆ I, ∀ J' ⊆ J, |∑ i ∈ I', ∑ j ∈ J', x i j| ≤ ε) :
+    |∑ i ∈ I, (1 : ℝ) * ∑ j ∈ J, (1 : ℝ) * x i j| ≤ ε :=
+  abs_sum_bilinear_le I J (fun _ _ => zero_le_one) (fun _ _ => le_rfl)
+    (fun _ _ => zero_le_one) (fun _ _ => le_rfl) x hrect
+
+-- Zero coefficients give zero, well inside the bound — the degenerate cell case.
+example {ι κ : Type*} [DecidableEq ι] [DecidableEq κ] (I : Finset ι) (J : Finset κ)
+    (x : ι → κ → ℝ) {ε : ℝ}
+    (hrect : ∀ I' ⊆ I, ∀ J' ⊆ J, |∑ i ∈ I', ∑ j ∈ J', x i j| ≤ ε) :
+    |∑ i ∈ I, (0 : ℝ) * ∑ j ∈ J, (0 : ℝ) * x i j| ≤ ε :=
+  abs_sum_bilinear_le I J (fun _ _ => le_rfl) (fun _ _ => zero_le_one)
+    (fun _ _ => le_rfl) (fun _ _ => zero_le_one) x hrect
 
 -- A strict instance: (1+2)²/(1+1) = 4.5 ≤ 1 + 4 = 5.
 example : ((1 : ℝ) + 2) ^ 2 / (1 + 1) ≤ 1 ^ 2 / 1 + 2 ^ 2 / 1 :=
