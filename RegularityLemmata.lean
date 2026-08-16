@@ -41,6 +41,7 @@ import RegularityLemmata.Partition.ActiveTraceSchedule
 import RegularityLemmata.Partition.ParentSample
 import RegularityLemmata.Partition.PrefixBlockSampling
 import RegularityLemmata.Partition.BalancedSlicing
+import RegularityLemmata.Partition.AbsorbLeftover
 import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.UniformSlicing
 import RegularityLemmata.Graph.UnionCenter
