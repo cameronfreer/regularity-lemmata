@@ -101,6 +101,7 @@ import RegularityLemmata.Relational.BinaryRegularity
 import RegularityLemmata.Relational.BinaryStrong
 import RegularityLemmata.Relational.BinaryBridges
 import RegularityLemmata.Relational.BinaryPattern
+import RegularityLemmata.Relational.Indivisible
 import RegularityLemmata.Relational.TwoVertexCounting
 import RegularityLemmata.Relational.ThreeVertexCounting
 import RegularityLemmata.Relational.TransversalCounting
