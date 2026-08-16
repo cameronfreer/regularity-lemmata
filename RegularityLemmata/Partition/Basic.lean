@@ -259,6 +259,41 @@ theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α �
   conv_rhs => rw [← parts_biUnion_filter_subset hQ]
   rw [Finset.sum_biUnion hfib]
 
+/-- **Partitioning a point-indexed sum by the containing part.** A sum over `S` whose
+summand depends on each point *and* on the part containing it splits into a sum over the
+parts of their cell traces.
+
+`S ⊆ s` is essential and not cosmetic: a point outside the carrier contributes on the left
+through `P.part x = ∅`, but belongs to no cell on the right, so the two sides genuinely
+differ. See the falsification example among the tests.
+
+Deliberately stated for an arbitrary `AddCommMonoid` and an arbitrary `g : Finset α → α → M`,
+so that this file stays independent of the weight API and the statement captures only the
+combinatorics. The weighted forms are corollaries. -/
+theorem sum_over_parts {M : Type*} [AddCommMonoid M] (P : Finpartition s) {S : Finset α}
+    (hS : S ⊆ s) (g : Finset α → α → M) :
+    ∑ x ∈ S, g (P.part x) x = ∑ C ∈ P.parts, ∑ x ∈ S ∩ C, g C x := by
+  classical
+  have hdisj : (↑P.parts : Set (Finset α)).PairwiseDisjoint (fun C => S ∩ C) := by
+    intro C₁ hC₁ C₂ hC₂ hne
+    simp only [Function.onFun, Finset.disjoint_left, Finset.mem_inter]
+    rintro x ⟨-, hx₁⟩ ⟨-, hx₂⟩
+    exact hne (P.eq_of_mem_parts (Finset.mem_coe.mp hC₁) (Finset.mem_coe.mp hC₂) hx₁ hx₂)
+  have hcover : P.parts.biUnion (fun C => S ∩ C) = S := by
+    ext x
+    simp only [Finset.mem_biUnion, Finset.mem_inter]
+    constructor
+    · rintro ⟨C, -, hxS, -⟩; exact hxS
+    · intro hxS
+      obtain ⟨C, hC, hxC⟩ := P.exists_mem (hS hxS)
+      exact ⟨C, hC, hxS, hxC⟩
+  calc ∑ x ∈ S, g (P.part x) x
+      = ∑ x ∈ P.parts.biUnion (fun C => S ∩ C), g (P.part x) x := by rw [hcover]
+    _ = ∑ C ∈ P.parts, ∑ x ∈ S ∩ C, g (P.part x) x := Finset.sum_biUnion hdisj
+    _ = ∑ C ∈ P.parts, ∑ x ∈ S ∩ C, g C x :=
+        Finset.sum_congr rfl fun C hC => Finset.sum_congr rfl fun x hx => by
+          rw [P.part_eq_of_mem hC (Finset.mem_of_mem_inter_right hx)]
+
 /-- The parts of a refinement `Q` that sit inside a fixed `P`-part `C`, packaged as a
 `Finpartition` of `C`.
 
@@ -380,6 +415,29 @@ example : ¬ IsPartUnion (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) {0, 1
 
 -- Degenerate ground set: the empty partition.
 example : IsPartUnion (⊥ : Finpartition (∅ : Finset (Fin 3))) ∅ := by decide
+
+-- `sum_over_parts` on a genuinely nontrivial instance: singleton cells on a three-point
+-- carrier, a two-point test set, and a summand depending on **both** the cell and the point.
+example : ∑ x ∈ ({0, 1} : Finset (Fin 3)),
+      (((⊥ : Finpartition ({0, 1, 2} : Finset (Fin 3))).part x).card + (x : ℕ))
+    = ∑ C ∈ (⊥ : Finpartition ({0, 1, 2} : Finset (Fin 3))).parts,
+        ∑ x ∈ ({0, 1} : Finset (Fin 3)) ∩ C, (C.card + (x : ℕ)) :=
+  sum_over_parts (⊥ : Finpartition ({0, 1, 2} : Finset (Fin 3)))
+    (S := ({0, 1} : Finset (Fin 3))) (by decide) (fun C x => C.card + (x : ℕ))
+
+-- …and both sides really are `3`, so the instance is not vacuous.
+example : ∑ x ∈ ({0, 1} : Finset (Fin 3)),
+      (((⊥ : Finpartition ({0, 1, 2} : Finset (Fin 3))).part x).card + (x : ℕ)) = 3 := by
+  decide
+
+-- **Falsification: the `S ⊆ s` hypothesis cannot be dropped.** A point outside the carrier
+-- contributes on the left through `P.part x = ∅`, but belongs to no cell on the right.
+example :
+    ∑ x ∈ ({1} : Finset (Fin 2)),
+        (if ((⊤ : Finpartition ({0} : Finset (Fin 2))).part x) = ∅ then 1 else 0)
+      ≠ ∑ C ∈ (⊤ : Finpartition ({0} : Finset (Fin 2))).parts,
+          ∑ _x ∈ ({1} : Finset (Fin 2)) ∩ C, (if C = ∅ then 1 else 0) := by
+  decide
 
 -- Predicate partition of {0,1,2} by `= 0`: exactly two cells.
 example : (predicatePartition (fun a : Fin 3 => a = 0) {0, 1, 2}).parts.card = 2 := by
