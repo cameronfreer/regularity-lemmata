@@ -230,6 +230,76 @@ theorem IsHomogeneousPair.restrict {ρA ρB : ℝ} (h : IsHomogeneousPair R A B 
     rw [pairDensity_not hAe hBe] at hnotd
     linarith
 
+/-! ### Perturbation -/
+
+/-- Homogeneity is stable under density perturbation: if two rectangles have densities within
+`γ`, homogeneity of one at `ε` gives homogeneity of the other at `ε + γ`. -/
+theorem IsHomogeneousPair.of_abs_pairDensity_sub_le [DecidableRel R] {γ : ℝ}
+    (h : IsHomogeneousPair R A' B' ε)
+    (hclose : |pairDensity R A B - pairDensity R A' B'| ≤ γ) :
+    IsHomogeneousPair R A B (ε + γ) := by
+  rw [isHomogeneousPair_def] at h ⊢
+  rw [abs_le] at hclose
+  rcases h with h | h
+  · exact Or.inl (by linarith [hclose.2])
+  · exact Or.inr (by linarith [hclose.1])
+
+/-- Division form of the sub-rectangle comparison: growing each side by at most one element
+moves the density by at most `2 * (s + 1) / s ^ 2` when the smaller rectangle has both sides of
+size at least `s`. This is the exact cost of absorbing one leftover element per block. -/
+theorem abs_pairDensity_sub_le_of_grow_one [DecidableRel R] [DecidableEq α] [DecidableEq β]
+    {s : ℕ} (hs : 0 < s)
+    (hA : A' ⊆ A) (hB : B' ⊆ B)
+    (hA'c : s ≤ A'.card) (hB'c : s ≤ B'.card)
+    (hAc : A.card ≤ A'.card + 1) (hBc : B.card ≤ B'.card + 1) :
+    |pairDensity R A B - pairDensity R A' B'| ≤ 2 * ((s : ℝ) + 1) / s ^ 2 := by
+  have hsR : (0 : ℝ) < (s : ℝ) := by exact_mod_cast hs
+  have haR : (s : ℝ) ≤ (A'.card : ℝ) := by exact_mod_cast hA'c
+  have hbR : (s : ℝ) ≤ (B'.card : ℝ) := by exact_mod_cast hB'c
+  have hap : (0 : ℝ) < (A'.card : ℝ) := hsR.trans_le haR
+  have hbp : (0 : ℝ) < (B'.card : ℝ) := hsR.trans_le hbR
+  have hmass : (0 : ℝ) < (A'.card : ℝ) * (B'.card : ℝ) := mul_pos hap hbp
+  have hdA : ((A \ A').card : ℝ) ≤ 1 := by
+    have h1 : (A \ A').card ≤ 1 := by
+      rw [Finset.card_sdiff_of_subset hA]
+      omega
+    exact_mod_cast h1
+  have hdB : ((B \ B').card : ℝ) ≤ 1 := by
+    have h1 : (B \ B').card ≤ 1 := by
+      rw [Finset.card_sdiff_of_subset hB]
+      omega
+    exact_mod_cast h1
+  have hAcR : (A.card : ℝ) ≤ (A'.card : ℝ) + 1 := by exact_mod_cast hAc
+  have hBcR : (B.card : ℝ) ≤ (B'.card : ℝ) + 1 := by exact_mod_cast hBc
+  -- Each discarded strip has mass at most one full row or column of the small rectangle.
+  have hstripA : ((A \ A').card : ℝ) * (B.card : ℝ) ≤ (B'.card : ℝ) + 1 :=
+    calc ((A \ A').card : ℝ) * (B.card : ℝ)
+        ≤ 1 * ((B'.card : ℝ) + 1) := mul_le_mul hdA hBcR (Nat.cast_nonneg _) zero_le_one
+      _ = (B'.card : ℝ) + 1 := one_mul _
+  have hstripB : (A.card : ℝ) * ((B \ B').card : ℝ) ≤ (A'.card : ℝ) + 1 :=
+    calc (A.card : ℝ) * ((B \ B').card : ℝ)
+        ≤ ((A'.card : ℝ) + 1) * 1 := mul_le_mul hAcR hdB (Nat.cast_nonneg _) (by positivity)
+      _ = (A'.card : ℝ) + 1 := mul_one _
+  -- Divide the multiplication-form comparison by the small rectangle's mass.
+  have hstep : |pairDensity R A' B' - pairDensity R A B|
+      ≤ ((A'.card : ℝ) + (B'.card : ℝ) + 2) / ((A'.card : ℝ) * (B'.card : ℝ)) := by
+    rw [le_div_iff₀ hmass]
+    calc |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
+        ≤ ((A \ A').card : ℝ) * (B.card : ℝ) + (A.card : ℝ) * ((B \ B').card : ℝ) :=
+          abs_pairDensity_sub_mul_le hA hB
+      _ ≤ (A'.card : ℝ) + (B'.card : ℝ) + 2 := by linarith
+  -- Worsen the bound to depend only on `s`: both sides are at least `s`.
+  have hdiv : ((A'.card : ℝ) + (B'.card : ℝ) + 2) / ((A'.card : ℝ) * (B'.card : ℝ))
+      ≤ 2 * ((s : ℝ) + 1) / (s : ℝ) ^ 2 := by
+    rw [div_le_div_iff₀ hmass (by positivity)]
+    nlinarith [mul_nonneg (mul_nonneg hsR.le hap.le) (sub_nonneg.mpr hbR),
+      mul_nonneg (mul_nonneg hsR.le hbp.le) (sub_nonneg.mpr haR),
+      mul_nonneg (sub_nonneg.mpr haR) (sub_nonneg.mpr hbR),
+      mul_nonneg hsR.le (sub_nonneg.mpr haR), mul_nonneg hsR.le (sub_nonneg.mpr hbR)]
+  calc |pairDensity R A B - pairDensity R A' B'|
+      = |pairDensity R A' B' - pairDensity R A B| := abs_sub_comm _ _
+    _ ≤ 2 * ((s : ℝ) + 1) / (s : ℝ) ^ 2 := hstep.trans hdiv
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -291,6 +361,25 @@ example (B : Finset (Fin 3)) (ε : ℝ) :
     IsHomogeneousPair (fun (a : Fin 2) (b : Fin 3) => ¬ (a.val ≤ b.val)) ∅ B ε
       ↔ IsHomogeneousPair (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val) ∅ B ε :=
   isHomogeneousPair_not_iff
+
+-- Density perturbation at `γ = 0` transfers homogeneity between rectangles of literally
+-- equal density; the tolerance picks up only a harmless `+ 0`.
+example [DecidableRel R] (h : IsHomogeneousPair R A' B' ε)
+    (hEq : pairDensity R A B = pairDensity R A' B') :
+    IsHomogeneousPair R A B (ε + 0) :=
+  h.of_abs_pairDensity_sub_le (by simp [hEq])
+
+-- NOTE (adversarial, documented): at `s = 1` the growth bound is `2 * 2 / 1 = 4` — vacuously
+-- large, since two densities can differ by at most `1`. The theorem must nevertheless apply
+-- at this extreme; only from `s = 3` on does the bound `2 * (s + 1) / s ^ 2` dip below `1`.
+example :
+    |pairDensity (fun (a b : Fin 2) => a = b) Finset.univ Finset.univ
+        - pairDensity (fun (a b : Fin 2) => a = b) {0} {0}|
+      ≤ 2 * ((1 : ℝ) + 1) / 1 ^ 2 := by
+  exact_mod_cast abs_pairDensity_sub_le_of_grow_one (R := fun (a b : Fin 2) => a = b) (s := 1)
+    (A' := ({0} : Finset (Fin 2))) (B' := ({0} : Finset (Fin 2))) one_pos
+    (Finset.subset_univ _) (Finset.subset_univ _)
+    (by decide) (by decide) (by decide) (by decide)
 
 end Tests
 
