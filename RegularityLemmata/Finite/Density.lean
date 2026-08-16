@@ -171,7 +171,7 @@ along an equivalence. `Fin k` remains an instance of the general form, so every 
 spelling continues to elaborate unchanged. -/
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
-variable {R R' : (ι → α) → Prop} [DecidablePred R] [DecidablePred R'] {A : ι → Finset α}
+variable {R R' : (ι → α) → Prop} [DecidablePred R] [DecidablePred R'] {A A' : ι → Finset α}
 
 /-- Number of tuples in the box `A` satisfying `R`. -/
 def tupleCount (R : (ι → α) → Prop) [DecidablePred R] (A : ι → Finset α) : ℕ :=
@@ -198,11 +198,44 @@ theorem tupleDensity_neg (hne : ∀ i, (A i).Nonempty) :
     tupleDensity (fun x => ¬ R x) A = 1 - tupleDensity R A :=
   densityOn_not (Fintype.piFinset_nonempty.mpr hne)
 
-/-- Count from a density upper bound, `k`-ary form. Holds for all boxes. -/
+/-- Count from a density upper bound, `n`-ary form. Holds for all boxes. -/
 theorem card_filter_le_of_tupleDensity_le {c : ℝ} (h : tupleDensity R A ≤ c) :
     (tupleCount R A : ℝ) ≤ c * ∏ i, ((A i).card : ℝ) := by
   have := card_filter_le_of_densityOn_le h
   rwa [Fintype.card_piFinset, Nat.cast_prod] at this
+
+/-- Count from a density lower bound, `n`-ary form. Holds for all boxes: with an empty side
+the conclusion reads `c · 0 ≤ 0`. -/
+theorem le_card_filter_of_le_tupleDensity {c : ℝ} (h : c ≤ tupleDensity R A) :
+    c * ∏ i, ((A i).card : ℝ) ≤ (tupleCount R A : ℝ) := by
+  have := le_card_filter_of_le_densityOn h
+  rwa [Fintype.card_piFinset, Nat.cast_prod] at this
+
+/-- A tuple count never exceeds the size of its box. -/
+theorem tupleCount_le_card : tupleCount R A ≤ (Fintype.piFinset A).card :=
+  Finset.card_filter_le _ _
+
+/-- A relation and its complement partition the box. Guard-free: on a box with an empty
+side both counts are `0` and so is the box. -/
+theorem tupleCount_add_neg :
+    tupleCount R A + tupleCount (fun x ↦ ¬ R x) A = (Fintype.piFinset A).card :=
+  (Fintype.piFinset A).card_filter_add_card_filter_not R
+
+/-- Tuple counts are monotone in the box, coordinatewise. (Tuple *densities* are not; no
+such lemma is stated.) -/
+theorem tupleCount_mono (h : ∀ i, A' i ⊆ A i) : tupleCount R A' ≤ tupleCount R A :=
+  card_filter_mono_subset R (Fintype.piFinset_subset _ _ h)
+
+/-- An empty box has density `0`, for every relation. This is the convention frozen by
+`densityOn`'s `x / 0 = 0`, not a nontrivial fact. -/
+theorem tupleDensity_eq_zero_of_box_empty (h : Fintype.piFinset A = ∅) :
+    tupleDensity R A = 0 := by
+  rw [tupleDensity, h, densityOn_empty]
+
+/-- A box with an empty side is empty, hence has density `0`, for every relation. -/
+theorem tupleDensity_eq_zero_of_side_empty {i : ι} (hi : A i = ∅) : tupleDensity R A = 0 := by
+  refine tupleDensity_eq_zero_of_box_empty (Finset.not_nonempty_iff_eq_empty.mp fun hne => ?_)
+  exact (Finset.not_nonempty_iff_eq_empty.mpr hi) (Fintype.piFinset_nonempty.mp hne i)
 
 /-! ### `Fin 2` boxes -/
 
