@@ -259,6 +259,35 @@ theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α �
   conv_rhs => rw [← parts_biUnion_filter_subset hQ]
   rw [Finset.sum_biUnion hfib]
 
+/-- The parts of a refinement `Q` that sit inside a fixed `P`-part `C`, packaged as a
+`Finpartition` of `C`.
+
+The refinement hypothesis is consumed *here*, at the construction, so that statements about
+refinement variance can quantify over ordinary partitions and take `hQ` as an ordinary
+hypothesis rather than carrying proofs as data. -/
+def refinementOnPart {P Q : Finpartition s} (hQ : Q ≤ P) {C : Finset α} (hC : C ∈ P.parts) :
+    Finpartition C :=
+  Q.ofSubset (Finset.filter_subset (· ⊆ C) Q.parts)
+    (by rw [Finset.sup_eq_biUnion]; exact biUnion_filter_subset_eq hQ hC)
+
+@[simp]
+theorem parts_refinementOnPart {P Q : Finpartition s} (hQ : Q ≤ P) {C : Finset α}
+    (hC : C ∈ P.parts) :
+    (refinementOnPart hQ hC).parts = Q.parts.filter (· ⊆ C) := rfl
+
+/-- A partition refines itself trivially: the only `P`-part contained in a `P`-part `C`
+is `C`. This is what collapses one side of a two-sided refinement variance. -/
+theorem filter_subset_self_eq_singleton {P : Finpartition s} {C : Finset α}
+    (hC : C ∈ P.parts) : P.parts.filter (· ⊆ C) = {C} := by
+  ext E
+  simp only [Finset.mem_filter, Finset.mem_singleton]
+  constructor
+  · rintro ⟨hE, hEC⟩
+    obtain ⟨x, hx⟩ := P.nonempty_of_mem_parts hE
+    exact P.eq_of_mem_parts hE hC hx (hEC hx)
+  · rintro rfl
+    exact ⟨hC, Finset.Subset.refl _⟩
+
 /-! ### Predicate partitions -/
 
 /-- The at-most-two-cell partition of `s` by a decidable predicate, via
