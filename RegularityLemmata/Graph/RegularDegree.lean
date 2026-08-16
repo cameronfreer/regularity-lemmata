@@ -41,24 +41,6 @@ variable {α : Type*} (R : α → α → Prop) [DecidableRel R] {A B T : Finset 
 /-- The normalized out-degree of `x` into `B` (guard-free: `0` on empty `B`). -/
 noncomputable def degreeDensity (x : α) (B : Finset α) : ℝ := pairDensity R {x} B
 
-/-- The out-degree of `x` counts the neighbours of `x` in `B`. -/
-theorem pairCount_singleton_left (x : α) (B : Finset α) :
-    pairCount R {x} B = (B.filter (R x ·)).card := by
-  rw [pairCount]
-  refine Finset.card_bij' (fun p _ => p.2) (fun b _ => (x, b)) ?_ ?_ ?_ ?_
-  · intro p hp
-    rw [Finset.mem_filter, Finset.mem_product, Finset.mem_singleton] at hp
-    exact Finset.mem_filter.mpr ⟨hp.1.2, hp.1.1 ▸ hp.2⟩
-  · intro b hb
-    rw [Finset.mem_filter] at hb
-    exact Finset.mem_filter.mpr
-      ⟨Finset.mem_product.mpr ⟨Finset.mem_singleton_self x, hb.1⟩, hb.2⟩
-  · intro p hp
-    rw [Finset.mem_filter, Finset.mem_product, Finset.mem_singleton] at hp
-    exact Prod.ext hp.1.1.symm rfl
-  · intro b _
-    rfl
-
 theorem degreeDensity_eq (x : α) (B : Finset α) :
     degreeDensity R x B = ((B.filter (R x ·)).card : ℝ) / B.card := by
   rw [degreeDensity, pairDensity_eq_count_div, pairCount_singleton_left, Finset.card_singleton]
