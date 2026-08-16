@@ -17,23 +17,28 @@ Besides the metric laws (symmetry, triangle inequality), the file provides the b
 lemmas used by removal arguments: monotonicity in the box, summation along a chain of
 relations, and the split of the full-box edit distance into an injective part plus the
 collision count from `RegularityLemmata.Finite.Injective`.
+
+Coordinates are indexed by an **arbitrary** finite type `ι` with decidable equality, matching
+`RegularityLemmata.Finite.Density`. Nothing here uses the order structure of `Fin k`; the
+chain-summation lemma indexes its *chain* by `Fin (m + 1)`, which is a separate index and
+stays as it is.
 -/
 
 namespace RegularityLemmata
 
-variable {α : Type*} {k : ℕ}
-variable {R₁ R₂ R₃ : (Fin k → α) → Prop}
+variable {α : Type*} {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {R₁ R₂ R₃ : (ι → α) → Prop}
   [DecidablePred R₁] [DecidablePred R₂] [DecidablePred R₃]
-variable {A B : Fin k → Finset α}
+variable {A B : ι → Finset α}
 
 /-! ### Edit sets -/
 
 /-- The tuples of the box `A` on which `R₁` and `R₂` disagree. -/
-def editSet (R₁ R₂ : (Fin k → α) → Prop) [DecidablePred R₁] [DecidablePred R₂]
-    (A : Fin k → Finset α) : Finset (Fin k → α) :=
+def editSet (R₁ R₂ : (ι → α) → Prop) [DecidablePred R₁] [DecidablePred R₂]
+    (A : ι → Finset α) : Finset (ι → α) :=
   (Fintype.piFinset A).filter fun x => ¬ (R₁ x ↔ R₂ x)
 
-@[simp] theorem mem_editSet {x : Fin k → α} :
+@[simp] theorem mem_editSet {x : ι → α} :
     x ∈ editSet R₁ R₂ A ↔ x ∈ Fintype.piFinset A ∧ ¬ (R₁ x ↔ R₂ x) := by
   simp [editSet]
 
@@ -44,8 +49,8 @@ theorem editSet_comm : editSet R₁ R₂ A = editSet R₂ R₁ A := by
 /-! ### Edit distance -/
 
 /-- The number of tuples of the box on which the relations disagree. -/
-def editDistance (R₁ R₂ : (Fin k → α) → Prop) [DecidablePred R₁] [DecidablePred R₂]
-    (A : Fin k → Finset α) : ℕ :=
+def editDistance (R₁ R₂ : (ι → α) → Prop) [DecidablePred R₁] [DecidablePred R₂]
+    (A : ι → Finset α) : ℕ :=
   (editSet R₁ R₂ A).card
 
 theorem editDistance_comm : editDistance R₁ R₂ A = editDistance R₂ R₁ A := by
@@ -81,8 +86,8 @@ theorem editDistance_mono_box (h : ∀ i, A i ⊆ B i) :
 
 /-- Edit-budget summation along a chain of relations. -/
 theorem editDistance_le_sum_chain {m : ℕ}
-    (Rs : Fin (m + 1) → (Fin k → α) → Prop) [∀ i, DecidablePred (Rs i)]
-    (A : Fin k → Finset α) :
+    (Rs : Fin (m + 1) → (ι → α) → Prop) [∀ i, DecidablePred (Rs i)]
+    (A : ι → Finset α) :
     editDistance (Rs 0) (Rs (Fin.last m)) A
       ≤ ∑ i : Fin m, editDistance (Rs i.castSucc) (Rs i.succ) A := by
   induction m with
@@ -106,7 +111,7 @@ plus at most the collision count. -/
 theorem editDistance_univ_le_injective_add_nonInjective [Fintype α] [DecidableEq α] :
     editDistance R₁ R₂ (fun _ => Finset.univ)
       ≤ ((editSet R₁ R₂ fun _ => Finset.univ).filter Function.Injective).card
-        + (nonInjectiveMaps (Fin k) α).card := by
+        + (nonInjectiveMaps ι α).card := by
   rw [editDistance,
     ← Finset.card_filter_add_card_filter_not
       (s := editSet R₁ R₂ fun _ => Finset.univ) Function.Injective]
@@ -117,8 +122,8 @@ theorem editDistance_univ_le_injective_add_nonInjective [Fintype α] [DecidableE
 /-! ### Relative edit distance -/
 
 /-- Normalized edit distance: the density of disagreement on the box. -/
-noncomputable def relativeEditDistance (R₁ R₂ : (Fin k → α) → Prop) [DecidablePred R₁]
-    [DecidablePred R₂] (A : Fin k → Finset α) : ℝ :=
+noncomputable def relativeEditDistance (R₁ R₂ : (ι → α) → Prop) [DecidablePred R₁]
+    [DecidablePred R₂] (A : ι → Finset α) : ℝ :=
   densityOn (Fintype.piFinset A) fun x => ¬ (R₁ x ↔ R₂ x)
 
 /-- The bridge between relative and raw edit distance. -/
@@ -159,6 +164,18 @@ example :
 example :
     editDistance (fun x : Fin 2 → Fin 3 => x 0 = x 1) (fun x => ¬ x 0 = x 1)
       ![Finset.univ, ∅] = 0 := by decide
+
+-- **Index-generic**: coordinates indexed by `Bool` rather than `Fin 2`. A full flip still
+-- disagrees on all 4 tuples of the full box.
+example :
+    editDistance (fun x : Bool → Fin 2 => x true = x false) (fun x => ¬ x true = x false)
+      (fun _ => Finset.univ) = 4 := by decide
+
+-- **Degenerate index**: over an empty index type the box is a singleton, so two relations
+-- that disagree on the empty tuple are at edit distance `1`.
+example :
+    editDistance (fun _ : Empty → Fin 3 => True) (fun _ => False) (fun _ => Finset.univ) = 1 := by
+  decide
 
 -- Relative edit distance of a half-flip is 1/2: over `Fin 2` (as `Fin 1`-tuples),
 -- `x 0 = 0` and `True` disagree exactly on `x 0 = 1`, i.e. on 1 of 2 tuples.

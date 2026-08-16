@@ -23,7 +23,10 @@ Density is *not* monotone under restricting or enlarging the support; the file p
 only the three honest monotonicity notions: predicate monotonicity on a fixed support,
 count monotonicity under support inclusion, and count/density conversions.
 
-The tuple layer specializes to boxes `Fintype.piFinset A`.
+The tuple layer specializes to boxes `Fintype.piFinset A` over an **arbitrary** finite index
+type `ι` with decidable equality. Arity is deliberately not tied to `Fin k`: no counting
+argument here uses the order or successor structure of `Fin k`, and `Fin k` is itself an
+instance of the general form, so existing `Fin k` spellings are unaffected.
 -/
 
 namespace RegularityLemmata
@@ -159,18 +162,24 @@ theorem le_card_filter_of_le_densityOn (h : c ≤ densityOn S p) :
     calc c * S.card ≤ densityOn S p * S.card := mul_le_mul_of_nonneg_right h hcard.le
       _ = ((S.filter p).card : ℝ) := by rw [densityOn, div_mul_cancel₀]; exact hcard.ne'
 
-/-! ### Tuple densities over boxes -/
+/-! ### Tuple densities over boxes
 
-variable {k : ℕ} {R R' : (Fin k → α) → Prop} [DecidablePred R] [DecidablePred R']
-  {A : Fin k → Finset α}
+The index type is an **arbitrary** `Fintype` with decidable equality, not `Fin k`: nothing in
+the counting layer uses the linear order or the successor structure of `Fin k`, and consumers
+that index coordinates by a subtype, a sum type, or an edge set should not have to transport
+along an equivalence. `Fin k` remains an instance of the general form, so every `Fin k`
+spelling continues to elaborate unchanged. -/
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {R R' : (ι → α) → Prop} [DecidablePred R] [DecidablePred R'] {A : ι → Finset α}
 
 /-- Number of tuples in the box `A` satisfying `R`. -/
-def tupleCount (R : (Fin k → α) → Prop) [DecidablePred R] (A : Fin k → Finset α) : ℕ :=
+def tupleCount (R : (ι → α) → Prop) [DecidablePred R] (A : ι → Finset α) : ℕ :=
   ((Fintype.piFinset A).filter R).card
 
 /-- Density of `R` on the box `A`; `0` if some coordinate set is empty. -/
-noncomputable def tupleDensity (R : (Fin k → α) → Prop) [DecidablePred R]
-    (A : Fin k → Finset α) : ℝ :=
+noncomputable def tupleDensity (R : (ι → α) → Prop) [DecidablePred R]
+    (A : ι → Finset α) : ℝ :=
   densityOn (Fintype.piFinset A) R
 
 theorem tupleDensity_eq_count_div :
@@ -255,6 +264,22 @@ example :
 example :
     densityOn (∅ : Finset (Fin 3)) (fun _ => True)
       + densityOn (∅ : Finset (Fin 3)) (fun _ => ¬ True) = 0 := by simp
+
+-- **Index-generic**: the coordinate index need not be `Fin k`. Over `ι = Bool` the diagonal
+-- of the full `Fin 2` box holds for 2 of the 4 tuples — the same count the `Fin 2` spelling
+-- above produces, so the generalization is conservative on existing call sites.
+example : tupleCount (fun x : Bool → Fin 2 => x true = x false) (fun _ => Finset.univ) = 2 := by
+  decide
+
+-- An empty coordinate set kills the count over a non-`Fin` index too.
+example :
+    tupleCount (fun x : Bool → Fin 2 => x true = x false)
+      (fun b => if b then Finset.univ else ∅) = 0 := by decide
+
+-- **Degenerate index**: over an empty index type the box is the singleton containing the
+-- empty tuple, so the always-true relation has count `1` — not `0`. The convention is
+-- inherited from `Fintype.piFinset` and is deliberately not special-cased.
+example : tupleCount (fun _ : Empty → Fin 3 => True) (fun _ => Finset.univ) = 1 := by decide
 
 -- Count extraction, upper bound, on a concrete instance.
 example :
