@@ -82,6 +82,29 @@ theorem nat_mul_pow_mul_one_sub_pow_lt_one
 noncomputable def polyGeometricThreshold (K d : ℕ) (x : ℝ) : ℕ :=
   ⌊(K : ℝ) * (Nat.factorial (d + 1) : ℝ) / x ^ (d + 1)⌋₊ + 1
 
+/-- The threshold is monotone: larger coefficient, higher degree, or smaller (positive) ratio
+slack all raise it. Stated jointly so consumers compose one lemma. -/
+theorem polyGeometricThreshold_le_polyGeometricThreshold {K₁ K₂ d₁ d₂ : ℕ} {x₁ x₂ : ℝ}
+    (hK : K₁ ≤ K₂) (hd : d₁ ≤ d₂) (hx₂ : 0 < x₂) (hx : x₂ ≤ x₁) (hx₁ : x₁ ≤ 1) :
+    polyGeometricThreshold K₁ d₁ x₁ ≤ polyGeometricThreshold K₂ d₂ x₂ := by
+  unfold polyGeometricThreshold
+  have hx₁pos : (0 : ℝ) < x₁ := lt_of_lt_of_le hx₂ hx
+  have hpow : x₂ ^ (d₂ + 1) ≤ x₁ ^ (d₁ + 1) := by
+    calc x₂ ^ (d₂ + 1) ≤ x₁ ^ (d₂ + 1) := pow_le_pow_left₀ hx₂.le hx _
+      _ ≤ x₁ ^ (d₁ + 1) := pow_le_pow_of_le_one hx₁pos.le hx₁ (by omega)
+  have hnum : (K₁ : ℝ) * (Nat.factorial (d₁ + 1) : ℝ)
+      ≤ (K₂ : ℝ) * (Nat.factorial (d₂ + 1) : ℝ) := by
+    have h1 : (K₁ : ℝ) ≤ (K₂ : ℝ) := by exact_mod_cast hK
+    have h2 : (Nat.factorial (d₁ + 1) : ℝ) ≤ (Nat.factorial (d₂ + 1) : ℝ) := by
+      exact_mod_cast Nat.factorial_le (by omega)
+    have h3 : (0 : ℝ) ≤ (K₁ : ℝ) := Nat.cast_nonneg _
+    have h4 : (0 : ℝ) ≤ (Nat.factorial (d₂ + 1) : ℝ) := Nat.cast_nonneg _
+    nlinarith [Nat.cast_nonneg (α := ℝ) (Nat.factorial (d₁ + 1))]
+  have hdiv : (K₁ : ℝ) * (Nat.factorial (d₁ + 1) : ℝ) / x₁ ^ (d₁ + 1)
+      ≤ (K₂ : ℝ) * (Nat.factorial (d₂ + 1) : ℝ) / x₂ ^ (d₂ + 1) := by
+    apply div_le_div₀ (by positivity) hnum (by positivity) hpow
+  exact Nat.add_le_add_right (Nat.floor_le_floor hdiv) 1
+
 /-- Beyond `polyGeometricThreshold K d x`, the polynomial-geometric expression is strictly
 below one. -/
 theorem polyGeometricThreshold_spec (K d : ℕ) (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1) :
