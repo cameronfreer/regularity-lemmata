@@ -244,6 +244,61 @@ theorem IsHomogeneousPair.of_abs_pairDensity_sub_le [DecidableRel R] {γ : ℝ}
   · exact Or.inl (by linarith [hclose.2])
   · exact Or.inr (by linarith [hclose.1])
 
+/-- Division form of the sub-rectangle comparison for growth by at most `k` elements per side:
+the density moves by at most `2k(s + k)/s²` when the smaller rectangle has both sides of size
+at least `s`. Generalizes `abs_pairDensity_sub_le_of_grow_one` (the case `k = 1`). -/
+theorem abs_pairDensity_sub_le_of_grow [DecidableRel R] [DecidableEq α] [DecidableEq β]
+    {A' : Finset α} {B' : Finset β} {s k : ℕ} (hs : 0 < s)
+    (hA : A' ⊆ A) (hB : B' ⊆ B)
+    (hA'c : s ≤ A'.card) (hB'c : s ≤ B'.card)
+    (hAc : A.card ≤ A'.card + k) (hBc : B.card ≤ B'.card + k) :
+    |pairDensity R A B - pairDensity R A' B'| ≤ 2 * k * ((s : ℝ) + k) / s ^ 2 := by
+  have hsR : (0 : ℝ) < (s : ℝ) := by exact_mod_cast hs
+  have hkR : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+  have haR : (s : ℝ) ≤ (A'.card : ℝ) := by exact_mod_cast hA'c
+  have hbR : (s : ℝ) ≤ (B'.card : ℝ) := by exact_mod_cast hB'c
+  have hap : (0 : ℝ) < (A'.card : ℝ) := hsR.trans_le haR
+  have hbp : (0 : ℝ) < (B'.card : ℝ) := hsR.trans_le hbR
+  have hmass : (0 : ℝ) < (A'.card : ℝ) * (B'.card : ℝ) := mul_pos hap hbp
+  have hdA : ((A \ A').card : ℝ) ≤ (k : ℝ) := by
+    have h1 : (A \ A').card ≤ k := by
+      rw [Finset.card_sdiff_of_subset hA]
+      omega
+    exact_mod_cast h1
+  have hdB : ((B \ B').card : ℝ) ≤ (k : ℝ) := by
+    have h1 : (B \ B').card ≤ k := by
+      rw [Finset.card_sdiff_of_subset hB]
+      omega
+    exact_mod_cast h1
+  have hAcR : (A.card : ℝ) ≤ (A'.card : ℝ) + k := by exact_mod_cast hAc
+  have hBcR : (B.card : ℝ) ≤ (B'.card : ℝ) + k := by exact_mod_cast hBc
+  -- Each discarded strip has mass at most `k` full rows or columns of the enlarged rectangle.
+  have hstripA : ((A \ A').card : ℝ) * (B.card : ℝ) ≤ (k : ℝ) * ((B'.card : ℝ) + k) :=
+    mul_le_mul hdA hBcR (Nat.cast_nonneg _) hkR
+  have hstripB : (A.card : ℝ) * ((B \ B').card : ℝ) ≤ ((A'.card : ℝ) + k) * k :=
+    mul_le_mul hAcR hdB (Nat.cast_nonneg _) (by positivity)
+  -- Divide the multiplication-form comparison by the small rectangle's mass.
+  have hstep : |pairDensity R A' B' - pairDensity R A B|
+      ≤ ((k : ℝ) * ((B'.card : ℝ) + k) + ((A'.card : ℝ) + k) * k)
+        / ((A'.card : ℝ) * (B'.card : ℝ)) := by
+    rw [le_div_iff₀ hmass]
+    calc |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
+        ≤ ((A \ A').card : ℝ) * (B.card : ℝ) + (A.card : ℝ) * ((B \ B').card : ℝ) :=
+          abs_pairDensity_sub_mul_le hA hB
+      _ ≤ (k : ℝ) * ((B'.card : ℝ) + k) + ((A'.card : ℝ) + k) * k := by linarith
+  -- Worsen the bound to depend only on `s`: both sides are at least `s`.
+  have hdiv : ((k : ℝ) * ((B'.card : ℝ) + k) + ((A'.card : ℝ) + k) * k)
+      / ((A'.card : ℝ) * (B'.card : ℝ)) ≤ 2 * k * ((s : ℝ) + k) / (s : ℝ) ^ 2 := by
+    rw [div_le_div_iff₀ hmass (by positivity)]
+    nlinarith [mul_nonneg (mul_nonneg (mul_nonneg hkR hsR.le) hap.le) (sub_nonneg.mpr hbR),
+      mul_nonneg (mul_nonneg (mul_nonneg hkR hsR.le) hbp.le) (sub_nonneg.mpr haR),
+      mul_nonneg (mul_nonneg (mul_nonneg hkR hkR) (sub_nonneg.mpr haR)) (sub_nonneg.mpr hbR),
+      mul_nonneg (mul_nonneg (mul_nonneg hkR hkR) hsR.le) (sub_nonneg.mpr haR),
+      mul_nonneg (mul_nonneg (mul_nonneg hkR hkR) hsR.le) (sub_nonneg.mpr hbR)]
+  calc |pairDensity R A B - pairDensity R A' B'|
+      = |pairDensity R A' B' - pairDensity R A B| := abs_sub_comm _ _
+    _ ≤ 2 * k * ((s : ℝ) + k) / (s : ℝ) ^ 2 := hstep.trans hdiv
+
 /-- Division form of the sub-rectangle comparison: growing each side by at most one element
 moves the density by at most `2 * (s + 1) / s ^ 2` when the smaller rectangle has both sides of
 size at least `s`. This is the exact cost of absorbing one leftover element per block. -/
@@ -253,52 +308,7 @@ theorem abs_pairDensity_sub_le_of_grow_one [DecidableRel R] [DecidableEq α] [De
     (hA'c : s ≤ A'.card) (hB'c : s ≤ B'.card)
     (hAc : A.card ≤ A'.card + 1) (hBc : B.card ≤ B'.card + 1) :
     |pairDensity R A B - pairDensity R A' B'| ≤ 2 * ((s : ℝ) + 1) / s ^ 2 := by
-  have hsR : (0 : ℝ) < (s : ℝ) := by exact_mod_cast hs
-  have haR : (s : ℝ) ≤ (A'.card : ℝ) := by exact_mod_cast hA'c
-  have hbR : (s : ℝ) ≤ (B'.card : ℝ) := by exact_mod_cast hB'c
-  have hap : (0 : ℝ) < (A'.card : ℝ) := hsR.trans_le haR
-  have hbp : (0 : ℝ) < (B'.card : ℝ) := hsR.trans_le hbR
-  have hmass : (0 : ℝ) < (A'.card : ℝ) * (B'.card : ℝ) := mul_pos hap hbp
-  have hdA : ((A \ A').card : ℝ) ≤ 1 := by
-    have h1 : (A \ A').card ≤ 1 := by
-      rw [Finset.card_sdiff_of_subset hA]
-      omega
-    exact_mod_cast h1
-  have hdB : ((B \ B').card : ℝ) ≤ 1 := by
-    have h1 : (B \ B').card ≤ 1 := by
-      rw [Finset.card_sdiff_of_subset hB]
-      omega
-    exact_mod_cast h1
-  have hAcR : (A.card : ℝ) ≤ (A'.card : ℝ) + 1 := by exact_mod_cast hAc
-  have hBcR : (B.card : ℝ) ≤ (B'.card : ℝ) + 1 := by exact_mod_cast hBc
-  -- Each discarded strip has mass at most one full row or column of the small rectangle.
-  have hstripA : ((A \ A').card : ℝ) * (B.card : ℝ) ≤ (B'.card : ℝ) + 1 :=
-    calc ((A \ A').card : ℝ) * (B.card : ℝ)
-        ≤ 1 * ((B'.card : ℝ) + 1) := mul_le_mul hdA hBcR (Nat.cast_nonneg _) zero_le_one
-      _ = (B'.card : ℝ) + 1 := one_mul _
-  have hstripB : (A.card : ℝ) * ((B \ B').card : ℝ) ≤ (A'.card : ℝ) + 1 :=
-    calc (A.card : ℝ) * ((B \ B').card : ℝ)
-        ≤ ((A'.card : ℝ) + 1) * 1 := mul_le_mul hAcR hdB (Nat.cast_nonneg _) (by positivity)
-      _ = (A'.card : ℝ) + 1 := mul_one _
-  -- Divide the multiplication-form comparison by the small rectangle's mass.
-  have hstep : |pairDensity R A' B' - pairDensity R A B|
-      ≤ ((A'.card : ℝ) + (B'.card : ℝ) + 2) / ((A'.card : ℝ) * (B'.card : ℝ)) := by
-    rw [le_div_iff₀ hmass]
-    calc |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
-        ≤ ((A \ A').card : ℝ) * (B.card : ℝ) + (A.card : ℝ) * ((B \ B').card : ℝ) :=
-          abs_pairDensity_sub_mul_le hA hB
-      _ ≤ (A'.card : ℝ) + (B'.card : ℝ) + 2 := by linarith
-  -- Worsen the bound to depend only on `s`: both sides are at least `s`.
-  have hdiv : ((A'.card : ℝ) + (B'.card : ℝ) + 2) / ((A'.card : ℝ) * (B'.card : ℝ))
-      ≤ 2 * ((s : ℝ) + 1) / (s : ℝ) ^ 2 := by
-    rw [div_le_div_iff₀ hmass (by positivity)]
-    nlinarith [mul_nonneg (mul_nonneg hsR.le hap.le) (sub_nonneg.mpr hbR),
-      mul_nonneg (mul_nonneg hsR.le hbp.le) (sub_nonneg.mpr haR),
-      mul_nonneg (sub_nonneg.mpr haR) (sub_nonneg.mpr hbR),
-      mul_nonneg hsR.le (sub_nonneg.mpr haR), mul_nonneg hsR.le (sub_nonneg.mpr hbR)]
-  calc |pairDensity R A B - pairDensity R A' B'|
-      = |pairDensity R A' B' - pairDensity R A B| := abs_sub_comm _ _
-    _ ≤ 2 * ((s : ℝ) + 1) / (s : ℝ) ^ 2 := hstep.trans hdiv
+  simpa using abs_pairDensity_sub_le_of_grow (k := 1) hs hA hB hA'c hB'c hAc hBc
 
 /-! ### Tests and adversarial examples -/
 
@@ -379,6 +389,29 @@ example :
   exact_mod_cast abs_pairDensity_sub_le_of_grow_one (R := fun (a b : Fin 2) => a = b) (s := 1)
     (A' := ({0} : Finset (Fin 2))) (B' := ({0} : Finset (Fin 2))) one_pos
     (Finset.subset_univ _) (Finset.subset_univ _)
+    (by decide) (by decide) (by decide) (by decide)
+
+-- The `k`-growth bound at `k = 2`, `s = 1`: growing `{0} × {0}` to the full `Fin 3` square is
+-- within the (vacuously large) tolerance `2 * 2 * (1 + 2) / 1 = 12`.
+example :
+    |pairDensity (fun (a b : Fin 3) => a = b) Finset.univ Finset.univ
+        - pairDensity (fun (a b : Fin 3) => a = b) {0} {0}|
+      ≤ 2 * 2 * ((1 : ℝ) + 2) / 1 ^ 2 := by
+  exact_mod_cast abs_pairDensity_sub_le_of_grow (R := fun (a b : Fin 3) => a = b) (s := 1)
+    (k := 2) (A' := ({0} : Finset (Fin 3))) (B' := ({0} : Finset (Fin 3))) one_pos
+    (Finset.subset_univ _) (Finset.subset_univ _)
+    (by decide) (by decide) (by decide) (by decide)
+
+-- NOTE (adversarial, documented): at `k = 0` the growth hypotheses force `A = A'` and
+-- `B = B'`, and the bound degenerates to `0` — the theorem then asserts that the two
+-- densities are literally equal, which must still typecheck and hold.
+example :
+    |pairDensity (fun (a b : Fin 2) => a = b) Finset.univ Finset.univ
+        - pairDensity (fun (a b : Fin 2) => a = b) Finset.univ Finset.univ|
+      ≤ 2 * 0 * ((2 : ℝ) + 0) / 2 ^ 2 := by
+  exact_mod_cast abs_pairDensity_sub_le_of_grow (R := fun (a b : Fin 2) => a = b) (s := 2)
+    (k := 0) (A' := (Finset.univ : Finset (Fin 2))) (B' := (Finset.univ : Finset (Fin 2)))
+    two_pos (Finset.subset_univ _) (Finset.subset_univ _)
     (by decide) (by decide) (by decide) (by decide)
 
 end Tests
