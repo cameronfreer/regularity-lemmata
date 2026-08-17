@@ -190,6 +190,159 @@ theorem rectSum_rectResidual_eq_rectError [DecidableEq X] [DecidableEq Y]
   rw [← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun y _ => by rw [rectResidual_apply]; ring
 
+/-! ### The tower identity
+
+**The first genuinely conditional-expectation step in this file, and the first use of
+nonnegativity.** Stepping the residual of a coarse pair against a finer pair gives exactly
+the difference of the two stepped predictions.
+
+The internal unit is deliberately the **trace-mass-multiplied** fine-cell identity below,
+never an unmultiplied identity between fine-cell averages: on a zero-mass fine cell the
+guard-free average of the residual is `0 / 0 = 0` while the difference of averages need not
+be, so the unmultiplied statement is false as written. Multiplying by the trace masses
+repairs it, because nonnegativity forces the trace mass of a zero-mass cell to vanish too.
+That is precisely where signed weights would break the argument: a signed fine cell can have
+zero total mass with a nonzero-mass trace inside it. -/
+
+/-- Trace masses add over the fine cells inside a coarse cell.
+
+Purely algebraic — no nonnegativity — since it is just `sum_over_parts` for the fibre
+partition of `C`, applied to the trace `S ∩ C`. -/
+private theorem sum_trace_mass_filter_subset [DecidableEq X] {P P' : Finpartition A}
+    (hP : P' ≤ P) {C : Finset X} (hC : C ∈ P.parts) (w : X → ℝ) (S : Finset X) :
+    ∑ C' ∈ P'.parts.filter (· ⊆ C), finsetMass w (S ∩ C') = finsetMass w (S ∩ C) := by
+  classical
+  have h := sum_over_parts (refinementOnPart hP hC) (S := S ∩ C)
+    Finset.inter_subset_right (fun _ x => w x)
+  rw [parts_refinementOnPart] at h
+  rw [finsetMass, h]
+  refine Finset.sum_congr rfl fun C' hC' => ?_
+  rw [Finset.mem_filter] at hC'
+  rw [finsetMass, Finset.inter_assoc, Finset.inter_eq_right.mpr hC'.2]
+
+/-- **The fine-cell identity, multiplied by the trace masses.** For a fine cell `C' ⊆ C` and
+`D' ⊆ D`, the residual's average is the difference of the fine and coarse averages — but only
+after multiplication by the trace masses, which is what makes the zero-mass branch true
+rather than merely convenient.
+
+Private: the only consumer is `steppedRectSum_rectResidual`. -/
+private theorem rectAverage_rectResidual_mul_trace_mass [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) {P : Finpartition A} {Q : Finpartition B}
+    {C C' : Finset X} {D D' : Finset Y} (hC : C ∈ P.parts) (hD : D ∈ Q.parts)
+    (hC' : C' ⊆ C) (hD' : D' ⊆ D) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (S : Finset X) (T : Finset Y) :
+    rectAverage (rectResidual f wX wY P Q) wX wY C' D'
+        * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D'))
+      = (rectAverage f wX wY C' D' - rectAverage f wX wY C D)
+        * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D')) := by
+  classical
+  have hwC' : ∀ x ∈ C', 0 ≤ wX x := fun x hx => hwX x ((P.le hC) (hC' hx))
+  have hwD' : ∀ y ∈ D', 0 ≤ wY y := fun y hy => hwY y ((Q.le hD) (hD' hy))
+  -- The residual's rectangle sum over a fine cell, with the coarse average factored out.
+  have hsum : rectSum (rectResidual f wX wY P Q) wX wY C' D'
+      = rectSum f wX wY C' D'
+        - rectAverage f wX wY C D * (finsetMass wX C' * finsetMass wY D') := by
+    have hmass : ∑ x ∈ C', ∑ y ∈ D', wX x * wY y * rectAverage f wX wY C D
+        = rectAverage f wX wY C D * (finsetMass wX C' * finsetMass wY D') := by
+      rw [finsetMass, finsetMass, Finset.sum_mul_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun x _ => ?_
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl fun y _ => by ring
+    rw [← hmass, rectSum, rectSum, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun x hx => ?_
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun y hy => ?_
+    rw [rectResidual_apply, P.part_eq_of_mem hC (hC' hx), Q.part_eq_of_mem hD (hD' hy)]
+    ring
+  rcases eq_or_lt_of_le (finsetMass_nonneg hwC') with hmC' | hmC'
+  · -- Zero-mass fine left cell: nonnegativity kills the trace mass, so both sides vanish.
+    have hle : finsetMass wX (S ∩ C') ≤ finsetMass wX C' :=
+      finsetMass_mono hwC' Finset.inter_subset_right
+    rw [← hmC'] at hle
+    rw [le_antisymm hle (finsetMass_nonneg fun x hx =>
+      hwC' x (Finset.mem_of_mem_inter_right hx)), zero_mul, mul_zero, mul_zero]
+  rcases eq_or_lt_of_le (finsetMass_nonneg hwD') with hmD' | hmD'
+  · -- …and likewise on the right.
+    have hle : finsetMass wY (T ∩ D') ≤ finsetMass wY D' :=
+      finsetMass_mono hwD' Finset.inter_subset_right
+    rw [← hmD'] at hle
+    rw [le_antisymm hle (finsetMass_nonneg fun y hy =>
+      hwD' y (Finset.mem_of_mem_inter_right hy)), mul_zero, mul_zero, mul_zero]
+  -- Positive mass on both sides: only now is cancellation legitimate.
+  have hne : finsetMass wX C' * finsetMass wY D' ≠ 0 := ne_of_gt (mul_pos hmC' hmD')
+  have havg : rectAverage (rectResidual f wX wY P Q) wX wY C' D'
+      = rectAverage f wX wY C' D' - rectAverage f wX wY C D := by
+    rw [rectAverage, rectAverage, hsum, sub_div, mul_div_assoc, div_self hne, mul_one]
+  rw [havg]
+
+/-- **The tower identity.** Stepping the `P ×ˢ Q`-residual against a finer pair `P' ×ˢ Q'`
+gives the difference of the two stepped predictions.
+
+Nonnegative carrier weights are genuinely required, and this is the only theorem in the file
+that needs them for a reason other than an inequality: see the section note.
+
+`S ⊆ A` and `T ⊆ B` are **not** needed, unlike in `rectSum_rectResidual_eq_rectError`. A
+stepped sum ranges over cells, so points of `S` outside the carrier are invisible to both
+sides; the ordinary rectangle sum, by contrast, sees them and there the residual equals `f`.
+Consumers below supply the carrier hypotheses anyway, since their other inputs need them. -/
+theorem steppedRectSum_rectResidual [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) {P P' : Finpartition A} {Q Q' : Finpartition B}
+    (hP : P' ≤ P) (hQ : Q' ≤ Q) (S : Finset X) (T : Finset Y)
+    (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    steppedRectSum (rectResidual f wX wY P Q) wX wY P' Q' S T
+      = steppedRectSum f wX wY P' Q' S T - steppedRectSum f wX wY P Q S T := by
+  classical
+  -- Regroup the fine cells under their coarse parents, so that each parent is in scope.
+  have key : ∀ g : Finset X → Finset Y → ℝ,
+      ∑ C' ∈ P'.parts, ∑ D' ∈ Q'.parts, g C' D'
+        = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C),
+            ∑ D ∈ Q.parts, ∑ D' ∈ Q'.parts.filter (· ⊆ D), g C' D' := by
+    intro g
+    rw [← sum_over_parents hP fun C' => ∑ D' ∈ Q'.parts, g C' D']
+    exact Finset.sum_congr rfl fun C _ => Finset.sum_congr rfl fun C' _ =>
+      (sum_over_parents hQ (g C')).symm
+  have hparent : ∀ C ∈ P.parts, ∀ D ∈ Q.parts,
+      ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ Q'.parts.filter (· ⊆ D),
+          rectAverage f wX wY C D * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D'))
+        = rectAverage f wX wY C D
+            * (finsetMass wX (S ∩ C) * finsetMass wY (T ∩ D)) := by
+    intro C hC D hD
+    rw [← sum_trace_mass_filter_subset hP hC wX S, ← sum_trace_mass_filter_subset hQ hD wY T,
+      Finset.sum_mul_sum, Finset.mul_sum]
+    exact Finset.sum_congr rfl fun C' _ => by rw [Finset.mul_sum]
+  have hL : steppedRectSum (rectResidual f wX wY P Q) wX wY P' Q' S T
+      = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C),
+          ∑ D ∈ Q.parts, ∑ D' ∈ Q'.parts.filter (· ⊆ D),
+            rectAverage (rectResidual f wX wY P Q) wX wY C' D'
+              * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D')) := by
+    rw [steppedRectSum]; exact key _
+  have hF : steppedRectSum f wX wY P' Q' S T
+      = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C),
+          ∑ D ∈ Q.parts, ∑ D' ∈ Q'.parts.filter (· ⊆ D),
+            rectAverage f wX wY C' D'
+              * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D')) := by
+    rw [steppedRectSum]; exact key _
+  have hCoarse : steppedRectSum f wX wY P Q S T
+      = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C),
+          ∑ D ∈ Q.parts, ∑ D' ∈ Q'.parts.filter (· ⊆ D),
+            rectAverage f wX wY C D
+              * (finsetMass wX (S ∩ C') * finsetMass wY (T ∩ D')) := by
+    rw [steppedRectSum]
+    refine Finset.sum_congr rfl fun C hC => ?_
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun D hD => (hparent C hC D hD).symm
+  rw [hL, hF, hCoarse, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun C hC => ?_
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun C' hC' => ?_
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun D hD => ?_
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun D' hD' => ?_
+  rw [Finset.mem_filter] at hC' hD'
+  rw [rectAverage_rectResidual_mul_trace_mass f wX wY hC hD hC'.2 hD'.2 hwX hwY S T]
+  ring
+
 /-! ### Relative cell-mass coefficients
 
 The bridge from the stepped prediction to a bilinear form: the coefficients are the
@@ -456,6 +609,104 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
     rectCutDiscrepancy f (fun x => 5 * cL x) cR P Q
       = 5 * rectCutDiscrepancy f cL cR P Q :=
   rectCutDiscrepancy_smul_weight_left (by norm_num) f cL cR P Q
+
+/-! #### The zero-mass fine cell
+
+The adversarial case for the tower identity: a **zero-weight point sitting inside a
+positive-mass coarse cell**, so that the fine partition has a genuine zero-mass cell.
+
+The weights are `[1, 0, 1]` rather than `[1, 0]` for a reason. On two points with weights
+`[1, 0]` all the mass sits at a single point, so *every* partition has the same stepped sum
+and the identity degenerates to `0 = 0 - 0`. Adding a third weighted point keeps the
+zero-mass fine cell `{1}` while making the coarse and fine stepped predictions genuinely
+different — so the test pins the refinement bookkeeping and the zero-trace argument, not just
+an arithmetic endpoint. -/
+
+private def cZ : Fin 3 → ℝ := ![1, 0, 1]
+
+private def cU : Fin 1 → ℝ := fun _ => 1
+
+private def fZ : RectKernel (Fin 3) (Fin 1) := fun x _ => (x : ℝ)
+
+private theorem hZne : (Finset.univ : Finset (Fin 3)) ≠ ∅ := by decide
+
+private theorem hUne : (Finset.univ : Finset (Fin 1)) ≠ ∅ := by decide
+
+/-- The coarse left partition: one cell of mass `2`, containing the zero-weight point `1`. -/
+private def PZ : Finpartition (Finset.univ : Finset (Fin 3)) := Finpartition.indiscrete hZne
+
+private def QZ : Finpartition (Finset.univ : Finset (Fin 1)) := Finpartition.indiscrete hUne
+
+private theorem hPZparts : PZ.parts = {Finset.univ} := by
+  rw [PZ, Finpartition.indiscrete_parts]
+
+private theorem hQZparts : QZ.parts = {Finset.univ} := by
+  rw [QZ, Finpartition.indiscrete_parts]
+
+private theorem hPZpart : ∀ x : Fin 3, PZ.part x = Finset.univ :=
+  fun x => PZ.part_eq_of_mem (by rw [hPZparts]; exact Finset.mem_singleton_self _)
+    (Finset.mem_univ x)
+
+private theorem hQZpart : ∀ y : Fin 1, QZ.part y = Finset.univ :=
+  fun y => QZ.part_eq_of_mem (by rw [hQZparts]; exact Finset.mem_singleton_self _)
+    (Finset.mem_univ y)
+
+private theorem hcZ : ∀ x ∈ (Finset.univ : Finset (Fin 3)), 0 ≤ cZ x := by
+  intro x _
+  fin_cases x <;> norm_num [cZ]
+
+private theorem hcU : ∀ y ∈ (Finset.univ : Finset (Fin 1)), 0 ≤ cU y := fun _ _ => by
+  norm_num [cU]
+
+private theorem hZI0 : ({0, 1} : Finset (Fin 3)) ∩ {0} = {0} := by decide
+
+private theorem hZI1 : ({0, 1} : Finset (Fin 3)) ∩ {1} = {1} := by decide
+
+private theorem hZI2 : ({0, 1} : Finset (Fin 3)) ∩ {2} = ∅ := by decide
+
+-- The **coarse** stepped prediction on the test set `{0, 1}`.
+example : steppedRectSum fZ cZ cU PZ QZ ({0, 1} : Finset (Fin 3)) Finset.univ = 1 := by
+  rw [steppedRectSum, hPZparts, hQZparts]
+  simp only [Finset.sum_singleton]
+  rw [rectAverage, rectSum, finsetMass, finsetMass, finsetMass, finsetMass]
+  norm_num [cZ, cU, fZ, Fin.sum_univ_three, Fin.sum_univ_one, Matrix.cons_val_two,
+    Matrix.tail_cons]
+
+-- The **fine** stepped prediction, for the strict refinement into singletons. The zero-mass
+-- cell `{1}` contributes `0` through a `0 / 0` average *and* a zero trace mass; the cell
+-- `{2}` contributes `0` because the test set misses it.
+example : steppedRectSum fZ cZ cU (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) QZ
+    ({0, 1} : Finset (Fin 3)) Finset.univ = 0 := by
+  rw [steppedRectSum, hQZparts]
+  simp only [Finpartition.parts_bot, Finset.sum_map, Finset.sum_singleton,
+    Function.Embedding.coeFn_mk]
+  rw [Fin.sum_univ_three]
+  simp only [rectAverage, rectSum, finsetMass, Finset.sum_singleton, hZI0, hZI1, hZI2]
+  norm_num [cZ, cU, fZ, Fin.sum_univ_one, Matrix.cons_val_two, Matrix.tail_cons]
+
+-- …and the residual's fine stepped sum, computed independently: `-1`, which is exactly
+-- `0 - 1`. So the tower identity is verified numerically on data where it is not vacuous.
+example : steppedRectSum (rectResidual fZ cZ cU PZ QZ) cZ cU
+    (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) QZ ({0, 1} : Finset (Fin 3))
+    Finset.univ = -1 := by
+  rw [steppedRectSum, hQZparts]
+  simp only [Finpartition.parts_bot, Finset.sum_map, Finset.sum_singleton,
+    Function.Embedding.coeFn_mk]
+  rw [Fin.sum_univ_three]
+  simp only [rectAverage, rectSum, finsetMass, Finset.sum_singleton, rectResidual_apply,
+    hPZpart, hQZpart, hZI0, hZI1, hZI2]
+  norm_num [cZ, cU, fZ, Fin.sum_univ_three, Fin.sum_univ_one, Matrix.cons_val_two,
+    Matrix.tail_cons]
+
+-- The theorem itself on that data: `⊥` is a strict refinement of the indiscrete partition,
+-- and no positive-mass hypothesis on cells is required.
+example : steppedRectSum (rectResidual fZ cZ cU PZ QZ) cZ cU
+      (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) QZ ({0, 1} : Finset (Fin 3))
+      Finset.univ
+    = steppedRectSum fZ cZ cU (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) QZ
+        ({0, 1} : Finset (Fin 3)) Finset.univ
+      - steppedRectSum fZ cZ cU PZ QZ ({0, 1} : Finset (Fin 3)) Finset.univ :=
+  steppedRectSum_rectResidual fZ cZ cU bot_le le_rfl _ _ hcZ hcU
 
 -- The discrepancy is never negative, and the empty rectangle is always a legal test.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
