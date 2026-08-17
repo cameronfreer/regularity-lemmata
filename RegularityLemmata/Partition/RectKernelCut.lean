@@ -527,6 +527,84 @@ theorem rectCutDiscrepancy_smul_weight_left [DecidableEq X] [DecidableEq Y] {c :
       _ = rectCutDiscrepancy f (fun x => c * wX x) wY P Q := by
           field_simp
 
+/-! ### Transfer to a refinement, and the common-refinement adapter
+
+Derived surface: the tower identity supplies the residual's bookkeeping, the contraction
+supplies the estimate, and nothing below introduces new mathematics. The constant `2` is the
+triangle inequality of `abs_rectError_le_two_mul`; stepping itself is free. -/
+
+/-- The rectangle error of the **residual** against a finer pair is the rectangle error of
+`f` itself against that pair: the coarse prediction cancels. -/
+theorem rectError_rectResidual [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) {P P' : Finpartition A} {Q Q' : Finpartition B}
+    (hP : P' ≤ P) (hQ : Q' ≤ Q) {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B)
+    (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectError (rectResidual f wX wY P Q) wX wY P' Q' S T = rectError f wX wY P' Q' S T := by
+  rw [rectError, rectSum_rectResidual_eq_rectError f wX wY P Q hS hT,
+    steppedRectSum_rectResidual f wX wY hP hQ S T hwX hwY, rectError, rectError]
+  ring
+
+/-- **The transfer theorem.** Refining *both* partitions costs at most a factor of `2` in the
+cut discrepancy.
+
+The proof is the residual's: its rectangle sums are the coarse pair's rectangle errors, hence
+bounded by the coarse discrepancy; the contraction bounds the residual's stepped predictions
+by the same quantity; and the triangle inequality pays the factor `2`. -/
+theorem rectCutDiscrepancy_le_two_mul [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) {P P' : Finpartition A} {Q Q' : Finpartition B}
+    (hP : P' ≤ P) (hQ : Q' ≤ Q) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectCutDiscrepancy f wX wY P' Q' ≤ 2 * rectCutDiscrepancy f wX wY P Q := by
+  rw [rectCutDiscrepancy_le_iff]
+  intro S hS T hT
+  have hres : ∀ S' ⊆ A, ∀ T' ⊆ B,
+      |rectSum (rectResidual f wX wY P Q) wX wY S' T'|
+        ≤ rectCutDiscrepancy f wX wY P Q := by
+    intro S' hS' T' hT'
+    rw [rectSum_rectResidual_eq_rectError f wX wY P Q hS' hT']
+    exact rectCutDiscrepancy_le_iff.mp le_rfl S' hS' T' hT'
+  have h := abs_rectError_le_two_mul (f := rectResidual f wX wY P Q) P' Q' hS hT hwX hwY hres
+  rwa [rectError_rectResidual f wX wY hP hQ hS hT hwX hwY] at h
+
+/-- The common refinement inherits the **left** pair's bound, up to the factor `2`. -/
+theorem rectCutDiscrepancy_inf_le_two_mul_left [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P₁ P₂ : Finpartition A)
+    (Q₁ Q₂ : Finpartition B) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectCutDiscrepancy f wX wY (P₁ ⊓ P₂) (Q₁ ⊓ Q₂)
+      ≤ 2 * rectCutDiscrepancy f wX wY P₁ Q₁ :=
+  rectCutDiscrepancy_le_two_mul f wX wY inf_le_left inf_le_left hwX hwY
+
+/-- …and symmetrically the **right** pair's. -/
+theorem rectCutDiscrepancy_inf_le_two_mul_right [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P₁ P₂ : Finpartition A)
+    (Q₁ Q₂ : Finpartition B) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectCutDiscrepancy f wX wY (P₁ ⊓ P₂) (Q₁ ⊓ Q₂)
+      ≤ 2 * rectCutDiscrepancy f wX wY P₂ Q₂ :=
+  rectCutDiscrepancy_le_two_mul f wX wY inf_le_right inf_le_right hwX hwY
+
+/-- **The `ε/2` common-refinement adapter.** A pair achieving `ε/2` yields a *common
+refinement with any second pair* achieving `ε`, with the two complexity inputs kept separate:
+the left part count multiplies left inputs, the right multiplies right inputs, and they are
+never merged into a single bound.
+
+**Quantitative disclaimer.** This recovers the **discrepancy conclusion** of the existing
+Boolean same-carrier summit, not that theorem's sharper complexity bound: the part counts here
+are the generic product bounds of `card_parts_inf_le`, and the `4^t`-type control of the
+Boolean development is *not* reproduced. Single-exponential dependence is preserved; see
+`docs/design/rectangular-kernels.md`. -/
+theorem rectCutDiscrepancy_inf_le_of_le_half [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P₁ P₂ : Finpartition A)
+    (Q₁ Q₂ : Finpartition B) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ}
+    (hε : rectCutDiscrepancy f wX wY P₁ Q₁ ≤ ε / 2) :
+    rectCutDiscrepancy f wX wY (P₁ ⊓ P₂) (Q₁ ⊓ Q₂) ≤ ε
+      ∧ (P₁ ⊓ P₂).parts.card ≤ P₁.parts.card * P₂.parts.card
+      ∧ (Q₁ ⊓ Q₂).parts.card ≤ Q₁.parts.card * Q₂.parts.card := by
+  refine ⟨?_, card_parts_inf_le P₁ P₂, card_parts_inf_le Q₁ Q₂⟩
+  calc rectCutDiscrepancy f wX wY (P₁ ⊓ P₂) (Q₁ ⊓ Q₂)
+      ≤ 2 * rectCutDiscrepancy f wX wY P₁ Q₁ :=
+        rectCutDiscrepancy_inf_le_two_mul_left f wX wY P₁ P₂ Q₁ Q₂ hwX hwY
+    _ ≤ 2 * (ε / 2) := by linarith
+    _ = ε := by ring
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -707,6 +785,21 @@ example : steppedRectSum (rectResidual fZ cZ cU PZ QZ) cZ cU
         ({0, 1} : Finset (Fin 3)) Finset.univ
       - steppedRectSum fZ cZ cU PZ QZ ({0, 1} : Finset (Fin 3)) Finset.univ :=
   steppedRectSum_rectResidual fZ cZ cU bot_le le_rfl _ _ hcZ hcU
+
+-- **Transfer on the same adversarial data**: refining into singletons across a zero-mass
+-- cell costs at most the factor `2`.
+example : rectCutDiscrepancy fZ cZ cU (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) QZ
+    ≤ 2 * rectCutDiscrepancy fZ cZ cU PZ QZ :=
+  rectCutDiscrepancy_le_two_mul fZ cZ cU bot_le le_rfl hcZ hcU
+
+-- **The `ε/2` adapter on asymmetric carriers**, with the two complexity inputs separate.
+example (f : RectKernel (Fin 2) (Fin 3)) (P₁ P₂ : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q₁ Q₂ : Finpartition (Finset.univ : Finset (Fin 3))) {ε : ℝ}
+    (hε : rectCutDiscrepancy f cL cR P₁ Q₁ ≤ ε / 2) :
+    rectCutDiscrepancy f cL cR (P₁ ⊓ P₂) (Q₁ ⊓ Q₂) ≤ ε
+      ∧ (P₁ ⊓ P₂).parts.card ≤ P₁.parts.card * P₂.parts.card
+      ∧ (Q₁ ⊓ Q₂).parts.card ≤ Q₁.parts.card * Q₂.parts.card :=
+  rectCutDiscrepancy_inf_le_of_le_half f cL cR P₁ P₂ Q₁ Q₂ hcL hcR hε
 
 -- The discrepancy is never negative, and the empty rectangle is always a legal test.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
