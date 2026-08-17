@@ -149,6 +149,47 @@ has average `0`. -/
   rw [rectResidual_apply, Q.part_eq_empty.mpr hy, rectAverage,
     rectSum_empty_right, zero_div, sub_zero]
 
+/-- **The carrier-local bridge.** On a test rectangle inside the carriers, the residual's
+rectangle sum *is* the rectangle error.
+
+Pure algebra: `S ⊆ A` and `T ⊆ B` are the only hypotheses. No nonnegativity, no positive
+mass, and no unfolding of `rectAverage` — each cell average is an opaque coefficient
+throughout, and `sum_part_mul_weight` is applied once per coordinate. If division appeared
+here, the proof would have crossed into tower mathematics prematurely. -/
+theorem rectSum_rectResidual_eq_rectError [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) :
+    rectSum (rectResidual f wX wY P Q) wX wY S T = rectError f wX wY P Q S T := by
+  classical
+  -- The predicted term alone, reindexed one coordinate at a time.
+  have hinner : ∀ x : X, ∑ y ∈ T, wX x * wY y * rectAverage f wX wY (P.part x) (Q.part y)
+      = wX x * ∑ D ∈ Q.parts,
+          rectAverage f wX wY (P.part x) D * finsetMass wY (T ∩ D) := by
+    intro x
+    rw [← sum_part_mul_weight Q T hT wY (fun D => rectAverage f wX wY (P.part x) D),
+      Finset.mul_sum]
+    exact Finset.sum_congr rfl fun y _ => by ring
+  have hswap : ∀ x : X,
+      wX x * (∑ D ∈ Q.parts, rectAverage f wX wY (P.part x) D * finsetMass wY (T ∩ D))
+        = (fun C => ∑ D ∈ Q.parts, rectAverage f wX wY C D * finsetMass wY (T ∩ D))
+            (P.part x) * wX x := fun x => by ring
+  have hpred : ∑ x ∈ S, ∑ y ∈ T,
+        wX x * wY y * rectAverage f wX wY (P.part x) (Q.part y)
+      = steppedRectSum f wX wY P Q S T := by
+    rw [Finset.sum_congr rfl (fun x _ => hinner x),
+      Finset.sum_congr rfl (fun x _ => hswap x),
+      sum_part_mul_weight P S hS wX
+        (fun C => ∑ D ∈ Q.parts, rectAverage f wX wY C D * finsetMass wY (T ∩ D)),
+      steppedRectSum]
+    refine Finset.sum_congr rfl fun C _ => ?_
+    rw [Finset.sum_mul]
+    exact Finset.sum_congr rfl fun D _ => by ring
+  -- Now the residual splits termwise against the predicted term.
+  rw [rectError, ← hpred, rectSum, rectSum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun x _ => ?_
+  rw [← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun y _ => by rw [rectResidual_apply]; ring
+
 /-! ### Relative cell-mass coefficients
 
 The bridge from the stepped prediction to a bilinear form: the coefficients are the
@@ -382,6 +423,17 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition ({0} : Finset (Fin 2)
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) (y : Fin 3) :
     rectResidual f cL cR P Q 1 y = f 1 y :=
   rectResidual_of_notMem_left f cL cR P Q (by decide) y
+
+-- **The residual bridge needs no sign hypothesis either.** Signed weights that cancel to
+-- zero total mass — the algebra side of the boundary. The tower identity, by contrast, will
+-- require nonnegativity.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) (S : Finset (Fin 2))
+    (T : Finset (Fin 3)) :
+    rectSum (rectResidual f (fun x : Fin 2 => if x = 0 then (1 : ℝ) else -1) cR P Q)
+        (fun x : Fin 2 => if x = 0 then (1 : ℝ) else -1) cR S T
+      = rectError f (fun x : Fin 2 => if x = 0 then (1 : ℝ) else -1) cR P Q S T :=
+  rectSum_rectResidual_eq_rectError f _ cR P Q (Finset.subset_univ S) (Finset.subset_univ T)
 
 -- **The cell reindexing needs no sign hypothesis.** Signed weights that cancel to zero
 -- total mass, where every average-level statement in this file would need nonnegativity.
