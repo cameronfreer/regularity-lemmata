@@ -237,6 +237,45 @@ theorem tupleDensity_eq_zero_of_side_empty {i : ι} (hi : A i = ∅) : tupleDens
   refine tupleDensity_eq_zero_of_box_empty (Finset.not_nonempty_iff_eq_empty.mp fun hne => ?_)
   exact (Finset.not_nonempty_iff_eq_empty.mpr hi) (Fintype.piFinset_nonempty.mp hne i)
 
+/-! ### `Fin 1` boxes
+
+A `Fin 1` box is a single coordinate set under the encoding `a ↦ ![a]`, so its tuple density is
+an ordinary `densityOn`. These are the arity-one companions of the `Fin 2` lemmas below; they
+live in this file rather than beside `card_piFinset_two` in `Finite/Tuple.lean` because their
+consumers are density-level. No `DecidableEq α` is needed: the transfer is a bijection, not an
+image. -/
+
+/-- Cardinality of a `Fin 1` box. -/
+theorem card_piFinset_one (A : Fin 1 → Finset α) :
+    (Fintype.piFinset A).card = (A 0).card := by
+  rw [Fintype.card_piFinset, Fin.prod_univ_one]
+
+/-- Filter cardinalities agree across the arity-one encoding `a ↦ ![a]`. -/
+theorem card_filter_piFinset_one (A : Fin 1 → Finset α) (R : (Fin 1 → α) → Prop)
+    [DecidablePred R] :
+    ((Fintype.piFinset A).filter R).card = ((A 0).filter fun a ↦ R ![a]).card := by
+  refine Finset.card_bij' (fun x _ ↦ x 0) (fun a _ ↦ ![a]) ?_ ?_ ?_ ?_
+  · intro x hx
+    rw [Finset.mem_filter] at hx ⊢
+    refine ⟨Fintype.mem_piFinset.mp hx.1 0, ?_⟩
+    rw [show (![x 0] : Fin 1 → α) = x from funext fun i ↦ by fin_cases i; rfl]
+    exact hx.2
+  · intro a ha
+    rw [Finset.mem_filter] at ha ⊢
+    refine ⟨Fintype.mem_piFinset.mpr fun i ↦ ?_, ha.2⟩
+    fin_cases i
+    simpa using ha.1
+  · intro x hx
+    exact funext fun i ↦ by fin_cases i; rfl
+  · intro a ha
+    simp
+
+/-- Arity-one tuple density is the density of the curried relation on the single coordinate
+set. Holds for all boxes: with an empty side both sides are `0` by the division convention. -/
+theorem tupleDensity_one_eq {A : Fin 1 → Finset α} {R : (Fin 1 → α) → Prop} [DecidablePred R] :
+    tupleDensity R A = densityOn (A 0) fun a ↦ R ![a] := by
+  rw [tupleDensity, densityOn, densityOn, card_filter_piFinset_one, card_piFinset_one]
+
 /-! ### `Fin 2` boxes -/
 
 variable [DecidableEq α] {A₂ : Fin 2 → Finset α} {R₂ : (Fin 2 → α) → Prop} [DecidablePred R₂]
@@ -319,5 +358,16 @@ example :
     ((Finset.univ ×ˢ Finset.univ).filter
         (fun p : Fin 3 × Fin 3 => (![p.1, p.2] : Fin 2 → Fin 3) 0 = ![p.1, p.2] 1)).card = 3 := by
   decide
+
+-- **Arity one**: the `Fin 1` box over `Fin 3` is the coordinate set itself, so `x 0 = 0` holds
+-- of exactly 1 of the 3 tuples.
+example : tupleCount (fun x : Fin 1 → Fin 3 ↦ x 0 = 0) (fun _ ↦ Finset.univ) = 1 := by decide
+
+-- …and the arity-one bridge identifies the tuple density with the plain density of the curried
+-- relation on that coordinate set.
+example :
+    tupleDensity (fun x : Fin 1 → Fin 3 ↦ x 0 = 0) (fun _ ↦ Finset.univ)
+      = densityOn (Finset.univ : Finset (Fin 3)) fun a ↦ (![a] : Fin 1 → Fin 3) 0 = 0 :=
+  tupleDensity_one_eq
 
 end RegularityLemmata
