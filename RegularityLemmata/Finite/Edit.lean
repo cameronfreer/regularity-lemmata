@@ -18,6 +18,12 @@ lemmas used by removal arguments: monotonicity in the box, summation along a cha
 relations, and the split of the full-box edit distance into an injective part plus the
 collision count from `RegularityLemmata.Finite.Injective`.
 
+It also provides the **bridges to tuple counting**: when one relation is constant on the box
+the edit distance is a plain `tupleCount`, and a `tupleDensity` bound on the other becomes a
+count bound against the box mass. These relate two pinned definitions and introduce no second
+counting layer — every counting primitive they use comes from
+`RegularityLemmata.Finite.Density`.
+
 Coordinates are indexed by an **arbitrary** finite type `ι` with decidable equality, matching
 `RegularityLemmata.Finite.Density`. Nothing here uses the order structure of `Fin k`; the
 chain-summation lemma indexes its *chain* by `Fin (m + 1)`, which is a separate index and
@@ -119,6 +125,49 @@ theorem editDistance_univ_le_injective_add_nonInjective [Fintype α] [DecidableE
   rw [Finset.mem_filter] at hf
   exact mem_nonInjectiveMaps.mpr hf.2
 
+/-! ### Bridges to tuple counting
+
+If one of the two relations is constant on the box, the edit set is exactly the truth set (or
+the falsity set) of the other, so the edit distance collapses to a `tupleCount` and a
+`tupleDensity` bound converts into a count bound against the box mass.
+
+The two count bounds are deliberately asymmetric. The sparse form is guard-free; the dense form
+requires every side of the box to be nonempty, because that is what the pinned
+`tupleDensity_neg` requires. The same asymmetry is recorded in
+`RegularityLemmata.Finite.HomogeneousCell`'s frozen conventions and is not an artefact here. -/
+
+/-- If `R₂` is false on every tuple of the box, the edit distance counts the tuples
+satisfying `R₁`. -/
+theorem editDistance_eq_tupleCount_of_forall_not (h : ∀ x ∈ Fintype.piFinset A, ¬ R₂ x) :
+    editDistance R₁ R₂ A = tupleCount R₁ A :=
+  congrArg Finset.card (Finset.filter_congr fun x hx ↦ by simp [h x hx])
+
+/-- If `R₂` is true on every tuple of the box, the edit distance counts the tuples where `R₁`
+fails. -/
+theorem editDistance_eq_tupleCount_not_of_forall (h : ∀ x ∈ Fintype.piFinset A, R₂ x) :
+    editDistance R₁ R₂ A = tupleCount (fun x ↦ ¬ R₁ x) A :=
+  congrArg Finset.card (Finset.filter_congr fun x hx ↦ by simp [h x hx])
+
+/-- **Sparse branch.** Against a relation that is constantly false on the box, a density upper
+bound on `R₁` bounds the edit distance by that fraction of the box mass. Guard-free: with an
+empty side both sides are `0`. -/
+theorem editDistance_le_of_tupleDensity_le {ε : ℝ} (hd : tupleDensity R₁ A ≤ ε)
+    (hconst : ∀ x ∈ Fintype.piFinset A, ¬ R₂ x) :
+    (editDistance R₁ R₂ A : ℝ) ≤ ε * ∏ i, ((A i).card : ℝ) := by
+  rw [editDistance_eq_tupleCount_of_forall_not hconst]
+  exact card_filter_le_of_tupleDensity_le hd
+
+/-- **Dense branch.** Against a relation that is constantly true on the box, a density lower
+bound `1 - ε ≤ d` on `R₁` bounds the edit distance by an `ε` fraction of the box mass. The
+nonemptiness hypothesis is the one `tupleDensity_neg` carries. -/
+theorem editDistance_le_of_le_tupleDensity {ε : ℝ} (hd : 1 - ε ≤ tupleDensity R₁ A)
+    (hconst : ∀ x ∈ Fintype.piFinset A, R₂ x) (hne : ∀ i, (A i).Nonempty) :
+    (editDistance R₁ R₂ A : ℝ) ≤ ε * ∏ i, ((A i).card : ℝ) := by
+  rw [editDistance_eq_tupleCount_not_of_forall hconst]
+  refine card_filter_le_of_tupleDensity_le ?_
+  rw [tupleDensity_neg hne]
+  linarith
+
 /-! ### Relative edit distance -/
 
 /-- Normalized edit distance: the density of disagreement on the box. -/
@@ -176,6 +225,16 @@ example :
 example :
     editDistance (fun _ : Empty → Fin 3 => True) (fun _ => False) (fun _ => Finset.univ) = 1 := by
   decide
+
+-- **Bridge, constantly-false side**: the edit distance against `False` is the count of `R₁`.
+example :
+    editDistance (fun x : Fin 1 → Fin 2 => x 0 = 0) (fun _ => False) (fun _ => Finset.univ)
+      = tupleCount (fun x : Fin 1 → Fin 2 => x 0 = 0) (fun _ => Finset.univ) := by decide
+
+-- **Bridge, constantly-true side**: the edit distance against `True` is the count of `¬ R₁`.
+example :
+    editDistance (fun x : Fin 1 → Fin 2 => x 0 = 0) (fun _ => True) (fun _ => Finset.univ)
+      = tupleCount (fun x : Fin 1 → Fin 2 => ¬ x 0 = 0) (fun _ => Finset.univ) := by decide
 
 -- Relative edit distance of a half-flip is 1/2: over `Fin 2` (as `Fin 1`-tuples),
 -- `x 0 = 0` and `True` disagree exactly on `x 0 = 1`, i.e. on 1 of 2 tuples.

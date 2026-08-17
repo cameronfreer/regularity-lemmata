@@ -38,6 +38,10 @@ zero-instance test at the end of the file pins this contract.
   bound degenerates to `0 * γ = 0`, correctly: there is nothing to perturb.
 * **Degenerate tolerance.** No sign condition is imposed on `ε` in the definition. At `ε < 0`
   the predicate is simply strong; the lemmas that need `0 ≤ ε` say so.
+* **Half tolerance.** From `1/2 ≤ ε` onwards the predicate is unconditionally true
+  (`isHomogeneousCell_of_half_le`): a density and its complement cannot both exceed `1/2`. So
+  homogeneity carries information only below `1/2`, and a consumer in that regime should not
+  expect any structural content from it.
 
 ## Not claimed
 
@@ -94,6 +98,16 @@ theorem IsHomogeneousCell.mono (h : IsHomogeneousCell R A ε) (hε : ε ≤ ε')
   · exact Or.inl (h.trans hε)
   · exact Or.inr (by linarith)
 
+/-- **Half tolerance is free.** From `1/2` onwards every cell is homogeneous for every
+relation: a density and its complement cannot both exceed `1/2`. So the predicate has content
+only below `1/2`, and a consumer above it gets no structural information. -/
+theorem isHomogeneousCell_of_half_le (hε : 1 / 2 ≤ ε) : IsHomogeneousCell R A ε := by
+  classical
+  rw [isHomogeneousCell_def]
+  rcases le_or_gt (tupleDensity R A) (1 / 2) with h | h
+  · exact Or.inl (h.trans hε)
+  · exact Or.inr (by linarith)
+
 /-- An empty coordinate set makes the cell sparse, hence `ε`-homogeneous for every `ε ≥ 0`.
 This is the empty-box convention, stated so that consumers do not re-derive it. -/
 theorem isHomogeneousCell_of_side_empty [DecidableEq ι] {i : ι} (hi : A i = ∅) (hε : 0 ≤ ε) :
@@ -101,6 +115,40 @@ theorem isHomogeneousCell_of_side_empty [DecidableEq ι] {i : ι} (hi : A i = �
   classical
   rw [isHomogeneousCell_def]
   exact Or.inl (by rw [tupleDensity_eq_zero_of_side_empty (R := R) hi]; exact hε)
+
+/-- **The arity-zero cell is exactly homogeneous.** Over an empty index type the box is the
+singleton containing the empty tuple, so the density is `0` or `1` on the nose and no tolerance
+is needed. The general form of the concrete `Empty`-index test at the end of the file. -/
+theorem isHomogeneousCell_of_isEmpty_index [IsEmpty ι] : IsHomogeneousCell R A 0 := by
+  classical
+  rw [isHomogeneousCell_def]
+  have hcard : (Fintype.piFinset A).card = 1 := by simp
+  rcases Nat.lt_or_ge (tupleCount R A) 1 with h | h
+  · left
+    rw [tupleDensity_eq_count_div, Nat.lt_one_iff.mp h]
+    simp
+  · right
+    have h1 : tupleCount R A = 1 := le_antisymm (hcard ▸ tupleCount_le_card) h
+    rw [tupleDensity_eq_count_div, h1, hcard]
+    norm_num
+
+/-! ### The `ι = Fin 1` bridge
+
+The arity-one case of a cell is a single coordinate set, and the two readings agree once the
+tuple relation is uncurried along `a ↦ ![a]`. There is no arity-one companion of
+`IsHomogeneousPair` to land in — a pair predicate needs two sides — so the bridge lands in
+`densityOn` directly, which is what `tupleDensity_one_eq` provides.
+
+Unlike `IsHomogeneousCell` itself, the statement carries `[DecidablePred R₁]`: the right-hand
+side mentions `densityOn`, which needs the instance. That matches `isHomogeneousCell_def`. -/
+
+/-- **The arity-one bridge**: a `Fin 1`-indexed cell is homogeneous exactly when the curried
+relation has density within `ε` of `0` or of `1` on the single coordinate set. -/
+theorem isHomogeneousCell_one_iff {R₁ : (Fin 1 → α) → Prop} [DecidablePred R₁]
+    {A₁ : Fin 1 → Finset α} :
+    IsHomogeneousCell R₁ A₁ ε ↔ densityOn (A₁ 0) (fun a ↦ R₁ ![a]) ≤ ε
+      ∨ 1 - ε ≤ densityOn (A₁ 0) fun a ↦ R₁ ![a] := by
+  rw [isHomogeneousCell_def, tupleDensity_one_eq]
 
 /-! ### The `ι = Fin 2` bridge
 
@@ -432,6 +480,34 @@ example : IsHomogeneousCell (fun _ : Empty → Fin 3 => True) (fun _ => Finset.u
     show (Fintype.piFinset fun _ : Empty => (Finset.univ : Finset (Fin 3))).card = 1 from by
       decide]
   norm_num
+
+-- **Degenerate index, general form.** The same cell, through
+-- `isHomogeneousCell_of_isEmpty_index`, with no computation.
+example : IsHomogeneousCell (fun _ : Empty → Fin 3 => True) (fun _ => Finset.univ) 0 :=
+  isHomogeneousCell_of_isEmpty_index
+
+-- **Half tolerance is free**, even for a relation that is neither sparse nor dense: the
+-- diagonal of `Fin 2` has density exactly `1/2`, and `1/2`-homogeneity needs no computation.
+example : IsHomogeneousCell (fun x : Fin 2 → Fin 2 => x 0 = x 1) (fun _ => Finset.univ)
+    (1 / 2) :=
+  isHomogeneousCell_of_half_le le_rfl
+
+-- **Adversarial companion**: at `1/2` the predicate is *unconditionally* true, so no structural
+-- conclusion may be drawn from it there — here for a relation with no sparse or dense side at
+-- all, over an arbitrary box.
+example {A : Fin 2 → Finset (Fin 5)} (ε : ℝ) (hε : 1 / 2 ≤ ε) :
+    IsHomogeneousCell (fun x : Fin 2 → Fin 5 => x 0 = x 1) A ε :=
+  isHomogeneousCell_of_half_le hε
+
+-- **The arity-one bridge**, at a concrete relation: `x 0 = 0` holds of 1 of the 3 tuples, so the
+-- cell is `1/3`-homogeneous, and the bridge reduces this to a `densityOn` statement.
+example :
+    IsHomogeneousCell (fun x : Fin 1 → Fin 3 => x 0 = 0) (fun _ => Finset.univ) (1 / 3)
+      ↔ densityOn (Finset.univ : Finset (Fin 3))
+            (fun a => (![a] : Fin 1 → Fin 3) 0 = 0) ≤ 1 / 3
+        ∨ 1 - 1 / 3 ≤ densityOn (Finset.univ : Finset (Fin 3))
+            fun a => (![a] : Fin 1 → Fin 3) 0 = 0 :=
+  isHomogeneousCell_one_iff
 
 -- **Index-generic.** Nothing above is tied to `Fin k`: here the index is `Bool`.
 example : IsHomogeneousCell (fun x : Bool → Fin 2 => x true = x false) (fun _ => Finset.univ)

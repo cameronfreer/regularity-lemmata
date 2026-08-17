@@ -211,6 +211,13 @@ theorem le_card_filter_of_le_tupleDensity {c : ℝ} (h : c ≤ tupleDensity R A)
   have := le_card_filter_of_le_densityOn h
   rwa [Fintype.card_piFinset, Nat.cast_prod] at this
 
+/-- Raw count from the density: `#tuples = d · ∏|Aᵢ|`, unconditionally (an empty side gives
+`0 = d · 0`). The `n`-ary companion of `pairCount_eq_pairDensity_mul`. -/
+theorem tupleCount_eq_tupleDensity_mul :
+    (tupleCount R A : ℝ) = tupleDensity R A * ∏ i, ((A i).card : ℝ) :=
+  le_antisymm (card_filter_le_of_tupleDensity_le le_rfl)
+    (le_card_filter_of_le_tupleDensity le_rfl)
+
 /-- A tuple count never exceeds the size of its box. -/
 theorem tupleCount_le_card : tupleCount R A ≤ (Fintype.piFinset A).card :=
   Finset.card_filter_le _ _
@@ -236,6 +243,18 @@ theorem tupleDensity_eq_zero_of_box_empty (h : Fintype.piFinset A = ∅) :
 theorem tupleDensity_eq_zero_of_side_empty {i : ι} (hi : A i = ∅) : tupleDensity R A = 0 := by
   refine tupleDensity_eq_zero_of_box_empty (Finset.not_nonempty_iff_eq_empty.mp fun hne => ?_)
   exact (Finset.not_nonempty_iff_eq_empty.mpr hi) (Fintype.piFinset_nonempty.mp hne i)
+
+/-! ### `Fin 1` boxes
+
+A `Fin 1` box is a single coordinate set under the encoding `a ↦ ![a]`, so its tuple density is
+an ordinary `densityOn`. The two cardinality lemmas this rests on carry no density notion and
+live beside their `Fin 2` analogues in `Finite/Tuple.lean`. -/
+
+/-- Arity-one tuple density is the density of the curried relation on the single coordinate
+set. Holds for all boxes: with an empty side both sides are `0` by the division convention. -/
+theorem tupleDensity_one_eq {A : Fin 1 → Finset α} {R : (Fin 1 → α) → Prop} [DecidablePred R] :
+    tupleDensity R A = densityOn (A 0) fun a ↦ R ![a] := by
+  rw [tupleDensity, densityOn, densityOn, card_filter_piFinset_one, card_piFinset_one]
 
 /-! ### `Fin 2` boxes -/
 
@@ -319,5 +338,16 @@ example :
     ((Finset.univ ×ˢ Finset.univ).filter
         (fun p : Fin 3 × Fin 3 => (![p.1, p.2] : Fin 2 → Fin 3) 0 = ![p.1, p.2] 1)).card = 3 := by
   decide
+
+-- **Arity one**: the `Fin 1` box over `Fin 3` is the coordinate set itself, so `x 0 = 0` holds
+-- of exactly 1 of the 3 tuples.
+example : tupleCount (fun x : Fin 1 → Fin 3 ↦ x 0 = 0) (fun _ ↦ Finset.univ) = 1 := by decide
+
+-- …and the arity-one bridge identifies the tuple density with the plain density of the curried
+-- relation on that coordinate set.
+example :
+    tupleDensity (fun x : Fin 1 → Fin 3 ↦ x 0 = 0) (fun _ ↦ Finset.univ)
+      = densityOn (Finset.univ : Finset (Fin 3)) fun a ↦ (![a] : Fin 1 → Fin 3) 0 = 0 :=
+  tupleDensity_one_eq
 
 end RegularityLemmata

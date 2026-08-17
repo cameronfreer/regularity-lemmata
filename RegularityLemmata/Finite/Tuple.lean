@@ -78,6 +78,36 @@ theorem mem_map_finTwoArrowEquiv (P : Finset (Fin 2 → α)) (w : Fin 2 → α) 
     finTwoArrowEquiv α w ∈ P.map (finTwoArrowEquiv α).toEmbedding ↔ w ∈ P := by
   rw [Finset.mem_map_equiv, Equiv.symm_apply_apply]
 
+/-! ### `Fin 1` boxes
+
+The arity-one companions of the `Fin 2` lemmas below, under the encoding `a ↦ ![a]`. No
+`DecidableEq α` is needed: the transfer is a bijection, not an image. -/
+
+/-- Cardinality of a `Fin 1` box. -/
+theorem card_piFinset_one (A : Fin 1 → Finset α) :
+    (Fintype.piFinset A).card = (A 0).card := by
+  rw [Fintype.card_piFinset, Fin.prod_univ_one]
+
+/-- Filter cardinalities agree across the arity-one encoding `a ↦ ![a]`. -/
+theorem card_filter_piFinset_one (A : Fin 1 → Finset α) (R : (Fin 1 → α) → Prop)
+    [DecidablePred R] :
+    ((Fintype.piFinset A).filter R).card = ((A 0).filter fun a ↦ R ![a]).card := by
+  refine Finset.card_bij' (fun x _ ↦ x 0) (fun a _ ↦ ![a]) ?_ ?_ ?_ ?_
+  · intro x hx
+    rw [Finset.mem_filter] at hx ⊢
+    refine ⟨Fintype.mem_piFinset.mp hx.1 0, ?_⟩
+    rw [show (![x 0] : Fin 1 → α) = x from funext fun i ↦ by fin_cases i; rfl]
+    exact hx.2
+  · intro a ha
+    rw [Finset.mem_filter] at ha ⊢
+    refine ⟨Fintype.mem_piFinset.mpr fun i ↦ ?_, ha.2⟩
+    fin_cases i
+    simpa using ha.1
+  · intro x hx
+    exact funext fun i ↦ by fin_cases i; rfl
+  · intro a ha
+    simp
+
 /-! ### `Fin 2` boxes as binary products -/
 
 /-- A `Fin 2` box is a binary product under the pair encoding. Stated for an arbitrary
