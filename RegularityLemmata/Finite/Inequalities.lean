@@ -54,6 +54,36 @@ theorem titu_finset {ι : Type*} [DecidableEq ι] (f g : ι → ℝ) (I : Finset
           fun i hi _ => ?_
         exact div_nonneg (sq_nonneg _) (hg i hi)
 
+/-- **Mass-weighted Cauchy–Schwarz.** A mass-weighted average is dominated by the
+mass-weighted mean square, in the denominator-free form the energy calculus wants:
+`(∑ aᵢ mᵢ)² ≤ (∑ mᵢ) · ∑ aᵢ² mᵢ`.
+
+Only nonnegativity of the masses is assumed — no positivity, and no convention hypothesis,
+because the `mᵢ = 0` indices drop from both sides on their own. This is the form that turns a
+large rectangle error into an energy increment. -/
+theorem sq_sum_mul_le_sum_mul_sum_sq_mul {ι : Type*} [DecidableEq ι] (a m : ι → ℝ)
+    (I : Finset ι) (hm : ∀ i ∈ I, 0 ≤ m i) :
+    (∑ i ∈ I, a i * m i) ^ 2 ≤ (∑ i ∈ I, m i) * ∑ i ∈ I, a i ^ 2 * m i := by
+  have hterm : ∀ i ∈ I, (a i * m i) ^ 2 / m i = a i ^ 2 * m i := by
+    intro i _
+    rcases eq_or_ne (m i) 0 with h | h
+    · rw [h, div_zero, mul_zero]
+    · field_simp
+  have htitu := titu_finset (fun i => a i * m i) m I hm (fun i _ h => by rw [h, mul_zero])
+  rw [Finset.sum_congr rfl hterm] at htitu
+  rcases eq_or_lt_of_le (Finset.sum_nonneg hm) with h0 | hpos
+  · -- Total mass zero: every mass vanishes, so both sides are `0`.
+    have hz : ∀ i ∈ I, m i = 0 := by
+      intro i hi
+      by_contra hne
+      exact absurd h0.symm (ne_of_gt (Finset.sum_pos' hm
+        ⟨i, hi, lt_of_le_of_ne (hm i hi) (Ne.symm hne)⟩))
+    rw [Finset.sum_eq_zero fun i hi => by rw [hz i hi, mul_zero], ← h0]
+    norm_num
+  · rw [div_le_iff₀ hpos] at htitu
+    calc (∑ i ∈ I, a i * m i) ^ 2 ≤ (∑ i ∈ I, a i ^ 2 * m i) * ∑ i ∈ I, m i := htitu
+      _ = (∑ i ∈ I, m i) * ∑ i ∈ I, a i ^ 2 * m i := by ring
+
 /-- Two-term Engel form with the division convention. -/
 theorem titu_two {a b p q : ℝ} (hp : 0 ≤ p) (hq : 0 ≤ q)
     (ha : p = 0 → a = 0) (hb : q = 0 → b = 0) :

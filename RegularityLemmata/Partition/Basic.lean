@@ -390,6 +390,63 @@ theorem predicatePartition_parts (p : α → Prop) [DecidablePred p] (s : Finset
   rw [mem_predicatePartition, Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton]
   tauto
 
+/-! ### One-cut refinement
+
+Cutting a partition by a single test set: each cell is split into its trace on the set and
+its trace off it. This is the atomic step of an energy-increment iteration, and it costs a
+factor of exactly `2` in the part count.
+
+Named `cutRefinePartition` rather than `cutRefine` because the latter already denotes the
+unrelated polyad-witness colour refinement of `Hypergraph/PolyadWitness.lean`. -/
+
+/-- Refine `P` by cutting every cell along the test set `S`. -/
+def cutRefinePartition (P : Finpartition s) (S : Finset α) : Finpartition s :=
+  P ⊓ predicatePartition (· ∈ S) s
+
+/-- A cut refinement is a refinement. -/
+theorem cutRefinePartition_le (P : Finpartition s) (S : Finset α) :
+    cutRefinePartition P S ≤ P :=
+  inf_le_left
+
+/-- **The factor-2 part bound**, for one coordinate. -/
+theorem card_parts_cutRefinePartition_le (P : Finpartition s) (S : Finset α) :
+    (cutRefinePartition P S).parts.card ≤ 2 * P.parts.card := by
+  refine le_trans (card_parts_inf_le P (predicatePartition (· ∈ S) s)) ?_
+  rw [mul_comm]
+  exact Nat.mul_le_mul_right _ (predicatePartition_parts_card_le (· ∈ S) s)
+
+/-- **The cut separates `S`.** Every cell lands inside the test set or misses it entirely,
+which is what makes `S` a union of cells. -/
+theorem cutRefinePartition_part_subset_or_disjoint (P : Finpartition s) (S : Finset α)
+    {C : Finset α} (hC : C ∈ (cutRefinePartition P S).parts) : C ⊆ S ∨ Disjoint C S := by
+  obtain ⟨E, hE, hCE⟩ :=
+    (inf_le_right : cutRefinePartition P S ≤ predicatePartition (· ∈ S) s) hC
+  rcases predicatePartition_constant hE with hin | hout
+  · exact Or.inl fun x hx => hin x (hCE hx)
+  · exact Or.inr (Finset.disjoint_left.mpr fun x hx => hout x (hCE hx))
+
+/-- **The test set is a union of cells.** The form an energy step consumes: after the cut, `S`
+is exactly the union of the cells contained in it. `S ⊆ s` is required — a test set reaching
+outside the carrier is not covered by any cell. -/
+theorem biUnion_cutRefinePartition_filter_subset (P : Finpartition s) {S : Finset α}
+    (hS : S ⊆ s) :
+    ((cutRefinePartition P S).parts.filter (· ⊆ S)).biUnion id = S := by
+  classical
+  refine Finset.Subset.antisymm (fun x hx => ?_) (fun x hx => ?_)
+  · rw [Finset.mem_biUnion] at hx
+    obtain ⟨C, hCf, hxC⟩ := hx
+    exact (Finset.mem_filter.mp hCf).2 hxC
+  · have hxs : x ∈ s := hS hx
+    have hmem : (cutRefinePartition P S).part x ∈ (cutRefinePartition P S).parts :=
+      (cutRefinePartition P S).part_mem.2 hxs
+    have hxpart : x ∈ (cutRefinePartition P S).part x := (cutRefinePartition P S).mem_part hxs
+    have hsub : (cutRefinePartition P S).part x ⊆ S := by
+      rcases cutRefinePartition_part_subset_or_disjoint P S hmem with h | h
+      · exact h
+      · exact absurd hx (Finset.disjoint_left.mp h hxpart)
+    exact Finset.mem_biUnion.mpr
+      ⟨(cutRefinePartition P S).part x, Finset.mem_filter.mpr ⟨hmem, hsub⟩, hxpart⟩
+
 /-- **Part-size inheritance under refinement.** If `P` refines `Q` (`P ≤ Q`) and every cell of
 `Q` has cardinality at most `m`, then so does every cell of `P` — a finer cell sits inside a
 coarse one. -/
