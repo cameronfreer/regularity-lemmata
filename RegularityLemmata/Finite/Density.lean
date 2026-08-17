@@ -211,6 +211,13 @@ theorem le_card_filter_of_le_tupleDensity {c : ℝ} (h : c ≤ tupleDensity R A)
   have := le_card_filter_of_le_densityOn h
   rwa [Fintype.card_piFinset, Nat.cast_prod] at this
 
+/-- Raw count from the density: `#tuples = d · ∏|Aᵢ|`, unconditionally (an empty side gives
+`0 = d · 0`). The `n`-ary companion of `pairCount_eq_pairDensity_mul`. -/
+theorem tupleCount_eq_tupleDensity_mul :
+    (tupleCount R A : ℝ) = tupleDensity R A * ∏ i, ((A i).card : ℝ) :=
+  le_antisymm (card_filter_le_of_tupleDensity_le le_rfl)
+    (le_card_filter_of_le_tupleDensity le_rfl)
+
 /-- A tuple count never exceeds the size of its box. -/
 theorem tupleCount_le_card : tupleCount R A ≤ (Fintype.piFinset A).card :=
   Finset.card_filter_le _ _
@@ -240,35 +247,8 @@ theorem tupleDensity_eq_zero_of_side_empty {i : ι} (hi : A i = ∅) : tupleDens
 /-! ### `Fin 1` boxes
 
 A `Fin 1` box is a single coordinate set under the encoding `a ↦ ![a]`, so its tuple density is
-an ordinary `densityOn`. These are the arity-one companions of the `Fin 2` lemmas below; they
-live in this file rather than beside `card_piFinset_two` in `Finite/Tuple.lean` because their
-consumers are density-level. No `DecidableEq α` is needed: the transfer is a bijection, not an
-image. -/
-
-/-- Cardinality of a `Fin 1` box. -/
-theorem card_piFinset_one (A : Fin 1 → Finset α) :
-    (Fintype.piFinset A).card = (A 0).card := by
-  rw [Fintype.card_piFinset, Fin.prod_univ_one]
-
-/-- Filter cardinalities agree across the arity-one encoding `a ↦ ![a]`. -/
-theorem card_filter_piFinset_one (A : Fin 1 → Finset α) (R : (Fin 1 → α) → Prop)
-    [DecidablePred R] :
-    ((Fintype.piFinset A).filter R).card = ((A 0).filter fun a ↦ R ![a]).card := by
-  refine Finset.card_bij' (fun x _ ↦ x 0) (fun a _ ↦ ![a]) ?_ ?_ ?_ ?_
-  · intro x hx
-    rw [Finset.mem_filter] at hx ⊢
-    refine ⟨Fintype.mem_piFinset.mp hx.1 0, ?_⟩
-    rw [show (![x 0] : Fin 1 → α) = x from funext fun i ↦ by fin_cases i; rfl]
-    exact hx.2
-  · intro a ha
-    rw [Finset.mem_filter] at ha ⊢
-    refine ⟨Fintype.mem_piFinset.mpr fun i ↦ ?_, ha.2⟩
-    fin_cases i
-    simpa using ha.1
-  · intro x hx
-    exact funext fun i ↦ by fin_cases i; rfl
-  · intro a ha
-    simp
+an ordinary `densityOn`. The two cardinality lemmas this rests on carry no density notion and
+live beside their `Fin 2` analogues in `Finite/Tuple.lean`. -/
 
 /-- Arity-one tuple density is the density of the curried relation on the single coordinate
 set. Holds for all boxes: with an empty side both sides are `0` by the division convention. -/

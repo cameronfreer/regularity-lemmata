@@ -230,14 +230,15 @@ This is the canonical statement of the rounding estimate: the exact `min d (1 - 
 which both the unconditional `1/2` bound and the `ε` bound follow in a few lines each. -/
 
 /-- **On a cell box the rounded model differs from `M` exactly on the minority tuples**, so its
-edit count is at most `min d (1 - d)` times the box mass, where `d` is the density of the symbol
-on that box. Hypothesis-free: nonemptiness of the cells is derived internally from
-`Finpartition.nonempty_of_mem_parts`. -/
-theorem editDistance_majorityRound_le_min (M : FiniteRelModel L V) (P : Finpartition s) {n : ℕ}
+edit count *equals* `min d (1 - d)` times the box mass, where `d` is the density of the symbol on
+that box. Hypothesis-free: nonemptiness of the cells is derived internally from
+`Finpartition.nonempty_of_mem_parts`. This is the canonical form; the `≤` version and both
+consequences are derived from it. -/
+theorem editDistance_majorityRound_eq_min (M : FiniteRelModel L V) (P : Finpartition s) {n : ℕ}
     (S : L.Relations n) (C : Fin n → P.parts) :
     (editDistance (M.Holds S) ((M.majorityRound P).Holds S)
         (fun i ↦ (C i : Finset V)) : ℝ)
-      ≤ min (tupleDensity (M.Holds S) (fun i ↦ (C i : Finset V)))
+      = min (tupleDensity (M.Holds S) (fun i ↦ (C i : Finset V)))
             (1 - tupleDensity (M.Holds S) (fun i ↦ (C i : Finset V)))
         * ∏ i, ((C i : Finset V).card : ℝ) := by
   classical
@@ -279,9 +280,7 @@ theorem editDistance_majorityRound_le_min (M : FiniteRelModel L V) (P : Finparti
     rw [show editDistance (M.Holds S) ((M.majorityRound P).Holds S) box
         = tupleCount (fun x ↦ ¬ M.Holds S x) box from
       congrArg Finset.card (Finset.filter_congr fun x hx ↦ by simp [(hconst x hx).mpr hthr])]
-    exact card_filter_le_of_tupleDensity_le
-      (show tupleDensity (fun x ↦ ¬ M.Holds S x) box ≤ 1 - tupleDensity (M.Holds S) box from
-        by linarith)
+    rw [tupleCount_eq_tupleDensity_mul, tupleDensity_neg hne]
   · -- Rounded to constantly FALSE on the box: the edits are the tuples where `M` holds.
     have hdhalf : tupleDensity (M.Holds S) box < 1 / 2 := by
       by_contra hcon
@@ -292,9 +291,20 @@ theorem editDistance_majorityRound_le_min (M : FiniteRelModel L V) (P : Finparti
         = tupleCount (M.Holds S) box from
       congrArg Finset.card (Finset.filter_congr fun x hx ↦ by
         simp [show ¬ ((M.majorityRound P).Holds S x) from fun hh ↦ hthr ((hconst x hx).mp hh)])]
-    exact card_filter_le_of_tupleDensity_le le_rfl
+    rw [tupleCount_eq_tupleDensity_mul]
 
 /-! ### The two consequences of the box lemma -/
+
+/-- The inequality form of `editDistance_majorityRound_eq_min`, for consumers that only need a
+bound. -/
+theorem editDistance_majorityRound_le_min (M : FiniteRelModel L V) (P : Finpartition s) {n : ℕ}
+    (S : L.Relations n) (C : Fin n → P.parts) :
+    (editDistance (M.Holds S) ((M.majorityRound P).Holds S)
+        (fun i ↦ (C i : Finset V)) : ℝ)
+      ≤ min (tupleDensity (M.Holds S) (fun i ↦ (C i : Finset V)))
+            (1 - tupleDensity (M.Holds S) (fun i ↦ (C i : Finset V)))
+        * ∏ i, ((C i : Finset V).card : ℝ) :=
+  le_of_eq (editDistance_majorityRound_eq_min M P S C)
 
 /-- **The unconditional half bound.** A density and its complement cannot both exceed `1/2`, so
 majority rounding is within `1/2` of `M` on every cell box, over every partition, with no
@@ -455,7 +465,7 @@ example (M : FiniteRelModel L V) :
     rw [tupleDensity_eq_count_div, le_antisymm (hbox ▸ tupleCount_le_card) h, hbox]
     norm_num
 
--- **Adversarial: an empty ground set (hence also an empty carrier) and a negative tolerance.**
+-- **Adversarial: an empty ground set, even on an arbitrary carrier, and a negative tolerance.**
 -- A partition of `∅` has no cells, so at positive arity there is no tuple of cells and the
 -- predicate is vacuously true — even at `ε < 0`. Nothing is claimed about `M` and `N` there.
 example (M N : FiniteRelModel L V) :
