@@ -111,9 +111,13 @@ average over the cell pair containing `x` and `y`.
 
 **Outside-support convention.** `Finpartition.part` returns `∅` off the carrier, and an
 empty rectangle has average `0`, so the residual **equals `f`** outside `A ×ˢ B`. That is a
-clean convention rather than a defect, but it means every substantive statement below is
-**carrier-local**: the tower and error identities all quantify over test rectangles
-`S ⊆ A`, `T ⊆ B`.
+clean convention rather than a defect, but it splits the statements below in two.
+
+Ordinary residual-sum and error identities are **carrier-local**: they quantify over test
+rectangles `S ⊆ A`, `T ⊆ B`, because an ordinary rectangle sum ranges over the test rectangle
+itself and so sees points outside the carrier, where the residual is `f`. Stepped-sum tower
+identities need no such hypothesis, because stepping ranges over partition cells and thereby
+ignores points outside the carriers entirely.
 
 **Where hypotheses begin.** The residual-to-error bridge is pure algebra — it needs neither
 nonnegative weights nor positive masses, only `S ⊆ A` and `T ⊆ B`. Conditional-expectation
@@ -278,8 +282,10 @@ private theorem rectAverage_rectResidual_mul_trace_mass [DecidableEq X] [Decidab
 /-- **The tower identity.** Stepping the `P ×ˢ Q`-residual against a finer pair `P' ×ˢ Q'`
 gives the difference of the two stepped predictions.
 
-Nonnegative carrier weights are genuinely required, and this is the only theorem in the file
-that needs them for a reason other than an inequality: see the section note.
+Nonnegative carrier weights are genuinely required. This is the **first primitive identity**
+in the file needing them rather than an inequality; the derived identities below — such as
+`rectError_rectResidual`, which is also an equality — inherit the hypotheses rather than
+introducing them. See the section note for why signed weights break the argument.
 
 `S ⊆ A` and `T ⊆ B` are **not** needed, unlike in `rectSum_rectResidual_eq_rectError`. A
 stepped sum ranges over cells, so points of `S` outside the carrier are invisible to both
@@ -605,6 +611,29 @@ theorem rectCutDiscrepancy_inf_le_of_le_half [DecidableEq X] [DecidableEq Y]
     _ ≤ 2 * (ε / 2) := by linarith
     _ = ε := by ring
 
+/-- **The same-carrier adapter.** The statement the design freeze actually promises (§2.2 of
+`docs/design/rectangular-kernels.md`): one partition `P ⊓ Q` used on **both** coordinates, so
+this is a genuine same-carrier conclusion rather than two independently refined sides.
+
+Both halves of the common refinement do work here — `inf_le_left` on the left coordinate and
+`inf_le_right` on the right — which is exactly what lets a single partition serve both.
+
+The same-carrier product bound is **derived**, from the two separate part counts, never
+primitive. The quantitative disclaimer of `rectCutDiscrepancy_inf_le_of_le_half` applies
+verbatim: this recovers the Boolean summit's discrepancy conclusion, not its sharper
+complexity bound. -/
+theorem rectCutDiscrepancy_inf_self_le_of_le_half [DecidableEq X] (f : RectKernel X X)
+    (w₁ w₂ : X → ℝ) (P Q : Finpartition A) (hw₁ : ∀ x ∈ A, 0 ≤ w₁ x)
+    (hw₂ : ∀ x ∈ A, 0 ≤ w₂ x) {ε : ℝ} (hε : rectCutDiscrepancy f w₁ w₂ P Q ≤ ε / 2) :
+    rectCutDiscrepancy f w₁ w₂ (P ⊓ Q) (P ⊓ Q) ≤ ε
+      ∧ (P ⊓ Q).parts.card ≤ P.parts.card * Q.parts.card := by
+  refine ⟨?_, card_parts_inf_le P Q⟩
+  calc rectCutDiscrepancy f w₁ w₂ (P ⊓ Q) (P ⊓ Q)
+      ≤ 2 * rectCutDiscrepancy f w₁ w₂ P Q :=
+        rectCutDiscrepancy_le_two_mul f w₁ w₂ inf_le_left inf_le_right hw₁ hw₂
+    _ ≤ 2 * (ε / 2) := by linarith
+    _ = ε := by ring
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -800,6 +829,28 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P₁ P₂ : Finpartition (Finset.univ 
       ∧ (P₁ ⊓ P₂).parts.card ≤ P₁.parts.card * P₂.parts.card
       ∧ (Q₁ ⊓ Q₂).parts.card ≤ Q₁.parts.card * Q₂.parts.card :=
   rectCutDiscrepancy_inf_le_of_le_half f cL cR P₁ P₂ Q₁ Q₂ hcL hcR hε
+
+-- **The tower needs no carrier hypothesis.** The test set `{0, 2}` contains the point `2`,
+-- which lies *outside* the carrier `{0, 1}`. This example would not typecheck if the tower
+-- still required `S ⊆ A`; stepping ranges over cells, so the off-carrier point is invisible
+-- to both sides.
+example (f : RectKernel (Fin 3) (Fin 1)) {P P' : Finpartition ({0, 1} : Finset (Fin 3))}
+    (hP : P' ≤ P) (Q : Finpartition (Finset.univ : Finset (Fin 1))) :
+    steppedRectSum (rectResidual f cZ cU P Q) cZ cU P' Q ({0, 2} : Finset (Fin 3))
+        Finset.univ
+      = steppedRectSum f cZ cU P' Q ({0, 2} : Finset (Fin 3)) Finset.univ
+        - steppedRectSum f cZ cU P Q ({0, 2} : Finset (Fin 3)) Finset.univ :=
+  steppedRectSum_rectResidual f cZ cU hP le_rfl _ _
+    (fun x _ => hcZ x (Finset.mem_univ x)) hcU
+
+-- **The same-carrier adapter**: one partition on both coordinates, with the product part
+-- count derived rather than assumed.
+example (f : RectKernel (Fin 3) (Fin 3))
+    (P Q : Finpartition (Finset.univ : Finset (Fin 3))) {ε : ℝ}
+    (hε : rectCutDiscrepancy f cZ cZ P Q ≤ ε / 2) :
+    rectCutDiscrepancy f cZ cZ (P ⊓ Q) (P ⊓ Q) ≤ ε
+      ∧ (P ⊓ Q).parts.card ≤ P.parts.card * Q.parts.card :=
+  rectCutDiscrepancy_inf_self_le_of_le_half f cZ cZ P Q hcZ hcZ hε
 
 -- The discrepancy is never negative, and the empty rectangle is always a legal test.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
