@@ -68,6 +68,9 @@ section Tests
 
 private def cF : Fin 2 → ℝ := ![1, 1]
 
+/-- Masses with a **genuine zero**, so the guard-free behaviour is actually exercised. -/
+private def cF0 : Fin 2 → ℝ := ![1, 0]
+
 -- Cutting by the empty set, or by the whole carrier, is legal and still costs at most `2`.
 example (P : Finpartition (Finset.univ : Finset (Fin 3))) :
     (cutRefinePartition P (∅ : Finset (Fin 3))).parts.card ≤ 2 * P.parts.card :=
@@ -94,12 +97,28 @@ example (P : Finpartition (Finset.univ : Finset (Fin 2)))
       ∧ (cutRefinePartition Q T).parts.card ≤ 2 * Q.parts.card :=
   card_parts_cut_pair_le P Q S T
 
--- The mass-weighted Cauchy–Schwarz the energy step consumes, with **no** positive-mass
--- hypothesis: zero-mass cells drop from both sides on their own.
+-- The mass-weighted Cauchy–Schwarz the energy step consumes.
 example (a : Fin 2 → ℝ) :
     (∑ i, a i * cF i) ^ 2 ≤ (∑ i, cF i) * ∑ i, a i ^ 2 * cF i :=
   sq_sum_mul_le_sum_mul_sum_sq_mul a cF Finset.univ
     (fun i _ => by fin_cases i <;> norm_num [cF])
+
+-- …with **no** positive-mass hypothesis. Masses `[1, 0]`, so the zero-mass index is real and
+-- drops from both sides unaided. This is the branch the energy step will rely on.
+example (a : Fin 2 → ℝ) :
+    (∑ i, a i * cF0 i) ^ 2 ≤ (∑ i, cF0 i) * ∑ i, a i ^ 2 * cF0 i :=
+  sq_sum_mul_le_sum_mul_sum_sq_mul a cF0 Finset.univ
+    (fun i _ => by fin_cases i <;> norm_num [cF0])
+
+-- …and the zero-mass index really is inert: both sides collapse to the surviving term.
+example (a : Fin 2 → ℝ) :
+    (∑ i, a i * cF0 i) ^ 2 = (a 0) ^ 2 ∧ (∑ i, cF0 i) * ∑ i, a i ^ 2 * cF0 i = (a 0) ^ 2 := by
+  constructor <;> simp [Fin.sum_univ_two, cF0]
+
+-- **Every mass zero**: the inequality degenerates to `0 ≤ 0` rather than dividing by zero.
+example (a : Fin 2 → ℝ) :
+    (∑ i, a i * (0 : ℝ)) ^ 2 ≤ (∑ _i : Fin 2, (0 : ℝ)) * ∑ i, a i ^ 2 * (0 : ℝ) :=
+  sq_sum_mul_le_sum_mul_sum_sq_mul a (fun _ => 0) Finset.univ (fun _ _ => le_rfl)
 
 end Tests
 

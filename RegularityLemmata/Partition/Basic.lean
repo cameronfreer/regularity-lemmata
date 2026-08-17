@@ -393,8 +393,10 @@ theorem predicatePartition_parts (p : α → Prop) [DecidablePred p] (s : Finset
 /-! ### One-cut refinement
 
 Cutting a partition by a single test set: each cell is split into its trace on the set and
-its trace off it. This is the atomic step of an energy-increment iteration, and it costs a
-factor of exactly `2` in the part count.
+its trace off it. This is the atomic step of an energy-increment iteration, and it costs **at
+most** a factor of `2` in the part count — a uniform factor-2 bound, not an exact count. An
+empty or full cut costs nothing at all, and a cut respecting existing cell boundaries costs
+less than `2`.
 
 Named `cutRefinePartition` rather than `cutRefine` because the latter already denotes the
 unrelated polyad-witness colour refinement of `Hypergraph/PolyadWitness.lean`. -/
