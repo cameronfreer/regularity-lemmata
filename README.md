@@ -22,7 +22,7 @@ instantiated and its constants inspected.
 | --- | --- |
 | **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, abstract weighted selection. |
 | **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), leftover and chunk absorption into equipartitions. |
-| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the constant-kernel contraction. |
+| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the cut-norm contraction of stepping with constant 1. |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
 | **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
 | **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting; **indivisibility** (cellwise-constant models, with the quotient reading and exact nullary compatibility) and **cellwise edit bounds** with a computable majority rounding whose box-level edit count is computed exactly. |
@@ -46,10 +46,12 @@ prevents closed questions from being reopened silently. These modules live under
 separate umbrella `RegularityLemmataGates` — built and audited by the same CI, directly
 importable by module name, but not pulled in by `import RegularityLemmata`.
 
-## Proved summits
+## Proved summits and major entry points
 
 The declarations to reach for, and the module each lives in. A summit's constants are visible
-in its statement.
+in its statement. The final two rows are entry points rather than regularity summits —
+balanced slicing is a sampling theorem, and the indivisible-approximation theorem takes its
+partition as an input.
 
 | Summit | Declaration | Module |
 | --- | --- | --- |

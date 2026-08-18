@@ -29,7 +29,7 @@ each listed module remains directly importable.
   parallel-axis identity: a refinement's energy gain is the mass-weighted variance of the
   stepped values.
 * `Partition.RectKernelCut` — rectangle error, cut discrepancy (`rectCutDiscrepancy`),
-  residuals, and the contraction of the constant-`1` kernel.
+  residuals, and the cut-norm contraction of stepping with constant `1`.
 
 The design freeze for this stack is `docs/design/rectangular-kernels.md`.
 -/
