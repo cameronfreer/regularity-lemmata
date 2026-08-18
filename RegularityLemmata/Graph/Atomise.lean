@@ -66,7 +66,7 @@ theorem left_mem_witnessCuts {P : Finpartition s} {C D : Finset α} (hD : D ∈ 
   rw [witnessCuts, Finset.mem_union]
   left
   rw [Finset.mem_image]
-  exact ⟨D, hD, dif_pos hbad⟩
+  exact ⟨D, hD, dite_eq_left hbad⟩
 
 /-- The right witness of a bad pair `(C, D)` is one of `D`'s cuts. -/
 theorem right_mem_witnessCuts {P : Finpartition s} {C D : Finset α} (hC : C ∈ P.parts)
@@ -76,7 +76,7 @@ theorem right_mem_witnessCuts {P : Finpartition s} {C D : Finset α} (hC : C ∈
   rw [witnessCuts, Finset.mem_union]
   right
   rw [Finset.mem_image]
-  exact ⟨C, hC, dif_pos hbad⟩
+  exact ⟨C, hC, dite_eq_left hbad⟩
 
 /-- The simultaneous witness refinement: each cell atomised by its own cuts. -/
 noncomputable def witnessRefinement (P : Finpartition s) : Finpartition s :=

@@ -22,7 +22,7 @@ lake build 2>&1 | tee "$LOG"
 
 # Scan only paths that exist (fail-closed rg errors on missing paths; the library
 # directory appears in Phase 1). Missing REQUIRED paths still fail via the root file.
-lib_paths=(RegularityLemmata.lean scripts)
+lib_paths=(RegularityLemmata.lean RegularityLemmataGates.lean scripts)
 [ -d RegularityLemmata ] && lib_paths+=(RegularityLemmata)
 
 echo "== Gate 2: no sorry/admit/axiom in library source =="

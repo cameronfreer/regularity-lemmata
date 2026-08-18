@@ -138,16 +138,16 @@ theorem IsPolyadRegularAt.anti_r {κ : RSet j α → Fin K}
       by_cases ht : (t : ℕ) < r'
       · refine ⟨⟨t, ht⟩, Finset.mem_univ _, ?_⟩
         rw [hF'] at hv
-        simp only [dif_pos ht] at hv
+        simp only [dite_eq_left ht] at hv
         exact hv
       · rw [hF'] at hv
-        simp only [dif_neg ht] at hv
+        simp only [dite_eq_right ht] at hv
         rw [discAtom_empty_family] at hv
         exact absurd hv (Finset.notMem_empty v)
     · rintro ⟨t, -, hv⟩
       refine ⟨⟨t.1, lt_of_lt_of_le t.2 hr⟩, Finset.mem_univ _, ?_⟩
       rw [hF']
-      simp only [dif_pos t.2]
+      simp only [dite_eq_left t.2]
       exact hv
   have h' := h F' ?_
   · rwa [hunion] at h'

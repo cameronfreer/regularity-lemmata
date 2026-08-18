@@ -114,27 +114,10 @@ import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 import RegularityLemmata.Relational.BinaryStrongCounting
 import RegularityLemmata.Relational.DiagonalGate
 import RegularityLemmata.Relational.GraphCounting
-import RegularityLemmata.Relational.InducedRemovalGates
-import RegularityLemmata.Relational.Transversalization
-import RegularityLemmata.Relational.OrientationProbe
-import RegularityLemmata.Relational.CloneProxyProbe
-import RegularityLemmata.Relational.ProxyMove
-import RegularityLemmata.Relational.ProxyGroupingGate
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
-import RegularityLemmata.Relational.RepresentativeSelection
-import RegularityLemmata.Relational.ProxyEventIndex
-import RegularityLemmata.Relational.ProxyAggregateMass
-import RegularityLemmata.Relational.ProxySelectionSetup
-import RegularityLemmata.Relational.ProxyCostBudget
-import RegularityLemmata.Relational.ProxySelectionConstants
-import RegularityLemmata.Relational.ProxyHierarchyBridge
-import RegularityLemmata.Relational.ProxyNormalizedCostGate
-import RegularityLemmata.Relational.ForbiddenForkGate
-import RegularityLemmata.Relational.WeakenedCountingGate
-import RegularityLemmata.Relational.GenericTripleEstimate
-import RegularityLemmata.Relational.PositivityGate
-import RegularityLemmata.Relational.PlacementStrata
+import RegularityLemmata.Kernel
+import RegularityLemmata.RelationalApproximation
 
 /-!
 # RegularityLemmata
@@ -142,8 +125,12 @@ import RegularityLemmata.Relational.PlacementStrata
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on mathlib.
 
-The first release concerns finite combinatorial regularity: a finite tuple and counting
-substrate, a density and edit calculus, and partition and weighted-energy machinery.
+This root imports the library's public surface. Two curated facades bundle the stacks a
+consumer most often wants whole: `RegularityLemmata.Kernel` (the rectangular weighted-kernel
+layer) and `RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility,
+and cellwise edit bounds). The probe and obstruction-gate modules of in-progress campaigns
+live under the separate umbrella `RegularityLemmataGates` — same namespace, proof gates, and
+CI, but not part of this import; each stays directly importable by its module name.
 See `README.md` for scope and `ARCHITECTURE.md` for the library's conventions.
 -/
 
@@ -151,6 +138,6 @@ namespace RegularityLemmata
 
 /-- Library version marker. Also guarantees the axiom audit always has at least one
 declaration to check. -/
-def version : String := "0.1.0"
+def version : String := "0.2.0"
 
 end RegularityLemmata

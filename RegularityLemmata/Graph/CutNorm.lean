@@ -126,12 +126,12 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P)
       rw [abs_le]
       constructor <;> linarith
     by_cases hcase : IsBadPair R ε C D ∨ C = D
-    · rw [if_pos hcase]
+    · rw [ite_eq_left hcase]
       calc |pairDensity R (A ∩ C) (B ∩ D) - pairDensity R C D| * m
           ≤ 1 * m := mul_le_mul_of_nonneg_right hdev1 hm0
         _ = m := one_mul m
         _ ≤ (C.card : ℝ) * D.card := hmm
-    · rw [if_neg hcase]
+    · rw [ite_eq_right hcase]
       push Not at hcase
       have hunif : IsUniformPair R C D ε := by
         rcases hcase with ⟨hbad, hne⟩
@@ -175,14 +175,14 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P)
       have hnn : (0 : ℝ) ≤ (p.1.card : ℝ) * p.2.card := by positivity
       have hεnn : (0 : ℝ) ≤ ε * ((p.1.card : ℝ) * p.2.card) := by positivity
       by_cases h1 : IsBadPair R ε p.1 p.2
-      · rw [if_pos (Or.inl h1), if_pos h1]
+      · rw [ite_eq_left (Or.inl h1), ite_eq_left h1]
         have : (0:ℝ) ≤ (if p.1 = p.2 then ((p.1.card : ℝ) * p.2.card) else 0) := by
           split_ifs <;> simp [hnn]
         linarith
       · by_cases h2 : p.1 = p.2
-        · rw [if_pos (Or.inr h2), if_neg h1, if_pos h2]
+        · rw [ite_eq_left (Or.inr h2), ite_eq_right h1, ite_eq_left h2]
           linarith
-        · rw [if_neg (by tauto), if_neg h1, if_neg h2]
+        · rw [ite_eq_right (by tauto), ite_eq_right h1, ite_eq_right h2]
           linarith
     refine (Finset.sum_le_sum hterm).trans (le_of_eq ?_)
     rw [Finset.sum_add_distrib, Finset.sum_add_distrib]

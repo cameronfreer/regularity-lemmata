@@ -99,19 +99,19 @@ instance (r : ℕ) : FiniteRelational (singleRelLang r) where
   arityBound := r
   functionsEmpty := fun _ => inferInstanceAs (IsEmpty Empty)
   relationsFintype := fun n => by
-    by_cases h : n = r <;> simp only [singleRelLang, h, if_true, if_false] <;>
+    by_cases h : n = r <;> simp only [singleRelLang, h, ite_true, ite_false] <;>
       infer_instance
   relationsDecidableEq := fun n => by
-    by_cases h : n = r <;> simp only [singleRelLang, h, if_true, if_false] <;>
+    by_cases h : n = r <;> simp only [singleRelLang, h, ite_true, ite_false] <;>
       infer_instance
   relationsEmptyAbove := fun n hn => by
     have h : n ≠ r := by omega
-    simp only [singleRelLang, h, if_false]
+    simp only [singleRelLang, h, ite_false]
     infer_instance
 
 /-- The unique symbol of the one-symbol language. -/
 def singleRelSymbol (r : ℕ) : (singleRelLang r).Relations r :=
-  cast (if_pos rfl : (if r = r then Unit else Empty) = Unit).symm Unit.unit
+  cast (ite_eq_left rfl : (if r = r then Unit else Empty) = Unit).symm Unit.unit
 
 /-- The empty language is finite relational (zero symbols, bound `0`). -/
 instance : FiniteRelational FirstOrder.Language.empty where

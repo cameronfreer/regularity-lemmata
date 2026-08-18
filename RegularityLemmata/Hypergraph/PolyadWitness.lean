@@ -211,7 +211,7 @@ theorem discAtom_eq_biUnion_cutRefine (κ : RSet j α → Fin K)
       Finset.mem_filter.mpr ⟨Finset.mem_univ _, fun i => ?_, fun i => ?_⟩, ?_⟩
     · rw [congrFun (cutRefineProj_comp κ W) (lowerFaceRSet hinj i)]
       exact hkey i
-    · rw [cutRefineBit_cutRefine, if_pos (hatom.2 i)]
+    · rw [cutRefineBit_cutRefine, ite_eq_left (hatom.2 i)]
     · rw [mem_polyadBlock_iff_of_injective hinj]
       intro i
       rfl
@@ -230,7 +230,7 @@ theorem discAtom_eq_biUnion_cutRefine (κ : RSet j α → Fin K)
       have hb := hbit i
       rw [← hface i, cutRefineBit_cutRefine] at hb
       by_contra hmem
-      rw [if_neg hmem] at hb
+      rw [ite_eq_right hmem] at hb
       exact absurd hb (by decide)
 
 /-- Cardinality of a witness atom: the sum over its resolving keys (the refined

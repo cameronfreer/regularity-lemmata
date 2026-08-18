@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import Lean
 import RegularityLemmata
+import RegularityLemmataGates
 
 /-!
 # Axiom audit
@@ -22,10 +23,16 @@ def allowedAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]
 
 def auditRoot : Name := `RegularityLemmata
 
+/-- The modules to load: the public root plus the probe/gate umbrella. Both put their
+declarations under the `RegularityLemmata` namespace, which is the audited prefix, so the
+audit covers the gate modules even though the public root no longer imports them. -/
+def auditModules : Array Name := #[`RegularityLemmata, `RegularityLemmataGates]
+
 def main : IO UInt32 := do
   try
     initSearchPath (← findSysroot)
-    let env ← importModules #[{ module := auditRoot }] {} (trustLevel := 1024)
+    let env ← importModules (auditModules.map fun m => { module := m }) {}
+      (trustLevel := 1024)
     -- Normalize private names (`_private.RegularityLemmata.….0.RegularityLemmata.foo`)
     -- back to their user names so private project declarations are audited too.
     let targets := env.constants.fold (init := #[]) fun acc n _ =>

@@ -194,13 +194,13 @@ theorem sum_card_badNbhd_le (hP : P.IsEquipartition) (hm : 0 < A.card / P.parts.
             (f := fun k : Fin K => (if IsBadPair (Rk k) ρ C D then 1 else 0)
               + (if IsBadPair (Rk k) ρ D C then 1 else 0))
             (fun j _ => Nat.zero_le _) (Finset.mem_univ k))
-          rw [if_pos hk]
+          rw [ite_eq_left hk]
           omega
         · refine le_trans ?_ (Finset.single_le_sum
             (f := fun k : Fin K => (if IsBadPair (Rk k) ρ C D then 1 else 0)
               + (if IsBadPair (Rk k) ρ D C then 1 else 0))
             (fun j _ => Nat.zero_le _) (Finset.mem_univ k))
-          rw [if_pos hk]
+          rw [ite_eq_left hk]
           omega
       · exact Nat.zero_le _
     calc (badNbhd (IsFamilyBadPair Rk ρ) P.parts C).card

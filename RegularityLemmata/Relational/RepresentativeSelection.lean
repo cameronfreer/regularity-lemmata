@@ -620,7 +620,7 @@ theorem BinaryPaletteStrongDiagWitness.exists_representatives
   · -- Membership, containment, and the size guarantee (the only consumers of `q`).
     intro C hC i
     beta_reduce
-    rw [dif_pos hC]
+    rw [dite_eq_left hC]
     have hmem : g (⟨C, hC⟩, i) ∈ t (⟨C, hC⟩, i) := Fintype.mem_piFinset.mp hg _
     simp only [ht] at hmem
     have h3 := mem_repCandidates.mp hmem
@@ -628,7 +628,7 @@ theorem BinaryPaletteStrongDiagWitness.exists_representatives
   · -- Uniformity and density-closeness, from the avoided bad events.
     intro C hC D hD i j hij c
     beta_reduce
-    rw [dif_pos hC, dif_pos hD]
+    rw [dite_eq_left hC, dite_eq_left hD]
     have hgoodE := hgood ((⟨C, hC⟩, ⟨D, hD⟩), (⟨(i, j), hij⟩, c))
     simp only [hi₁, hi₂, hBad] at hgoodE
     have hmemC : g (⟨C, hC⟩, i) ∈ t (⟨C, hC⟩, i) := Fintype.mem_piFinset.mp hg _

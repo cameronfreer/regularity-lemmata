@@ -105,10 +105,10 @@ def glue (σ : CoordinateSplit n) (xL : ∀ i : σ.Left, V i.1) (xR : ∀ i : σ
 variable {σ : CoordinateSplit n}
 
 @[simp] theorem glue_apply_left {xL : ∀ i : σ.Left, V i.1} {xR : ∀ i : σ.Right, V i.1}
-    {i : Fin n} (hi : i ∈ σ.left) : σ.glue xL xR i = xL ⟨i, hi⟩ := dif_pos hi
+    {i : Fin n} (hi : i ∈ σ.left) : σ.glue xL xR i = xL ⟨i, hi⟩ := dite_eq_left hi
 
 @[simp] theorem glue_apply_right {xL : ∀ i : σ.Left, V i.1} {xR : ∀ i : σ.Right, V i.1}
-    {i : Fin n} (hi : i ∉ σ.left) : σ.glue xL xR i = xR ⟨i, hi⟩ := dif_neg hi
+    {i : Fin n} (hi : i ∉ σ.left) : σ.glue xL xR i = xR ⟨i, hi⟩ := dite_eq_right hi
 
 @[simp] theorem restrictLeft_glue (xL : ∀ i : σ.Left, V i.1) (xR : ∀ i : σ.Right, V i.1) :
     σ.restrictLeft (σ.glue xL xR) = xL := by
