@@ -16,9 +16,10 @@ ordered tuples of that box. That is `CellwiseEditBound`. Together with
 approximate blow-up statement concludes with.
 
 The file then constructs a witness: `FiniteRelModel.majorityRound` rounds each relation to the
-cellwise majority bit, and the box-level lemma `editDistance_majorityRound_le_min` bounds its
-edit count by `min d (1 - d)` times the box mass. Both the unconditional half bound and the
-`ε` bound from cell homogeneity are derived from that one lemma, and
+cellwise majority bit, and the box-level identity `editDistance_majorityRound_eq_min` computes
+its edit count **exactly**: `min d (1 - d)` times the box mass (the comparison form
+`editDistance_majorityRound_le_min` is derived from it). Both the unconditional half bound and
+the `ε` bound from cell homogeneity are derived from that one identity, and
 `exists_isIndivisibleFor_of_isHomogeneousCell` packages the three clauses. The converse
 `isHomogeneousCell_of_cellwiseEditBound` recovers homogeneity at exactly the same `ε`.
 
