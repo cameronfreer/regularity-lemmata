@@ -244,20 +244,41 @@ theorem parts_biUnion_filter_subset {P Q : Finpartition s} (hQ : Q ≤ P) :
     obtain ⟨C, hCmem, hsub⟩ := hQ hQ'mem
     exact ⟨C, hCmem, hQ'mem, hsub⟩
 
-/-- Reindexing: summing a function of `Q`-parts over the `P`-part fibers recovers the
-total (each `Q`-part lies in a unique `P`-part). -/
-theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α → ℝ) :
-    ∑ C ∈ P.parts, ∑ C' ∈ Q.parts.filter (· ⊆ C), g C' = ∑ C' ∈ Q.parts, g C' := by
+/-- **Reindexing an arbitrary sub-family of fine parts by parents.** Any collection `I` of
+`Q`-parts splits over the `P`-part fibres, because each `Q`-part lies in a unique `P`-part.
+
+Stated for a sub-family rather than all of `Q.parts` because energy arguments select the fine
+cells meeting a witness rectangle and still need to group them under their coarse parents;
+`sum_over_parents` is the special case `I = Q.parts`. -/
+theorem sum_over_parents_subset {P Q : Finpartition s} (hQ : Q ≤ P) {I : Finset (Finset α)}
+    (hI : I ⊆ Q.parts) (g : Finset α → ℝ) :
+    ∑ C ∈ P.parts, ∑ C' ∈ I.filter (· ⊆ C), g C' = ∑ C' ∈ I, g C' := by
+  classical
   have hfib : (↑P.parts : Set (Finset α)).PairwiseDisjoint
-      (fun C => Q.parts.filter (· ⊆ C)) := by
+      (fun C => I.filter (· ⊆ C)) := by
     intro C₁ hC₁ C₂ hC₂ hne
     simp only [Function.onFun, Finset.disjoint_left, Finset.mem_filter]
     rintro Q' ⟨hQ'mem, hsub₁⟩ ⟨-, hsub₂⟩
-    obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts hQ'mem
+    obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts (hI hQ'mem)
     exact hne (P.eq_of_mem_parts (Finset.mem_coe.mp hC₁) (Finset.mem_coe.mp hC₂)
       (hsub₁ hx) (hsub₂ hx))
-  conv_rhs => rw [← parts_biUnion_filter_subset hQ]
+  have hcover : P.parts.biUnion (fun C => I.filter (· ⊆ C)) = I := by
+    ext C'
+    simp only [Finset.mem_biUnion, Finset.mem_filter]
+    constructor
+    · rintro ⟨-, -, hC'mem, -⟩
+      exact hC'mem
+    · intro hC'mem
+      obtain ⟨C, hCmem, hsub⟩ := hQ (hI hC'mem)
+      exact ⟨C, hCmem, hC'mem, hsub⟩
+  conv_rhs => rw [← hcover]
   rw [Finset.sum_biUnion hfib]
+
+/-- Reindexing: summing a function of `Q`-parts over the `P`-part fibers recovers the
+total (each `Q`-part lies in a unique `P`-part). -/
+theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α → ℝ) :
+    ∑ C ∈ P.parts, ∑ C' ∈ Q.parts.filter (· ⊆ C), g C' = ∑ C' ∈ Q.parts, g C' :=
+  sum_over_parents_subset hQ Finset.Subset.rfl g
 
 /-- **Partitioning a point-indexed sum by the containing part.** A sum over `S` whose
 summand depends on each point *and* on the part containing it splits into a sum over the
