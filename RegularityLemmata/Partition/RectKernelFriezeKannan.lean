@@ -62,6 +62,144 @@ theorem card_parts_cut_pair_le [DecidableEq X] [DecidableEq Y] (P : Finpartition
       ∧ (cutRefinePartition Q T).parts.card ≤ 2 * Q.parts.card :=
   ⟨card_parts_cutRefinePartition_le P S, card_parts_cutRefinePartition_le Q T⟩
 
+/-! ### Layer 1: the witness error as a mass-weighted sum over selected cells
+
+After cutting, the witness rectangle `S ×ˢ T` is exactly a union of fine cells, so the
+rectangle error decomposes into a **mass-weighted sum of the residual's cell averages**. The
+coefficients are genuine functions of the cell pair — no parent is mentioned — which is what
+makes the Cauchy–Schwarz step a direct application rather than a reindexing argument. Parents
+enter only in layer 2. -/
+
+/-- The fine cells selected by the witness set on the left. -/
+noncomputable def selectedLeft [DecidableEq X] (P : Finpartition A) (S : Finset X) :
+    Finset (Finset X) :=
+  (cutRefinePartition P S).parts.filter (· ⊆ S)
+
+/-- …and on the right. -/
+noncomputable def selectedRight [DecidableEq Y] (Q : Finpartition B) (T : Finset Y) :
+    Finset (Finset Y) :=
+  (cutRefinePartition Q T).parts.filter (· ⊆ T)
+
+theorem selectedLeft_subset [DecidableEq X] (P : Finpartition A) (S : Finset X) :
+    selectedLeft P S ⊆ (cutRefinePartition P S).parts :=
+  Finset.filter_subset _ _
+
+theorem selectedRight_subset [DecidableEq Y] (Q : Finpartition B) (T : Finset Y) :
+    selectedRight Q T ⊆ (cutRefinePartition Q T).parts :=
+  Finset.filter_subset _ _
+
+/-- **The witness rectangle is the union of the selected cells.** -/
+theorem biUnion_selectedLeft [DecidableEq X] (P : Finpartition A) {S : Finset X}
+    (hS : S ⊆ A) : (selectedLeft P S).biUnion id = S :=
+  biUnion_cutRefinePartition_filter_subset P hS
+
+theorem biUnion_selectedRight [DecidableEq Y] (Q : Finpartition B) {T : Finset Y}
+    (hT : T ⊆ B) : (selectedRight Q T).biUnion id = T :=
+  biUnion_cutRefinePartition_filter_subset Q hT
+
+/-- **Layer 1, the decomposition.** The rectangle error of `f` against the coarse pair, on the
+witness rectangle, is the mass-weighted sum of the residual's averages over the selected cell
+pairs.
+
+Pure bookkeeping: the bridge of `Partition/RectKernelCut.lean`, additivity of a rectangle sum
+over disjoint unions, and the cancellation gate `rectAverage_mul_mass` — which needs no
+positive-mass hypothesis, so neither does this. -/
+theorem rectError_eq_sum_selected [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) {S : Finset X}
+    {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectError f wX wY P Q S T
+      = ∑ p ∈ selectedLeft P S ×ˢ selectedRight Q T,
+          rectAverage (rectResidual f wX wY P Q) wX wY p.1 p.2
+            * (finsetMass wX p.1 * finsetMass wY p.2) := by
+  classical
+  have hdisjI : ((selectedLeft P S : Finset (Finset X)) : Set (Finset X)).PairwiseDisjoint id :=
+    (cutRefinePartition P S).supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact selectedLeft_subset P S)
+  have hdisjJ : ((selectedRight Q T : Finset (Finset Y)) : Set (Finset Y)).PairwiseDisjoint id :=
+    (cutRefinePartition Q T).supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact selectedRight_subset Q T)
+  have hsplit := rectSum_biUnion (rectResidual f wX wY P Q) wX wY hdisjI hdisjJ
+  rw [biUnion_selectedLeft P hS, biUnion_selectedRight Q hT] at hsplit
+  rw [← rectSum_rectResidual_eq_rectError f wX wY P Q hS hT, hsplit]
+  refine Finset.sum_congr rfl fun p hp => ?_
+  rw [Finset.mem_product] at hp
+  have hp1 : p.1 ⊆ A := ((cutRefinePartition P S).le (selectedLeft_subset P S hp.1))
+  have hp2 : p.2 ⊆ B := ((cutRefinePartition Q T).le (selectedRight_subset Q T hp.2))
+  exact (rectAverage_mul_mass (f := rectResidual f wX wY P Q) (A := p.1) (B := p.2)
+    (fun x hx => hwX x (hp1 hx)) (fun y hy => hwY y (hp2 hy))).symm
+
+/-- The **selected variance**: the mass-weighted mean square of the residual's averages over
+the selected cell pairs. Deliberately phrased through the residual, so that it mentions no
+parent and layer 1 needs no reindexing. -/
+noncomputable def selectedVariance [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) (S : Finset X)
+    (T : Finset Y) : ℝ :=
+  ∑ p ∈ selectedLeft P S ×ˢ selectedRight Q T,
+    rectAverage (rectResidual f wX wY P Q) wX wY p.1 p.2 ^ 2
+      * (finsetMass wX p.1 * finsetMass wY p.2)
+
+theorem selectedVariance_nonneg [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) (S : Finset X)
+    (T : Finset Y) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    0 ≤ selectedVariance f wX wY P Q S T := by
+  refine Finset.sum_nonneg fun p hp => ?_
+  rw [Finset.mem_product] at hp
+  exact mul_nonneg (sq_nonneg _) (mul_nonneg
+    (finsetMass_nonneg fun x hx =>
+      hwX x ((cutRefinePartition P S).le (selectedLeft_subset P S hp.1) hx))
+    (finsetMass_nonneg fun y hy =>
+      hwY y ((cutRefinePartition Q T).le (selectedRight_subset Q T hp.2) hy)))
+
+/-- The selected cell masses sum to the mass of the witness rectangle. -/
+theorem sum_selected_mass [DecidableEq X] [DecidableEq Y] (wX : X → ℝ) (wY : Y → ℝ)
+    (P : Finpartition A) (Q : Finpartition B) {S : Finset X} {T : Finset Y} (hS : S ⊆ A)
+    (hT : T ⊆ B) :
+    ∑ p ∈ selectedLeft P S ×ˢ selectedRight Q T, finsetMass wX p.1 * finsetMass wY p.2
+      = finsetMass wX S * finsetMass wY T := by
+  classical
+  have hdisjI : ((selectedLeft P S : Finset (Finset X)) : Set (Finset X)).PairwiseDisjoint id :=
+    (cutRefinePartition P S).supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact selectedLeft_subset P S)
+  have hdisjJ : ((selectedRight Q T : Finset (Finset Y)) : Set (Finset Y)).PairwiseDisjoint id :=
+    (cutRefinePartition Q T).supIndep.pairwiseDisjoint.subset
+      (by rw [Finset.coe_subset]; exact selectedRight_subset Q T)
+  rw [Finset.sum_product, ← Finset.sum_mul_sum, ← finsetMass_biUnion wX hdisjI,
+    ← finsetMass_biUnion wY hdisjJ, biUnion_selectedLeft P hS, biUnion_selectedRight Q hT]
+
+/-- **Layer 1.** The squared witness error is at most the total rectangle mass times the
+selected variance.
+
+Mass-weighted Cauchy–Schwarz, applied to the decomposition above. No positive-mass hypothesis
+and no boundedness hypothesis on `f`; nonnegative carrier weights are the only assumption. -/
+theorem sq_rectError_le_mul_selectedVariance [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectError f wX wY P Q S T ^ 2
+      ≤ (finsetMass wX A * finsetMass wY B) * selectedVariance f wX wY P Q S T := by
+  classical
+  have hmass : ∀ p ∈ selectedLeft P S ×ˢ selectedRight Q T,
+      0 ≤ finsetMass wX p.1 * finsetMass wY p.2 := by
+    intro p hp
+    rw [Finset.mem_product] at hp
+    exact mul_nonneg
+      (finsetMass_nonneg fun x hx =>
+        hwX x ((cutRefinePartition P S).le (selectedLeft_subset P S hp.1) hx))
+      (finsetMass_nonneg fun y hy =>
+        hwY y ((cutRefinePartition Q T).le (selectedRight_subset Q T hp.2) hy))
+  have hcs := sq_sum_mul_le_sum_mul_sum_sq_mul
+    (fun p => rectAverage (rectResidual f wX wY P Q) wX wY p.1 p.2)
+    (fun p => finsetMass wX p.1 * finsetMass wY p.2)
+    (selectedLeft P S ×ˢ selectedRight Q T) hmass
+  rw [← rectError_eq_sum_selected f wX wY P Q hS hT hwX hwY,
+    sum_selected_mass wX wY P Q hS hT] at hcs
+  refine le_trans hcs (mul_le_mul_of_nonneg_right ?_
+    (selectedVariance_nonneg f wX wY P Q S T hwX hwY))
+  exact mul_le_mul (finsetMass_mono hwX hS) (finsetMass_mono hwY hT)
+    (finsetMass_nonneg fun y hy => hwY y (hT hy))
+    (finsetMass_nonneg hwX)
+
 /-! ### Tests -/
 
 section Tests
