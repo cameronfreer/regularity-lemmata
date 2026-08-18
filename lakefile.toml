@@ -1,6 +1,6 @@
 name = "RegularityLemmata"
 version = "0.1.0"
-defaultTargets = ["RegularityLemmata"]
+defaultTargets = ["RegularityLemmata", "RegularityLemmataGates"]
 
 [[require]]
 name = "mathlib"
@@ -9,6 +9,12 @@ version = "git#v4.34.0-rc1"
 
 [[lean_lib]]
 name = "RegularityLemmata"
+
+# The probe/gate umbrella: same source tree and namespace, separate root, so the public
+# surface (`import RegularityLemmata`) no longer pulls in the in-progress campaign modules
+# while CI still builds and audits them.
+[[lean_lib]]
+name = "RegularityLemmataGates"
 
 [[lean_exe]]
 name = "axiom_audit"
