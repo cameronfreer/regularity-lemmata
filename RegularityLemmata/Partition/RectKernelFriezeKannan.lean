@@ -200,6 +200,184 @@ theorem sq_rectError_le_mul_selectedVariance [DecidableEq X] [DecidableEq Y]
     (finsetMass_nonneg fun y hy => hwY y (hT hy))
     (finsetMass_nonneg hwX)
 
+/-! ### Layer 2: the selected variance sits inside the refinement variance
+
+Parents enter here, and only here. The conversion from the residual's averages to
+child-minus-parent differences goes through `sq_rectAverage_rectResidual_mul_mass`, which is
+stated **only** in mass-multiplied form — the unweighted equality is false on a zero-mass fine
+cell. After that the selected cells regroup under their parents and embed termwise into the
+full refinement variance. -/
+
+/-- **Layer 2.** The selected variance is at most the full refinement variance of the cut
+pair.
+
+Three moves, none of them quantitative: regroup the selected cells under coarse parents
+(`sum_product_parts_eq_sum_over_parents_subset`); replace each residual average by the
+child-minus-parent difference, mass-multiplied; then extend each inner sum from the selected
+cells to all fine cells inside that parent, which is legitimate because every term is
+nonnegative. -/
+theorem selectedVariance_le_rectRefinementVarianceNum [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    (S : Finset X) (T : Finset Y) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    selectedVariance f wX wY P Q S T
+      ≤ rectRefinementVarianceNum f wX wY P Q (cutRefinePartition P S)
+          (cutRefinePartition Q T) := by
+  classical
+  set P' := cutRefinePartition P S with hP'def
+  set Q' := cutRefinePartition Q T with hQ'def
+  have hP : P' ≤ P := cutRefinePartition_le P S
+  have hQ : Q' ≤ Q := cutRefinePartition_le Q T
+  -- Regroup the selected cells under their coarse parents.
+  rw [selectedVariance, ← sum_product_parts_eq_sum_over_parents_subset hP hQ
+    (selectedLeft_subset P S) (selectedRight_subset Q T)
+    (fun C' D' => rectAverage (rectResidual f wX wY P Q) wX wY C' D' ^ 2
+      * (finsetMass wX C' * finsetMass wY D')), rectRefinementVarianceNum]
+  refine Finset.sum_le_sum fun pd hpd => ?_
+  rw [Finset.mem_product] at hpd
+  -- Inside one coarse cell pair: rewrite to child-minus-parent, then extend the index set.
+  have hcongr : ∑ p ∈ (selectedLeft P S).filter (· ⊆ pd.1) ×ˢ
+        (selectedRight Q T).filter (· ⊆ pd.2),
+        rectAverage (rectResidual f wX wY P Q) wX wY p.1 p.2 ^ 2
+          * (finsetMass wX p.1 * finsetMass wY p.2)
+      = ∑ p ∈ (selectedLeft P S).filter (· ⊆ pd.1) ×ˢ
+          (selectedRight Q T).filter (· ⊆ pd.2),
+          (rectAverage f wX wY p.1 p.2 - rectAverage f wX wY pd.1 pd.2) ^ 2
+            * (finsetMass wX p.1 * finsetMass wY p.2) := by
+    refine Finset.sum_congr rfl fun p hp => ?_
+    rw [Finset.mem_product, Finset.mem_filter, Finset.mem_filter] at hp
+    exact sq_rectAverage_rectResidual_mul_mass f wX wY hpd.1 hpd.2 hp.1.2 hp.2.2 hwX hwY
+  rw [hcongr]
+  refine Finset.sum_le_sum_of_subset_of_nonneg
+    (Finset.product_subset_product
+      (Finset.filter_subset_filter _ (selectedLeft_subset P S))
+      (Finset.filter_subset_filter _ (selectedRight_subset Q T)))
+    fun p hp _ => ?_
+  rw [Finset.mem_product, Finset.mem_filter, Finset.mem_filter] at hp
+  exact mul_nonneg (sq_nonneg _)
+    (mul_nonneg (finsetMass_nonneg fun x hx => hwX x ((P'.le hp.1.1) hx))
+      (finsetMass_nonneg fun y hy => hwY y ((Q'.le hp.2.1) hy)))
+
+/-! ### Layer 3: the raw energy increment
+
+Zero total mass is handled **internally**. Under nonnegative weights a zero-mass carrier
+forces every rectangle error to vanish, so a witness of positive error simply cannot exist
+there; the public theorem therefore carries no positive-mass hypothesis, and division appears
+only after positivity has been established locally. -/
+
+/-- A zero-mass left carrier kills every rectangle error: nonnegative weights summing to zero
+are pointwise zero. -/
+private theorem rectError_eq_zero_of_left_mass_zero [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (h0 : finsetMass wX A = 0) : rectError f wX wY P Q S T = 0 := by
+  classical
+  have hzero : ∀ x ∈ A, wX x = 0 := (Finset.sum_eq_zero_iff_of_nonneg hwX).mp h0
+  have hsum : rectSum f wX wY S T = 0 := by
+    rw [rectSum]
+    exact Finset.sum_eq_zero fun x hx => Finset.sum_eq_zero fun y _ => by
+      rw [hzero x (hS hx)]; ring
+  have hstep : steppedRectSum f wX wY P Q S T = 0 := by
+    rw [steppedRectSum]
+    refine Finset.sum_eq_zero fun C _ => Finset.sum_eq_zero fun D _ => ?_
+    have : finsetMass wX (S ∩ C) = 0 :=
+      Finset.sum_eq_zero fun x hx => hzero x (hS (Finset.mem_of_mem_inter_left hx))
+    rw [this, zero_mul, mul_zero]
+  rw [rectError, hsum, hstep, sub_zero]
+
+/-- …and symmetrically on the right, transported through `op`. -/
+private theorem rectError_eq_zero_of_right_mass_zero [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hT : T ⊆ B) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (h0 : finsetMass wY B = 0) : rectError f wX wY P Q S T = 0 := by
+  rw [← rectError_op f wX wY P Q S T]
+  exact rectError_eq_zero_of_left_mass_zero f.op wY wX Q P hT hwY h0
+
+/-- **A witness forces positive total mass.** This is what lets the increment theorems below
+omit a positive-mass hypothesis: under nonnegative weights a zero-mass carrier makes every
+rectangle error vanish, so no witness can exist there. -/
+theorem finsetMass_mul_pos_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (_hε : 0 < ε)
+    (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectError f wX wY P Q S T|) :
+    0 < finsetMass wX A * finsetMass wY B := by
+  rcases eq_or_lt_of_le (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)) with
+    h0 | h
+  · exfalso
+    have hE : rectError f wX wY P Q S T = 0 := by
+      rcases mul_eq_zero.mp h0.symm with hA0 | hB0
+      · exact rectError_eq_zero_of_left_mass_zero f wX wY P Q hS hwX hA0
+      · exact rectError_eq_zero_of_right_mass_zero f wX wY P Q hT hwY hB0
+    rw [hE, abs_zero, ← h0, mul_zero] at hwit
+    exact lt_irrefl 0 hwit
+  · exact h
+
+/-- **Layer 3, the raw energy increment.** A witness rectangle whose error exceeds
+`ε · (mass A · mass B)` forces the cut refinement to gain at least `ε²` times the total
+rectangle mass in raw energy.
+
+Consumes `rectEnergyNum_eq_add_rectRefinementVarianceNum` — the tranche-4c primitive — so the
+refinement bookkeeping is the established one and not a private substitute.
+
+Hypotheses are exactly nonnegative carrier weights and `0 < ε`. There is **no** boundedness
+hypothesis on `f`: absolute bounds are owed only by the iteration, to force termination. -/
+theorem rectEnergyNum_add_le_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (hε : 0 < ε)
+    (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectError f wX wY P Q S T|) :
+    rectEnergyNum f wX wY P Q + ε ^ 2 * (finsetMass wX A * finsetMass wY B)
+      ≤ rectEnergyNum f wX wY (cutRefinePartition P S) (cutRefinePartition Q T) := by
+  classical
+  have hmA : 0 ≤ finsetMass wX A := finsetMass_nonneg hwX
+  have hmB : 0 ≤ finsetMass wY B := finsetMass_nonneg hwY
+  have hm : 0 ≤ finsetMass wX A * finsetMass wY B := mul_nonneg hmA hmB
+  have hmpos : 0 < finsetMass wX A * finsetMass wY B :=
+    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
+  have hP : cutRefinePartition P S ≤ P := cutRefinePartition_le P S
+  have hQ : cutRefinePartition Q T ≤ Q := cutRefinePartition_le Q T
+  rw [rectEnergyNum_eq_add_rectRefinementVarianceNum hP hQ hwX hwY]
+  -- The witness bound, squared, against the Cauchy–Schwarz chain.
+  have hchain : rectError f wX wY P Q S T ^ 2
+      ≤ (finsetMass wX A * finsetMass wY B)
+        * rectRefinementVarianceNum f wX wY P Q (cutRefinePartition P S)
+            (cutRefinePartition Q T) :=
+    le_trans (sq_rectError_le_mul_selectedVariance f wX wY P Q hS hT hwX hwY)
+      (mul_le_mul_of_nonneg_left
+        (selectedVariance_le_rectRefinementVarianceNum f wX wY P Q S T hwX hwY) hm)
+  have hsq : (ε * (finsetMass wX A * finsetMass wY B)) ^ 2
+      < rectError f wX wY P Q S T ^ 2 := by
+    have hnn : 0 ≤ ε * (finsetMass wX A * finsetMass wY B) := mul_nonneg hε.le hm
+    have habs : |rectError f wX wY P Q S T| ^ 2 = rectError f wX wY P Q S T ^ 2 := sq_abs _
+    nlinarith [abs_nonneg (rectError f wX wY P Q S T)]
+  -- Divide out the (now positive) total mass.
+  have hexpand : (ε * (finsetMass wX A * finsetMass wY B)) ^ 2
+      = (finsetMass wX A * finsetMass wY B)
+        * (ε ^ 2 * (finsetMass wX A * finsetMass wY B)) := by ring
+  rw [hexpand] at hsq
+  have hkey : ε ^ 2 * (finsetMass wX A * finsetMass wY B)
+      ≤ rectRefinementVarianceNum f wX wY P Q (cutRefinePartition P S)
+          (cutRefinePartition Q T) :=
+    le_of_lt (lt_of_mul_lt_mul_left (lt_of_lt_of_le hsq hchain) hm)
+  linarith
+
+/-- **The normalized `ε²` increment**, as a corollary. Division and the positivity of the
+total mass are confined here; the combinatorial core above is denominator-free.
+
+Still no positive-mass and no boundedness hypothesis: the witness supplies the positivity. -/
+theorem rectEnergy_add_le_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (hε : 0 < ε)
+    (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectError f wX wY P Q S T|) :
+    rectEnergy f wX wY P Q + ε ^ 2
+      ≤ rectEnergy f wX wY (cutRefinePartition P S) (cutRefinePartition Q T) := by
+  have hmpos : 0 < finsetMass wX A * finsetMass wY B :=
+    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
+  have hraw := rectEnergyNum_add_le_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
+  rw [rectEnergy, rectEnergy, div_add' _ _ _ (ne_of_gt hmpos), div_le_div_iff_of_pos_right hmpos]
+  linarith
+
 /-! ### Tests -/
 
 section Tests
@@ -208,6 +386,17 @@ private def cF : Fin 2 → ℝ := ![1, 1]
 
 /-- Masses with a **genuine zero**, so the guard-free behaviour is actually exercised. -/
 private def cF0 : Fin 2 → ℝ := ![1, 0]
+
+/-- Right-hand weights on a carrier of a **different** size. -/
+private def cG : Fin 3 → ℝ := ![1, 2, 3]
+
+private theorem hcF : ∀ x ∈ (Finset.univ : Finset (Fin 2)), 0 ≤ cF x := by
+  intro x _
+  fin_cases x <;> norm_num [cF]
+
+private theorem hcG : ∀ y ∈ (Finset.univ : Finset (Fin 3)), 0 ≤ cG y := by
+  intro y _
+  fin_cases y <;> norm_num [cG]
 
 -- Cutting by the empty set, or by the whole carrier, is legal and still costs at most `2`.
 example (P : Finpartition (Finset.univ : Finset (Fin 3))) :
@@ -234,6 +423,39 @@ example (P : Finpartition (Finset.univ : Finset (Fin 2)))
     (cutRefinePartition P S).parts.card ≤ 2 * P.parts.card
       ∧ (cutRefinePartition Q T).parts.card ≤ 2 * Q.parts.card :=
   card_parts_cut_pair_le P Q S T
+
+-- **The raw energy increment on asymmetric carriers.** `f` is an arbitrary kernel: there is
+-- no boundedness hypothesis anywhere, and no positive-mass hypothesis — the witness supplies
+-- the positivity itself.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) {S : Finset (Fin 2)}
+    {T : Finset (Fin 3)} (hS : S ⊆ Finset.univ) (hT : T ⊆ Finset.univ) {ε : ℝ} (hε : 0 < ε)
+    (hwit : ε * (finsetMass cF Finset.univ * finsetMass cG Finset.univ)
+      < |rectError f cF cG P Q S T|) :
+    rectEnergyNum f cF cG P Q
+        + ε ^ 2 * (finsetMass cF Finset.univ * finsetMass cG Finset.univ)
+      ≤ rectEnergyNum f cF cG (cutRefinePartition P S) (cutRefinePartition Q T) :=
+  rectEnergyNum_add_le_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
+
+-- …and its normalized form, where the `ε²` gain is stated outright.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) {S : Finset (Fin 2)}
+    {T : Finset (Fin 3)} (hS : S ⊆ Finset.univ) (hT : T ⊆ Finset.univ) {ε : ℝ} (hε : 0 < ε)
+    (hwit : ε * (finsetMass cF Finset.univ * finsetMass cG Finset.univ)
+      < |rectError f cF cG P Q S T|) :
+    rectEnergy f cF cG P Q + ε ^ 2
+      ≤ rectEnergy f cF cG (cutRefinePartition P S) (cutRefinePartition Q T) :=
+  rectEnergy_add_le_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
+
+-- **A witness cannot exist on a zero-mass carrier**, which is why neither theorem above
+-- needs a positive-mass hypothesis.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) {S : Finset (Fin 2)}
+    {T : Finset (Fin 3)} (hS : S ⊆ Finset.univ) (hT : T ⊆ Finset.univ) {ε : ℝ} (hε : 0 < ε)
+    (hwit : ε * (finsetMass cF Finset.univ * finsetMass cG Finset.univ)
+      < |rectError f cF cG P Q S T|) :
+    0 < finsetMass cF Finset.univ * finsetMass cG Finset.univ :=
+  finsetMass_mul_pos_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
 
 -- The mass-weighted Cauchy–Schwarz the energy step consumes.
 example (a : Fin 2 → ℝ) :
