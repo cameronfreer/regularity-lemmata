@@ -244,20 +244,41 @@ theorem parts_biUnion_filter_subset {P Q : Finpartition s} (hQ : Q ≤ P) :
     obtain ⟨C, hCmem, hsub⟩ := hQ hQ'mem
     exact ⟨C, hCmem, hQ'mem, hsub⟩
 
-/-- Reindexing: summing a function of `Q`-parts over the `P`-part fibers recovers the
-total (each `Q`-part lies in a unique `P`-part). -/
-theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α → ℝ) :
-    ∑ C ∈ P.parts, ∑ C' ∈ Q.parts.filter (· ⊆ C), g C' = ∑ C' ∈ Q.parts, g C' := by
+/-- **Reindexing an arbitrary sub-family of fine parts by parents.** Any collection `I` of
+`Q`-parts splits over the `P`-part fibres, because each `Q`-part lies in a unique `P`-part.
+
+Stated for a sub-family rather than all of `Q.parts` because energy arguments select the fine
+cells meeting a witness rectangle and still need to group them under their coarse parents;
+`sum_over_parents` is the special case `I = Q.parts`. -/
+theorem sum_over_parents_subset {P Q : Finpartition s} (hQ : Q ≤ P) {I : Finset (Finset α)}
+    (hI : I ⊆ Q.parts) (g : Finset α → ℝ) :
+    ∑ C ∈ P.parts, ∑ C' ∈ I.filter (· ⊆ C), g C' = ∑ C' ∈ I, g C' := by
+  classical
   have hfib : (↑P.parts : Set (Finset α)).PairwiseDisjoint
-      (fun C => Q.parts.filter (· ⊆ C)) := by
+      (fun C => I.filter (· ⊆ C)) := by
     intro C₁ hC₁ C₂ hC₂ hne
     simp only [Function.onFun, Finset.disjoint_left, Finset.mem_filter]
     rintro Q' ⟨hQ'mem, hsub₁⟩ ⟨-, hsub₂⟩
-    obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts hQ'mem
+    obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts (hI hQ'mem)
     exact hne (P.eq_of_mem_parts (Finset.mem_coe.mp hC₁) (Finset.mem_coe.mp hC₂)
       (hsub₁ hx) (hsub₂ hx))
-  conv_rhs => rw [← parts_biUnion_filter_subset hQ]
+  have hcover : P.parts.biUnion (fun C => I.filter (· ⊆ C)) = I := by
+    ext C'
+    simp only [Finset.mem_biUnion, Finset.mem_filter]
+    constructor
+    · rintro ⟨-, -, hC'mem, -⟩
+      exact hC'mem
+    · intro hC'mem
+      obtain ⟨C, hCmem, hsub⟩ := hQ (hI hC'mem)
+      exact ⟨C, hCmem, hC'mem, hsub⟩
+  conv_rhs => rw [← hcover]
   rw [Finset.sum_biUnion hfib]
+
+/-- Reindexing: summing a function of `Q`-parts over the `P`-part fibers recovers the
+total (each `Q`-part lies in a unique `P`-part). -/
+theorem sum_over_parents {P Q : Finpartition s} (hQ : Q ≤ P) (g : Finset α → ℝ) :
+    ∑ C ∈ P.parts, ∑ C' ∈ Q.parts.filter (· ⊆ C), g C' = ∑ C' ∈ Q.parts, g C' :=
+  sum_over_parents_subset hQ Finset.Subset.rfl g
 
 /-- **Partitioning a point-indexed sum by the containing part.** A sum over `S` whose
 summand depends on each point *and* on the part containing it splits into a sum over the
@@ -389,6 +410,65 @@ theorem predicatePartition_parts (p : α → Prop) [DecidablePred p] (s : Finset
   ext C
   rw [mem_predicatePartition, Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton]
   tauto
+
+/-! ### One-cut refinement
+
+Cutting a partition by a single test set: each cell is split into its trace on the set and
+its trace off it. This is the atomic step of an energy-increment iteration, and it costs **at
+most** a factor of `2` in the part count — a uniform factor-2 bound, not an exact count. An
+empty or full cut costs nothing at all, and a cut respecting existing cell boundaries costs
+less than `2`.
+
+Named `cutRefinePartition` rather than `cutRefine` because the latter already denotes the
+unrelated polyad-witness colour refinement of `Hypergraph/PolyadWitness.lean`. -/
+
+/-- Refine `P` by cutting every cell along the test set `S`. -/
+def cutRefinePartition (P : Finpartition s) (S : Finset α) : Finpartition s :=
+  P ⊓ predicatePartition (· ∈ S) s
+
+/-- A cut refinement is a refinement. -/
+theorem cutRefinePartition_le (P : Finpartition s) (S : Finset α) :
+    cutRefinePartition P S ≤ P :=
+  inf_le_left
+
+/-- **The factor-2 part bound**, for one coordinate. -/
+theorem card_parts_cutRefinePartition_le (P : Finpartition s) (S : Finset α) :
+    (cutRefinePartition P S).parts.card ≤ 2 * P.parts.card := by
+  refine le_trans (card_parts_inf_le P (predicatePartition (· ∈ S) s)) ?_
+  rw [mul_comm]
+  exact Nat.mul_le_mul_right _ (predicatePartition_parts_card_le (· ∈ S) s)
+
+/-- **The cut separates `S`.** Every cell lands inside the test set or misses it entirely,
+which is what makes `S` a union of cells. -/
+theorem cutRefinePartition_part_subset_or_disjoint (P : Finpartition s) (S : Finset α)
+    {C : Finset α} (hC : C ∈ (cutRefinePartition P S).parts) : C ⊆ S ∨ Disjoint C S := by
+  obtain ⟨E, hE, hCE⟩ :=
+    (inf_le_right : cutRefinePartition P S ≤ predicatePartition (· ∈ S) s) hC
+  rcases predicatePartition_constant hE with hin | hout
+  · exact Or.inl fun x hx => hin x (hCE hx)
+  · exact Or.inr (Finset.disjoint_left.mpr fun x hx => hout x (hCE hx))
+
+/-- **The test set is a union of cells.** The form an energy step consumes: after the cut, `S`
+is exactly the union of the cells contained in it. `S ⊆ s` is required — a test set reaching
+outside the carrier is not covered by any cell. -/
+theorem biUnion_cutRefinePartition_filter_subset (P : Finpartition s) {S : Finset α}
+    (hS : S ⊆ s) :
+    ((cutRefinePartition P S).parts.filter (· ⊆ S)).biUnion id = S := by
+  classical
+  refine Finset.Subset.antisymm (fun x hx => ?_) (fun x hx => ?_)
+  · rw [Finset.mem_biUnion] at hx
+    obtain ⟨C, hCf, hxC⟩ := hx
+    exact (Finset.mem_filter.mp hCf).2 hxC
+  · have hxs : x ∈ s := hS hx
+    have hmem : (cutRefinePartition P S).part x ∈ (cutRefinePartition P S).parts :=
+      (cutRefinePartition P S).part_mem.2 hxs
+    have hxpart : x ∈ (cutRefinePartition P S).part x := (cutRefinePartition P S).mem_part hxs
+    have hsub : (cutRefinePartition P S).part x ⊆ S := by
+      rcases cutRefinePartition_part_subset_or_disjoint P S hmem with h | h
+      · exact h
+      · exact absurd hx (Finset.disjoint_left.mp h hxpart)
+    exact Finset.mem_biUnion.mpr
+      ⟨(cutRefinePartition P S).part x, Finset.mem_filter.mpr ⟨hmem, hsub⟩, hxpart⟩
 
 /-- **Part-size inheritance under refinement.** If `P` refines `Q` (`P ≤ Q`) and every cell of
 `Q` has cardinality at most `m`, then so does every cell of `P` — a finer cell sits inside a
