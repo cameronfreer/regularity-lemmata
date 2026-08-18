@@ -160,14 +160,14 @@ theorem copyCount_ofSimpleGraph (G₁ : SimpleGraph W) [DecidableRel G₁.Adj]
     rw [hcolH, hcolP] at hc
     constructor
     · intro h1
-      rw [if_pos h1] at hc
+      rw [ite_eq_left h1] at hc
       by_contra h2
-      rw [if_neg h2] at hc
+      rw [ite_eq_right h2] at hc
       exact absurd hc (by decide)
     · intro h2
-      rw [if_pos h2] at hc
+      rw [ite_eq_left h2] at hc
       by_contra h1
-      rw [if_neg h1] at hc
+      rw [ite_eq_right h1] at hc
       exact absurd hc.symm (by decide)
   · intro hiff e h
     have hiff' := hiff e.1
@@ -180,8 +180,8 @@ theorem copyCount_ofSimpleGraph (G₁ : SimpleGraph W) [DecidableRel G₁.Adj]
       rfl
     rw [hcolH, hcolP]
     by_cases h1 : e.1 ∈ (UniformHypergraph.ofSimpleGraph G₁).edges
-    · rw [if_pos h1, if_pos (hiff'.mp h1)]
-    · rw [if_neg h1, if_neg fun h2 => h1 (hiff'.mpr h2)]
+    · rw [ite_eq_left h1, ite_eq_left (hiff'.mp h1)]
+    · rw [ite_eq_right h1, ite_eq_right fun h2 => h1 (hiff'.mpr h2)]
 
 end ColoredHypergraph
 

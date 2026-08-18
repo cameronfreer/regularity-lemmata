@@ -74,10 +74,10 @@ theorem exists_fibre_labelling {β : Type*} [DecidableEq β] (d : ℕ) :
           constructor
           · rintro ⟨hxS, hxg⟩
             by_cases hxT : x ∈ T
-            · rw [if_pos hxT] at hxg; omega
-            · rw [if_neg hxT] at hxg; exact ⟨⟨hxS, hxT⟩, hxg⟩
+            · rw [ite_eq_left hxT] at hxg; omega
+            · rw [ite_eq_right hxT] at hxg; exact ⟨⟨hxS, hxT⟩, hxg⟩
           · rintro ⟨⟨hxS, hxT⟩, hxg⟩
-            exact ⟨hxS, by rw [if_neg hxT]; exact hxg⟩
+            exact ⟨hxS, by rw [ite_eq_right hxT]; exact hxg⟩
         rw [hfil]
         exact hg'fib j hjk
       · have hfil : (S.filter fun x => (if x ∈ T then j else g' x) = j) = T := by
@@ -87,11 +87,11 @@ theorem exists_fibre_labelling {β : Type*} [DecidableEq β] (d : ℕ) :
           · rintro ⟨hxS, hxg⟩
             by_cases hxT : x ∈ T
             · exact hxT
-            · rw [if_neg hxT] at hxg
+            · rw [ite_eq_right hxT] at hxg
               have := hg'lt x (Finset.mem_sdiff.mpr ⟨hxS, hxT⟩)
               omega
           · intro hxT
-            exact ⟨hTS hxT, by rw [if_pos hxT]⟩
+            exact ⟨hTS hxT, by rw [ite_eq_left hxT]⟩
         rw [hfil, hTcard]
 
 /-! ### Owners as unions of their proxies -/

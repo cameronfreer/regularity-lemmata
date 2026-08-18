@@ -248,12 +248,12 @@ theorem sum_nontransversal_weight_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card �
     have e12 : 0 ≤ (if T 1 = T 2 then cellTripleVolume T else 0) := by
       split_ifs <;> [exact hv; exact le_rfl]
     by_cases h : Function.Injective T
-    · rw [if_neg (not_not.mpr h)]; linarith
-    · rw [if_pos h, not_injective_fin_three] at *
+    · rw [ite_eq_right (not_not.mpr h)]; linarith
+    · rw [ite_eq_left h, not_injective_fin_three] at *
       rcases h with h01 | h02 | h12
-      · rw [if_pos h01]; linarith
-      · rw [if_pos h02]; linarith
-      · rw [if_pos h12]; linarith
+      · rw [ite_eq_left h01]; linarith
+      · rw [ite_eq_left h02]; linarith
+      · rw [ite_eq_left h12]; linarith
   calc ∑ T ∈ nontransversalCellTriples Q, weight T
       ≤ ∑ T ∈ nontransversalCellTriples Q, cellTripleVolume T :=
         Finset.sum_le_sum hw

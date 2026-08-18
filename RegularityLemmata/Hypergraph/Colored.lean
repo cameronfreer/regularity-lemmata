@@ -105,11 +105,11 @@ theorem ofSimpleGraph_colorClass_one (G : SimpleGraph V) [DecidableRel G.Adj] :
   · rintro ⟨h, hc⟩
     rw [hcol h] at hc
     by_contra hne
-    rw [if_neg hne] at hc
+    rw [ite_eq_right hne] at hc
     exact absurd hc (by decide)
   · intro he
     refine ⟨(UniformHypergraph.ofSimpleGraph G).card_eq e he, ?_⟩
-    rw [hcol, if_pos he]
+    rw [hcol, ite_eq_left he]
 
 /-- Color `0` is exactly the non-edges among the pairs. -/
 theorem ofSimpleGraph_colorClass_zero (G : SimpleGraph V) [DecidableRel G.Adj] :
@@ -124,7 +124,7 @@ theorem ofSimpleGraph_colorClass_zero (G : SimpleGraph V) [DecidableRel G.Adj] :
   · rintro ⟨h, hc⟩
     rw [hcol h] at hc
     by_cases he : e ∈ (UniformHypergraph.ofSimpleGraph G).edges
-    · rw [if_pos he] at hc
+    · rw [ite_eq_left he] at hc
       exact absurd hc (by decide)
     · refine ⟨?_, he⟩
       rw [UniformHypergraph.complete, Finset.mem_powersetCard]
@@ -132,7 +132,7 @@ theorem ofSimpleGraph_colorClass_zero (G : SimpleGraph V) [DecidableRel G.Adj] :
   · rintro ⟨hmem, hne⟩
     rw [UniformHypergraph.complete, Finset.mem_powersetCard] at hmem
     refine ⟨hmem.2, ?_⟩
-    rw [hcol, if_neg hne]
+    rw [hcol, ite_eq_right hne]
 
 /-! ### Arity-3 convenience API -/
 

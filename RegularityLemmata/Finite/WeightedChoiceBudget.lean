@@ -46,7 +46,7 @@ theorem sum_le_sum_of_exists_mem {γ κ : Type*} [DecidableEq γ] [Fintype κ]
       ≤ ∑ x ∈ S, ∑ k : κ, (if x ∈ T k then f x else 0) := by
         refine Finset.sum_le_sum fun x hx => ?_
         obtain ⟨k, hk⟩ := hcov x hx
-        have hterm : f x = (if x ∈ T k then f x else 0) := by rw [if_pos hk]
+        have hterm : f x = (if x ∈ T k then f x else 0) := by rw [ite_eq_left hk]
         refine le_trans (le_of_eq hterm) (Finset.single_le_sum
           (f := fun k => if x ∈ T k then f x else 0)
           (fun k _ => by by_cases h : x ∈ T k <;> simp [h, hf x]) (Finset.mem_univ k))

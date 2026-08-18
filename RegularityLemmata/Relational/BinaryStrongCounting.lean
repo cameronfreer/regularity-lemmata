@@ -105,15 +105,15 @@ theorem BinaryPaletteStrongWitness.abs_fineInducedEstimate_sub_coarseInducedEsti
                 - pairDensity (HasBinaryPairPalette M (binaryPairPalette P 1 2)) (T 1) (T 2)|
               then cellTripleVolume W else 0) := by
         rcases hd with h | h | h
-        · rw [if_pos h]; linarith
-        · rw [if_pos h]; linarith
-        · rw [if_pos h]; linarith
+        · rw [ite_eq_left h]; linarith
+        · rw [ite_eq_left h]; linarith
+        · rw [ite_eq_left h]; linarith
       linarith [mul_le_mul_of_nonneg_right habs1 hvolnn, hge,
         mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 3) hη.le) hvolnn]
     · -- no pair deviant: the three-factor perturbation gives `3η`
       rw [not_or, not_or] at hd
       obtain ⟨hn01, hn02, hn12⟩ := hd
-      rw [if_neg hn01, if_neg hn02, if_neg hn12, add_zero, add_zero, add_zero]
+      rw [ite_eq_right hn01, ite_eq_right hn02, ite_eq_right hn12, add_zero, add_zero, add_zero]
       have hbound : |requiredPaletteProduct P M W - requiredPaletteProduct P M T| ≤ 3 * η := by
         simp only [requiredPaletteProduct]
         refine le_trans (abs_mul_mul_sub_mul_mul_le (pairDensity_abs_le_one _ _)

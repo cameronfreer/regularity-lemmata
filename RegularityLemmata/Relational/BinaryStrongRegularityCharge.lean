@@ -216,9 +216,9 @@ theorem BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_fineEstimate_
             + (if bad 0 2 (binaryPairPalette P 0 2) W then cellTripleVolume W else 0)
             + (if bad 1 2 (binaryPairPalette P 1 2) W then cellTripleVolume W else 0) := by
         rcases hb with h | h | h
-        · rw [if_pos h]; linarith
-        · rw [if_pos h]; linarith
-        · rw [if_pos h]; linarith
+        · rw [ite_eq_left h]; linarith
+        · rw [ite_eq_left h]; linarith
+        · rw [ite_eq_left h]; linarith
       linarith [hcrude, hge,
         mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 7) hτ0) hvolnn]
     · rw [not_or, not_or] at hb
@@ -229,7 +229,7 @@ theorem BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_fineEstimate_
         intro i j c hnb hij
         by_contra hcon
         exact hnb ⟨hne hij, hcon⟩
-      rw [if_neg hn01, if_neg hn02, if_neg hn12, add_zero, add_zero, add_zero]
+      rw [ite_eq_right hn01, ite_eq_right hn02, ite_eq_right hn12, add_zero, add_zero, add_zero]
       have hWeq : (![W 0, W 1, W 2] : Fin 3 → Finset V) = W := by funext i; fin_cases i <;> rfl
       have hbound := abs_inducedEmbeddingCountOn_three_sub_le (P := P) (M := M)
         hnull (hprofW 0) (hprofW 1) (hprofW 2)

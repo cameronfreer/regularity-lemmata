@@ -490,7 +490,7 @@ example : ∀ g ∈ Fintype.piFinset tSharp, (g 0, g 1) ∉ badSharp →
   have h0 : g 0 = 0 := by
     have hne : g 0 ≠ 1 := fun h => hgood (by simp [badSharp, h, h1])
     omega
-  rw [costSharp, if_pos h0]
+  rw [costSharp, ite_eq_left h0]
   norm_num
 
 end Sharpness
