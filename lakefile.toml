@@ -5,7 +5,7 @@ defaultTargets = ["RegularityLemmata"]
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-version = "git#v4.34.0-rc1"
+version = "git#77cbcbc65f9e26f6ede0a01b24c2cb909e11cc0d"
 
 [[lean_lib]]
 name = "RegularityLemmata"
