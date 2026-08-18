@@ -76,8 +76,8 @@ densities and edits; `RegularityLemmata.Partition.Basic` and
 Two curated **facades** import a stack whole:
 
 - `RegularityLemmata.Kernel` — the rectangular weighted-kernel layer (raw weights, kernels,
-  relation indicators, stepping, energy and the refinement-variance identity, cut
-  discrepancy).
+  relation indicators, one-variable averages and almost-constancy, stepping, energy and the
+  refinement-variance identity, cut discrepancy, and the Frieze–Kannan summit).
 - `RegularityLemmata.RelationalApproximation` — homogeneous cells, finite relational models,
   indivisibility, and cellwise edit bounds with the majority-rounding theorems.
 

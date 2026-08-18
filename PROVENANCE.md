@@ -194,8 +194,19 @@ they were developed as stability-neutral infrastructure. No third-party source t
   disc regularity (`Hypergraph/PolyadRegularity.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
 - G. Conant and C. Terry, *Quantitative analytic stable regularity*.
-  [arXiv:2607.21762](https://arxiv.org/abs/2607.21762). The almost-constancy vocabulary and
-  the separation lemma of `Finite/AlmostConstant.lean` (their Definitions 1.6/2.1 and
-  Proposition 2.2); the level-set staircase is this library's reduction of their sampling
-  needs to `Partition/BalancedSlicing.lean` and is not from the paper. The stable-regularity
-  theorems themselves are upstream (stability-flavored) material, not part of this library.
+  [arXiv:2607.21762](https://arxiv.org/abs/2607.21762). The almost-constancy vocabulary and the
+  separation lemma of `Finite/AlmostConstant.lean` follow their Definitions 1.6/2.1 and
+  Proposition 2.2.
+
+  What is formalized is **not a verbatim transcription**. The predicates here are a
+  **real-valued, empty-totalized extension**: `φ : α → ℝ` carries no range or sign constraint,
+  and the empty set is almost constant by convention, matching this library's guard-free
+  homogeneity treatment. On nonempty sets they **agree with the paper under its `[0,1]` range
+  and positive-parameter assumptions**. Correspondingly,
+  `exists_separation_of_not_isAlmostConstantOn` is a **real-valued generalization** of
+  Proposition 2.2, with `exists_separation_mem_Icc_of_not_isAlmostConstantOn` as the exact
+  **range-aware companion** recovering the paper's `[0,1]` setting.
+
+  The level-set staircase is this library's own reduction of their sampling needs to
+  `Partition/BalancedSlicing.lean` and is not from the paper. The stable-regularity theorems
+  themselves are upstream (stability-flavored) material, not part of this library.
