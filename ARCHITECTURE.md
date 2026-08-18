@@ -82,6 +82,21 @@ layer where its hypotheses live, not where it was first needed: a lemma mentioni
 partition belongs in `Finite`, and one mentioning no palette or proxy belongs with the
 counting substrate rather than with its first consumer.
 
+## Import surfaces
+
+Two library roots, one namespace:
+
+- **`RegularityLemmata`** (the default `import RegularityLemmata`) is the public surface:
+  settled API only. Curated **facade** modules — `RegularityLemmata.Kernel` and
+  `RegularityLemmata.RelationalApproximation` — bundle a stack behind one import; a facade
+  imports and documents, and defines nothing.
+- **`RegularityLemmataGates`** is the umbrella for probe, obstruction-gate, and feasibility
+  modules of in-progress campaigns. Same directory tree, same namespace, same proof and
+  axiom gates (it is a default build target and the axiom audit walks both roots), and each
+  member stays directly importable — but the public root does not import it, and **no module
+  imported by the public root may import a module that only the gates umbrella imports**.
+  Promotion out of the umbrella is an ordinary reviewed move of one import line.
+
 ## Relational substrate conventions
 
 - **Mathlib languages, directly.** No competing first-order syntax. A typeclass

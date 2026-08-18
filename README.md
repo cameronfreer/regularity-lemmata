@@ -20,10 +20,12 @@ instantiated and its constants inspected.
 
 | Area | Public capability |
 | --- | --- |
-| **Finite foundations** | Tuple boxes, injective counts, densities, edits, partitions, equitable refinements, weighted energy, abstract weighted selection. |
+| **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, abstract weighted selection. |
+| **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), leftover and chunk absorption into equipartitions. |
+| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the constant-kernel contraction. |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
 | **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
-| **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting. |
+| **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting; **indivisibility** (cellwise-constant models, with the quotient reading and exact nullary compatibility) and **cellwise edit bounds** with a computable majority rounding whose box-level edit count is computed exactly. |
 | **Adapters** | Bridges to mathlib's `SimpleGraph` and to this library's uniform and colored hypergraphs, so an existing structure can enter the machinery without being re-encoded. |
 
 ## Current theorem boundary
@@ -38,9 +40,11 @@ instantiated and its constants inspected.
 - Regularity-based counting estimates for **general fixed patterns**, higher relational
   arities, and general hypergraph removal are **outside the current API**.
 
-Counterexamples and impossibility results that constrain the API are retained as named
-**gate** modules. This keeps rejected interfaces machine-checkable and prevents closed
-questions from being reopened silently.
+Counterexamples, impossibility results, and feasibility probes that constrain the API are
+retained as named **gate** modules. This keeps rejected interfaces machine-checkable and
+prevents closed questions from being reopened silently. These modules live under the
+separate umbrella `RegularityLemmataGates` — built and audited by the same CI, directly
+importable by module name, but not pulled in by `import RegularityLemmata`.
 
 ## Proved summits
 
@@ -58,12 +62,22 @@ in its statement.
 | Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
 | Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
 | Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
+| Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
+| Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
 
 For the substrate rather than the summits: `RegularityLemmata.Finite.Tuple`,
 `RegularityLemmata.Finite.Injective` and `RegularityLemmata.Finite.Density` for counting,
 densities and edits; `RegularityLemmata.Partition.Basic` and
 `RegularityLemmata.Partition.BlockEnergy` for partitions and weighted energy;
 `RegularityLemmata.Relational.Language` for the finite relational layer.
+
+Two curated **facades** import a stack whole:
+
+- `RegularityLemmata.Kernel` — the rectangular weighted-kernel layer (raw weights, kernels,
+  relation indicators, stepping, energy and the refinement-variance identity, cut
+  discrepancy).
+- `RegularityLemmata.RelationalApproximation` — homogeneous cells, finite relational models,
+  indivisibility, and cellwise edit bounds with the majority-rounding theorems.
 
 ## Using as a dependency
 
@@ -76,7 +90,8 @@ rev = "v0.1.0"
 
 Pin a tag. `main` is the development branch and its API moves between tags.
 
-Then `import RegularityLemmata`, or an individual module such as
+Then `import RegularityLemmata`, a curated facade such as `RegularityLemmata.Kernel` or
+`RegularityLemmata.RelationalApproximation`, or an individual module such as
 `RegularityLemmata.Relational.GraphCounting`.
 
 ## Building
