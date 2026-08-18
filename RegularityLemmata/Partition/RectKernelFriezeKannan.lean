@@ -4,6 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Partition.RectKernelCut
 import RegularityLemmata.Partition.RectKernelEnergy
+import Mathlib.Algebra.Order.Floor.Semiring
+import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # Frieze–Kannan weak regularity for rectangular weighted kernels
@@ -378,6 +380,151 @@ theorem rectEnergy_add_le_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
   rw [rectEnergy, rectEnergy, div_add' _ _ _ (ne_of_gt hmpos), div_le_div_iff_of_pos_right hmpos]
   linarith
 
+/-! ### Steps 4–5: the paired iteration, with separate left and right budgets
+
+The iteration is **genuinely paired**: each round cuts the left carrier by its witness set and
+the right carrier by its, and the two part-count bounds are carried side by side and never
+multiplied. A round costs `2` on each coordinate independently, so `t` rounds cost `2^t` on
+each. The common refinement appears nowhere here — only in the same-carrier adapter below.
+
+Absolute unit boundedness of `f` enters here for the first time, and only to force
+termination through `rectEnergy_le_one`. The energy step itself needed no such hypothesis. -/
+
+/-- **Fuel-parametrized rectangular FK iteration.** From energy within `t · ε²` of the
+ceiling, `t` rounds reach a *pair* of refinements whose stepped prediction is uniformly
+`ε · (mass A · mass B)`-accurate on every test rectangle.
+
+The round-budget arithmetic mirrors `Graph/FriezeKannan.lean`'s `fk_iterate`, including its
+strict-increment handling: the `t = 0` case is closed by contradiction against the energy
+ceiling, which is what makes `⌈1/ε²⌉₊ + 1` rather than `⌈1/ε²⌉₊` the right fuel. -/
+theorem rectFkIterate [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y) (wX : X → ℝ)
+    (wY : Y → ℝ) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (hf : IsAbsUnitBoundedOnRectangle f A B) {ε : ℝ} (hε : 0 < ε) :
+    ∀ (t : ℕ) (P : Finpartition A) (Q : Finpartition B),
+      1 - (t : ℝ) * ε ^ 2 ≤ rectEnergy f wX wY P Q →
+      ∃ P' : Finpartition A, ∃ Q' : Finpartition B, P' ≤ P ∧ Q' ≤ Q ∧
+        P'.parts.card ≤ P.parts.card * 2 ^ t ∧ Q'.parts.card ≤ Q.parts.card * 2 ^ t ∧
+        ∀ S ⊆ A, ∀ T ⊆ B,
+          |rectError f wX wY P' Q' S T| ≤ ε * (finsetMass wX A * finsetMass wY B) := by
+  intro t
+  induction t with
+  | zero =>
+    intro P Q hbudget
+    refine ⟨P, Q, le_rfl, le_rfl, by simp, by simp, ?_⟩
+    intro S hS T hT
+    by_contra hcon
+    rw [not_le] at hcon
+    have hinc := rectEnergy_add_le_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hcon
+    have h1 : rectEnergy f wX wY (cutRefinePartition P S) (cutRefinePartition Q T) ≤ 1 :=
+      rectEnergy_le_one _ _ hwX hwY hf
+    have h2 : (1 : ℝ) ≤ rectEnergy f wX wY P Q := by simpa using hbudget
+    have hpos : (0 : ℝ) < ε ^ 2 := by positivity
+    linarith
+  | succ t IH =>
+    intro P Q hbudget
+    by_cases hreg : ∀ S ⊆ A, ∀ T ⊆ B,
+        |rectError f wX wY P Q S T| ≤ ε * (finsetMass wX A * finsetMass wY B)
+    · exact ⟨P, Q, le_rfl, le_rfl, Nat.le_mul_of_pos_right _ (Nat.pow_pos (by norm_num)),
+        Nat.le_mul_of_pos_right _ (Nat.pow_pos (by norm_num)), hreg⟩
+    · push Not at hreg
+      obtain ⟨S, hS, T, hT, hdev⟩ := hreg
+      have hinc := rectEnergy_add_le_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hdev
+      have hbudget' : 1 - (t : ℝ) * ε ^ 2
+          ≤ rectEnergy f wX wY (cutRefinePartition P S) (cutRefinePartition Q T) := by
+        push_cast at hbudget
+        linarith
+      obtain ⟨P', Q', hP', hQ', hPcard, hQcard, hreg'⟩ := IH _ _ hbudget'
+      refine ⟨P', Q', hP'.trans (cutRefinePartition_le P S),
+        hQ'.trans (cutRefinePartition_le Q T), ?_, ?_, hreg'⟩
+      · calc P'.parts.card ≤ (cutRefinePartition P S).parts.card * 2 ^ t := hPcard
+          _ ≤ (2 * P.parts.card) * 2 ^ t :=
+              Nat.mul_le_mul_right _ (card_parts_cutRefinePartition_le P S)
+          _ = P.parts.card * 2 ^ (t + 1) := by ring
+      · calc Q'.parts.card ≤ (cutRefinePartition Q T).parts.card * 2 ^ t := hQcard
+          _ ≤ (2 * Q.parts.card) * 2 ^ t :=
+              Nat.mul_le_mul_right _ (card_parts_cutRefinePartition_le Q T)
+          _ = Q.parts.card * 2 ^ (t + 1) := by ring
+
+/-- **The round budget is seed-independent**, exactly as in the Boolean development: the
+energy is nonnegative and `⌈1/ε²⌉₊ + 1` rounds already exhaust a budget of `1`. The `+ 1` is
+the strict-increment allowance — the last round must still be able to fail. -/
+theorem one_sub_rounds_mul_sq_le_rectEnergy [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
+    (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (hε : 0 < ε) :
+    1 - ((⌈1 / ε ^ 2⌉₊ + 1 : ℕ) : ℝ) * ε ^ 2 ≤ rectEnergy f wX wY P Q := by
+  have h0 : (0 : ℝ) ≤ rectEnergy f wX wY P Q := rectEnergy_nonneg P Q hwX hwY
+  have hε2 : (0 : ℝ) < ε ^ 2 := by positivity
+  have ht : (1 : ℝ) ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 := by
+    calc (1 : ℝ) = 1 / ε ^ 2 * ε ^ 2 := by field_simp
+      _ ≤ (⌈1 / ε ^ 2⌉₊ : ℝ) * ε ^ 2 :=
+          mul_le_mul_of_nonneg_right (Nat.le_ceil _) hε2.le
+  push_cast
+  nlinarith
+
+/-! ### Step 6: the rectangular summit -/
+
+/-- **Seeded rectangular Frieze–Kannan weak regularity.** From arbitrary seeds `P₀`, `Q₀`, a
+*pair* of refinements whose stepped prediction is uniformly accurate on every test rectangle,
+with **separate** left and right part-count bounds.
+
+The two bounds are exposed individually and are never multiplied here. That is the point of
+the rectangular formulation: the product is where sharpness is lost, so it is deferred to the
+same-carrier adapter, which is the only place a factor `4` can appear. -/
+theorem rect_frieze_kannan_refining [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P₀ : Finpartition A) (Q₀ : Finpartition B)
+    (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (hf : IsAbsUnitBoundedOnRectangle f A B) {ε : ℝ} (hε : 0 < ε) :
+    ∃ P : Finpartition A, ∃ Q : Finpartition B, P ≤ P₀ ∧ Q ≤ Q₀ ∧
+      P.parts.card ≤ P₀.parts.card * 2 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
+      Q.parts.card ≤ Q₀.parts.card * 2 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
+      ∀ S ⊆ A, ∀ T ⊆ B,
+        |rectError f wX wY P Q S T| ≤ ε * (finsetMass wX A * finsetMass wY B) :=
+  rectFkIterate f wX wY hwX hwY hf hε (⌈1 / ε ^ 2⌉₊ + 1) P₀ Q₀
+    (one_sub_rounds_mul_sq_le_rectEnergy f wX wY P₀ Q₀ hwX hwY hε)
+
+/-- The summit in cut-discrepancy form. -/
+theorem rect_frieze_kannan_cutDiscrepancy [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (wX : X → ℝ) (wY : Y → ℝ) (P₀ : Finpartition A) (Q₀ : Finpartition B)
+    (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (hf : IsAbsUnitBoundedOnRectangle f A B) {ε : ℝ} (hε : 0 < ε) :
+    ∃ P : Finpartition A, ∃ Q : Finpartition B, P ≤ P₀ ∧ Q ≤ Q₀ ∧
+      P.parts.card ≤ P₀.parts.card * 2 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
+      Q.parts.card ≤ Q₀.parts.card * 2 ^ (⌈1 / ε ^ 2⌉₊ + 1) ∧
+      rectCutDiscrepancy f wX wY P Q ≤ ε * (finsetMass wX A * finsetMass wY B) := by
+  obtain ⟨P, Q, hP, hQ, hPcard, hQcard, hreg⟩ :=
+    rect_frieze_kannan_refining f wX wY P₀ Q₀ hwX hwY hf hε
+  exact ⟨P, Q, hP, hQ, hPcard, hQcard, rectCutDiscrepancy_le_iff.mpr hreg⟩
+
+/-! ### Step 6, continued: the same-carrier specialization
+
+**Where the factor `4` comes from, and nowhere else.** Running the paired iteration at `ε/2`
+costs `2^t` on each coordinate separately; the adapter of `Partition/RectKernelCut.lean` then
+multiplies the two, and `2^t · 2^t = 4^t` appears for the first time.
+
+The existing Boolean same-carrier summit in `Graph/FriezeKannan.lean` remains the **sharper
+direct result** and is untouched: it obtains `4 ^ (⌈1/ε²⌉₊ + 1)` directly, whereas the route
+below pays `⌈4/ε²⌉₊ + 1` rounds because it calls at `ε/2`. This theorem is an adapter, not a
+replacement. -/
+theorem rect_frieze_kannan_same_carrier [DecidableEq X] (f : RectKernel X X) (w₁ w₂ : X → ℝ)
+    (P₀ Q₀ : Finpartition A) (hw₁ : ∀ x ∈ A, 0 ≤ w₁ x) (hw₂ : ∀ x ∈ A, 0 ≤ w₂ x)
+    (hf : IsAbsUnitBoundedOnRectangle f A A) {ε : ℝ} (hε : 0 < ε) :
+    ∃ R : Finpartition A, R ≤ P₀ ∧ R ≤ Q₀ ∧
+      R.parts.card
+        ≤ (P₀.parts.card * 2 ^ (⌈1 / (ε / 2) ^ 2⌉₊ + 1))
+          * (Q₀.parts.card * 2 ^ (⌈1 / (ε / 2) ^ 2⌉₊ + 1)) ∧
+      rectCutDiscrepancy f w₁ w₂ R R ≤ ε * (finsetMass w₁ A * finsetMass w₂ A) := by
+  obtain ⟨P, Q, hP, hQ, hPcard, hQcard, hdisc⟩ :=
+    rect_frieze_kannan_cutDiscrepancy f w₁ w₂ P₀ Q₀ hw₁ hw₂ hf (by linarith : (0:ℝ) < ε / 2)
+  have hhalf : rectCutDiscrepancy f w₁ w₂ P Q
+      ≤ (ε * (finsetMass w₁ A * finsetMass w₂ A)) / 2 := by
+    calc rectCutDiscrepancy f w₁ w₂ P Q
+        ≤ ε / 2 * (finsetMass w₁ A * finsetMass w₂ A) := hdisc
+      _ = (ε * (finsetMass w₁ A * finsetMass w₂ A)) / 2 := by ring
+  obtain ⟨hdisc', hcard'⟩ :=
+    rectCutDiscrepancy_inf_self_le_of_le_half f w₁ w₂ P Q hw₁ hw₂ hhalf
+  refine ⟨P ⊓ Q, inf_le_left.trans hP, inf_le_right.trans hQ, ?_, hdisc'⟩
+  exact hcard'.trans (Nat.mul_le_mul hPcard hQcard)
+
 /-! ### Tests -/
 
 section Tests
@@ -456,6 +603,41 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
       < |rectError f cF cG P Q S T|) :
     0 < finsetMass cF Finset.univ * finsetMass cG Finset.univ :=
   finsetMass_mul_pos_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
+
+-- **The seeded rectangular summit**, on carriers of different sizes, with the two part-count
+-- bounds arriving **separately**. Nothing here multiplies them.
+example (f : RectKernel (Fin 2) (Fin 3)) (P₀ : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q₀ : Finpartition (Finset.univ : Finset (Fin 3)))
+    (hf : IsAbsUnitBoundedOnRectangle f Finset.univ Finset.univ) :
+    ∃ P : Finpartition (Finset.univ : Finset (Fin 2)),
+      ∃ Q : Finpartition (Finset.univ : Finset (Fin 3)), P ≤ P₀ ∧ Q ≤ Q₀ ∧
+        P.parts.card ≤ P₀.parts.card * 2 ^ (⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ + 1) ∧
+        Q.parts.card ≤ Q₀.parts.card * 2 ^ (⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ + 1) ∧
+        ∀ S ⊆ (Finset.univ : Finset (Fin 2)), ∀ T ⊆ (Finset.univ : Finset (Fin 3)),
+          |rectError f cF cG P Q S T|
+            ≤ (1 / 2 : ℝ) * (finsetMass cF Finset.univ * finsetMass cG Finset.univ) :=
+  rect_frieze_kannan_refining f cF cG P₀ Q₀ hcF hcG hf (by norm_num)
+
+-- **The same-carrier adapter is the only place a factor `4` appears**: the two `2^t` bounds
+-- are multiplied here and nowhere earlier. Note the round count is at `ε/2`, which is exactly
+-- why this is weaker than the Boolean summit it adapts to.
+example (f : RectKernel (Fin 2) (Fin 2))
+    (P₀ Q₀ : Finpartition (Finset.univ : Finset (Fin 2)))
+    (hf : IsAbsUnitBoundedOnRectangle f Finset.univ Finset.univ) :
+    ∃ R : Finpartition (Finset.univ : Finset (Fin 2)), R ≤ P₀ ∧ R ≤ Q₀ ∧
+      R.parts.card
+        ≤ (P₀.parts.card * 2 ^ (⌈1 / ((1 / 2 : ℝ) / 2) ^ 2⌉₊ + 1))
+          * (Q₀.parts.card * 2 ^ (⌈1 / ((1 / 2 : ℝ) / 2) ^ 2⌉₊ + 1)) ∧
+      rectCutDiscrepancy f cF cF R R
+        ≤ (1 / 2 : ℝ) * (finsetMass cF Finset.univ * finsetMass cF Finset.univ) :=
+  rect_frieze_kannan_same_carrier f cF cF P₀ Q₀ hcF hcF hf (by norm_num)
+
+-- The round budget is **seed-independent**: it holds for an arbitrary starting pair.
+example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
+    (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
+    1 - ((⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ + 1 : ℕ) : ℝ) * (1 / 2 : ℝ) ^ 2
+      ≤ rectEnergy f cF cG P Q :=
+  one_sub_rounds_mul_sq_le_rectEnergy f cF cG P Q hcF hcG (by norm_num)
 
 -- The mass-weighted Cauchy–Schwarz the energy step consumes.
 example (a : Fin 2 → ℝ) :
