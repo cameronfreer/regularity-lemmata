@@ -164,3 +164,9 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/PolyadRegularity.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
+- G. Conant and C. Terry, *Quantitative analytic stable regularity*.
+  [arXiv:2607.21762](https://arxiv.org/abs/2607.21762). The almost-constancy vocabulary and
+  the separation lemma of `Finite/AlmostConstant.lean` (their Definitions 1.6/2.1 and
+  Proposition 2.2); the level-set staircase is this library's reduction of their sampling
+  needs to `Partition/BalancedSlicing.lean` and is not from the paper. The stable-regularity
+  theorems themselves are upstream (stability-flavored) material, not part of this library.
