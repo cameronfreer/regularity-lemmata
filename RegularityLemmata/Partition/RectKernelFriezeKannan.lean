@@ -30,10 +30,13 @@ The one-cut refinement itself is carrier-only machinery and lives upstream, in
 
 ## Provenance
 
-The weak-regularity architecture — approximating a rectangular matrix by a small sum of cut
-matrices, and driving the construction by a greedy energy increment — is due to A. Frieze and
-R. Kannan, *Quick approximation to matrices and applications*, Combinatorica **19** (1999),
-175–220. The energy-increment mechanism and the `ε²`-per-round gain are theirs.
+The weak-regularity architecture — weak approximation in cut discrepancy via a greedy energy
+increment — is due to A. Frieze and R. Kannan, *Quick approximation to matrices and
+applications*, Combinatorica **19** (1999), 175–220. The energy-increment mechanism and the
+`ε²`-per-round gain are theirs.
+
+What this file proves is a **step-partition summit**, not the separate cut-matrix
+decomposition interface, which remains unimplemented.
 
 The formulation here is this repository's, and differs from the classical source in ways that
 are not cosmetic: raw carrier weights on **two heterogeneous carriers** rather than a single
@@ -296,11 +299,15 @@ private theorem rectError_eq_zero_of_right_mass_zero [DecidableEq X] [DecidableE
 
 /-- **A witness forces positive total mass.** This is what lets the increment theorems below
 omit a positive-mass hypothesis: under nonnegative weights a zero-mass carrier makes every
-rectangle error vanish, so no witness can exist there. -/
+rectangle error vanish, so no witness can exist there.
+
+`ε` is **unconstrained** — no positivity is needed. At zero total mass the threshold
+`ε · 0` and the error both vanish for *any* `ε`, so the witness inequality is already
+contradictory. The increment theorems still need `0 < ε`, but for the gain, not for this. -/
 theorem finsetMass_mul_pos_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
     (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B)
     {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
-    (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (_hε : 0 < ε)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ}
     (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectError f wX wY P Q S T|) :
     0 < finsetMass wX A * finsetMass wY B := by
   rcases eq_or_lt_of_le (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)) with
@@ -335,7 +342,7 @@ theorem rectEnergyNum_add_le_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
   have hmB : 0 ≤ finsetMass wY B := finsetMass_nonneg hwY
   have hm : 0 ≤ finsetMass wX A * finsetMass wY B := mul_nonneg hmA hmB
   have hmpos : 0 < finsetMass wX A * finsetMass wY B :=
-    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
+    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hwit
   have hP : cutRefinePartition P S ≤ P := cutRefinePartition_le P S
   have hQ : cutRefinePartition Q T ≤ Q := cutRefinePartition_le Q T
   rw [rectEnergyNum_eq_add_rectRefinementVarianceNum hP hQ hwX hwY]
@@ -375,7 +382,7 @@ theorem rectEnergy_add_le_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
     rectEnergy f wX wY P Q + ε ^ 2
       ≤ rectEnergy f wX wY (cutRefinePartition P S) (cutRefinePartition Q T) := by
   have hmpos : 0 < finsetMass wX A * finsetMass wY B :=
-    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
+    finsetMass_mul_pos_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hwit
   have hraw := rectEnergyNum_add_le_of_lt_abs_rectError f wX wY P Q hS hT hwX hwY hε hwit
   rw [rectEnergy, rectEnergy, div_add' _ _ _ (ne_of_gt hmpos), div_le_div_iff_of_pos_right hmpos]
   linarith
@@ -595,14 +602,15 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
   rectEnergy_add_le_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
 
 -- **A witness cannot exist on a zero-mass carrier**, which is why neither theorem above
--- needs a positive-mass hypothesis.
+-- needs a positive-mass hypothesis. Note `ε` is entirely unconstrained here — not even
+-- `0 < ε` — since at zero total mass both the threshold and the error vanish outright.
 example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset (Fin 2)))
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) {S : Finset (Fin 2)}
-    {T : Finset (Fin 3)} (hS : S ⊆ Finset.univ) (hT : T ⊆ Finset.univ) {ε : ℝ} (hε : 0 < ε)
+    {T : Finset (Fin 3)} (hS : S ⊆ Finset.univ) (hT : T ⊆ Finset.univ) {ε : ℝ}
     (hwit : ε * (finsetMass cF Finset.univ * finsetMass cG Finset.univ)
       < |rectError f cF cG P Q S T|) :
     0 < finsetMass cF Finset.univ * finsetMass cG Finset.univ :=
-  finsetMass_mul_pos_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hε hwit
+  finsetMass_mul_pos_of_lt_abs_rectError f cF cG P Q hS hT hcF hcG hwit
 
 -- **The seeded rectangular summit**, on carriers of different sizes, with the two part-count
 -- bounds arriving **separately**. Nothing here multiplies them.

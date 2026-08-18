@@ -104,9 +104,10 @@ they were developed as stability-neutral infrastructure. No third-party source t
   `Partition/RectKernelCut.lean`, `Partition/RectKernelFriezeKannan.lean`; design freeze in
   `docs/design/rectangular-kernels.md`) divides credit three ways.
 
-  **Classical source.** The weak-regularity architecture is theirs: approximating a
-  rectangular matrix by a small sum of cut matrices, driven by a greedy energy increment,
-  with the `ε²`-per-round gain and the resulting single-exponential round count.
+  **Classical source.** The weak-regularity architecture is theirs: weak approximation in cut
+  discrepancy via a greedy energy increment, with the `ε²`-per-round gain and the resulting
+  single-exponential round count. What is formalized here is a **step-partition summit**; the
+  separate cut-matrix decomposition interface is not implemented.
 
   **This repository's formulation.** Raw carrier weights on **two heterogeneous carriers**
   rather than one normalized vertex set; **independent** left and right partitions whose part
