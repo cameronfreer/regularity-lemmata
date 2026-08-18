@@ -77,14 +77,21 @@ theorem isDeltaConstantOn_empty (φ : α → ℝ) (δ : ℝ) :
     IsDeltaConstantOn φ δ (∅ : Finset α) :=
   fun v hv ↦ absurd hv (by simp)
 
-/-- Singletons are `δ`-constant for every positive `δ` — and only for those; strictness
-matters. -/
+/-- Singletons are `δ`-constant for every positive `δ`. -/
 theorem isDeltaConstantOn_singleton (hδ : 0 < δ) (v : α) :
     IsDeltaConstantOn φ δ ({v} : Finset α) := by
   intro w hw w' hw'
   rw [Finset.mem_singleton] at hw hw'
   subst hw; subst hw'
   simpa using hδ
+
+/-- … and **only** for positive `δ`: strictness makes even the one-point diagonal fail at
+`δ ≤ 0`. -/
+theorem isDeltaConstantOn_singleton_iff (v : α) :
+    IsDeltaConstantOn φ δ ({v} : Finset α) ↔ 0 < δ := by
+  refine ⟨fun h ↦ ?_, fun hδ ↦ isDeltaConstantOn_singleton hδ v⟩
+  have := h v (Finset.mem_singleton_self v) v (Finset.mem_singleton_self v)
+  simpa using this
 
 theorem IsAlmostConstantOn.mono_delta (h : IsAlmostConstantOn φ δ ε V) (hδ : δ ≤ δ') :
     IsAlmostConstantOn φ δ' ε V := by
@@ -123,11 +130,26 @@ theorem isAlmostConstantOn_of_one_le (hδ : 0 < δ) (hε : 1 ≤ ε) :
       mul_nonpos_of_nonpos_of_nonneg (by linarith) (Nat.cast_nonneg _)
     simpa using lt_of_le_of_lt h1 one_pos
 
+theorem IsAlmostConstantPair.mono_delta {f : RectKernel X Y} {A : Finset X} {B : Finset Y}
+    (h : IsAlmostConstantPair f δ ε A B) (hδ : δ ≤ δ') :
+    IsAlmostConstantPair f δ' ε A B :=
+  IsAlmostConstantOn.mono_delta h hδ
+
+theorem IsAlmostConstantPair.mono_eps {f : RectKernel X Y} {A : Finset X} {B : Finset Y}
+    (h : IsAlmostConstantPair f δ ε A B) (hε : ε ≤ ε') :
+    IsAlmostConstantPair f δ ε' A B :=
+  IsAlmostConstantOn.mono_eps h hε
+
 /-! ### Separation (Conant–Terry Proposition 2.2) -/
 
 /-- **Separation.** A function that is not `2ε`-almost `δ`-constant admits a threshold with
 `ε`-fractions at or below it and at or above it plus `δ`. The threshold produced is the
-`⌈ε·|V|⌉`-th smallest value of `φ` on `V`. -/
+`⌈ε·|V|⌉`-th smallest value of `φ` on `V`.
+
+This **generalizes** Conant–Terry Proposition 2.2: the paper assumes a `[0,1]`-valued
+function and returns `r ∈ [0,1]`, while this statement permits an arbitrary real-valued `φ`;
+the constants and strict inequalities otherwise match. The range-aware companion
+`exists_separation_mem_Icc_of_not_isAlmostConstantOn` is the paper's exact consumer shape. -/
 theorem exists_separation_of_not_isAlmostConstantOn [DecidableEq α]
     (hδ : 0 < δ) (hε : 0 < ε) (h : ¬ IsAlmostConstantOn φ δ (2 * ε) V) :
     ∃ r : ℝ, (ε * V.card ≤ ((V.filter fun x ↦ φ x ≤ r).card : ℝ)) ∧
@@ -231,6 +253,46 @@ theorem exists_separation_of_not_isAlmostConstantOn [DecidableEq α]
       have : ((V.filter fun x ↦ φ x < r).card : ℝ) + 1 ≤ (m : ℝ) := by
         exact_mod_cast hlt
       linarith
+    linarith
+
+/-- **Range-aware separation** — the exact Conant–Terry Proposition 2.2 shape: for a
+`[0,1]`-valued function the threshold can be taken in `[0,1]`, since both level sets it
+produces are nonempty and pin it between attained values. -/
+theorem exists_separation_mem_Icc_of_not_isAlmostConstantOn [DecidableEq α]
+    (hδ : 0 < δ) (hε : 0 < ε) (hrange : ∀ x ∈ V, φ x ∈ Set.Icc (0 : ℝ) 1)
+    (h : ¬ IsAlmostConstantOn φ δ (2 * ε) V) :
+    ∃ r ∈ Set.Icc (0 : ℝ) 1,
+      (ε * V.card ≤ ((V.filter fun x ↦ φ x ≤ r).card : ℝ)) ∧
+      (ε * V.card ≤ ((V.filter fun x ↦ r + δ ≤ φ x).card : ℝ)) := by
+  obtain ⟨r, h1, h2⟩ := exists_separation_of_not_isAlmostConstantOn hδ hε h
+  have hVne : V.Nonempty := by
+    rcases V.eq_empty_or_nonempty with rfl | h'
+    · exact absurd (isAlmostConstantOn_empty φ δ (2 * ε)) h
+    · exact h'
+  have hNpos : (0 : ℝ) < (V.card : ℝ) := by exact_mod_cast Finset.card_pos.mpr hVne
+  have hlow : (V.filter fun x ↦ φ x ≤ r).Nonempty := by
+    rw [← Finset.card_pos]
+    by_contra hc
+    push Not at hc
+    have h0 : ((V.filter fun x ↦ φ x ≤ r).card : ℝ) = 0 := by
+      exact_mod_cast Nat.le_zero.mp hc
+    nlinarith
+  have hhigh : (V.filter fun x ↦ r + δ ≤ φ x).Nonempty := by
+    rw [← Finset.card_pos]
+    by_contra hc
+    push Not at hc
+    have h0 : ((V.filter fun x ↦ r + δ ≤ φ x).card : ℝ) = 0 := by
+      exact_mod_cast Nat.le_zero.mp hc
+    nlinarith
+  obtain ⟨a, ha⟩ := hlow
+  obtain ⟨b, hb⟩ := hhigh
+  have haV := (Finset.mem_filter.mp ha).1
+  have har := (Finset.mem_filter.mp ha).2
+  have hbV := (Finset.mem_filter.mp hb).1
+  have hbr := (Finset.mem_filter.mp hb).2
+  refine ⟨r, ⟨?_, ?_⟩, h1, h2⟩
+  · exact le_trans (hrange a haV).1 har
+  · have := (hrange b hbV).2
     linarith
 
 /-! ### The level-set staircase -/
@@ -387,7 +449,7 @@ theorem abs_averageOn_sub_averageOn_le_of_levelSets [DecidableEq α] {φ : α �
   linarith [hQside, hmid, htri, hAside', hprice]
 
 /-- The clean `2ν + 2β` reading, under `ν ≤ 1`. -/
-theorem abs_averageOn_sub_averageOn_le_of_levelSets' [DecidableEq α] {φ : α → ℝ}
+theorem abs_averageOn_sub_averageOn_le_of_levelSets_of_le_one [DecidableEq α] {φ : α → ℝ}
     {A Q : Finset α} {β ν : ℝ} (hν : 0 < ν) (hν1 : ν ≤ 1) (hβ : 0 ≤ β) (hQ : Q ⊆ A)
     (hQne : Q.Nonempty) (hrange : ∀ x ∈ A, φ x ∈ Set.Icc (0 : ℝ) 1)
     (hlevels : ∀ r : ℕ, 1 ≤ r → (r : ℝ) * ν ≤ 1 →
