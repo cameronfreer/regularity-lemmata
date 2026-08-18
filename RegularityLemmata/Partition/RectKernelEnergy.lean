@@ -247,6 +247,34 @@ theorem rectRefinementVarianceNum_nonneg [DecidableEq X] [DecidableEq Y]
     (mul_nonneg (finsetMass_nonneg fun x hx => hwX x ((P'.le hp.1.1) hx))
       (finsetMass_nonneg fun y hy => hwY y ((Q'.le hp.2.1) hy)))
 
+/-- **Sub-family form.** Any collections `I ⊆ P'.parts` and `J ⊆ Q'.parts` of fine cells
+regroup under their coarse parents.
+
+Stated for sub-families because the energy increment selects the fine cells meeting a witness
+rectangle and still has to group them under parents to match the summand of
+`rectRefinementVarianceNum`; the unrestricted version below does not apply there. -/
+theorem sum_product_parts_eq_sum_over_parents_subset [DecidableEq X] [DecidableEq Y]
+    {P P' : Finpartition A} {Q Q' : Finpartition B} (hP : P' ≤ P) (hQ : Q' ≤ Q)
+    {I : Finset (Finset X)} {J : Finset (Finset Y)} (hI : I ⊆ P'.parts) (hJ : J ⊆ Q'.parts)
+    (g : Finset X → Finset Y → ℝ) :
+    ∑ pd ∈ P.parts ×ˢ Q.parts,
+        ∑ p ∈ (I.filter (· ⊆ pd.1)) ×ˢ (J.filter (· ⊆ pd.2)), g p.1 p.2
+      = ∑ p ∈ I ×ˢ J, g p.1 p.2 := by
+  classical
+  rw [Finset.sum_product, Finset.sum_product]
+  calc ∑ C ∈ P.parts, ∑ D ∈ Q.parts,
+        ∑ p ∈ (I.filter (· ⊆ C)) ×ˢ (J.filter (· ⊆ D)), g p.1 p.2
+      = ∑ C ∈ P.parts, ∑ C' ∈ I.filter (· ⊆ C),
+          ∑ D ∈ Q.parts, ∑ D' ∈ J.filter (· ⊆ D), g C' D' := by
+        refine Finset.sum_congr rfl fun C _ => ?_
+        rw [Finset.sum_comm]
+        exact Finset.sum_congr rfl fun D _ => by rw [Finset.sum_product]
+    _ = ∑ C ∈ P.parts, ∑ C' ∈ I.filter (· ⊆ C), ∑ D' ∈ J, g C' D' :=
+        Finset.sum_congr rfl fun C _ => Finset.sum_congr rfl fun C' _ =>
+          sum_over_parents_subset hQ hJ (g C')
+    _ = ∑ C' ∈ I, ∑ D' ∈ J, g C' D' :=
+        sum_over_parents_subset hP hI fun C' => ∑ D' ∈ J, g C' D'
+
 /-- Summing over the fine parts inside each coarse cell recovers the sum over all fine
 cells — the two-coordinate form of `sum_over_parents`. -/
 theorem sum_product_parts_eq_sum_over_parents [DecidableEq X] [DecidableEq Y]
@@ -254,21 +282,8 @@ theorem sum_product_parts_eq_sum_over_parents [DecidableEq X] [DecidableEq Y]
     (g : Finset X → Finset Y → ℝ) :
     ∑ pd ∈ P.parts ×ˢ Q.parts,
         ∑ p ∈ (P'.parts.filter (· ⊆ pd.1)) ×ˢ (Q'.parts.filter (· ⊆ pd.2)), g p.1 p.2
-      = ∑ p ∈ P'.parts ×ˢ Q'.parts, g p.1 p.2 := by
-  classical
-  rw [Finset.sum_product, Finset.sum_product]
-  calc ∑ C ∈ P.parts, ∑ D ∈ Q.parts,
-        ∑ p ∈ (P'.parts.filter (· ⊆ C)) ×ˢ (Q'.parts.filter (· ⊆ D)), g p.1 p.2
-      = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C),
-          ∑ D ∈ Q.parts, ∑ D' ∈ Q'.parts.filter (· ⊆ D), g C' D' := by
-        refine Finset.sum_congr rfl fun C _ => ?_
-        rw [Finset.sum_comm]
-        exact Finset.sum_congr rfl fun D _ => by rw [Finset.sum_product]
-    _ = ∑ C ∈ P.parts, ∑ C' ∈ P'.parts.filter (· ⊆ C), ∑ D' ∈ Q'.parts, g C' D' :=
-        Finset.sum_congr rfl fun C _ => Finset.sum_congr rfl fun C' _ =>
-          sum_over_parents hQ (g C')
-    _ = ∑ C' ∈ P'.parts, ∑ D' ∈ Q'.parts, g C' D' :=
-        sum_over_parents hP fun C' => ∑ D' ∈ Q'.parts, g C' D'
+      = ∑ p ∈ P'.parts ×ˢ Q'.parts, g p.1 p.2 :=
+  sum_product_parts_eq_sum_over_parents_subset hP hQ Finset.Subset.rfl Finset.Subset.rfl g
 
 /-- **The refinement-pair parallel-axis identity.** Refining *both* partitions gains exactly
 the mass-weighted variance of the fine cell averages around the coarse ones.

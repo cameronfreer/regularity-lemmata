@@ -9,6 +9,11 @@ implementation, because the canonical Frieze–Kannan object is a rectangular we
 (cf. Frieze–Kannan, *Quick Approximation to Matrices and Applications*), while the library's
 current theorem is Boolean, same-carrier, and uses one partition on both coordinates.
 
+**Provenance.** Credit for this track — the classical Frieze–Kannan source, this repository's
+own formulation, and the internal Boolean antecedent — is recorded in one consolidated entry
+in [`PROVENANCE.md`](../../PROVENANCE.md), under the Frieze–Kannan publication. This document
+deliberately does **not** maintain its own bibliography.
+
 ## 1. Goal
 
 A cut-discrepancy and Frieze–Kannan theory for

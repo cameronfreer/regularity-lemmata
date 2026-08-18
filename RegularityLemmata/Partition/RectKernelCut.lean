@@ -229,8 +229,12 @@ private theorem sum_trace_mass_filter_subset [DecidableEq X] {P P' : Finpartitio
 after multiplication by the trace masses, which is what makes the zero-mass branch true
 rather than merely convenient.
 
-Private: the only consumer is `steppedRectSum_rectResidual`. -/
-private theorem rectAverage_rectResidual_mul_trace_mass [DecidableEq X] [DecidableEq Y]
+**Only the multiplied form is exposed, deliberately.** The unweighted equality
+`rectAverage (rectResidual …) C' D' = rectAverage f C' D' - rectAverage f C D` is **false**
+on a zero-mass fine cell: the guard-free residual average is `0 / 0 = 0` there, while the
+difference of averages need not vanish. Consumers that want to cancel must first establish a
+nonzero mass product locally. -/
+theorem rectAverage_rectResidual_mul_trace_mass [DecidableEq X] [DecidableEq Y]
     (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) {P : Finpartition A} {Q : Finpartition B}
     {C C' : Finset X} {D D' : Finset Y} (hC : C ∈ P.parts) (hD : D ∈ Q.parts)
     (hC' : C' ⊆ C) (hD' : D' ⊆ D) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
@@ -278,6 +282,30 @@ private theorem rectAverage_rectResidual_mul_trace_mass [DecidableEq X] [Decidab
       = rectAverage f wX wY C' D' - rectAverage f wX wY C D := by
     rw [rectAverage, rectAverage, hsum, sub_div, mul_div_assoc, div_self hne, mul_one]
   rw [havg]
+
+/-- **The squared fine-cell identity, multiplied by the cell masses.** The form the energy
+increment consumes.
+
+Same contract as the linear version above: the identity is stated **only** after multiplying
+by the fine-cell mass product, because the unweighted equality of averages fails on a
+zero-mass fine cell. The cancellation happens inside this proof, under a locally established
+`mass ≠ 0`, and is never exposed. -/
+theorem sq_rectAverage_rectResidual_mul_mass [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) {P : Finpartition A} {Q : Finpartition B}
+    {C C' : Finset X} {D D' : Finset Y} (hC : C ∈ P.parts) (hD : D ∈ Q.parts)
+    (hC' : C' ⊆ C) (hD' : D' ⊆ D) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectAverage (rectResidual f wX wY P Q) wX wY C' D' ^ 2
+        * (finsetMass wX C' * finsetMass wY D')
+      = (rectAverage f wX wY C' D' - rectAverage f wX wY C D) ^ 2
+        * (finsetMass wX C' * finsetMass wY D') := by
+  classical
+  have hAC : A ∩ C' = C' := Finset.inter_eq_right.mpr (hC'.trans (P.le hC))
+  have hBD : B ∩ D' = D' := Finset.inter_eq_right.mpr (hD'.trans (Q.le hD))
+  have hlin := rectAverage_rectResidual_mul_trace_mass f wX wY hC hD hC' hD' hwX hwY A B
+  rw [hAC, hBD] at hlin
+  rcases eq_or_ne (finsetMass wX C' * finsetMass wY D') 0 with h0 | hne
+  · rw [h0, mul_zero, mul_zero]
+  · rw [mul_right_cancel₀ hne hlin]
 
 /-- **The tower identity.** Stepping the `P ×ˢ Q`-residual against a finer pair `P' ×ˢ Q'`
 gives the difference of the two stepped predictions.

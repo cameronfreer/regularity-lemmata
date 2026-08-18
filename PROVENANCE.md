@@ -98,6 +98,35 @@ they were developed as stability-neutral infrastructure. No third-party source t
 - E. Szemerédi, *Regular partitions of graphs*, Colloq. Internat. CNRS 260, 1978.
 - A. Frieze, R. Kannan, *Quick approximation to matrices and applications*,
   Combinatorica 19 (1999).
+
+  **The rectangular weighted-kernel development** (`Finite/RectKernel.lean`,
+  `Partition/RectKernel.lean`, `Partition/RectKernelEnergy.lean`,
+  `Partition/RectKernelCut.lean`, `Partition/RectKernelFriezeKannan.lean`; design freeze in
+  `docs/design/rectangular-kernels.md`) divides credit three ways.
+
+  **Classical source.** The weak-regularity architecture is theirs: weak approximation in cut
+  discrepancy via a greedy energy increment, with the `ε²`-per-round gain and the resulting
+  single-exponential round count. What is formalized here is a **step-partition summit**; the
+  separate cut-matrix decomposition interface is not implemented.
+
+  **This repository's formulation.** Raw carrier weights on **two heterogeneous carriers**
+  rather than one normalized vertex set; **independent** left and right partitions whose part
+  counts are exposed separately (`2^t` per coordinate, with `4^t` appearing only where the
+  same-carrier adapter multiplies them); guard-free `x / 0 = 0` conventions throughout, so
+  zero-mass cells and zero-mass carriers need no side conditions; the contraction of a stepped
+  prediction at constant **1** rather than 2; and the common-refinement adapter converting the
+  two-coordinate statement into a same-carrier one. The supporting inequalities
+  (`abs_sum_bilinear_le`, `sq_sum_mul_le_sum_mul_sum_sq_mul` in `Finite/Inequalities.lean`)
+  are proved here independently.
+
+  **Internal antecedent.** The Boolean development in `Graph/FriezeKannan.lean`, which is
+  **unchanged and not superseded**: it remains the sharper direct same-carrier summit. The
+  rectangular route recovers its *discrepancy* conclusion through the adapter, at a weaker
+  complexity bound, because it calls at `ε/2`.
+
+  Cut-norm and step-kernel background for `Partition/RectKernelCut.lean` is Lovász's, cited
+  below; the constant-1 contraction proved there is this repository's finite weighted
+  formulation, not a restatement of a lemma from that source.
 - T. Tao, *Szemerédi's regularity lemma revisited*, Contrib. Discrete Math. 1 (2006) —
   the strong-regularity energy-gap iteration (`Graph/Strong.lean`).
 - Y. Zhao, *Graph Theory and Additive Combinatorics* (MIT notes / CUP 2023) — the
