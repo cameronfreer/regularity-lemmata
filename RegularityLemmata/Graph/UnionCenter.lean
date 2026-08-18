@@ -194,18 +194,18 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
     have hdxy : 0 ≤ (d + 2 * α) * (xi i * yj j) :=
       mul_nonneg (by linarith) hxynn
     by_cases hij : i = j
-    · simp only [if_pos hij]
+    · simp only [ite_eq_left hij]
       have h1 : (0 : ℝ) ≤ if xi i < α * m then xi i * yj j else 0 := by positivity
       have h2 : (0 : ℝ) ≤ if yj j < α * m then xi i * yj j else 0 := by positivity
       linarith
     by_cases hx : xi i < α * m
-    · simp only [if_neg hij, if_pos hx]
+    · simp only [ite_eq_right hij, ite_eq_left hx]
       have h2 : (0 : ℝ) ≤ if yj j < α * m then xi i * yj j else 0 := by positivity
       linarith
     by_cases hy : yj j < α * m
-    · simp only [if_neg hij, if_neg hx, if_pos hy]
+    · simp only [ite_eq_right hij, ite_eq_right hx, ite_eq_left hy]
       linarith
-    · simp only [if_neg hij, if_neg hx, if_neg hy, add_zero]
+    · simp only [ite_eq_right hij, ite_eq_right hx, ite_eq_right hy, add_zero]
       have h2α := (abs_le.mp (hgood i j hij (le_of_not_gt hx) (le_of_not_gt hy))).2
       have hcount : cij i j
           = pairDensity R (X ∩ A i) (Y ∩ A j) * (xi i * yj j) := by
@@ -226,18 +226,18 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
     have hd2 : (d - 2 * α) * (xi i * yj j) ≤ xi i * yj j :=
       mul_le_of_le_one_left hxynn (by linarith)
     by_cases hij : i = j
-    · simp only [if_pos hij]
+    · simp only [ite_eq_left hij]
       have h1 : (0 : ℝ) ≤ if xi i < α * m then xi i * yj j else 0 := by positivity
       have h2 : (0 : ℝ) ≤ if yj j < α * m then xi i * yj j else 0 := by positivity
       linarith
     by_cases hx : xi i < α * m
-    · simp only [if_neg hij, if_pos hx]
+    · simp only [ite_eq_right hij, ite_eq_left hx]
       have h2 : (0 : ℝ) ≤ if yj j < α * m then xi i * yj j else 0 := by positivity
       linarith
     by_cases hy : yj j < α * m
-    · simp only [if_neg hij, if_neg hx, if_pos hy]
+    · simp only [ite_eq_right hij, ite_eq_right hx, ite_eq_left hy]
       linarith
-    · simp only [if_neg hij, if_neg hx, if_neg hy, add_zero]
+    · simp only [ite_eq_right hij, ite_eq_right hx, ite_eq_right hy, add_zero]
       have h2α := (abs_le.mp (hgood i j hij (le_of_not_gt hx) (le_of_not_gt hy))).1
       have hcount : cij i j
           = pairDensity R (X ∩ A i) (Y ∩ A j) * (xi i * yj j) := by
@@ -274,9 +274,9 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     by_cases hc : xi i < α * m
-    · simp only [if_pos hc]
+    · simp only [ite_eq_left hc]
       rw [← Finset.mul_sum, ← hYC]
-    · simp only [if_neg hc, Finset.sum_const_zero, zero_mul]
+    · simp only [ite_eq_right hc, Finset.sum_const_zero, zero_mul]
   have hsy_sum : ∑ i, ∑ j, (if yj j < α * m then xi i * yj j else 0)
       = (X.card : ℝ) * (∑ j, if yj j < α * m then yj j else 0) := by
     rw [hXC, Finset.sum_mul]
@@ -284,8 +284,8 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     by_cases hc : yj j < α * m
-    · simp only [if_pos hc]
-    · simp only [if_neg hc, mul_zero]
+    · simp only [ite_eq_left hc]
+    · simp only [ite_eq_right hc, mul_zero]
   -- Bounds on the structural sums.
   have hS1 : ∑ i, xi i * yj i ≤ (m : ℝ) * (Y.card : ℝ) := by
     calc ∑ i, xi i * yj i
@@ -299,9 +299,9 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
         ≤ ∑ _i : Fin s, α * (m : ℝ) := by
           refine Finset.sum_le_sum fun i _ => ?_
           by_cases hc : xi i < α * m
-          · simp only [if_pos hc]
+          · simp only [ite_eq_left hc]
             linarith
-          · simp only [if_neg hc]
+          · simp only [ite_eq_right hc]
             positivity
       _ = α * ((s : ℝ) * m) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
@@ -311,9 +311,9 @@ theorem pairDensity_union_close_center (hm : 0 < m) (hs : 0 < s)
         ≤ ∑ _j : Fin s, α * (m : ℝ) := by
           refine Finset.sum_le_sum fun j _ => ?_
           by_cases hc : yj j < α * m
-          · simp only [if_pos hc]
+          · simp only [ite_eq_left hc]
             linarith
-          · simp only [if_neg hc]
+          · simp only [ite_eq_right hc]
             positivity
       _ = α * ((s : ℝ) * m) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
@@ -459,11 +459,11 @@ theorem pairDensity_union_self_close_center (hm : 0 < m) (hs : 0 < s)
       rw [hcard i, hcard j] at h
       exact_mod_cast h
     by_cases hij : i = j
-    · simp only [if_pos hij]
+    · simp only [ite_eq_left hij]
       have h0 : 0 ≤ (d + α) * ((m : ℝ) * m) :=
         mul_nonneg (by linarith) (by positivity)
       linarith
-    · simp only [if_neg hij, add_zero]
+    · simp only [ite_eq_right hij, add_zero]
       have h1 := (abs_le.mp (hclose i j hij)).2
       have hcount : ((pairCount R (A i) (A j)) : ℝ)
           = pairDensity R (A i) (A j) * ((m : ℝ) * m) := by
@@ -478,11 +478,11 @@ theorem pairDensity_union_self_close_center (hm : 0 < m) (hs : 0 < s)
     intro i j
     have hnn : (0 : ℝ) ≤ ((pairCount R (A i) (A j)) : ℝ) := Nat.cast_nonneg _
     by_cases hij : i = j
-    · simp only [if_pos hij]
+    · simp only [ite_eq_left hij]
       have h0 : (d - α) * ((m : ℝ) * m) ≤ (m : ℝ) * m :=
         mul_le_of_le_one_left (by positivity) (by linarith)
       linarith
-    · simp only [if_neg hij, sub_zero]
+    · simp only [ite_eq_right hij, sub_zero]
       have h1 := (abs_le.mp (hclose i j hij)).1
       have hcount : ((pairCount R (A i) (A j)) : ℝ)
           = pairDensity R (A i) (A j) * ((m : ℝ) * m) := by

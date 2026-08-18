@@ -49,7 +49,7 @@ def ofUniformHypergraph [DecidableEq V] {r : ℕ} (H : UniformHypergraph r V) :
     (ofUniformHypergraph H).Holds (singleRelSymbol r) x ↔ H.orderedRel x := by
   show (if h : r = r then decide (H.orderedRel fun i => x (Fin.cast h.symm i))
     else false) = true ↔ _
-  rw [dif_pos rfl, decide_eq_true_eq]
+  rw [dite_eq_left rfl, decide_eq_true_eq]
   exact Iff.rfl
 
 theorem not_ofUniformHypergraph_holds_of_not_injective [DecidableEq V] {r : ℕ}

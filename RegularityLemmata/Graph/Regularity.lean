@@ -57,9 +57,9 @@ theorem energyNum_increment_of_pairwise_gain {P P' : Finpartition s} (hP' : P' �
     rw [Finset.mem_product] at huv
     obtain ⟨hC, hD⟩ := huv
     by_cases hbad : IsBadPair R ε uv.1 uv.2
-    · rw [if_pos hbad]
+    · rw [ite_eq_left hbad]
       exact hpair uv.1 hC uv.2 hD hbad
-    · rw [if_neg hbad, add_zero]
+    · rw [ite_eq_right hbad, add_zero]
       exact blockEnergy_le_sum_refined hP' R hC hD
   calc energyNum R P + g * badMassNum R ε P
       = ∑ uv ∈ P.parts ×ˢ P.parts, (blockEnergy R uv.1 uv.2

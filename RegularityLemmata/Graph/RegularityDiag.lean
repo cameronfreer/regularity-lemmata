@@ -112,13 +112,13 @@ theorem diagWitnessRefinement_resolves (P : Finpartition s) :
     rw [diagWitnessCuts, Finset.mem_union]
     left
     rw [Finset.mem_image]
-    exact ⟨D, hD, dif_pos hbad⟩
+    exact ⟨D, hD, dite_eq_left hbad⟩
   · refine isPartUnion_bind_atomise hD ?_
       (NonuniformWitness.ofNotUniform hbad).right_subset
     rw [diagWitnessCuts, Finset.mem_union]
     right
     rw [Finset.mem_image]
-    exact ⟨C, hC, dif_pos hbad⟩
+    exact ⟨C, hC, dite_eq_left hbad⟩
 
 end Cuts
 
@@ -144,11 +144,11 @@ theorem energyNum_increment_of_badMassDiagNum {P P' : Finpartition s} (hP' : P' 
     rw [Finset.mem_product] at huv
     obtain ⟨hC, hD⟩ := huv
     by_cases hbad : IsBadPairDiag R ε uv.1 uv.2
-    · rw [if_pos hbad, ← mul_assoc]
+    · rw [ite_eq_left hbad, ← mul_assoc]
       obtain ⟨w, hlU, hrU⟩ := hwit uv.1 hC uv.2 hD hbad
       exact blockEnergy_increment_refined R hε w
         (isPartUnion_of_mem_of_le hP' hC) (isPartUnion_of_mem_of_le hP' hD) hlU hrU
-    · rw [if_neg hbad, add_zero]
+    · rw [ite_eq_right hbad, add_zero]
       exact blockEnergy_le_sum_refined hP' R hC hD
   calc energyNum R P + ε ^ 4 * badMassDiagNum R ε P
       = ∑ uv ∈ P.parts ×ˢ P.parts, (blockEnergy R uv.1 uv.2

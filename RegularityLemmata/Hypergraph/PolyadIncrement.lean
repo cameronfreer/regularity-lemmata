@@ -160,7 +160,7 @@ theorem badPolyadWitnessFamily_spec {κ : RSet j α → Fin K}
   classical
   refine ⟨(exists_discWitness h).some, ?_⟩
   rw [badPolyadWitnessFamily]
-  simp only [dif_pos h]
+  simp only [dite_eq_left h]
 
 /-! ### The global increment -/
 

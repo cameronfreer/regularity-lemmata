@@ -131,11 +131,11 @@ theorem familyEnergy_add_le_of_component {g : ℝ} (hQP : Q ≤ P) (k : Fin K)
     by_cases hjk : j = k
     · subst hjk
       simpa using hgain
-    · rw [if_neg hjk, add_zero]
+    · rw [ite_eq_right hjk, add_zero]
       exact energy_mono (Rk j) hQP
   have hsum := Finset.sum_le_sum hpoint
   rw [Finset.sum_add_distrib, Finset.sum_ite_eq' Finset.univ k fun _ => g] at hsum
-  simp only [Finset.mem_univ, if_true] at hsum
+  simp only [Finset.mem_univ, ite_true] at hsum
   exact hsum
 
 /-- The empty family has zero energy. -/

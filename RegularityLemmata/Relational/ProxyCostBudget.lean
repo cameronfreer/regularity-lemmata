@@ -242,7 +242,7 @@ example (M : FiniteRelModel L V) (η : ℝ) (F Q : Finpartition s) (g : ProxyInd
     proxyDeviationCost M η F Q g = 0 := by
   classical
   refine Finset.sum_eq_zero fun e _ => ?_
-  rw [if_neg (hg e)]
+  rw [ite_eq_right (hg e)]
 
 end Tests
 

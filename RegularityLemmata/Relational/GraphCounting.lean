@@ -110,9 +110,9 @@ theorem binaryPairPalette_ofSimpleGraph (G : SimpleGraph V) [DecidableRel G.Adj]
     binaryPairPalette (ofSimpleGraph G) a b
       = if G.Adj a b then adjPalette else nonadjPalette := by
   by_cases h : G.Adj a b
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     exact (hasBinaryPairPalette_adjPalette_iff G a b).mpr h
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     exact (hasBinaryPairPalette_nonadjPalette_iff G a b).mpr h
 
 /-- The palette relation required by a pattern pair is adjacency on a pattern edge and
@@ -123,8 +123,8 @@ theorem hasBinaryPairPalette_binaryPairPalette_ofSimpleGraph {W : Type*} (P : Si
       = if P.Adj i j then G.Adj else fun a b => ¬ G.Adj a b := by
   rw [binaryPairPalette_ofSimpleGraph]
   by_cases h : P.Adj i j
-  · rw [if_pos h, if_pos h, hasBinaryPairPalette_adjPalette_eq]
-  · rw [if_neg h, if_neg h, hasBinaryPairPalette_nonadjPalette_eq]
+  · rw [ite_eq_left h, ite_eq_left h, hasBinaryPairPalette_adjPalette_eq]
+  · rw [ite_eq_right h, ite_eq_right h, hasBinaryPairPalette_nonadjPalette_eq]
 
 /-! ### Ordered edge and length-two-path counts -/
 

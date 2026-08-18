@@ -117,18 +117,18 @@ theorem refineBySplit_parts (P : Finpartition s) (C : Finset α) (hC : C ∈ P.p
   · rintro ⟨D, hD, hb⟩
     by_cases h : D = C
     · subst h
-      rw [dif_pos rfl] at hb
+      rw [dite_eq_left rfl] at hb
       have hb' : b ∈ (twoPartition D A hA hAne hBne).parts := hb
       rw [twoPartition_parts, Finset.mem_insert, Finset.mem_singleton] at hb'
       exact Or.inr hb'
-    · rw [dif_neg h, Finpartition.indiscrete_parts, Finset.mem_singleton] at hb
+    · rw [dite_eq_right h, Finpartition.indiscrete_parts, Finset.mem_singleton] at hb
       subst hb
       exact Or.inl ⟨h, hD⟩
   · rintro (⟨hbC, hbP⟩ | hb)
     · refine ⟨b, hbP, ?_⟩
-      rw [dif_neg hbC, Finpartition.indiscrete_parts, Finset.mem_singleton]
+      rw [dite_eq_right hbC, Finpartition.indiscrete_parts, Finset.mem_singleton]
     · refine ⟨C, hC, ?_⟩
-      rw [dif_pos rfl]
+      rw [dite_eq_left rfl]
       show b ∈ (twoPartition C A hA hAne hBne).parts
       rw [twoPartition_parts, Finset.mem_insert, Finset.mem_singleton]
       exact hb
