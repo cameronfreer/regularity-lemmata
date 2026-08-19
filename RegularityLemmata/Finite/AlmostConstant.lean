@@ -23,8 +23,11 @@ one definition, not a parallel notion.
   load-bearing for indicator specializations: with `≤ δ` at `δ = 1`, "1-constant" would be
   vacuously true of every `[0,1]`-valued function.
 * **Totalization**: the empty set is almost constant (`V = ∅ ∨ …`), matching the library's
-  guard-free homogeneity conventions; on nonempty sets the definition is the paper's,
-  verbatim.
+  guard-free homogeneity conventions. On nonempty sets this **agrees with the paper under its
+  `[0,1]` range and positive-parameter assumptions**; it is not a verbatim transcription. What
+  is formalized here is a **real-valued, empty-totalized extension**: `φ` is an arbitrary
+  `α → ℝ`, and the definitions place no range or sign constraint of their own. Range and
+  positivity hypotheses appear on the theorems that need them, never in the predicates.
 * **No stability**: nothing here mentions ladders, trees, goodness, or ranks; those live
   upstairs.
 

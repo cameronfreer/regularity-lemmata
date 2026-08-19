@@ -3,6 +3,8 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Weight
+import RegularityLemmata.Finite.Average
+import RegularityLemmata.Finite.AlmostConstant
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.RelationKernel
 import RegularityLemmata.Partition.RectKernel
@@ -24,6 +26,13 @@ each listed module remains directly importable.
   pullback, restriction, and the boundedness predicates.
 * `Finite.RelationKernel` — relation indicators as kernels: the bridge between the kernel core
   and the pair-density core.
+* `Finite.Average` — one-variable averages (`averageOn`), guard-free at `∅`, with `densityOn`
+  as their indicator shadow and both rectangle-fiber factorizations of `rectAverageCount`. One
+  averaging vocabulary shared by kernel averages, fiber averages, and densities.
+* `Finite.AlmostConstant` — the analytic analogue of `ε`-homogeneity: `δ`-constant and
+  `ε`-almost `δ`-constant sets and rectangles, the separation theorem, and the level-set
+  staircase reducing `[0,1]`-valued average control to set-density control. Stability-free —
+  no ladders, trees, or ranks.
 * `Partition.RectKernel` — decomposition along independent partitions of the two carriers, and
   the stepped prediction (`steppedRectSum`).
 * `Partition.RectKernelEnergy` — kernel energy against a partition pair and the exact
