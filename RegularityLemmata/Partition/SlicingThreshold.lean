@@ -62,7 +62,8 @@ theorem sliceThreshold_key (hμ : 0 < μ) (hν : 0 < ν)
 theorem sliceBlockSize_le (hμ : 0 ≤ μ) : (sliceBlockSize μ n : ℝ) ≤ μ * n :=
   Nat.floor_le (by positivity)
 
-/-- On the summit domain, the block size clears `16`, in particular it is positive. -/
+/-- Under the threshold hypotheses, the block size clears `16`; in particular it is
+positive. -/
 theorem sixteen_le_sliceBlockSize (hμ : 0 < μ) (hν : 0 < ν) (hν2 : ν ≤ 1 / 2)
     (hn : sliceThreshold q μ ν ≤ n) : 16 ≤ sliceBlockSize μ n := by
   have hkey := sliceThreshold_key (q := q) hμ hν hn

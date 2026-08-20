@@ -207,6 +207,14 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Proposition 2.2, with `exists_separation_mem_Icc_of_not_isAlmostConstantOn` as the exact
   **range-aware companion** recovering the paper's `[0,1]` setting.
 
-  The level-set staircase is this library's own reduction of their sampling needs to
-  `Partition/BalancedSlicing.lean` and is not from the paper. The stable-regularity theorems
-  themselves are upstream (stability-flavored) material, not part of this library.
+  The average-slicing and common-block theorems (`Partition/AverageSlicing.lean`,
+  `Partition/CommonBlocks.lean`) are shaped by their Lemmas 4.3 and 4.6: an equipartition
+  into exact-size blocks on which a finite `[0,1]`-valued family keeps its averages, and its
+  per-piece version at one common block size. The route is this library's own — the
+  level-set staircase reduces average control to `Partition/BalancedSlicing.lean` (with the
+  rectangle-counting bridges of `Finite/RectangleCounting.lean` pricing exceptional-set
+  trace functions), and the ratio hypotheses are discharged by the geometric races of
+  `Partition/SlicingThreshold.lean` against `polyGeometricThreshold` — rather than the
+  paper's Hoeffding-with-permutation-encoding argument; the control is two-sided where the
+  paper's is one-sided. The stable-regularity theorems themselves are upstream
+  (stability-flavored) material, not part of this library.
