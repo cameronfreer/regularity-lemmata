@@ -21,7 +21,7 @@ instantiated and its constants inspected.
 | Area | Public capability |
 | --- | --- |
 | **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, abstract weighted selection. |
-| **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), leftover and chunk absorption into equipartitions. |
+| **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), **average-preserving slicing and common blocks** (exact-size blocks keeping every `[0,1]`-function's average, per piece at one common size, with named thresholds and geometric races), leftover and chunk absorption into equipartitions. |
 | **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the cut-norm contraction of stepping with constant 1. |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
 | **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |

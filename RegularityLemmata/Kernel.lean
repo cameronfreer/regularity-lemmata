@@ -11,6 +11,10 @@ import RegularityLemmata.Partition.RectKernel
 import RegularityLemmata.Partition.RectKernelEnergy
 import RegularityLemmata.Partition.RectKernelCut
 import RegularityLemmata.Partition.RectKernelFriezeKannan
+import RegularityLemmata.Finite.RectangleCounting
+import RegularityLemmata.Partition.SlicingThreshold
+import RegularityLemmata.Partition.AverageSlicing
+import RegularityLemmata.Partition.CommonBlocks
 
 /-!
 # Facade: the rectangular weighted-kernel stack
