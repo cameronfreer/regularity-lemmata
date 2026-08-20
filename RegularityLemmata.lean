@@ -6,6 +6,7 @@ import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Finite.Injective
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Average
+import RegularityLemmata.Finite.RectangleCounting
 import RegularityLemmata.Finite.AlmostConstant
 import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.WeightedChoice
@@ -46,6 +47,9 @@ import RegularityLemmata.Partition.ActiveTraceSchedule
 import RegularityLemmata.Partition.ParentSample
 import RegularityLemmata.Partition.PrefixBlockSampling
 import RegularityLemmata.Partition.BalancedSlicing
+import RegularityLemmata.Partition.SlicingThreshold
+import RegularityLemmata.Partition.AverageSlicing
+import RegularityLemmata.Partition.CommonBlocks
 import RegularityLemmata.Partition.AbsorbLeftover
 import RegularityLemmata.Graph.Uniformity
 import RegularityLemmata.Graph.UniformSlicing
