@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.Language
+import Mathlib.Data.Fin.VecNotation
 
 /-!
 # Computable finite relational models
@@ -62,6 +63,25 @@ theorem ext_holds {M N : FiniteRelModel L V}
       congr 1
       funext n R x
       exact Bool.eq_iff_iff.mpr (h R x)
+
+/-! ### The binary adapter
+
+A 2-ary symbol read as an ordinary heterogeneous-shaped relation `V → V → Prop`, which is the
+shape the pair-density and homogeneity layers consume. Purely an interface: no arity bound, no
+regularity notion, and nothing about ladders — transporting *ladder-freeness* along this
+adapter is a stability statement and belongs to the stable development, not here. -/
+
+/-- The binary relation named by a 2-ary symbol. -/
+def binaryRel (M : FiniteRelModel L V) (R : L.Relations 2) : V → V → Prop :=
+  fun a b => M.Holds R ![a, b]
+
+@[simp] theorem binaryRel_apply (M : FiniteRelModel L V) (R : L.Relations 2) (a b : V) :
+    M.binaryRel R a b ↔ M.Holds R ![a, b] := Iff.rfl
+
+/-- Decidable, inherited from `Holds`. This is what lets `pairDensity` and the homogeneity
+layer consume a model's binary relation without a classical detour. -/
+instance (M : FiniteRelModel L V) (R : L.Relations 2) : DecidableRel (M.binaryRel R) :=
+  fun a b => inferInstanceAs (Decidable (M.Holds R ![a, b]))
 
 /-- The mathlib structure of a model — an **explicit definition, never a global
 instance**. Consumers write `letI := M.toStructure`. -/
