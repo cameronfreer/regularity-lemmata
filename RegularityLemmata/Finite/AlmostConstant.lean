@@ -577,6 +577,37 @@ example : ¬ IsAlmostConstantOn (fun x : Fin 2 ↦ (x.val : ℝ)) (1/2) (1/4) Fi
     have := hconst 1 (Finset.mem_univ 1) 0 (Finset.mem_univ 0)
     norm_num at this
 
+-- **Falsification: `isAlmostConstantPair_singleton` cannot be weakened to `0 ≤ ε`.** At
+-- `ε = 0` the strict exceptional-mass clause demands a subset of a one-point rectangle with
+-- *more* than one point. The rectangle is still `δ`-constant — see below — so this pins the
+-- gap between `δ`-constancy and almost-`δ`-constancy at zero tolerance, not a defect.
+example (f : RectKernel (Fin 2) (Fin 2)) (δ : ℝ) :
+    ¬ IsAlmostConstantPair f δ 0 ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2)) := by
+  rintro (habs | ⟨W, hWV, hcard, -⟩)
+  · exact absurd habs (by decide)
+  · have hcardV : (({0} : Finset (Fin 2)) ×ˢ ({0} : Finset (Fin 2))).card = 1 := by decide
+    rw [hcardV] at hcard
+    have hle : W.card ≤ 1 := le_trans (Finset.card_le_card hWV) (le_of_eq hcardV)
+    have : (W.card : ℝ) ≤ 1 := by exact_mod_cast hle
+    norm_num at hcard
+    linarith
+
+-- …and the same one-point rectangle **is** `δ`-constant for positive `δ`, which is what makes
+-- the failure above a tolerance issue rather than a constancy one.
+example (f : RectKernel (Fin 2) (Fin 2)) {δ : ℝ} (hδ : 0 < δ) :
+    IsDeltaConstantOn (fun p ↦ f p.1 p.2) δ
+      (({0} : Finset (Fin 2)) ×ˢ ({0} : Finset (Fin 2))) := by
+  rintro ⟨x, y⟩ hxy ⟨x', y'⟩ hxy'
+  rw [Finset.mem_product, Finset.mem_singleton, Finset.mem_singleton] at hxy hxy'
+  obtain ⟨rfl, rfl⟩ := hxy
+  obtain ⟨rfl, rfl⟩ := hxy'
+  simpa using hδ
+
+-- At any positive `ε`, by contrast, the one-point rectangle is almost constant.
+example (f : RectKernel (Fin 2) (Fin 2)) :
+    IsAlmostConstantPair f (1/2) (1/4) ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2)) :=
+  isAlmostConstantPair_singleton f (by norm_num) (by norm_num) 0 0
+
 end Tests
 
 end RegularityLemmata

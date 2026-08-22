@@ -490,6 +490,45 @@ example :
     two_pos (Finset.subset_univ _) (Finset.subset_univ _)
     (by decide) (by decide) (by decide) (by decide)
 
+-- **Relative growth with genuinely unequal sides, one of them not growing at all.** The left
+-- carrier grows from 2 to 3 (`cX = 1/2`); the right does not grow (`cY = 0`). The theorem
+-- accepts the asymmetry, and `cY = 0` needs no special case: the error is
+-- `1/2 + 0 + 2·(1/2)·0 = 1/2`.
+example :
+    |pairDensity (fun (a b : Fin 3) => a = b) Finset.univ Finset.univ
+        - pairDensity (fun (a b : Fin 3) => a = b) ({0, 1} : Finset (Fin 3)) Finset.univ|
+      ≤ 1 / 2 + 0 + 2 * (1 / 2) * 0 := by
+  refine abs_pairDensity_sub_le_of_relative_grow (R := fun (a b : Fin 3) => a = b)
+    (cX := 1 / 2) (cY := 0) (Finset.subset_univ _) (Finset.subset_univ _)
+    ⟨0, by decide⟩ ⟨0, by decide⟩ ?_ ?_
+  · norm_num [show (Finset.univ : Finset (Fin 3)).card = 3 from by decide,
+      show ({0, 1} : Finset (Fin 3)).card = 2 from by decide]
+  · norm_num
+
+-- **The degenerate corner**: no growth on either side gives error exactly `0`, so the
+-- theorem degrades to the reflexive statement rather than to a positive slack.
+example (R : Fin 2 → Fin 2 → Prop) [DecidableRel R] (A : Finset (Fin 2)) (hA : A.Nonempty) :
+    |pairDensity R A A - pairDensity R A A| ≤ 0 + 0 + 2 * 0 * 0 :=
+  abs_pairDensity_sub_le_of_relative_grow (cX := 0) (cY := 0) Finset.Subset.rfl
+    Finset.Subset.rfl hA hA (by norm_num) (by norm_num)
+
+-- **No sign hypothesis is available to supply**, by construction: the statement takes none,
+-- and nonnegativity of `cX`, `cY` follows from the growth bounds themselves.
+example {α β : Type*} [DecidableEq α] [DecidableEq β] (R : α → β → Prop) [DecidableRel R]
+    {A A' : Finset α} {B B' : Finset β} {cX cY : ℝ}
+    (hA : A' ⊆ A) (hB : B' ⊆ B) (hA'ne : A'.Nonempty) (hB'ne : B'.Nonempty)
+    (hAc : (A.card : ℝ) ≤ (1 + cX) * A'.card) (hBc : (B.card : ℝ) ≤ (1 + cY) * B'.card) :
+    |pairDensity R A B - pairDensity R A' B'| ≤ cX + cY + 2 * cX * cY :=
+  abs_pairDensity_sub_le_of_relative_grow hA hB hA'ne hB'ne hAc hBc
+
+-- The two endpoint regimes, on a concrete relation.
+example (R : Fin 2 → Fin 3 → Prop) (A : Finset (Fin 2)) (B : Finset (Fin 3)) :
+    IsHomogeneousPair R A B (1 / 2) :=
+  isHomogeneousPair_of_half_le R A B le_rfl
+
+example (R : Fin 2 → Fin 3 → Prop) : IsHomogeneousPair R {0} {0} 0 :=
+  isHomogeneousPair_singleton R 0 0
+
 end Tests
 
 end RegularityLemmata
