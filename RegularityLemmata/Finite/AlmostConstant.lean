@@ -143,6 +143,65 @@ theorem IsAlmostConstantPair.mono_eps {f : RectKernel X Y} {A : Finset X} {B : F
     IsAlmostConstantPair f δ ε' A B :=
   IsAlmostConstantOn.mono_eps h hε
 
+/-! ### Singleton bridges
+
+A rectangle with a singleton side is the one-variable predicate on the other side. These are
+the specializations a fibrewise argument needs: they turn control of `φ` along one fiber into
+control of the pair form, with no stability content whatsoever. -/
+
+/-- A singleton **left** side: almost-constancy of the fiber `f a` transfers to the pair. -/
+theorem IsAlmostConstantOn.isAlmostConstantPair_singleton_left [DecidableEq X] [DecidableEq Y]
+    {f : RectKernel X Y} {a : X} {B : Finset Y} (h : IsAlmostConstantOn (f a) δ ε B) :
+    IsAlmostConstantPair f δ ε {a} B := by
+  classical
+  rcases h with hB | ⟨W, hWB, hcard, hconst⟩
+  · exact Or.inl (by rw [hB, Finset.product_empty])
+  · refine Or.inr ⟨{a} ×ˢ W, Finset.product_subset_product Finset.Subset.rfl hWB, ?_, ?_⟩
+    · rw [Finset.card_product, Finset.card_product, Finset.card_singleton]
+      simpa using hcard
+    · rintro ⟨x, y⟩ hxy ⟨x', y'⟩ hxy'
+      rw [Finset.mem_product, Finset.mem_singleton] at hxy hxy'
+      obtain ⟨rfl, hy⟩ := hxy
+      obtain ⟨rfl, hy'⟩ := hxy'
+      exact hconst _ hy _ hy'
+
+/-- A singleton **right** side: almost-constancy of the co-fiber `f · b` transfers to the
+pair. -/
+theorem IsAlmostConstantOn.isAlmostConstantPair_singleton_right [DecidableEq X] [DecidableEq Y]
+    {f : RectKernel X Y} {A : Finset X} {b : Y}
+    (h : IsAlmostConstantOn (fun x ↦ f x b) δ ε A) :
+    IsAlmostConstantPair f δ ε A {b} := by
+  classical
+  rcases h with hA | ⟨W, hWA, hcard, hconst⟩
+  · exact Or.inl (by rw [hA, Finset.empty_product])
+  · refine Or.inr ⟨W ×ˢ {b}, Finset.product_subset_product hWA Finset.Subset.rfl, ?_, ?_⟩
+    · rw [Finset.card_product, Finset.card_product, Finset.card_singleton]
+      simpa using hcard
+    · rintro ⟨x, y⟩ hxy ⟨x', y'⟩ hxy'
+      rw [Finset.mem_product, Finset.mem_singleton] at hxy hxy'
+      obtain ⟨hx, rfl⟩ := hxy
+      obtain ⟨hx', rfl⟩ := hxy'
+      exact hconst _ hx _ hx'
+
+/-- **A one-point rectangle is almost constant** for every positive `δ`: the product carries a
+single pair, so it is `δ`-constant outright.
+
+`0 < ε` is required and cannot be weakened to `0 ≤ ε`: the exceptional-mass clause is strict,
+and at `ε = 0` it reads `1 < 1`. The whole rectangle is still `δ`-constant — that is
+`isDeltaConstantOn_singleton` — but it does not witness *almost*-constancy at zero tolerance. -/
+theorem isAlmostConstantPair_singleton [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
+    (hδ : 0 < δ) (hε : 0 < ε) (a : X) (b : Y) : IsAlmostConstantPair f δ ε {a} {b} := by
+  classical
+  refine Or.inr ⟨{a} ×ˢ {b}, Finset.Subset.rfl, ?_, ?_⟩
+  · rw [Finset.card_product, Finset.card_singleton]
+    norm_num
+    linarith
+  · rintro ⟨x, y⟩ hxy ⟨x', y'⟩ hxy'
+    rw [Finset.mem_product, Finset.mem_singleton, Finset.mem_singleton] at hxy hxy'
+    obtain ⟨rfl, rfl⟩ := hxy
+    obtain ⟨rfl, rfl⟩ := hxy'
+    simpa using hδ
+
 /-! ### Separation (Conant–Terry Proposition 2.2) -/
 
 /-- **Separation.** A function that is not `2ε`-almost `δ`-constant admits a threshold with
@@ -517,6 +576,37 @@ example : ¬ IsAlmostConstantOn (fun x : Fin 2 ↦ (x.val : ℝ)) (1/2) (1/4) Fi
     subst hW2
     have := hconst 1 (Finset.mem_univ 1) 0 (Finset.mem_univ 0)
     norm_num at this
+
+-- **Falsification: `isAlmostConstantPair_singleton` cannot be weakened to `0 ≤ ε`.** At
+-- `ε = 0` the strict exceptional-mass clause demands a subset of a one-point rectangle with
+-- *more* than one point. The rectangle is still `δ`-constant — see below — so this pins the
+-- gap between `δ`-constancy and almost-`δ`-constancy at zero tolerance, not a defect.
+example (f : RectKernel (Fin 2) (Fin 2)) (δ : ℝ) :
+    ¬ IsAlmostConstantPair f δ 0 ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2)) := by
+  rintro (habs | ⟨W, hWV, hcard, -⟩)
+  · exact absurd habs (by decide)
+  · have hcardV : (({0} : Finset (Fin 2)) ×ˢ ({0} : Finset (Fin 2))).card = 1 := by decide
+    rw [hcardV] at hcard
+    have hle : W.card ≤ 1 := le_trans (Finset.card_le_card hWV) (le_of_eq hcardV)
+    have : (W.card : ℝ) ≤ 1 := by exact_mod_cast hle
+    norm_num at hcard
+    linarith
+
+-- …and the same one-point rectangle **is** `δ`-constant for positive `δ`, which is what makes
+-- the failure above a tolerance issue rather than a constancy one.
+example (f : RectKernel (Fin 2) (Fin 2)) {δ : ℝ} (hδ : 0 < δ) :
+    IsDeltaConstantOn (fun p ↦ f p.1 p.2) δ
+      (({0} : Finset (Fin 2)) ×ˢ ({0} : Finset (Fin 2))) := by
+  rintro ⟨x, y⟩ hxy ⟨x', y'⟩ hxy'
+  rw [Finset.mem_product, Finset.mem_singleton, Finset.mem_singleton] at hxy hxy'
+  obtain ⟨rfl, rfl⟩ := hxy
+  obtain ⟨rfl, rfl⟩ := hxy'
+  simpa using hδ
+
+-- At any positive `ε`, by contrast, the one-point rectangle is almost constant.
+example (f : RectKernel (Fin 2) (Fin 2)) :
+    IsAlmostConstantPair f (1/2) (1/4) ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2)) :=
+  isAlmostConstantPair_singleton f (by norm_num) (by norm_num) 0 0
 
 end Tests
 

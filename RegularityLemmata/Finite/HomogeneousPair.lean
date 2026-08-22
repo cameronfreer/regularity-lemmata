@@ -310,6 +310,82 @@ theorem abs_pairDensity_sub_le_of_grow_one [DecidableRel R] [DecidableEq α] [De
     |pairDensity R A B - pairDensity R A' B'| ≤ 2 * ((s : ℝ) + 1) / s ^ 2 := by
   simpa using abs_pairDensity_sub_le_of_grow (k := 1) hs hA hB hA'c hB'c hAc hBc
 
+/-! ### Endpoint regimes
+
+The two trivial ends of the tolerance scale, stated so that consumers need not re-derive
+them: at `1/2` every rectangle is homogeneous, and a one-point rectangle is homogeneous at
+tolerance `0`. -/
+
+/-- **Half is the trivial tolerance.** Every rectangle is `ε`-homogeneous once `1/2 ≤ ε`,
+because a density in `[0,1]` is either at most `1/2` or at least `1/2`. No hypothesis on `R`,
+`A`, or `B` — the empty rectangle included, where the guard-free density is `0`. -/
+theorem isHomogeneousPair_of_half_le (R : α → β → Prop) (A : Finset α) (B : Finset β)
+    (hε : (1 : ℝ) / 2 ≤ ε) : IsHomogeneousPair R A B ε := by
+  classical
+  rw [isHomogeneousPair_def]
+  rcases le_or_gt (pairDensity R A B) (1 / 2) with h | h
+  · exact Or.inl (h.trans hε)
+  · exact Or.inr (by linarith)
+
+/-- **A one-point rectangle is exactly homogeneous**: its density is `0` or `1`, so it is
+`0`-homogeneous, hence `ε`-homogeneous for every `ε ≥ 0`. -/
+theorem isHomogeneousPair_singleton [DecidableEq α] [DecidableEq β] (R : α → β → Prop)
+    (a : α) (b : β) : IsHomogeneousPair R {a} {b} 0 := by
+  classical
+  rw [isHomogeneousPair_def, pairDensity_singleton_left]
+  by_cases h : R a b
+  · refine Or.inr ?_
+    rw [Finset.filter_singleton]
+    simp [h]
+  · refine Or.inl ?_
+    rw [Finset.filter_singleton]
+    simp [h]
+
+/-! ### Relative growth
+
+The perturbation theorem in **relative** form: when each side grows by at most a proportion of
+itself, the density moves by a bound depending only on those proportions, not on any absolute
+size. This is the neutral statement; ledger-specific instantiations (a particular `β`-schedule
+and its arithmetic) belong to the developments that fix those constants, not here. -/
+
+/-- **Relative-growth transfer.** If `A' ⊆ A` grows by at most a factor `1 + cX` and `B' ⊆ B`
+by at most `1 + cY`, the pair density moves by at most `cX + cY + 2·cX·cY`.
+
+The error is symmetric under swapping the carriers, which is the sense in which a single
+output tolerance is the right shape: the asymmetry lives entirely in the two growth inputs.
+
+**No sign hypothesis on `cX`, `cY` is needed.** Nonnegativity is forced: `A' ⊆ A` gives
+`|A'| ≤ |A| ≤ (1 + cX)|A'|`, and `|A'| > 0` then yields `0 ≤ cX`. Stating it would be
+redundant rather than defensive. -/
+theorem abs_pairDensity_sub_le_of_relative_grow [DecidableRel R] [DecidableEq α] [DecidableEq β]
+    {A' : Finset α} {B' : Finset β} {cX cY : ℝ}
+    (hA : A' ⊆ A) (hB : B' ⊆ B) (hA'ne : A'.Nonempty) (hB'ne : B'.Nonempty)
+    (hAc : (A.card : ℝ) ≤ (1 + cX) * A'.card)
+    (hBc : (B.card : ℝ) ≤ (1 + cY) * B'.card) :
+    |pairDensity R A B - pairDensity R A' B'| ≤ cX + cY + 2 * cX * cY := by
+  have hap : (0 : ℝ) < (A'.card : ℝ) := by
+    exact_mod_cast Finset.card_pos.mpr hA'ne
+  have hbp : (0 : ℝ) < (B'.card : ℝ) := by
+    exact_mod_cast Finset.card_pos.mpr hB'ne
+  have hmass : (0 : ℝ) < (A'.card : ℝ) * (B'.card : ℝ) := mul_pos hap hbp
+  -- Each discarded strip is a proportion of the small rectangle.
+  have hdA : ((A \ A').card : ℝ) ≤ cX * A'.card := by
+    have h : ((A \ A').card : ℝ) = (A.card : ℝ) - (A'.card : ℝ) := by
+      rw [Finset.card_sdiff_of_subset hA, Nat.cast_sub (Finset.card_le_card hA)]
+    rw [h]; nlinarith
+  have hdB : ((B \ B').card : ℝ) ≤ cY * B'.card := by
+    have h : ((B \ B').card : ℝ) = (B.card : ℝ) - (B'.card : ℝ) := by
+      rw [Finset.card_sdiff_of_subset hB, Nat.cast_sub (Finset.card_le_card hB)]
+    rw [h]; nlinarith
+  have hbound : |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
+      ≤ (cX + cY + 2 * cX * cY) * ((A'.card : ℝ) * (B'.card : ℝ)) :=
+    calc |pairDensity R A' B' - pairDensity R A B| * ((A'.card : ℝ) * (B'.card : ℝ))
+        ≤ ((A \ A').card : ℝ) * (B.card : ℝ) + (A.card : ℝ) * ((B \ B').card : ℝ) :=
+          abs_pairDensity_sub_mul_le hA hB
+      _ ≤ (cX + cY + 2 * cX * cY) * ((A'.card : ℝ) * (B'.card : ℝ)) := by nlinarith
+  rw [abs_sub_comm]
+  exact le_of_mul_le_mul_right hbound hmass
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -413,6 +489,45 @@ example :
     (k := 0) (A' := (Finset.univ : Finset (Fin 2))) (B' := (Finset.univ : Finset (Fin 2)))
     two_pos (Finset.subset_univ _) (Finset.subset_univ _)
     (by decide) (by decide) (by decide) (by decide)
+
+-- **Relative growth with genuinely unequal sides, one of them not growing at all.** The left
+-- carrier grows from 2 to 3 (`cX = 1/2`); the right does not grow (`cY = 0`). The theorem
+-- accepts the asymmetry, and `cY = 0` needs no special case: the error is
+-- `1/2 + 0 + 2·(1/2)·0 = 1/2`.
+example :
+    |pairDensity (fun (a b : Fin 3) => a = b) Finset.univ Finset.univ
+        - pairDensity (fun (a b : Fin 3) => a = b) ({0, 1} : Finset (Fin 3)) Finset.univ|
+      ≤ 1 / 2 + 0 + 2 * (1 / 2) * 0 := by
+  refine abs_pairDensity_sub_le_of_relative_grow (R := fun (a b : Fin 3) => a = b)
+    (cX := 1 / 2) (cY := 0) (Finset.subset_univ _) (Finset.subset_univ _)
+    ⟨0, by decide⟩ ⟨0, by decide⟩ ?_ ?_
+  · norm_num [show (Finset.univ : Finset (Fin 3)).card = 3 from by decide,
+      show ({0, 1} : Finset (Fin 3)).card = 2 from by decide]
+  · norm_num
+
+-- **The degenerate corner**: no growth on either side gives error exactly `0`, so the
+-- theorem degrades to the reflexive statement rather than to a positive slack.
+example (R : Fin 2 → Fin 2 → Prop) [DecidableRel R] (A : Finset (Fin 2)) (hA : A.Nonempty) :
+    |pairDensity R A A - pairDensity R A A| ≤ 0 + 0 + 2 * 0 * 0 :=
+  abs_pairDensity_sub_le_of_relative_grow (cX := 0) (cY := 0) Finset.Subset.rfl
+    Finset.Subset.rfl hA hA (by norm_num) (by norm_num)
+
+-- **No sign hypothesis is available to supply**, by construction: the statement takes none,
+-- and nonnegativity of `cX`, `cY` follows from the growth bounds themselves.
+example {α β : Type*} [DecidableEq α] [DecidableEq β] (R : α → β → Prop) [DecidableRel R]
+    {A A' : Finset α} {B B' : Finset β} {cX cY : ℝ}
+    (hA : A' ⊆ A) (hB : B' ⊆ B) (hA'ne : A'.Nonempty) (hB'ne : B'.Nonempty)
+    (hAc : (A.card : ℝ) ≤ (1 + cX) * A'.card) (hBc : (B.card : ℝ) ≤ (1 + cY) * B'.card) :
+    |pairDensity R A B - pairDensity R A' B'| ≤ cX + cY + 2 * cX * cY :=
+  abs_pairDensity_sub_le_of_relative_grow hA hB hA'ne hB'ne hAc hBc
+
+-- The two endpoint regimes, on a concrete relation.
+example (R : Fin 2 → Fin 3 → Prop) (A : Finset (Fin 2)) (B : Finset (Fin 3)) :
+    IsHomogeneousPair R A B (1 / 2) :=
+  isHomogeneousPair_of_half_le R A B le_rfl
+
+example (R : Fin 2 → Fin 3 → Prop) : IsHomogeneousPair R {0} {0} 0 :=
+  isHomogeneousPair_singleton R 0 0
 
 end Tests
 

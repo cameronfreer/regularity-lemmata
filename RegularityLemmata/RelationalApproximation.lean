@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Finite.HomogeneousCell
+import RegularityLemmata.Partition.HomogeneousPartitions
 import RegularityLemmata.Relational.Language
 import RegularityLemmata.Relational.Model
 import RegularityLemmata.Relational.Indivisible
@@ -17,7 +18,11 @@ stable (or otherwise structured) regularity development concludes into. A **faca
 curated stack and defines nothing; each listed module remains directly importable.
 
 * `Finite.HomogeneousPair`, `Finite.HomogeneousCell` — `ε`-homogeneous rectangles and `n`-index
-  cell boxes, with the exact subcell laws and the `n`-box perturbation bound.
+  cell boxes, with the exact subcell laws, the `n`-box perturbation bound, the trivial `1/2`
+  and exact singleton endpoints, and the relative-growth transfer at `cX + cY + 2·cX·cY`.
+* `Partition.HomogeneousPartitions` — `AreHomogeneousPartitions`, the cellwise lift to a pair
+  of independent partitions, with a **single** output tolerance, its monotonicity, transpose
+  and complement equivalences, and the exact `⊥` and indiscrete endpoints.
 * `Relational.Language`, `Relational.Model` — finite relational languages with a stored arity
   bound, and computable finite models.
 * `Relational.Indivisible` — cellwise-constant (indivisible) relations and models over a
