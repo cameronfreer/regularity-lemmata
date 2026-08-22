@@ -26,6 +26,7 @@ import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.Equitable
 import RegularityLemmata.Partition.Grouping
 import RegularityLemmata.Partition.BlockEnergy
+import RegularityLemmata.Partition.HomogeneousPartitions
 import RegularityLemmata.Partition.RectKernel
 import RegularityLemmata.Partition.RectKernelEnergy
 import RegularityLemmata.Partition.RectKernelCut
