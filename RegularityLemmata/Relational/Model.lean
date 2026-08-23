@@ -68,9 +68,8 @@ theorem ext_holds {M N : FiniteRelModel L V}
 
 A 2-ary symbol read as an ordinary binary relation `V → V → Prop` — the same-carrier
 specialization of the heterogeneous pair API, which is the shape the pair-density and
-homogeneity layers consume. Purely an interface: no arity bound, no regularity notion, and
-nothing about ladders — transporting *ladder-freeness* along this adapter is a stability
-statement and belongs to the stable development, not here. -/
+homogeneity layers consume. Purely an interface, with no arity bound and no regularity notion.
+For the behavior of this reading under the model transports, see `Relational.Transport`. -/
 
 /-- The binary relation named by a 2-ary symbol. -/
 def binaryRel (M : FiniteRelModel L V) (R : L.Relations 2) : V → V → Prop :=
