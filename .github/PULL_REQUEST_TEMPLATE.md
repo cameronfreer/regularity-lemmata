@@ -2,6 +2,17 @@
 
 <!-- What does this change, and why? Link the discussion issue for substantive API additions. -->
 
+## Public API impact
+
+<!-- Replace this comment with one or more of the following forms. Use `None` explicitly
+when the PR has no public API impact.
+
+Added: ...
+Changed: ...
+Deprecated/removed: ...
+None
+-->
+
 ## Checklist
 
 - [ ] `lake build`, `bash scripts/check.sh`, and `git diff --check` pass locally

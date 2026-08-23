@@ -17,6 +17,9 @@ forbid() {
   esac
 }
 
+echo "== Gate 0: PR-body validator self-test =="
+python3 scripts/check_public_api_impact.py --self-test
+
 echo "== Gate 1: build =="
 lake build 2>&1 | tee "$LOG"
 

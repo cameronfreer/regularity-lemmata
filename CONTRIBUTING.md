@@ -18,6 +18,21 @@ that license. Add the standard SPDX header to new files.
 3. Open a pull request. CI runs `bash scripts/check.sh`; it must pass.
 4. Maintainers review; once approved, the PR is merged without history rewriting.
 
+## Public API impact
+
+Every pull request must contain a nonempty `## Public API impact` section. Use one or more
+of the following forms:
+
+- `Added: ...`
+- `Changed: ...`
+- `Deprecated/removed: ...`
+- `None`
+
+Use `None` explicitly when the change has no public API impact. CI checks that the section
+is present, nonblank after removing template comments, and contains one of these forms.
+Reviewers remain responsible for checking that the inventory is complete and that items
+classified as `None` are genuinely internal or documentary.
+
 ## Per-unit cadence
 
 For every bounded unit of work:
@@ -44,9 +59,10 @@ per commit. Never rewrite pushed history.
 ## Gates
 
 `scripts/check.sh` enforces: successful build; no `sorry`/`admit`/`axiom` in source; no
-sorry warnings in the build log; and an axiom audit of every declaration in the library
-namespace (standard axioms only: `propext`, `Classical.choice`, `Quot.sound`). CI runs
-the same script.
+sorry warnings in the build log; an axiom audit of every declaration in the library
+namespace (standard axioms only: `propext`, `Classical.choice`, `Quot.sound`); and the
+self-tests for the pull-request-body validator. On pull requests, CI additionally validates
+the actual `Public API impact` section before building.
 
 ## Documentation
 
