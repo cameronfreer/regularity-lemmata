@@ -7,6 +7,7 @@ import RegularityLemmata.Finite.HomogeneousCell
 import RegularityLemmata.Partition.HomogeneousPartitions
 import RegularityLemmata.Relational.Language
 import RegularityLemmata.Relational.Model
+import RegularityLemmata.Relational.Transport
 import RegularityLemmata.Relational.Indivisible
 import RegularityLemmata.Relational.CellwiseEdit
 
@@ -23,8 +24,10 @@ curated stack and defines nothing; each listed module remains directly importabl
 * `Partition.HomogeneousPartitions` — `AreHomogeneousPartitions`, the cellwise lift to a pair
   of independent partitions, with a **single** output tolerance, its monotonicity, transpose
   and complement equivalences, and the exact `⊥` and indiscrete endpoints.
-* `Relational.Language`, `Relational.Model` — finite relational languages with a stored arity
-  bound, and computable finite models.
+* `Relational.Language`, `Relational.Model`, `Relational.Transport` — finite relational
+  languages with a stored arity bound, computable finite models, and their pullback,
+  restriction, and relabeling API. In particular, the facade exposes the complete
+  `FiniteRelModel.binaryRel` adapter and its transport laws.
 * `Relational.Indivisible` — cellwise-constant (indivisible) relations and models over a
   partition, the quotient reading, and `NullaryCompatible` for the exact arity-0 layer.
 * `Relational.CellwiseEdit` — `CellwiseEditBound` (positive-arity cellwise `ε`-closeness, a
