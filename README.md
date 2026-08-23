@@ -20,7 +20,7 @@ instantiated and its constants inspected.
 
 | Area | Public capability |
 | --- | --- |
-| **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, relation fibers and trace families with support-sensitive VC/Sauer–Shelah bounds, abstract weighted selection. |
+| **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, relation fibers and trace families with support-sensitive VC/Sauer–Shelah and bounded-subset estimates, abstract weighted selection. |
 | **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), **average-preserving slicing and common blocks** (exact-size blocks keeping every `[0,1]`-function's average, per piece at one common size, with named thresholds and geometric races), leftover and chunk absorption into equipartitions. |
 | **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the cut-norm contraction of stepping with constant 1. |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
@@ -79,7 +79,8 @@ Three curated **facades** import a stack whole:
   relation indicators, one-variable averages and almost-constancy, stepping, energy and the
   refinement-variance identity, cut discrepancy, and the Frieze–Kannan summit).
 - `RegularityLemmata.FiniteSetSystems` — heterogeneous relation fibers, finite trace families,
-  Mathlib's VC dimension under restriction, and support-sensitive Sauer–Shelah bounds.
+  Mathlib's VC dimension under restriction, support-sensitive Sauer–Shelah bounds, and
+  polynomial bounded-subset estimates.
 - `RegularityLemmata.RelationalApproximation` — homogeneous cells, finite relational models,
   indivisibility, and cellwise edit bounds with the majority-rounding theorems.
 

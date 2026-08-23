@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.RelationFiber
 import Mathlib.Combinatorics.SetFamily.Shatter
+import Mathlib.Data.Nat.Choose.Bounds
 import Mathlib.Data.Nat.Choose.Sum
 
 /-!
@@ -110,6 +111,26 @@ theorem vcDim_image_inter_le (𝒜 : Finset (Finset α)) (s : Finset α) :
     (𝒜.image fun t => s ∩ t).vcDim ≤ 𝒜.vcDim :=
   vcDim_traceFamily_le 𝒜 s
 
+/-- The subsets of `s` of cardinality at most `d` are bounded by the corresponding
+binomial sum. This is the neutral counting statement behind applications that enumerate
+bounded-size sets of coordinate flips. -/
+theorem card_powerset_filter_card_le_sum_choose (s : Finset α) (d : ℕ) :
+    #(s.powerset.filter fun t => t.card ≤ d) ≤
+      ∑ k ∈ Finset.Iic d, s.card.choose k := by
+  calc
+    #(s.powerset.filter fun t => t.card ≤ d) ≤
+        #((Finset.Iic d).biUnion fun k => s.powersetCard k) := by
+      apply Finset.card_mono
+      intro t ht
+      rw [Finset.mem_filter] at ht
+      exact Finset.mem_biUnion.2 ⟨t.card, Finset.mem_Iic.2 ht.2,
+        Finset.mem_powersetCard.2 ⟨Finset.mem_powerset.1 ht.1, rfl⟩⟩
+    _ ≤ ∑ k ∈ Finset.Iic d, #(s.powersetCard k) := Finset.card_biUnion_le
+    _ = ∑ k ∈ Finset.Iic d, s.card.choose k := by
+      apply Finset.sum_congr rfl
+      intro k _
+      exact Finset.card_powersetCard k s
+
 /-- Support-sensitive Sauer–Shelah bound for a family all of whose members lie in `s`.
 
 Mathlib's `Finset.card_shatterer_le_sum_vcDim` counts against an entire finite ambient type.
@@ -152,8 +173,21 @@ theorem card_image_inter_le_sum_choose (𝒜 : Finset (Finset α)) (s : Finset �
     #(𝒜.image fun t => s ∩ t) ≤ ∑ k ∈ Finset.Iic 𝒜.vcDim, s.card.choose k :=
   card_traceFamily_le_sum_choose 𝒜 s
 
-/-- A partial binomial sum is bounded by the full sum `2 ^ n`. -/
+/-- A partial binomial sum through degree `d` is bounded polynomially by `(n + 1) ^ d`. -/
 theorem sum_choose_le_pow (n d : ℕ) :
+    (∑ k ∈ Finset.Iic d, n.choose k) ≤ (n + 1) ^ d := by
+  rw [← Nat.range_succ_eq_Iic, add_pow]
+  apply Finset.sum_le_sum
+  intro k hk
+  have hkd : k ≤ d := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+  calc
+    n.choose k ≤ n ^ k := Nat.choose_le_pow n k
+    _ ≤ n ^ k * 1 ^ (d - k) * d.choose k := by
+      simp only [one_pow, mul_one]
+      exact Nat.le_mul_of_pos_right (n ^ k) (Nat.choose_pos hkd)
+
+/-- A partial binomial sum is also bounded by the full sum `2 ^ n`. -/
+theorem sum_choose_le_two_pow (n d : ℕ) :
     (∑ k ∈ Finset.Iic d, n.choose k) ≤ 2 ^ n := by
   rw [← Nat.sum_range_choose n]
   apply Finset.sum_le_sum_of_ne_zero
@@ -164,7 +198,7 @@ theorem sum_choose_le_pow (n d : ℕ) :
 /-- Every trace family has at most all subsets of its support. -/
 theorem card_traceFamily_le_pow (𝒜 : Finset (Finset α)) (s : Finset α) :
     #(traceFamily 𝒜 s) ≤ 2 ^ s.card :=
-  (card_traceFamily_le_sum_choose 𝒜 s).trans (sum_choose_le_pow s.card 𝒜.vcDim)
+  (card_traceFamily_le_sum_choose 𝒜 s).trans (sum_choose_le_two_pow s.card 𝒜.vcDim)
 
 end VCTrace
 
@@ -184,7 +218,7 @@ theorem card_fiberFamily_le_pow (R : α → β → Prop) [DecidableRel R]
     (A : Finset α) (B : Finset β) :
     #(fiberFamily R A B) ≤ 2 ^ B.card :=
   (card_fiberFamily_le_sum_choose R A B).trans
-    (sum_choose_le_pow B.card (fiberFamily R A B).vcDim)
+    (sum_choose_le_two_pow B.card (fiberFamily R A B).vcDim)
 
 end FiberFamilyVC
 
@@ -207,6 +241,13 @@ example : ({{0}, {1}} : Finset (Finset (Fin 2))).vcDim = 1 := by
 
 example : (∑ k ∈ Finset.Iic 1, (3 : ℕ).choose k) = 4 := by
   decide
+
+example :
+    #((Finset.univ : Finset (Fin 3)).powerset.filter fun t => t.card ≤ 1) = 4 := by
+  decide
+
+example : (∑ k ∈ Finset.Iic 2, (5 : ℕ).choose k) ≤ (5 + 1) ^ 2 :=
+  sum_choose_le_pow 5 2
 
 end VCTraceTests
 

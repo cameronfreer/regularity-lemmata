@@ -14,7 +14,8 @@ a curated stack and defines nothing; each listed module remains directly importa
 * `Finite.RelationFiber` — fibers of heterogeneous relations on supplied finite supports,
   finite fiber families, restriction/monotonicity laws, and honest empty-support endpoints.
 * `Finite.VCTrace` — restriction of finite set families, Mathlib's VC dimension under tracing,
-  and support-sensitive Sauer–Shelah and powerset bounds.
+  support-sensitive Sauer–Shelah bounds, polynomial binomial-sum estimates, and bounded-subset
+  counting.
 
 Mathlib owns the underlying shattering and VC-dimension definitions. This facade introduces no
 stability, ladder, goodness, model, probability, or regularity vocabulary.
