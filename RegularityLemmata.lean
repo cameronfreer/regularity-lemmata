@@ -17,6 +17,8 @@ import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.Weight
 import RegularityLemmata.Finite.CoordinateSplit
+import RegularityLemmata.Finite.RelationFiber
+import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Finite.RelationKernel
@@ -124,6 +126,7 @@ import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
 import RegularityLemmata.Kernel
+import RegularityLemmata.FiniteSetSystems
 import RegularityLemmata.RelationalApproximation
 
 /-!
@@ -132,12 +135,13 @@ import RegularityLemmata.RelationalApproximation
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on mathlib.
 
-This root imports the library's public surface. Two curated facades bundle the stacks a
-consumer most often wants whole: `RegularityLemmata.Kernel` (the rectangular weighted-kernel
-layer) and `RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility,
-and cellwise edit bounds). The probe and obstruction-gate modules of in-progress campaigns
-live under the separate umbrella `RegularityLemmataGates` — same namespace, proof gates, and
-CI, but not part of this import; each stays directly importable by its module name.
+This root imports the library's public surface. Three curated facades bundle stacks a consumer
+often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels),
+`RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds), and
+`RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, and cellwise
+edit bounds). The probe and obstruction-gate modules of in-progress campaigns live under the
+separate umbrella `RegularityLemmataGates` — same namespace, proof gates, and CI, but not part
+of this import; each stays directly importable by its module name.
 See `README.md` for scope and `ARCHITECTURE.md` for the library's conventions.
 -/
 

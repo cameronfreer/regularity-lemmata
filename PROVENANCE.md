@@ -74,6 +74,12 @@ definition or proof is cited publicly, in the relevant file docstring and here.
     to simple graphs through the Phase 8 adapters and the hypergraph copy API
     (`Relational/GraphAdapter.lean`, `Hypergraph/Copies.lean`). It involves no
     antecedent beyond those already cited, and contains no removal theorem.
+  - `Mathlib.Combinatorics.SetFamily.Shatter` (Y. Dillies) — the shattering predicate,
+    shatterer, VC dimension, Pajor inequality, and Sauer–Shelah theorem consumed by
+    `Finite/VCTrace.lean`. This repository adds the finite relation-fiber/trace interface,
+    proves that image/intersection restriction cannot increase Mathlib's VC dimension, and
+    derives a support-sensitive cardinality bound using Mathlib's Pajor inequality and
+    `powersetCard` enumeration; it does not define a second VC dimension.
 - **Graphons in Lean 4** (C. Freer, Apache-2.0,
   <https://github.com/cameronfreer/graphon>) — the finite Frieze–Kannan iteration in
   `Graph/FriezeKannan.lean` ports the architecture of
