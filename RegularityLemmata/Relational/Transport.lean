@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.Model
+import Mathlib.Tactic.FinCases
 
 /-!
 # Transport: pullback, restriction, relabeling
@@ -85,6 +86,42 @@ theorem relabel_trans (M : FiniteRelModel L V) (e : V ≃ W) (f : W ≃ X) :
     M.relabel (e.trans f) = (M.relabel e).relabel f :=
   ext_holds fun _ _ => Iff.rfl
 
+/-! ### The binary adapter under transport
+
+`binaryRel` commutes with pullback: reading a 2-ary symbol in a pulled-back model is the
+same as reading it in the original along the map. Stated pointwise, which is the form the
+density and homogeneity layers use.
+
+No injectivity is required — the same falsification note as `pullback` applies: a
+noninjective `f` collapses pairs, and nothing here claims otherwise. -/
+
+@[simp] theorem binaryRel_pullback (M : FiniteRelModel L V) (f : W → V) (R : L.Relations 2)
+    (a b : W) : (M.pullback f).binaryRel R a b ↔ M.binaryRel R (f a) (f b) := by
+  have h : f ∘ ![a, b] = ![f a, f b] := by
+    funext i
+    fin_cases i <;> rfl
+  rw [binaryRel_apply, pullback_holds, h, binaryRel_apply]
+
+/-- The same law as an equality of relations, for rewriting under binders. -/
+theorem binaryRel_pullback_eq (M : FiniteRelModel L V) (f : W → V) (R : L.Relations 2) :
+    (M.pullback f).binaryRel R = fun a b => M.binaryRel R (f a) (f b) := by
+  funext a b
+  exact propext (binaryRel_pullback M f R a b)
+
+/-- Relabeling transports the binary reading along the inverse equivalence — immediate from
+`relabel_eq_pullback`, and the bridge a consumer would otherwise rebuild at each use. -/
+@[simp] theorem binaryRel_relabel (M : FiniteRelModel L V) (e : V ≃ W) (R : L.Relations 2)
+    (a b : W) :
+    (M.relabel e).binaryRel R a b ↔ M.binaryRel R (e.symm a) (e.symm b) := by
+  rw [relabel_eq_pullback, binaryRel_pullback]
+
+/-- Restriction is pullback along the subtype inclusion, so the binary reading restricts by
+composing with the coercion. -/
+theorem binaryRel_restrict (M : FiniteRelModel L V) (S : Finset V) (R : L.Relations 2)
+    (a b : {x // x ∈ S}) :
+    (M.restrict S).binaryRel R a b ↔ M.binaryRel R a.1 b.1 := by
+  rw [restrict_eq_pullback, binaryRel_pullback]
+
 /-- Relation-level compatibility with mathlib's induced structure: relabeling and
 `Equiv.inducedStructure` interpret every relation identically (the function side
 is empty for relational languages). -/
@@ -128,6 +165,41 @@ example :
 example (M : FiniteRelModel (singleRelLang 1) (Fin 3)) :
     M.relabel (Equiv.refl (Fin 3)) = M :=
   relabel_refl M
+
+-- The binary adapter commutes with pullback, statement-level.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) (f : Fin 2 → Fin 3) (a b : Fin 2) :
+    (M.pullback f).binaryRel (singleRelSymbol 2) a b
+      ↔ M.binaryRel (singleRelSymbol 2) (f a) (f b) :=
+  binaryRel_pullback M f _ a b
+
+-- **The adapter inherits the falsification, not an injectivity assumption.** Pulling the
+-- strict-inequality relation back along a constant map makes the binary reading empty on a
+-- pair that the original relates — exactly the collapse the module note warns about.
+example :
+    ¬((⟨fun {_} _ x => decide (¬∀ i j, x i = x j)⟩ :
+        FiniteRelModel (singleRelLang 2) (Fin 2)).pullback
+          (fun _ : Fin 2 => (0 : Fin 2))).binaryRel (singleRelSymbol 2) 0 1 := by decide
+
+example :
+    (⟨fun {_} _ x => decide (¬∀ i j, x i = x j)⟩ :
+      FiniteRelModel (singleRelLang 2) (Fin 2)).binaryRel (singleRelSymbol 2) 0 1 := by decide
+
+-- Relabeling transports the binary reading, statement-level.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) (e : Fin 3 ≃ Fin 3) (a b : Fin 3) :
+    (M.relabel e).binaryRel (singleRelSymbol 2) a b
+      ↔ M.binaryRel (singleRelSymbol 2) (e.symm a) (e.symm b) :=
+  binaryRel_relabel M e _ a b
+
+-- …and round-trips at the identity equivalence.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) (a b : Fin 3) :
+    (M.relabel (Equiv.refl (Fin 3))).binaryRel (singleRelSymbol 2) a b
+      ↔ M.binaryRel (singleRelSymbol 2) a b :=
+  binaryRel_relabel M _ _ a b
+
+-- The decidability instance is found, so a model's binary relation feeds the density layer
+-- directly with no classical detour.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) :
+    DecidableRel (M.binaryRel (singleRelSymbol 2)) := inferInstance
 
 -- Restriction agrees with the inclusion pullback on a concrete instance (kernel
 -- decide through the subtype).
