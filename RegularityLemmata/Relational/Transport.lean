@@ -108,6 +108,13 @@ theorem binaryRel_pullback_eq (M : FiniteRelModel L V) (f : W → V) (R : L.Rela
   funext a b
   exact propext (binaryRel_pullback M f R a b)
 
+/-- Relabeling transports the binary reading along the inverse equivalence — immediate from
+`relabel_eq_pullback`, and the bridge a consumer would otherwise rebuild at each use. -/
+@[simp] theorem binaryRel_relabel (M : FiniteRelModel L V) (e : V ≃ W) (R : L.Relations 2)
+    (a b : W) :
+    (M.relabel e).binaryRel R a b ↔ M.binaryRel R (e.symm a) (e.symm b) := by
+  rw [relabel_eq_pullback, binaryRel_pullback]
+
 /-- Restriction is pullback along the subtype inclusion, so the binary reading restricts by
 composing with the coercion. -/
 theorem binaryRel_restrict (M : FiniteRelModel L V) (S : Finset V) (R : L.Relations 2)
@@ -176,6 +183,18 @@ example :
 example :
     (⟨fun {_} _ x => decide (¬∀ i j, x i = x j)⟩ :
       FiniteRelModel (singleRelLang 2) (Fin 2)).binaryRel (singleRelSymbol 2) 0 1 := by decide
+
+-- Relabeling transports the binary reading, statement-level.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) (e : Fin 3 ≃ Fin 3) (a b : Fin 3) :
+    (M.relabel e).binaryRel (singleRelSymbol 2) a b
+      ↔ M.binaryRel (singleRelSymbol 2) (e.symm a) (e.symm b) :=
+  binaryRel_relabel M e _ a b
+
+-- …and round-trips at the identity equivalence.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 3)) (a b : Fin 3) :
+    (M.relabel (Equiv.refl (Fin 3))).binaryRel (singleRelSymbol 2) a b
+      ↔ M.binaryRel (singleRelSymbol 2) a b :=
+  binaryRel_relabel M _ _ a b
 
 -- The decidability instance is found, so a model's binary relation feeds the density layer
 -- directly with no classical detour.
