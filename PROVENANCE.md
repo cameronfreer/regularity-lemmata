@@ -200,6 +200,26 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/PolyadRegularity.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
+- N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite
+  Littlestone dimension*.
+  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — **Lemma 16** is the source of the
+  additive two-colour subtree theorem of `Finite/BinaryTreeRamsey.lean`. Their statement uses
+  positive integers `p, q` and host height `p + q - 1`; substituting `p = a + 1`, `q = b + 1`
+  gives the `a + b + 1` used here. Their recursive subtree notion is also the source of the
+  embedding semantics: the copy's root may sit at an arbitrary node of the host, descendants
+  may be more than one level deeper, and left/right branch direction is preserved.
+
+  The mathematics is theirs. What is this repository's own is the formulation: the
+  word-indexed node types and branch relation of `Finite/FullBinaryTree.lean`, the
+  single-law `InternalEmbedding` of `Finite/BinaryTreeEmbedding.lean` with injectivity and
+  ancestry preservation derived rather than assumed, the proper-embedding and leaf-extension
+  formulation, and the Lean proof engineering throughout. "Precise" in the theorem name refers
+  to the exact additive upper bound and is **not** a claim of optimality; no matching lower
+  bound is formalized here.
+
+  Mathlib's `BinaryTree` was audited for this purpose and is **not** used: it is a storage
+  type carrying data at nodes, with no notion of a node's address, and so supports neither the
+  ancestry nor the branch-direction relations these embeddings are defined by.
 - G. Conant and C. Terry, *Quantitative analytic stable regularity*.
   [arXiv:2607.21762](https://arxiv.org/abs/2607.21762). The almost-constancy vocabulary and the
   separation lemma of `Finite/AlmostConstant.lean` follow their Definitions 1.6/2.1 and
