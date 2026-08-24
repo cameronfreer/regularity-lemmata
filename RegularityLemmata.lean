@@ -20,6 +20,7 @@ import RegularityLemmata.Finite.CoordinateSplit
 import RegularityLemmata.Finite.ProductBox
 import RegularityLemmata.Finite.FullBinaryTree
 import RegularityLemmata.Finite.BinaryTreeEmbedding
+import RegularityLemmata.Finite.BinaryTreeProperEmbedding
 import RegularityLemmata.Finite.RelationFiber
 import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
