@@ -44,17 +44,21 @@ variable {s t : ℕ}
 
 /-! ### Padding a word out to the host height -/
 
-/-- Extend a word to length `t` with `false`s. Total: a word already that long is returned
-unchanged, which does not occur at the call sites here. -/
-def padTo (t : ℕ) (w : List Bool) : List Bool := w ++ List.replicate (t - w.length) false
+/-- Extend a word with `false`s until it has length `t`. Total: a word already that long is
+returned unchanged, which does not occur at the call sites here. -/
+def padWordToLength (t : ℕ) (w : List Bool) : List Bool :=
+  w ++ List.replicate (t - w.length) false
 
-theorem padTo_length {t : ℕ} {w : List Bool} (h : w.length ≤ t) : (padTo t w).length = t := by
-  rw [padTo, List.length_append, List.length_replicate]
+theorem padWordToLength_length {t : ℕ} {w : List Bool} (h : w.length ≤ t) :
+    (padWordToLength t w).length = t := by
+  rw [padWordToLength, List.length_append, List.length_replicate]
   omega
 
-theorem prefix_padTo (t : ℕ) (w : List Bool) : w <+: padTo t w := List.prefix_append _ _
+theorem prefix_padWordToLength (t : ℕ) (w : List Bool) : w <+: padWordToLength t w :=
+  List.prefix_append _ _
 
-@[simp] theorem padTo_nil (t : ℕ) : padTo t [] = List.replicate t false := by simp [padTo]
+@[simp] theorem padWordToLength_nil (t : ℕ) : padWordToLength t [] = List.replicate t false := by
+  simp [padWordToLength]
 
 /-! ### Proper embeddings -/
 
@@ -267,7 +271,8 @@ The leaf image enters the correct branch below the image of the leaf's parent an
 to the host height. No spare-height hypothesis appears. -/
 def extendProper (e : InternalEmbedding s t) : ProperEmbedding s t where
   internal := e.toFun
-  leaf l := ⟨padTo t (leafPrefix e l), padTo_length (leafPrefix_length_le e l)⟩
+  leaf l :=
+    ⟨padWordToLength t (leafPrefix e l), padWordToLength_length (leafPrefix_length_le e l)⟩
   branch_internal := e.branch
   branch_leaf b x l h := by
     -- The leaf lies below something, so it is not the root and does have a parent.
@@ -281,7 +286,7 @@ def extendProper (e : InternalEmbedding s t) : ProperEmbedding s t where
     have hsplit : w.1 ++ [c] = l.1 := leafParent_append_getLast l hl
     -- Read the hypothesis through the split, so both sides speak about `w.1 ++ [c]`.
     rw [BranchBelow, ← hsplit] at h
-    refine List.IsPrefix.trans ?_ (prefix_padTo t _)
+    refine List.IsPrefix.trans ?_ (prefix_padWordToLength t _)
     rw [leafPrefix_of_ne_nil e l hl, ← hw, ← hc]
     have hlen : x.1.length ≤ w.1.length := by
       have := h.length_le
@@ -309,8 +314,9 @@ changes nothing in the interior. -/
 
 /-- The leaf equation away from height `0`: enter the branch, then pad. -/
 theorem extendProper_leaf_val (e : InternalEmbedding s t) (l : LeafNode s) (hl : l.1 ≠ []) :
-    ((extendProper e).leaf l).1 = padTo t ((e (leafParent l hl)).1 ++ [l.1.getLast hl]) := by
-  rw [show ((extendProper e).leaf l).1 = padTo t (leafPrefix e l) from rfl,
+    ((extendProper e).leaf l).1
+      = padWordToLength t ((e (leafParent l hl)).1 ++ [l.1.getLast hl]) := by
+  rw [show ((extendProper e).leaf l).1 = padWordToLength t (leafPrefix e l) from rfl,
     leafPrefix_of_ne_nil e l hl]
 
 /-- **The height-zero endpoint.** There is no interior to read, so the single source leaf goes
@@ -318,8 +324,8 @@ to the canonical all-`false` host leaf. -/
 @[simp] theorem extendProper_leaf_zero (e : InternalEmbedding 0 t) (l : LeafNode 0) :
     ((extendProper e).leaf l).1 = List.replicate t false := by
   have hl : l.1 = [] := List.eq_nil_of_length_eq_zero l.2
-  rw [show ((extendProper e).leaf l).1 = padTo t (leafPrefix e l) from rfl,
-    leafPrefix_of_nil e l hl, padTo_nil]
+  rw [show ((extendProper e).leaf l).1 = padWordToLength t (leafPrefix e l) from rfl,
+    leafPrefix_of_nil e l hl, padWordToLength_nil]
 
 /-- The unique embedding out of a height-zero tree: it has no internal node to place. -/
 def ofHeightZero (t : ℕ) : InternalEmbedding 0 t where

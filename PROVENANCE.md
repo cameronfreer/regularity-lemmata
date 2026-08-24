@@ -209,8 +209,11 @@ they were developed as stability-neutral infrastructure. No third-party source t
 
   What is this repository's own is the formulation: the word-indexed node types and branch
   relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
-  injectivity and ancestry preservation derived from that law rather than assumed, and the
-  Lean proof engineering.
+  injectivity and ancestry preservation derived from that law rather than assumed, the
+  proper-embedding and leaf-extension formulation of
+  `Finite/BinaryTreeProperEmbedding.lean` — which places a leaf image by entering the correct
+  branch below the parent's image, so that no spare-height hypothesis is needed — and the Lean
+  proof engineering.
 
   Mathlib's `BinaryTree` was audited for this purpose and is **not** used: it is a storage
   type carrying data at nodes, with no notion of a node's address, and so supports neither the
