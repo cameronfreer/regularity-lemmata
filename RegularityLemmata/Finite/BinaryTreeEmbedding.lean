@@ -37,6 +37,14 @@ it as a field would let a caller supply a proof inconsistent with the branch law
 
 Ancestry preservation likewise follows, because a strict descent always happens through one
 definite turn.
+
+## Provenance
+
+The subtree notion formalized here — arbitrary root, descendants possibly more than one level
+deeper, branch direction preserved — is that of N. Alon, R. Livni, M. Malliaris, S. Moran,
+*Private PAC learning implies finite Littlestone dimension*,
+[arXiv:1806.00949](https://arxiv.org/abs/1806.00949). The word-indexed formulation and the
+derivation of injectivity from the branch law are this repository's own. See `PROVENANCE.md`.
 -/
 
 namespace RegularityLemmata

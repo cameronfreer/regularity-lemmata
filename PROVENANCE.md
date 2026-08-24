@@ -202,20 +202,15 @@ they were developed as stability-neutral infrastructure. No third-party source t
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
 - N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite
   Littlestone dimension*.
-  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — **Lemma 16** is the source of the
-  additive two-colour subtree theorem of `Finite/BinaryTreeRamsey.lean`. Their statement uses
-  positive integers `p, q` and host height `p + q - 1`; substituting `p = a + 1`, `q = b + 1`
-  gives the `a + b + 1` used here. Their recursive subtree notion is also the source of the
-  embedding semantics: the copy's root may sit at an arbitrary node of the host, descendants
-  may be more than one level deeper, and left/right branch direction is preserved.
+  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — their recursive subtree notion is the
+  antecedent for the embedding semantics of `Finite/BinaryTreeEmbedding.lean`: a copy's root
+  may sit at an arbitrary node of the host, a descendant may be more than one level deeper
+  than its parent's image, and left/right branch direction is preserved.
 
-  The mathematics is theirs. What is this repository's own is the formulation: the
-  word-indexed node types and branch relation of `Finite/FullBinaryTree.lean`, the
-  single-law `InternalEmbedding` of `Finite/BinaryTreeEmbedding.lean` with injectivity and
-  ancestry preservation derived rather than assumed, the proper-embedding and leaf-extension
-  formulation, and the Lean proof engineering throughout. "Precise" in the theorem name refers
-  to the exact additive upper bound and is **not** a claim of optimality; no matching lower
-  bound is formalized here.
+  What is this repository's own is the formulation: the word-indexed node types and branch
+  relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
+  injectivity and ancestry preservation derived from that law rather than assumed, and the
+  Lean proof engineering.
 
   Mathlib's `BinaryTree` was audited for this purpose and is **not** used: it is a storage
   type carrying data at nodes, with no notion of a node's address, and so supports neither the
