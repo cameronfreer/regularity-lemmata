@@ -14,12 +14,19 @@ import sys
 HEADER = re.compile(r"(?mi)^#{1,6}[ \t]+Public API impact[ \t]*$")
 NEXT_HEADER = re.compile(r"(?m)^#{1,6}[ \t]+")
 COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+# The policy is about semantic presence, not Markdown styling, so the emphasis markers around a
+# label are optional and are not required to balance: `Added:`, `**Added:**`, and `**Added**:` all
+# name the same thing. What is *not* optional is content after the colon — a bare `Added:` still
+# fails, exactly as before.
+#
+# The first content character may not itself be an emphasis marker. Without that, the closing `**`
+# of `**Added:**` would be read as the content and an empty entry would pass.
+LABEL = r"(?:Added|Changed|Deprecated/removed)"
+EMPH = r"[*_]{0,2}"
 ENTRY = re.compile(
-    r"(?mi)^\s*(?:[-*]\s*)?(?:"
-    r"Added:\s*\S.*|"
-    r"Changed:\s*\S.*|"
-    r"Deprecated/removed:\s*\S.*|"
-    r"None\s*)$"
+    r"(?mi)^\s*(?:[-*]\s+)?(?:"
+    rf"{EMPH}{LABEL}{EMPH}:{EMPH}\s*[^\s*_].*|"
+    rf"{EMPH}None{EMPH}\s*)$"
 )
 
 
@@ -48,13 +55,19 @@ def self_test() -> None:
         "## Summary\nNothing",
         "## Public API impact\n<!-- Added: ... -->",
         "## Public API impact\nAdded:\n## Checklist\n- [x] done",
+        "## Public API impact\n**Added:**\n## Checklist\n- [x] done",
         "## Public API impact\nNo public changes",
+        "## Public API impact\n**No public changes**",
     ]
     valid = [
         "## Public API impact\nAdded: `foo`.",
         "## Public API impact\n- Changed: `foo` now returns `bar`.\n## Checklist",
         "## Public API impact\nDeprecated/removed: `oldFoo`.",
         "## Public API impact\nNone",
+        "## Public API impact\n**Added:** `foo`.",
+        "## Public API impact\n**Changed**: `foo` now returns `bar`.",
+        "## Public API impact\n- **Deprecated/removed:** `oldFoo`.",
+        "## Public API impact\n**None**",
     ]
     for body in invalid:
         assert validate(body) is not None, body
