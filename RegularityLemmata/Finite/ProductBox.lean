@@ -17,9 +17,9 @@ is the total weight of the tuples it contains.
 ## One notion of mass
 
 `boxMass` is the **weighted sum over the tuples of the box**, and the product factorization is
-the *theorem* `boxMass_eq_prod_finsetMass`. This is issue #83's binding shape, and it is what
-makes predicate mass and density in later tranches a **restriction of the same construction**
-rather than a second definition needing reconciliation.
+the *theorem* `boxMass_eq_prod_finsetMass`. Taking the sum as primitive is what makes a mass
+restricted to a subfamily of tuples — a predicate mass, a density — a **restriction of the same
+construction** rather than a second definition needing reconciliation with this one.
 
 There is deliberately no separate `sum_tupleWeight_eq_prod_sum`: with this primitive it would
 be `boxMass_eq_prod_finsetMass` after unfolding, and the library does not carry two names for
@@ -36,8 +36,7 @@ Results that live purely on the product side (`boxMass_nonneg`, `boxMass_mono`,
 `boxMass_of_eq_empty`) still need it only because they are stated about `boxMass`.
 
 Decidable equality on the carriers `V i` is required nowhere in this file; fiberwise
-`DecidableEq` belongs only on later operations that genuinely intersect, image, or union
-tuple sets.
+`DecidableEq` belongs only on operations that genuinely intersect, image, or union tuple sets.
 
 The index type is an arbitrary `Fintype`, not `Fin n`, which is what makes the
 equivalence-based reindexing below expressible.
@@ -68,8 +67,8 @@ def FiniteBox.tuples [Fintype ι] [DecidableEq ι] (A : FiniteBox V) : Finset (�
   Fintype.mem_piFinset
 
 /-- **Reindexing a box along an equivalence of index types.** A canonical operation, named
-rather than left as a raw lambda, so that consumers and later laws can speak about it. Needs
-no instances. -/
+rather than left as a raw lambda, so that consumers and laws about relabelling can speak about
+it. Needs no instances. -/
 def FiniteBox.reindex {ι' : Type*} (e : ι' ≃ ι) (A : FiniteBox V) :
     FiniteBox (fun j => V (e j)) := fun j => A (e j)
 
@@ -84,8 +83,8 @@ def tupleWeight [Fintype ι] (w : ∀ i, V i → ℝ) (x : ∀ i, V i) : ℝ := 
 
 /-- **The mass of a box**: the total weight of its tuples.
 
-A weighted sum over tuples, so that predicate mass and density restrict it definitionally.
-The product factorization is `boxMass_eq_prod_finsetMass`. -/
+A weighted sum over tuples, so that a mass restricted to a subfamily of tuples restricts this
+one definitionally. The product factorization is `boxMass_eq_prod_finsetMass`. -/
 def boxMass [Fintype ι] [DecidableEq ι] (w : ∀ i, V i → ℝ) (A : FiniteBox V) : ℝ :=
   ∑ x ∈ A.tuples, tupleWeight w x
 
