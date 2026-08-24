@@ -17,6 +17,6 @@ a curated stack and defines nothing; each listed module remains directly importa
   support-sensitive Sauer–Shelah bounds, polynomial binomial-sum estimates, and bounded-subset
   counting.
 
-Mathlib owns the underlying shattering and VC-dimension definitions. This facade introduces no
-stability, ladder, goodness, model, probability, or regularity vocabulary.
+Mathlib owns the underlying shattering and VC-dimension definitions. This facade collects the
+relation-fiber, trace-family, and counting APIs on finite supports.
 -/

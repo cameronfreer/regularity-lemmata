@@ -112,8 +112,7 @@ theorem vcDim_image_inter_le (𝒜 : Finset (Finset α)) (s : Finset α) :
   vcDim_traceFamily_le 𝒜 s
 
 /-- The subsets of `s` of cardinality at most `d` are bounded by the corresponding
-binomial sum. This is the neutral counting statement behind applications that enumerate
-bounded-size sets of coordinate flips. -/
+binomial sum. -/
 theorem card_powerset_filter_card_le_sum_choose (s : Finset α) (d : ℕ) :
     #(s.powerset.filter fun t => t.card ≤ d) ≤
       ∑ k ∈ Finset.Iic d, s.card.choose k := by
