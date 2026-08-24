@@ -29,10 +29,10 @@ The library's finite Ramsey results behind one import.
 
 ## What they share, and what they do not
 
-Both halves are colour-avoidance statements about a finite structure with an explicit witness,
-and neither depends on the other: the pair colouring lives on an unstructured vertex set, the
-tree colouring on the interior of a binary tree. They are bundled because a consumer reaching
-for one commonly wants the other in view, not because either is built from the other.
+This facade collects the library's independent finite Ramsey APIs. Both halves are
+colour-avoidance statements about a finite structure with an explicit witness, and **neither is
+built from the other**: the pair colouring lives on an unstructured vertex set, the tree
+colouring on the interior of a binary tree.
 
 Neither half carries any stability, VC, ladder, or rank vocabulary. The tree theorem's antecedent
 comes from that literature (see `PROVENANCE.md`), but what is formalized here is finite

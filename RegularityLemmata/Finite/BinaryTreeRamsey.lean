@@ -12,11 +12,11 @@ either a colour-`0` subtree of height `a + 1` or a colour-`1` subtree of height 
 "subtree" means the image of an `InternalEmbedding`: arbitrary root, branch direction preserved,
 depth unconstrained.
 
-## The bound is exact, not optimal
+## A precise upper theorem, without an optimality claim
 
-`a + b + 1` is the exact statement proved here, and **not** a claim that it is least. No matching
-lower-bound colouring is formalized, so this is an upper theorem only; upgrading it to a
-Ramsey-number equality would be separate work.
+The theorem states the explicit height `a + b + 1`. No matching lower-bound colouring is
+formalized, so no optimality claim is made; upgrading this to a Ramsey-number equality would be
+separate work.
 
 ## The induction
 
@@ -51,7 +51,7 @@ namespace RegularityLemmata
 open InternalEmbedding
 
 /-- A two-colouring of the internal nodes of a tree of height `h`. -/
-abbrev TwoColouring (h : ℕ) : Type := InternalNode h → Fin 2
+abbrev BinaryTreeTwoColouring (h : ℕ) : Type := InternalNode h → Fin 2
 
 private theorem fin_two_cases (c : Fin 2) : c = 0 ∨ c = 1 := by revert c; decide
 
@@ -61,7 +61,7 @@ Keeping the height a single variable is what keeps every arithmetic fact about `
 height in a hypothesis instead of in a type: the branches of a height-`n + 1` tree have height
 `n` definitionally, and the relation `a + b = n` is then an ordinary `Nat` equation that `omega`
 discharges. -/
-private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : TwoColouring (n + 1),
+private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : BinaryTreeTwoColouring (n + 1),
     (∃ e : InternalEmbedding (a + 1) (n + 1), ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding (b + 1) (n + 1), ∀ x, colour (e x) = 1) := by
   intro n
@@ -160,7 +160,7 @@ colour-`0` subtree of height `a + 1` or a colour-`1` subtree of height `b + 1`.
 The subtrees are `InternalEmbedding` images: their roots may sit at any host node and their
 edges may span many host levels, but branch direction is preserved. Both freedoms are used by
 the proof and neither may be removed. -/
-theorem binaryTreeRamsey_two (a b : ℕ) (colour : TwoColouring (a + b + 1)) :
+theorem binaryTreeRamsey_two (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     (∃ e : InternalEmbedding (a + 1) (a + b + 1), ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding (b + 1) (a + b + 1), ∀ x, colour (e x) = 1) :=
   ramsey_aux (a + b) a b rfl colour
@@ -171,7 +171,7 @@ what is exhibited is a copy of the full tree of the stated height and not only o
 The colouring constrains only internal nodes, so the leaf placement is unconstrained; it is
 supplied by `InternalEmbedding.extendProper`, whose restriction to the interior is the embedding
 the previous theorem produces. -/
-theorem binaryTreeRamsey_two_proper (a b : ℕ) (colour : TwoColouring (a + b + 1)) :
+theorem binaryTreeRamsey_two_proper (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     (∃ e : ProperEmbedding (a + 1) (a + b + 1), ∀ x, colour (e.internal x) = 0) ∨
     (∃ e : ProperEmbedding (b + 1) (a + b + 1), ∀ x, colour (e.internal x) = 1) := by
   rcases binaryTreeRamsey_two a b colour with ⟨e, he⟩ | ⟨e, he⟩
@@ -184,7 +184,7 @@ section Tests
 
 -- **`a = b = 0`.** Host height one: the single root is one colour or the other, and the answer
 -- is a height-one subtree of that colour.
-example (colour : TwoColouring 1) :
+example (colour : BinaryTreeTwoColouring 1) :
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 1) :=
   binaryTreeRamsey_two 0 0 colour
@@ -192,32 +192,41 @@ example (colour : TwoColouring 1) :
 -- **`a = 0`.** Either some node is colour `0`, or the whole tree of height `b + 1` is colour
 -- `1`.
 --
--- The host height is written `0 + b + 1`, not `b + 1`. That is not cosmetic: `0 + b` is *not*
--- definitionally `b`, because `Nat` addition recurses on its second argument, so a consumer
--- holding a colouring of a `b + 1`-tall tree must rewrite by `Nat.zero_add` before applying the
--- theorem at `a = 0`. The test is stated in the theorem's own shape so that this is visible
--- rather than hidden behind a `simp`.
-example (b : ℕ) (colour : TwoColouring (0 + b + 1)) :
-    (∃ e : InternalEmbedding 1 (0 + b + 1), ∀ x, colour (e x) = 0) ∨
-    (∃ e : InternalEmbedding (b + 1) (0 + b + 1), ∀ x, colour (e x) = 1) :=
-  binaryTreeRamsey_two 0 b colour
+-- Stated the way a consumer would hold it, at height `b + 1`. Instantiating the theorem at
+-- `a = 0` gives host height `0 + b + 1`, and `0 + b` is *not* definitionally `b`, because `Nat`
+-- addition recurses on its second argument. So the conversion is a real step.
+--
+-- It is **not** a `simp [Nat.zero_add]` step. The height occurs in the type of the bound
+-- colouring, which the body then depends on, so rewriting it would require transporting that
+-- body — a cast `simp` will not build, and it reports no progress. What a consumer must do
+-- instead is what is written out here: restrict the colouring along the height inequality on
+-- the way in, and rebuild the embedding on the way out. Both directions are `omega` on lengths
+-- plus proof irrelevance, and nothing about the branch law changes.
+example (b : ℕ) (colour : BinaryTreeTwoColouring (b + 1)) :
+    (∃ e : InternalEmbedding 1 (b + 1), ∀ x, colour (e x) = 0) ∨
+    (∃ e : InternalEmbedding (b + 1) (b + 1), ∀ x, colour (e x) = 1) := by
+  have hnode : ∀ x : InternalNode (0 + b + 1), x.1.length < b + 1 := fun x => by
+    have := x.2; omega
+  rcases binaryTreeRamsey_two 0 b (fun x => colour ⟨x.1, hnode x⟩) with ⟨e, he⟩ | ⟨e, he⟩
+  · exact Or.inl ⟨⟨fun x => ⟨(e x).1, hnode (e x)⟩, fun d x y h => e.branch d x y h⟩, he⟩
+  · exact Or.inr ⟨⟨fun x => ⟨(e x).1, hnode (e x)⟩, fun d x y h => e.branch d x y h⟩, he⟩
 
 -- **`b = 0`.** The mirror statement.
-example (a : ℕ) (colour : TwoColouring (a + 1)) :
+example (a : ℕ) (colour : BinaryTreeTwoColouring (a + 1)) :
     (∃ e : InternalEmbedding (a + 1) (a + 1), ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding 1 (a + 1), ∀ x, colour (e x) = 1) :=
   binaryTreeRamsey_two a 0 colour
 
 -- **Host height one**, stated directly at the numeral rather than through `a + b + 1`.
-example (colour : TwoColouring 1) :
+example (colour : BinaryTreeTwoColouring 1) :
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 1) :=
   binaryTreeRamsey_two 0 0 colour
 
--- **A concrete colouring at host height two.** Both nodes below the root are colour `1` and the
--- root is colour `0`, so with `a = b = 0` the theorem applies; the colouring is not constant, so
--- the statement is not answered by a trivial whole-tree embedding at either colour.
-private def sampleColour : TwoColouring 2 := fun x => if x.1 = [] then 0 else 1
+-- **A concrete colouring at host height two.** The root is colour `0` and both nodes below it
+-- are colour `1`. Host height two is `a + b + 1` with `a = 0`, `b = 1`; the colouring is not
+-- constant, so the statement is not answered by a trivial whole-tree embedding at either colour.
+private def sampleColour : BinaryTreeTwoColouring 2 := fun x => if x.1 = [] then 0 else 1
 
 example : sampleColour (root 1) = 0 := by decide
 example : sampleColour (consInternal true (⟨[], by decide⟩ : InternalNode 1)) = 1 := by decide
@@ -228,7 +237,7 @@ example :
   binaryTreeRamsey_two 0 1 sampleColour
 
 /-- The constant colourings, used to exercise both root colours. -/
-private def constColour (h : ℕ) (c : Fin 2) : TwoColouring h := fun _ => c
+private def constColour (h : ℕ) (c : Fin 2) : BinaryTreeTwoColouring h := fun _ => c
 
 -- **Both root colours are covered**, at the smallest host height where the root has a choice:
 -- the constantly-`0` and constantly-`1` colourings of a height-two tree both resolve.
@@ -244,7 +253,7 @@ example :
 
 -- **The whole-tree form**, whose leaf placement comes from `extendProper`. Restricting it
 -- returns the interior embedding, so the two forms agree where they overlap.
-example (a b : ℕ) (colour : TwoColouring (a + b + 1)) :
+example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     (∃ e : ProperEmbedding (a + 1) (a + b + 1), ∀ x, colour (e.internal x) = 0) ∨
     (∃ e : ProperEmbedding (b + 1) (a + b + 1), ∀ x, colour (e.internal x) = 1) :=
   binaryTreeRamsey_two_proper a b colour
