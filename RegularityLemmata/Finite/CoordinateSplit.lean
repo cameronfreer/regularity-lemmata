@@ -327,8 +327,8 @@ matching `swap_glue`. -/
 theorem splitRel_swap (σ : CoordinateSplit n) (R : (∀ i, V i) → Prop)
     (xL : ∀ i : σ.swap.Left, V i.1) (xR : ∀ i : σ.swap.Right, V i.1) :
     -- Routing the indices through `swapLeftEquiv.symm` instead would make the carrier read
-    -- `V ↑(e.symm i)` rather than `V ↑i`; the v4.34 elaborator rejects that as an
-    -- application type mismatch even though the two are `rfl`-equal.
+    -- `V ↑(e.symm i)` rather than `V ↑i`. The two are `rfl`-equal but not syntactically
+    -- aligned, and elaborating the dependent application can reject that mismatch.
     σ.swap.splitRel R xL xR
       ↔ σ.splitRel R (fun i => xR ⟨i.1, fun h => (mem_right_iff.mp h) i.2⟩)
           (fun i => xL ⟨i.1, mem_right_iff.mpr i.2⟩) := by
