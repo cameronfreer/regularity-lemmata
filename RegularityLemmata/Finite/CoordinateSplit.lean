@@ -193,6 +193,16 @@ theorem swap_glue (σ : CoordinateSplit n) (xL : ∀ i : σ.swap.Left, V i.1)
   · rw [glue_apply_right hi,
       glue_apply_left (show i ∈ σ.swap.left from mem_right_iff.mpr hi)]
 
+/-- **Pointwise restriction under swap**, left half. Both sides read the same coordinate of
+`x`; the index correspondence is carried by `swapLeftEquiv`, not a cast. Stated pointwise so
+it applies without unfolding `restrictLeft`. -/
+@[simp] theorem restrictLeft_swap (σ : CoordinateSplit n) (x : ∀ i, V i) (i : σ.swap.Left) :
+    σ.swap.restrictLeft x i = σ.restrictRight x (σ.swapLeftEquiv i) := rfl
+
+/-- …and the right half. -/
+@[simp] theorem restrictRight_swap (σ : CoordinateSplit n) (x : ∀ i, V i) (i : σ.swap.Right) :
+    σ.swap.restrictRight x i = σ.restrictLeft x (σ.swapRightEquiv i) := rfl
+
 /-! ### Reindexing
 
 The membership equation below is the canonical statement of the direction. Naturality is
@@ -302,6 +312,27 @@ theorem splitRel_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n))
       ↔ σ.splitRel R xL xR := by
   rw [splitRel_apply, splitRel_apply, glue_reindex]
   exact reindexRel_comp π R (σ.glue xL xR)
+
+/-- **Naturality of `splitRel` under swap.** Reading a relation through the complementary
+split is reading it through the original with the two halves exchanged — the `Prod.swap`
+statement at the level of relations, completing `swap_glue`.
+
+Like `splitRel_reindex` this is a genuine transport rather than a tautology: the two halves
+are exchanged on the right-hand side, so a relation that distinguishes its coordinates
+distinguishes the two sides. The order-sensitive test below would be unprovable if the
+exchange were dropped.
+
+Explicit subtype constructors keep the dependent carrier indices syntactically aligned,
+matching `swap_glue`. -/
+theorem splitRel_swap (σ : CoordinateSplit n) (R : (∀ i, V i) → Prop)
+    (xL : ∀ i : σ.swap.Left, V i.1) (xR : ∀ i : σ.swap.Right, V i.1) :
+    -- Routing the indices through `swapLeftEquiv.symm` instead would make the carrier read
+    -- `V ↑(e.symm i)` rather than `V ↑i`. The two are `rfl`-equal but not syntactically
+    -- aligned, and elaborating the dependent application can reject that mismatch.
+    σ.swap.splitRel R xL xR
+      ↔ σ.splitRel R (fun i => xR ⟨i.1, fun h => (mem_right_iff.mp h) i.2⟩)
+          (fun i => xL ⟨i.1, mem_right_iff.mpr i.2⟩) := by
+  rw [splitRel_apply, splitRel_apply, swap_glue]
 
 /-! ### Properness under the structural operations -/
 
@@ -501,6 +532,56 @@ example (σ : CoordinateSplit 3) (xL : ∀ i : σ.Left, (fun _ : Fin 3 => Fin 4)
     σ.splitRel (V := fun _ => Fin 4) (fun x => x 0 < x 1) xL xR
       ↔ σ.glue (V := fun _ => Fin 4) xL xR 0 < σ.glue (V := fun _ => Fin 4) xL xR 1 :=
   Iff.rfl
+
+-- **Swap genuinely exchanges the halves.** For the split `{0}` of `Fin 2`, the complementary
+-- split's *left* half is coordinate `1` and its *right* half is coordinate `0`. Feeding
+-- `1` then `3` to the order-sensitive relation `x 0 < x 1` reads `3 < 1`, which is false…
+example :
+    ¬ (CoordinateSplit.singleton (0 : Fin 2)).swap.splitRel (V := fun _ => Fin 4)
+        (fun x => x 0 < x 1) (fun _ => 1) (fun _ => 3) := by
+  rw [splitRel_apply]; decide
+
+-- …while exchanging just those two values makes it true. So the two arguments are **not**
+-- interchangeable, and any transport law that conflated the halves would be refuted here.
+example :
+    (CoordinateSplit.singleton (0 : Fin 2)).swap.splitRel (V := fun _ => Fin 4)
+      (fun x => x 0 < x 1) (fun _ => 3) (fun _ => 1) := by
+  rw [splitRel_apply]; decide
+
+-- **The theorem at full generality**, which is where its content lives: this statement is
+-- *not* closed by `Iff.rfl`, because relating the two gluings needs `swap_glue`'s pointwise
+-- case split. Concrete instances below compute away and so cannot witness that.
+example (σ : CoordinateSplit 3) (R : (∀ _ : Fin 3, Fin 4) → Prop)
+    (xL : ∀ i : σ.swap.Left, (fun _ : Fin 3 => Fin 4) i.1)
+    (xR : ∀ i : σ.swap.Right, (fun _ : Fin 3 => Fin 4) i.1) :
+    σ.swap.splitRel (V := fun _ => Fin 4) R xL xR
+      ↔ σ.splitRel (V := fun _ => Fin 4) R
+          (fun i => xR ⟨i.1, fun h => (mem_right_iff.mp h) i.2⟩)
+          (fun i => xL ⟨i.1, mem_right_iff.mpr i.2⟩) :=
+  splitRel_swap σ R xL xR
+
+-- **The theorem on the concrete data**, pinning the orientation numerically. Proved *by*
+-- `splitRel_swap`, so deleting the theorem breaks compilation — unlike the `decide` examples
+-- above, which only compute the two sides independently.
+example :
+    (CoordinateSplit.singleton (0 : Fin 2)).swap.splitRel (V := fun _ => Fin 4)
+        (fun x => x 0 < x 1) (fun _ => 1) (fun _ => 3)
+      ↔ (CoordinateSplit.singleton (0 : Fin 2)).splitRel (V := fun _ => Fin 4)
+          (fun x => x 0 < x 1) (fun _ => 3) (fun _ => 1) :=
+  splitRel_swap _ _ _ _
+
+-- …and the right-hand reading is itself false, so the equivalence is not vacuously true of
+-- two unreachable propositions.
+example :
+    ¬ (CoordinateSplit.singleton (0 : Fin 2)).splitRel (V := fun _ => Fin 4)
+        (fun x => x 0 < x 1) (fun _ => 3) (fun _ => 1) := by
+  rw [splitRel_apply]; decide
+
+-- Restriction under swap is pointwise, and reads the same coordinate on both sides.
+example (x : ∀ _ : Fin 3, Fin 4) (σ : CoordinateSplit 3) (i : σ.swap.Left) :
+    σ.swap.restrictLeft (V := fun _ => Fin 4) x i
+      = σ.restrictRight (V := fun _ => Fin 4) x (σ.swapLeftEquiv i) :=
+  restrictLeft_swap σ x i
 
 -- **The range-disjointness clause is necessary.** Two singleton-domain halves of the split
 -- `{0}` of `Fin 2`, each vacuously injective, that collide — so the glued tuple is not
