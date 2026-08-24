@@ -202,17 +202,26 @@ they were developed as stability-neutral infrastructure. No third-party source t
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
 - N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite
   Littlestone dimension*.
-  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — their recursive subtree notion is the
-  antecedent for the embedding semantics of `Finite/BinaryTreeEmbedding.lean`: a copy's root
-  may sit at an arbitrary node of the host, a descendant may be more than one level deeper
-  than its parent's image, and left/right branch direction is preserved.
+  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — **Lemma 16** is the source of the
+  additive two-colour subtree theorem `binaryTreeRamsey_two` of
+  `Finite/BinaryTreeRamsey.lean`. Their statement uses positive integers `p, q` and host height
+  `p + q - 1`; substituting `p = a + 1` and `q = b + 1` gives the `a + b + 1` used here.
+
+  Their recursive subtree notion is likewise the antecedent for the embedding semantics of
+  `Finite/BinaryTreeEmbedding.lean`: a copy's root may sit at an arbitrary node of the host, a
+  descendant may be more than one level deeper than its parent's image, and left/right branch
+  direction is preserved.
+
+  The bound is stated **exactly**, which is not a claim that it is least: no matching
+  lower-bound colouring is formalized here, so what is proved is an upper theorem only.
 
   What is this repository's own is the formulation: the word-indexed node types and branch
   relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
   injectivity and ancestry preservation derived from that law rather than assumed, the
   proper-embedding and leaf-extension formulation of
   `Finite/BinaryTreeProperEmbedding.lean` — which places a leaf image by entering the correct
-  branch below the parent's image, so that no spare-height hypothesis is needed — and the Lean
+  branch below the parent's image, so that no spare-height hypothesis is needed — the
+  host-height-indexed recursion that keeps the height arithmetic out of the types, and the Lean
   proof engineering.
 
   Mathlib's `BinaryTree` was audited for this purpose and is **not** used: it is a storage
