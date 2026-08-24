@@ -212,8 +212,9 @@ they were developed as stability-neutral infrastructure. No third-party source t
   descendant may be more than one level deeper than its parent's image, and left/right branch
   direction is preserved.
 
-  The bound is stated **exactly**, which is not a claim that it is least: no matching
-  lower-bound colouring is formalized here, so what is proved is an upper theorem only.
+  What is formalized is a **precise upper theorem, with no optimality claim**: the statement
+  gives the explicit height `a + b + 1`, and no matching lower-bound colouring is formalized
+  here, so nothing asserts that this height is least.
 
   What is this repository's own is the formulation: the word-indexed node types and branch
   relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
