@@ -200,6 +200,21 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Algorithms 1 (1990) — the discrepancy (DISC) quasirandomness tradition behind
   disc regularity (`Hypergraph/PolyadRegularity.lean`).
 - L. Lovász, *Large Networks and Graph Limits*, AMS 2012 — cut-norm background.
+- N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite
+  Littlestone dimension*.
+  [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — their recursive subtree notion is the
+  antecedent for the embedding semantics of `Finite/BinaryTreeEmbedding.lean`: a copy's root
+  may sit at an arbitrary node of the host, a descendant may be more than one level deeper
+  than its parent's image, and left/right branch direction is preserved.
+
+  What is this repository's own is the formulation: the word-indexed node types and branch
+  relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
+  injectivity and ancestry preservation derived from that law rather than assumed, and the
+  Lean proof engineering.
+
+  Mathlib's `BinaryTree` was audited for this purpose and is **not** used: it is a storage
+  type carrying data at nodes, with no notion of a node's address, and so supports neither the
+  ancestry nor the branch-direction relations these embeddings are defined by.
 - G. Conant and C. Terry, *Quantitative analytic stable regularity*.
   [arXiv:2607.21762](https://arxiv.org/abs/2607.21762). The almost-constancy vocabulary and the
   separation lemma of `Finite/AlmostConstant.lean` follow their Definitions 1.6/2.1 and
