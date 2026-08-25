@@ -11,16 +11,12 @@ import RegularityLemmata.Finite.AlmostConstant
 import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.WeightedChoiceBudget
-import RegularityLemmata.Finite.MulticolorRamsey
 import RegularityLemmata.Finite.DensityBuckets
 import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
 import RegularityLemmata.Finite.Weight
 import RegularityLemmata.Finite.CoordinateSplit
 import RegularityLemmata.Finite.ProductBox
-import RegularityLemmata.Finite.FullBinaryTree
-import RegularityLemmata.Finite.BinaryTreeEmbedding
-import RegularityLemmata.Finite.BinaryTreeProperEmbedding
 import RegularityLemmata.Finite.RelationFiber
 import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
@@ -129,6 +125,7 @@ import RegularityLemmata.Relational.DiagonalGate
 import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
+import RegularityLemmata.FiniteRamsey
 import RegularityLemmata.Kernel
 import RegularityLemmata.FiniteSetSystems
 import RegularityLemmata.RelationalApproximation
@@ -139,11 +136,14 @@ import RegularityLemmata.RelationalApproximation
 A Lean 4 library of reusable finite regularity, counting, approximation, and removal
 infrastructure, built on mathlib.
 
-This root imports the library's public surface. Three curated facades bundle stacks a consumer
+This root imports the library's public surface. Four curated facades bundle stacks a consumer
 often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels),
-`RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds), and
+`RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds),
 `RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, and cellwise
-edit bounds). The probe and obstruction-gate modules of in-progress campaigns live under the
+edit bounds), and `RegularityLemmata.FiniteRamsey` (multicolour pair Ramsey, binary-tree
+subtree embeddings, and the additive two-colour subtree theorem). The Ramsey modules are
+imported here **through that facade** rather than individually.
+The probe and obstruction-gate modules of in-progress campaigns live under the
 separate umbrella `RegularityLemmataGates` — same namespace, proof gates, and CI, but not part
 of this import; each stays directly importable by its module name.
 See `README.md` for scope and `ARCHITECTURE.md` for the library's conventions.
