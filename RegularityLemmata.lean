@@ -25,6 +25,7 @@ import RegularityLemmata.Finite.RelationKernel
 import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Finite.HomogeneousCell
 import RegularityLemmata.Partition.Basic
+import RegularityLemmata.Partition.BoxPartition
 import RegularityLemmata.Partition.Equitable
 import RegularityLemmata.Partition.Grouping
 import RegularityLemmata.Partition.BlockEnergy
