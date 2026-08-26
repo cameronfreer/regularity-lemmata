@@ -216,13 +216,6 @@ theorem existsUnique_parent_boxCell [Fintype ι] [DecidableEq ι] [∀ i, Decida
   exact (P i).eq_of_mem_parts (mem_boxCells.mp hC' i) (hchoice i).choose_spec.1 (hsub' i hv)
     ((hchoice i).choose_spec.2 hv)
 
-/-- **A refinement decomposes the same total.** Immediate from the two decompositions, and the
-reason the mass identity needs no compatibility hypothesis of its own. -/
-theorem sum_boxCells_boxMass_congr_of_refines [Fintype ι] [DecidableEq ι]
-    [∀ i, DecidableEq (V i)] (w : ∀ i, V i → ℝ) {A : FiniteBox V} (P Q : BoxPartition A) :
-    ∑ D ∈ boxCells Q, boxMass w D = ∑ C ∈ boxCells P, boxMass w C := by
-  rw [← boxMass_eq_sum_boxCells w Q, boxMass_eq_sum_boxCells w P]
-
 /-! ### Tests -/
 
 section Tests
@@ -310,10 +303,12 @@ example : (boxCells fineP).card ≠ (boxCells mixedP).card := by
   rw [card_boxCells, card_boxCells, Fin.prod_univ_two, Fin.prod_univ_two]
   decide
 
--- …yet both decompose the same total mass.
+-- …yet both decompose the same total mass. This needs no refinement hypothesis at all: each
+-- side is `boxMass w bxP` by its own decomposition, so the agreement is a consequence of the
+-- two theorems rather than of `fineP` refining `mixedP`.
 example (w : ∀ i, VP i → ℝ) :
-    ∑ D ∈ boxCells fineP, boxMass w D = ∑ C ∈ boxCells mixedP, boxMass w C :=
-  sum_boxCells_boxMass_congr_of_refines w mixedP fineP
+    ∑ D ∈ boxCells fineP, boxMass w D = ∑ C ∈ boxCells mixedP, boxMass w C := by
+  rw [← boxMass_eq_sum_boxCells w fineP, boxMass_eq_sum_boxCells w mixedP]
 
 -- Every fine cell has a unique coarse parent.
 example (D : FiniteBox VP) (hD : D ∈ boxCells fineP) :
