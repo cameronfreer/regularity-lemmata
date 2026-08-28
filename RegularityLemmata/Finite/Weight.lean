@@ -8,6 +8,7 @@ import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Tactic.Positivity
 import Mathlib.Tactic.Linarith
 import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Data.Finset.SymmDiff
 
 /-!
 # Raw finite weights and masses
@@ -29,6 +30,8 @@ that genuinely need a positive denominator therefore assume `0 < finsetMass w A`
 -/
 
 namespace RegularityLemmata
+
+open scoped symmDiff
 
 variable {X : Type*} {w w' : X → ℝ} {A B : Finset X}
 
@@ -84,6 +87,61 @@ theorem finsetMass_biUnion [DecidableEq X] (w : X → ℝ) {s : Finset (Finset X
     finsetMass w (s.biUnion id) = ∑ A ∈ s, finsetMass w A := by
   rw [finsetMass]
   exact Finset.sum_biUnion hdisj
+
+/-! ### Subadditivity and the symmetric-difference bound
+
+Additivity over a disjoint union is an identity and needs no sign hypothesis. Everything below
+compares masses of **different** finsets, which is exactly when a signed weight can make a
+larger set lighter, so each carries nonnegativity — stated on the sets involved, never
+globally. -/
+
+/-- **Subadditive over a union.** Unlike `finsetMass_union_of_disjoint` this needs
+nonnegativity, because the overlap is counted twice on the right. -/
+theorem finsetMass_union_le [DecidableEq X] {w : X → ℝ} {A B : Finset X}
+    (hw : ∀ x ∈ A ∪ B, 0 ≤ w x) : finsetMass w (A ∪ B) ≤ finsetMass w A + finsetMass w B := by
+  rw [← Finset.union_sdiff_self_eq_union, finsetMass_union_of_disjoint w Finset.disjoint_sdiff]
+  have hle : finsetMass w (B \ A) ≤ finsetMass w B :=
+    finsetMass_mono (fun x hx => hw x (Finset.mem_union_right _ hx)) Finset.sdiff_subset
+  linarith
+
+/-- **The union bound over a finite family.** Proved by induction: the pinned Mathlib has
+cardinality and density versions of this, but no weighted one. -/
+theorem finsetMass_biUnion_le [DecidableEq X] {w : X → ℝ} {κ : Type*} [DecidableEq κ]
+    {s : Finset κ} {t : κ → Finset X} (hw : ∀ x ∈ s.biUnion t, 0 ≤ w x) :
+    finsetMass w (s.biUnion t) ≤ ∑ k ∈ s, finsetMass w (t k) := by
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert k s hk ih =>
+      rw [Finset.sum_insert hk, Finset.biUnion_insert] at *
+      have hrest := ih fun x hx => hw x (Finset.mem_union_right _ hx)
+      have hpair := finsetMass_union_le (w := w) hw
+      linarith
+
+/-- **A mass difference is controlled by the symmetric difference.**
+
+Nonnegativity is required **only on `A ∆ B`**: the two masses share the mass of `A ∩ B`, which
+cancels in the difference, so the weight is unconstrained there. The bound assumes neither
+disjointness nor nesting. -/
+theorem abs_sub_finsetMass_le [DecidableEq X] {w : X → ℝ} {A B : Finset X}
+    (hw : ∀ x ∈ A ∆ B, 0 ≤ w x) :
+    |finsetMass w A - finsetMass w B| ≤ finsetMass w (A ∆ B) := by
+  have hA : finsetMass w A = finsetMass w (A \ B) + finsetMass w (A ∩ B) := by
+    rw [← finsetMass_union_of_disjoint w (Finset.disjoint_sdiff_inter A B),
+      Finset.sdiff_union_inter]
+  have hB : finsetMass w B = finsetMass w (B \ A) + finsetMass w (B ∩ A) := by
+    rw [← finsetMass_union_of_disjoint w (Finset.disjoint_sdiff_inter B A),
+      Finset.sdiff_union_inter]
+  have hcomm : finsetMass w (B ∩ A) = finsetMass w (A ∩ B) := by rw [Finset.inter_comm]
+  have hsplit : finsetMass w (A ∆ B) = finsetMass w (A \ B) + finsetMass w (B \ A) := by
+    rw [Finset.symmDiff_def, finsetMass_union_of_disjoint w disjoint_sdiff_sdiff]
+  have hAB : 0 ≤ finsetMass w (A \ B) :=
+    finsetMass_nonneg fun x hx =>
+      hw x (by rw [Finset.symmDiff_def]; exact Finset.mem_union_left _ hx)
+  have hBA : 0 ≤ finsetMass w (B \ A) :=
+    finsetMass_nonneg fun x hx =>
+      hw x (by rw [Finset.symmDiff_def]; exact Finset.mem_union_right _ hx)
+  rw [hA, hB, hcomm, hsplit, abs_le]
+  constructor <;> linarith
 
 /-! ### Zero mass is not emptiness -/
 
