@@ -18,6 +18,7 @@ import RegularityLemmata.Finite.Weight
 import RegularityLemmata.Finite.CoordinateSplit
 import RegularityLemmata.Finite.ProductBox
 import RegularityLemmata.Finite.BoxUnion
+import RegularityLemmata.Finite.BoxCoordinateSplit
 import RegularityLemmata.Finite.RelationFiber
 import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
