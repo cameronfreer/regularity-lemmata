@@ -149,10 +149,10 @@ theorem boxMass_glue (σ : CoordinateSplit n) (w : ∀ i, V i → ℝ)
 
 /-- **Swapping the split exchanges the two side boxes.** The index equivalences of
 `CoordinateSplit` carry the correspondence, so this is cast-free. -/
-theorem boxLeft_swap (σ : CoordinateSplit n) (A : FiniteBox V) (i : σ.swap.Left) :
+@[simp] theorem boxLeft_swap (σ : CoordinateSplit n) (A : FiniteBox V) (i : σ.swap.Left) :
     σ.swap.boxLeft A i = σ.boxRight A (σ.swapLeftEquiv i) := rfl
 
-theorem boxRight_swap (σ : CoordinateSplit n) (A : FiniteBox V) (i : σ.swap.Right) :
+@[simp] theorem boxRight_swap (σ : CoordinateSplit n) (A : FiniteBox V) (i : σ.swap.Right) :
     σ.swap.boxRight A i = σ.boxLeft A (σ.swapRightEquiv i) := rfl
 
 /-- **The factorization is symmetric under swapping**, the two factors exchanging places. -/
@@ -164,12 +164,12 @@ theorem boxMass_split_swap (σ : CoordinateSplit n) (w : ∀ i, V i → ℝ) (A 
   rw [← boxMass_split σ.swap w A, ← boxMass_split σ w A]
 
 /-- **Coordinate reindexing commutes with restriction to a side.** -/
-theorem boxLeft_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n)) (A : FiniteBox V)
+@[simp] theorem boxLeft_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n)) (A : FiniteBox V)
     (i : (σ.reindex π).Left) :
     (σ.reindex π).boxLeft (V := fun i => V (π i)) (fun i => A (π i)) i
       = σ.boxLeft A (σ.reindexLeftEquiv π i) := rfl
 
-theorem boxRight_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n)) (A : FiniteBox V)
+@[simp] theorem boxRight_reindex (σ : CoordinateSplit n) (π : Equiv.Perm (Fin n)) (A : FiniteBox V)
     (i : (σ.reindex π).Right) :
     (σ.reindex π).boxRight (V := fun i => V (π i)) (fun i => A (π i)) i
       = σ.boxRight A (σ.reindexRightEquiv π i) := rfl
