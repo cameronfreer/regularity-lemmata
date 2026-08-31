@@ -73,7 +73,7 @@ densities and edits; `RegularityLemmata.Partition.Basic` and
 `RegularityLemmata.Partition.BlockEnergy` for partitions and weighted energy;
 `RegularityLemmata.Relational.Language` for the finite relational layer.
 
-Four curated **facades** import a stack whole:
+Five curated **facades** import a stack whole:
 
 - `RegularityLemmata.Kernel` — the rectangular weighted-kernel layer (raw weights, kernels,
   relation indicators, one-variable averages and almost-constancy, stepping, energy and the
@@ -87,6 +87,10 @@ Four curated **facades** import a stack whole:
   ordered-pair colourings, finite full binary trees as words, arbitrary-root subtree embeddings
   and their proper extensions through the leaf level, and the additive two-colour subtree
   theorem.
+- `RegularityLemmata.ProductSpaces` — the heterogeneous weighted-box stack: raw weights and
+  masses, boxes and their tuples, predicate mass and guard-free density, independent coordinate
+  partitions with exact cell decompositions, finite unions with a weighted symmetric-difference
+  error, and the coordinate-split adapter.
 
 ## Using as a dependency
 
@@ -100,9 +104,9 @@ rev = "v0.5.0"
 Pin a tag. `main` is the development branch and its API moves between tags.
 
 Then `import RegularityLemmata`, a curated facade such as `RegularityLemmata.Kernel`,
-`RegularityLemmata.FiniteSetSystems`, `RegularityLemmata.RelationalApproximation`, or
-`RegularityLemmata.FiniteRamsey`, or an individual module such as
-`RegularityLemmata.Relational.GraphCounting`.
+`RegularityLemmata.FiniteSetSystems`, `RegularityLemmata.RelationalApproximation`,
+`RegularityLemmata.FiniteRamsey`, or `RegularityLemmata.ProductSpaces`, or an individual module
+such as `RegularityLemmata.Relational.GraphCounting`.
 
 ## Building
 
