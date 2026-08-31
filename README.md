@@ -98,7 +98,7 @@ Five curated **facades** import a stack whole:
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "v0.5.0"
+rev = "v0.6.0"
 ```
 
 Pin a tag. `main` is the development branch and its API moves between tags.

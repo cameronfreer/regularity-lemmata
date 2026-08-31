@@ -154,6 +154,6 @@ namespace RegularityLemmata
 
 /-- Library version marker. Also guarantees the axiom audit always has at least one
 declaration to check. -/
-def version : String := "0.5.0"
+def version : String := "0.6.0"
 
 end RegularityLemmata
