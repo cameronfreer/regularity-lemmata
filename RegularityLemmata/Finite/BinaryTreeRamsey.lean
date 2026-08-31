@@ -43,7 +43,15 @@ N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite 
 dimension*, [arXiv:1806.00949](https://arxiv.org/abs/1806.00949), **Lemma 16**. Their statement
 uses positive integers `p, q` and host height `p + q - 1`; substituting `p = a + 1` and
 `q = b + 1` gives the `a + b + 1` here. The mathematics is theirs; the word-indexed formulation
-and Lean proof are this repository's own. See `PROVENANCE.md`.
+and Lean proof are this repository's own.
+
+`binaryTreeRamsey_two` is also the two-colour specialization of G. Conant and C. Terry,
+*Encoding orders and trees in real-valued functions*,
+[arXiv:2607.21761](https://arxiv.org/abs/2607.21761), **Lemma 2.6**, the tree-Ramsey ingredient
+used in their proof of Theorem 1.11. Their Lemma 2.6 is the multicolour generalization; Theorem
+1.11 is a downstream application, not a Ramsey statement.
+
+See `PROVENANCE.md`.
 -/
 
 namespace RegularityLemmata

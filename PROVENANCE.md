@@ -216,6 +216,14 @@ they were developed as stability-neutral infrastructure. No third-party source t
   gives the explicit height `a + b + 1`, and no matching lower-bound colouring is formalized
   here, so nothing asserts that this height is least.
 
+  `binaryTreeRamsey_two` formalizes the two-colour subtree theorem recorded from
+  Alon–Livni–Malliaris–Moran, Lemma 16. It is also the two-colour specialization of
+  G. Conant and C. Terry, *Encoding orders and trees in real-valued functions*
+  ([arXiv:2607.21761](https://arxiv.org/abs/2607.21761)), **Lemma 2.6**, the tree-Ramsey
+  ingredient used in their proof of Theorem 1.11. Their Lemma 2.6 is the multicolour
+  generalization; what is formalized here is its two-colour case, and Theorem 1.11 is a
+  downstream application rather than a Ramsey statement.
+
   What is this repository's own is the formulation: the word-indexed node types and branch
   relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
   injectivity and ancestry preservation derived from that law rather than assumed, the
