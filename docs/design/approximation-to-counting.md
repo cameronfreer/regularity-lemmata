@@ -5,10 +5,10 @@ in [`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document is the audit-and-fr
 for issue #84. It records what already exists, what each version actually proves, and the
 interface decisions — **no implementation**.
 
-The issue promises three interfaces, and this document freezes all three: the **aggregation
-bridge** with its local-error hypothesis (§6), the **boxwise-constant quotient** with its exact
-counting relationship (§7), the **edit transfer** between two models on one carrier (§8), and
-their **composite** (§9). The coefficient audits behind §7 and §8 do *not* trigger the issue's
+The issue promises three user-facing interfaces, and this document freezes all three — the
+**boxwise-constant quotient** with its exact counting relationship (§7), the **edit transfer**
+between two models on one carrier (§8), and their **composite** (§9) — supported by the
+**aggregation bridge** with its local-error hypothesis (§6). The coefficient audits behind §7 and §8 do *not* trigger the issue's
 hard stop — both derivations are uniform in the arity — so no part of the three-part goal needs
 to be split off; the hard stop fires only for the local uniformity coefficient (§1).
 
@@ -349,10 +349,19 @@ they are exactly the nontransversal cell tuples. On such a box the injective cou
 indivisible model is a product of falling factorials grouped by cell multiplicity, **not**
 `Π_i |C i|`, so no exact quotient formula is attempted there. Instead their entire contribution
 is routed through the diagonal gate: their total volume is at most `p(k)·m·#s^(k−1)` (§4), the
-charge §6's bridge already carries. So the full-count form is an inequality with the gate's
-charge as its only error:
+charge §6's bridge already carries. So the count form is an inequality with the gate's charge as
+its only error:
 
-> `|injectiveCount(N) − Σ_{transversal, matching} Π_i |C i|| ≤ p(k)·m·#s^(k−1)`.
+> `|inducedEmbeddingCountOn P N (fun _ ↦ s) − Σ_{transversal, matching} Π_i |C i||
+> ≤ p(k)·m·#s^(k−1)`.
+
+**Carrier scope.** `Q : Finpartition s` controls only tuples lying in `s`, so the left-hand side
+is the **`s`-restricted count** `inducedEmbeddingCountOn … (fun _ ↦ s)` — the existing
+restricted-count API — and *not* the full-carrier `inducedEmbeddingCount`, which counts over all
+of `V`. Tuples using a vertex outside `s` appear in neither the quotient sum nor the diagonal
+charge, so a full-count statement would simply be false for `s ≠ univ`. The full-carrier theorem
+is the specialization `s = univ`; if a proper-subset/full-count comparison is ever needed, it
+must carry an explicit off-`s` charge and is left out of this freeze.
 
 This is why the quotient audit triggers no hard stop: the only constant involved is the diagonal
 charge, whose uniform derivation §4 already established.
@@ -363,14 +372,18 @@ charge, whose uniform derivation §4 already established.
 `Relational/Edit`'s frozen conventions. Setting: two models `M N : FiniteRelModel L V` on the
 same carrier, a pattern on `k` vertices, ordered edit sets with diagonals included.
 
-**The derivation, and its coefficient.** An injective `k`-tuple `T` is counted by `M` but not by
-`N` only if some atom distinguishes them: there is a symbol `R` of arity `n` and a pattern tuple
-`w : Fin n → W` with `T ∘ w ∈ relationEditSet M N R`. Induced counting reads *every* atom on the
-pattern's vertices — all `k^n` tuples per symbol, not only the pattern's true atoms — so the
-double count runs over `Σ_R k^(arity R)` atomic incidences. For `n ≥ 1`, fixing the edited host
-tuple pins `T` on at least one coordinate, leaving at most `|V|^(k−1)` extensions. Hence:
+**The derivation, and its coefficient.** An injective `k`-tuple `T` through `s` is counted by
+`M` but not by `N` only if some atom distinguishes them: there is a symbol `R` of arity `n` and
+a pattern tuple `w : Fin n → W` on which the two models disagree at the host tuple `T ∘ w` — a
+tuple lying in `s`, so the relevant edit mass is the **`s`-box edit count**
+`editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s)`, not the full-carrier `relationEditCount`.
+Induced counting reads *every* atom on the pattern's vertices — all `k^n` tuples per symbol, not
+only the pattern's true atoms — so the double count runs over `Σ_R k^(arity R)` atomic
+incidences. For `n ≥ 1`, fixing the edited host tuple pins `T` on at least one coordinate,
+leaving at most `#s^(k−1)` extensions through `s`. Hence:
 
-> `|injectiveCount(M) − injectiveCount(N)| ≤ Σ_R k^(arity R) · relationEditCount M N R · |V|^(k−1)`.
+> `|inducedEmbeddingCountOn P M (fun _ ↦ s) − inducedEmbeddingCountOn P N (fun _ ↦ s)|
+> ≤ Σ_R k^(arity R) · editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s) · #s^(k−1)`.
 
 **The coefficient depends on both `k` and the language's arity profile — it is not `p(k)` and
 not a function of `k` alone.** `Σ_R k^(arity R)` is the number of potential atomic incidences on
@@ -389,11 +402,17 @@ are empty), the same exemption `NullaryCompatible` and `nullaryCompatible_majori
 encode. Since `majorityRound` never edits at arity 0, the hypothesis is free in the composite.
 
 **Conventions.** Ordered edit mass with diagonals included, per `Relational/Edit` — an injective
-`T` composed with a repeating pattern tuple `w` produces a diagonal host tuple, so diagonal edits
-genuinely matter and the full `relationEditCount` is the right input. A sharpening that
-stratifies by the pattern tuple's repetition profile and consumes `injectiveRelationEditCount`
-per stratum is available but stays out of the frozen core. The transfer is stated on the full
-carrier; the `s`-restricted variant only shrinks each edit set and follows by monotonicity.
+`T` composed with a repeating pattern tuple `w` produces a diagonal host tuple, so diagonal
+edits genuinely matter and the full (non-injective-filtered) `s`-box edit count is the right
+input. A sharpening that stratifies by the pattern tuple's repetition profile and consumes an
+injective edit count per stratum is available but stays out of the frozen core.
+
+**Carrier scope, matching §7.** The transfer is frozen on the constant box `fun _ ↦ s`, in the
+same units as the quotient and composite statements. The full-carrier form — with
+`inducedEmbeddingCount` and `relationEditCount` and factor `|V|^(k−1)` — is the specialization
+`s = univ`, since `editDistance … (fun _ ↦ univ)` is `relationEditCount`'s defining set. No
+mixed statement (restricted count against full-carrier edit mass, or vice versa) is frozen:
+either direction of mixing is unsound or lossy without an explicit off-`s` charge.
 
 **Hard-stop verdict: does not fire.** The pinning derivation is one argument uniform in `k` and
 in the arity — the coefficient is language-dependent but *computed*, by a closed formula, unlike
@@ -406,10 +425,15 @@ approximant `N`, quotient agreement evaluates `N`'s count exactly up to the diag
 §6's bridge estimates the transversal sum. The composite must be **explicit** — a named theorem,
 not a proof pattern — because it is the statement issue #84 actually promises.
 
-> Let `N` be indivisible for `Q` (e.g. `N = M.majorityRound Q`), with nullary agreement between
-> `M` and `N`. Then
-> `|injectiveCount(M) − Σ_{transversal, matching in N.quotient} Π_i |C i||`
-> `≤ Σ_R k^(arity R) · relationEditCount M N R · |V|^(k−1) + p(k)·m·#s^(k−1)`.
+> Let `N` be indivisible for `Q : Finpartition s` (e.g. `N = M.majorityRound Q`), with nullary
+> agreement between `M` and `N`. Then
+> `|inducedEmbeddingCountOn P M (fun _ ↦ s) − Σ_{transversal, matching in N.quotient} Π_i |C i||`
+> `≤ Σ_R k^(arity R) · editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s) · #s^(k−1)
+>   + p(k)·m·#s^(k−1)`.
+
+Everything is in the `s`-restricted units of §§7–8 — restricted count, `s`-box edit mass,
+extension factor `#s^(k−1)` — so the three terms compose without any off-`s` remainder; the
+full-carrier composite is the specialization `s = univ`.
 
 The first summand is §8; the second is §7's diagonal routing. Chaining §6's `bridgeRaw` on the
 transversal sum then adds `(δlocal + p(k)·β)·#s^k` when the quotient count is further compared
@@ -417,10 +441,12 @@ against a product-density estimate, and the normalized corollary divides the who
 `(|V|)_k` exactly as in §3a — guard-free, with positivity confined to the inversion lemma.
 
 One conversion lemma is needed and is deliberately a separate step: `CellwiseEditBound` speaks
-per cell box in relative form, while §8 consumes absolute per-symbol edit counts; summing the
-cellwise bound over the boxes of each arity yields
-`relationEditCount M N R ≤ ε · #s^(arity R)` (plus the off-`s` mass, absent when the carrier is
-`s`). That conversion — not a re-derivation of either side — is implementation step 11. With it,
+per cell box in relative form, while §8 consumes absolute per-symbol `s`-box edit counts. The
+cell boxes of arity `n` partition the `s`-box `(fun _ ↦ s)` exactly, so summing the cellwise
+bound over them yields
+`editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s) ≤ ε · #s^(arity R)` — **exact over the
+partition boxes, with no off-`s` remainder**, precisely because §8 is frozen in `s`-restricted
+units. That conversion — not a re-derivation of either side — is implementation step 11. With it,
 `cellwiseEditBound_majorityRound_of_isHomogeneousCell` instantiates the composite's edit term
 under cell homogeneity, which is exactly the "approximation yields counting" statement of the
 issue: homogeneity in, counting out, every constant either computed uniformly (`p(k)`,
