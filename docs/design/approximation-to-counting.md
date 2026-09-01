@@ -5,6 +5,13 @@ in [`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document is the audit-and-fr
 for issue #84. It records what already exists, what each version actually proves, and the
 interface decisions — **no implementation**.
 
+The issue promises three interfaces, and this document freezes all three: the **aggregation
+bridge** with its local-error hypothesis (§6), the **boxwise-constant quotient** with its exact
+counting relationship (§7), the **edit transfer** between two models on one carrier (§8), and
+their **composite** (§9). The coefficient audits behind §7 and §8 do *not* trigger the issue's
+hard stop — both derivations are uniform in the arity — so no part of the three-part goal needs
+to be split off; the hard stop fires only for the local uniformity coefficient (§1).
+
 **Provenance.** This document introduces no new external antecedent. The counting and
 exceptional-degree antecedents already cited in [`PROVENANCE.md`](../../PROVENANCE.md) for the
 graph layer cover the specialized results audited here.
@@ -18,7 +25,7 @@ pairs. The arity-3 estimate carries an error of `(7ε + 3β)·#s³` and the diag
 | Constant | Arity-`k` form | Status |
 | --- | --- | --- |
 | Diagonal charge `3·m·|s|²` | `p(k) · m · |s|^(k−1)` | **uniform**; derivation sound, see §4 |
-| Bad-pair charge `3β` | `p(k) · β` | **conditionally uniform**, once the indexed union bound of §4a is proved; unproved today |
+| Bad-pair charge `3β` | `p(k) · β` | **conditionally uniform**, once the positional lift of §4a is proved; unproved today |
 | Uniformity charge `7ε` | — | **no uniform closed form found**; see below |
 
 **The `7` is not a product-perturbation constant.** It would be tempting to read it as
@@ -83,7 +90,9 @@ What exists, and what each version actually proves.
 | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` (`Relational/BinaryStrongCounting`) | 3 | `(10τ + 3η + 3δ/η²)·|s|³` | transversal | witness- and palette-specific; a **consumer** of the bridge, not an instance |
 | `relationCount` / `relationDensity` (`Relational/Counts`) | any `n` | all tuples, `/ |V|^n` | diagonals **included** | the all-tuple normalization |
 | `injectiveRelationCount` / `injectiveRelationDensity` (`Relational/Counts`) | any `n` | injective tuples, `/ (|V|)_n` | injective by construction | the injective normalization |
-| `relationEditCount`, `aggregateEditCount`, `relativeAggregateEdit` (`Relational/Edit`) | per symbol | `/ |V|^arity`; aggregate `/ Σ_s |V|^arity(s)`, every symbol–tuple incidence weight one | diagonals included; `injectiveRelationEditCount` is the separate injective form | the **input** to edit transfer |
+| `relationEditCount`, `aggregateEditCount`, `relativeAggregateEdit` (`Relational/Edit`) | per symbol | `/ |V|^arity`; aggregate `/ Σ_s |V|^arity(s)`, every symbol–tuple incidence weight one | diagonals included; `injectiveRelationEditCount` is the separate injective form | the **input** to edit transfer; **no theorem transfers a pattern count across an edit today** — §8 is designed from scratch |
+| `quotientRel`, `IsIndivisibleFor` (`Relational/Indivisible`) | any `n` | — | — | the quotient's per-relation core; agreement round-trips proved (`quotientRel_iff`, `quotientRel_part`, `quotientRel_iff_forall`), but **no packaged model on `P.parts` is ever constructed** — §7 |
+| `majorityRound`, `CellwiseEditBound` (`Relational/CellwiseEdit`) | every positive `n` | per cell box, guard-free relative form | arity-0 exempt by `nullaryCompatible_majorityRound` | produces the indivisible approximant and its edit bound; the composite's first leg (§9) |
 | `homCount`, `copyCount`, `inducedCopyCount` (`Hypergraph/Copies`) | `r`-uniform | raw counts | `copyCount`/`inducedCopyCount` injective; `homCount` not | adapter target via `Relational/HypergraphAdapters` |
 | `ofUniformHypergraph`, `ofColoredHypergraph` (`Relational/HypergraphAdapters`) | `r` | count chain to `r!·#edges` | **every non-injective tuple false by construction** | makes the two normalizations agree on the hypergraph side |
 | `Graph/StrongTypicality` | — | mass-based | — | the layer a counting consumer sits on; not an instance |
@@ -152,21 +161,35 @@ The generalization is one lemma — a map `T : Fin k → α` fails to be injecti
 contributing at most `m · |s|^(k−1)`. Unlike the uniformity coefficient, this derivation is
 uniform in `k` with nothing hidden.
 
-### 4a. The indexed bad-pair union bound
+### 4a. The positional lift of the bad-pair mass
 
-The `p(k)·β` term is **not** free, and until it is proved the coefficient is a supplied parameter
-like `δlocal`. What must be shown is the generic union bound:
+The `p(k)·β` term is **not** free, and its semantics must be stated exactly, because there are
+two readings and conflating them multiplies by `p(k)` twice.
 
-> if every coordinate-pair bad event has mass at most `β`, their union has mass at most `p(k)·β`.
+**The hypothesis is one already-aggregated bound, not a per-pair family.** In the arity-3
+instance the hypothesis is `hmass : Σ_{(A,B) ∈ D} |A|·|B| ≤ β·#s²` — a single bound on the total
+*cell-pair* mass of the bad set `D`. There is no per-pair hypothesis and no union bound over
+hypothesis instances.
 
-This is a union bound over the `p(k)` events indexed by `i < j`, so it shares its index set with
-the diagonal gate's collision events and should reuse the same characterization. Once proved, the
-coefficient is **conditionally uniform under the indexed pairwise hypothesis** — conditional
-because it presupposes the bad events are given per coordinate pair, which is a real restriction
-on how a consumer states its uniformity failure.
+**The `p(k)` is a positional lift, not a hypothesis union bound.** What turns pair mass into
+`k`-tuple mass is: a cell `k`-tuple is bad when *some coordinate-pair position* `i < j` lands in
+`D`, so its volume is charged to that position; each of the `p(k)` positions carries at most
+(mass of `D`) `· #s^(k−2)` from the `k − 2` free coordinates, giving `p(k) · (β·#s²) · #s^(k−2)
+= p(k)·β·#s^k`. The arity-3 instance of this lift is `badTripleVolume_le`, with `p(3) = 3`. The
+generic lemma to prove is exactly this positional lift; its `p(k)` index set is the same `i < j`
+family as the diagonal gate's collision events, and it should reuse that characterization.
 
-Until then the bridge takes the aggregate bad-pair mass as a hypothesis, exactly as
-`abs_representativeInducedCount_sub_estimate_le` already does with `hmass`.
+Two consequences for the frozen signature:
+
+* `hbad` in §6 is the aggregated form, in units of `#s²`, matching `hmass` verbatim. Under that
+  reading the conclusion's `p(k)·β·#s^k` is correct and the lift is the only missing lemma.
+* A consumer holding *per-pair* bounds (`∀ i < j`, the `(i,j)`-bad mass `≤ β'·#s²`) first sums
+  them into the aggregated form — at cost `D`'s mass `≤ p(k)·β'·#s²` if the per-pair sets are
+  charged separately — and only then applies the lift. Applying a `p(k)` factor at *both* steps
+  would be wrong; the bridge therefore takes only the aggregated hypothesis and leaves any
+  per-pair-to-aggregate summation to the consumer, where its cost is visible.
+
+Until the positional lift is proved, the `β` coefficient is a supplied parameter like `δlocal`.
 
 **Patterns may repeat a vertex, but that is a different question and is out of scope.**
 `inducedEmbeddingCountOn` counts injective maps from the pattern's vertex type, so a pattern with
@@ -189,7 +212,7 @@ exist. The quotient object is what makes "approximation yields counting" a compo
 restatement; `Relational/CellwiseEdit`'s `majorityRound` is the existing precedent for constructing
 such an object with an agreement theorem (`majorityRound_isIndivisibleFor`,
 `editDistance_majorityRound_eq_min`). Freezing only the hypothesis form leaves the composite
-unstateable.
+unstateable. The quotient interface itself is frozen in §7.
 
 **Edit mass: ordered, matching `Relational/Edit`, and the `k!` conversion stays out of the core.**
 That file already froze the cross-arity weighting — every symbol–tuple incidence weight one,
@@ -217,13 +240,18 @@ coefficient does not come from a formula.
 ```
 bridgeRaw (k : ℕ) (δlocal β : ℝ)
   (hlocal  : <the local box estimate holds with error δlocal on each transversal cell tuple>)
-  (hbad    : <aggregate bad-pair mass ≤ β · #s ^ 2>)
+  (hbad    : <TOTAL cell-pair mass of the bad set D ≤ β · #s ^ 2>)   -- already aggregated; §4a
   (hdiag   : ∀ C ∈ Q.parts, C.card ≤ m)
   … : |injectiveCount − estimate| ≤ (δlocal + p k · β) · #s ^ k + p k · m · |s| ^ (k − 1)
 ```
 
 * `δlocal` is **supplied**, never computed. §1.
-* `p k · β` is computed **only once §4a is proved**; until then `β`'s coefficient is supplied too.
+* `hbad` is the **single aggregated** bound on the bad set's total cell-pair mass, exactly as
+  the arity-3 `hmass` is — **not** a per-pair family. The conclusion's `p k` factor is the
+  positional lift of §4a, not a union bound over per-pair hypotheses; a consumer with per-pair
+  bounds sums them *before* supplying `hbad`, and applying `p k` at both steps would be wrong.
+* `p k · β` is computed **only once §4a's positional lift is proved**; until then `β`'s
+  coefficient is supplied too.
 * `p k · m · |s| ^ (k − 1)` is computed, from §4.
 * No division appears, so this level is guard-free and signed-weight-safe.
 
@@ -267,15 +295,141 @@ because it hides the restriction instead of naming it.
 
 1. collision-event characterization (`not_injective_iff_exists_lt_eq` for `Fin k`);
 2. generalized diagonal gate, `p(k) · m · |s|^(k−1)`;
-3. indexed bad-pair union bound (§4a);
+3. positional lift of the bad-pair mass (§4a);
 4. injective/all-tuple conversion (§3);
 5. raw aggregation bridge;
 6. normalized corollary;
-7. arity-2 and arity-3 wrappers.
+7. arity-2 and arity-3 wrappers;
+8. packaged quotient model with cellwise agreement (§7);
+9. quotient counting theorem (§7);
+10. edit-transfer theorem, with the nullary-agreement hypothesis (§8);
+11. cellwise-to-aggregate edit conversion (§9);
+12. composite theorem and its normalized corollary (§9).
 
-Steps 1–2 are worth doing regardless of whether the bridge is ever built.
+Steps 1–2 are worth doing regardless of whether the bridge is ever built. Steps 8–10 are
+mutually independent and independent of 3–7; step 12 needs 5, 9, and 10.
 
-## 7. Would-be instance, with its discrepancy
+## 7. The quotient interface
+
+The audit found the quotient's per-relation core already proved but never packaged.
+`quotientRel P R : (Fin n → P.parts) → Prop` exists in `Relational/Indivisible` — the
+choice-free existential form, "some tuple of representatives satisfies `R`" — together with both
+agreement round-trips under indivisibility (`IsIndivisible.quotientRel_iff`,
+`IsIndivisible.quotientRel_part`) and the existential/universal collapse
+(`IsIndivisible.quotientRel_iff_forall`). What does **not** exist is a `FiniteRelModel L P.parts`
+bundling them, and without it the composite of §9 has no object to count against.
+
+**Construction.** `FiniteRelModel.quotient (N : FiniteRelModel L V) (P : Finpartition s) :
+FiniteRelModel L P.parts`, interpreting each symbol by `quotientRel`. The definition asks for no
+hypothesis — `quotientRel` is total — but its *theorems* require `N.IsIndivisibleFor P`; this
+mirrors how `majorityRound` is defined unconditionally and acquires content under homogeneity.
+Nullary symbols pass through unchanged (`quotientRel_zero` exists already).
+
+**Cellwise agreement.** For indivisible `N`, the quotient's truth at a cell tuple equals `N`'s
+truth at every tuple of representatives — this is `quotientRel_iff` verbatim, restated once at
+the model level for each symbol. No new mathematics; the theorem is repackaging.
+
+**Weighting of quotient cells.** Each cell is weighted by its cardinality, so a cell tuple
+carries the product weight `Π_i |C i|` — the arity-`k` generalization of `cellTripleVolume`, and
+precisely `boxMass`/`tupleWeight` from the `ProductSpaces` facade with weight `1` per vertex. No
+normalized weighting is introduced at this level; densities enter only through §6's bridge.
+
+**The exact counting relationship.** For `N` indivisible for `Q` and a pattern on `k` vertices,
+the induced-embedding count on a *transversal* cell tuple is all-or-nothing: cells are disjoint,
+so every tuple through distinct cells is automatically injective, and indivisibility makes the
+induced condition constant on the box. Hence on each transversal cell tuple the count is either
+`0` or exactly `Π_i |C i|`, according to whether the quotient model matches the pattern there:
+
+> `transversalCount(N) = Σ over transversal cell tuples C matching the pattern in N.quotient of
+> Π_i |C i|` — an **equality**, no ε.
+
+**Repeated quotient cells and the diagonal gate.** An injective host tuple may well place two
+distinct vertices in the *same* cell, so repeated-cell tuples are not excluded by injectivity —
+they are exactly the nontransversal cell tuples. On such a box the injective count for an
+indivisible model is a product of falling factorials grouped by cell multiplicity, **not**
+`Π_i |C i|`, so no exact quotient formula is attempted there. Instead their entire contribution
+is routed through the diagonal gate: their total volume is at most `p(k)·m·#s^(k−1)` (§4), the
+charge §6's bridge already carries. So the full-count form is an inequality with the gate's
+charge as its only error:
+
+> `|injectiveCount(N) − Σ_{transversal, matching} Π_i |C i|| ≤ p(k)·m·#s^(k−1)`.
+
+This is why the quotient audit triggers no hard stop: the only constant involved is the diagonal
+charge, whose uniform derivation §4 already established.
+
+## 8. The edit-transfer interface
+
+**No count-across-edit theorem exists in the library today**; this section designs one against
+`Relational/Edit`'s frozen conventions. Setting: two models `M N : FiniteRelModel L V` on the
+same carrier, a pattern on `k` vertices, ordered edit sets with diagonals included.
+
+**The derivation, and its coefficient.** An injective `k`-tuple `T` is counted by `M` but not by
+`N` only if some atom distinguishes them: there is a symbol `R` of arity `n` and a pattern tuple
+`w : Fin n → W` with `T ∘ w ∈ relationEditSet M N R`. Induced counting reads *every* atom on the
+pattern's vertices — all `k^n` tuples per symbol, not only the pattern's true atoms — so the
+double count runs over `Σ_R k^(arity R)` atomic incidences. For `n ≥ 1`, fixing the edited host
+tuple pins `T` on at least one coordinate, leaving at most `|V|^(k−1)` extensions. Hence:
+
+> `|injectiveCount(M) − injectiveCount(N)| ≤ Σ_R k^(arity R) · relationEditCount M N R · |V|^(k−1)`.
+
+**The coefficient depends on both `k` and the language's arity profile — it is not `p(k)` and
+not a function of `k` alone.** `Σ_R k^(arity R)` is the number of potential atomic incidences on
+`k` vertices: `k²` per binary symbol, `k³` per ternary symbol, summed over the (finitely many,
+by `FiniteRelational`) symbols. Conflating it with `p(k)` would be wrong at every arity — even
+for a single binary symbol it is `k²`, not `k(k−1)/2`, because ordered atoms and diagonal
+pattern tuples are both read by induced counting. The frozen form keeps the **per-symbol sum**;
+a coarser corollary through `aggregateEditCount` costs the factor `max_R k^(arity R)` and is a
+convenience wrapper, not the primitive.
+
+**Arity 0 is a genuine boundary, not a formality.** The pinning argument needs `n ≥ 1`; a
+nullary edit flips no tuple but changes every atom evaluation at once, so a single nullary
+disagreement can shift the count by the full `(|V|)_k` — no bound of the shape above can absorb
+it. The transfer therefore carries **nullary agreement as a hypothesis** (the arity-0 edit sets
+are empty), the same exemption `NullaryCompatible` and `nullaryCompatible_majorityRound` already
+encode. Since `majorityRound` never edits at arity 0, the hypothesis is free in the composite.
+
+**Conventions.** Ordered edit mass with diagonals included, per `Relational/Edit` — an injective
+`T` composed with a repeating pattern tuple `w` produces a diagonal host tuple, so diagonal edits
+genuinely matter and the full `relationEditCount` is the right input. A sharpening that
+stratifies by the pattern tuple's repetition profile and consumes `injectiveRelationEditCount`
+per stratum is available but stays out of the frozen core. The transfer is stated on the full
+carrier; the `s`-restricted variant only shrinks each edit set and follows by monotonicity.
+
+**Hard-stop verdict: does not fire.** The pinning derivation is one argument uniform in `k` and
+in the arity — the coefficient is language-dependent but *computed*, by a closed formula, unlike
+§1's local uniformity coefficient.
+
+## 9. The composite theorem
+
+The three parts chain in one order: edit transfer moves the count from `M` to an indivisible
+approximant `N`, quotient agreement evaluates `N`'s count exactly up to the diagonal charge, and
+§6's bridge estimates the transversal sum. The composite must be **explicit** — a named theorem,
+not a proof pattern — because it is the statement issue #84 actually promises.
+
+> Let `N` be indivisible for `Q` (e.g. `N = M.majorityRound Q`), with nullary agreement between
+> `M` and `N`. Then
+> `|injectiveCount(M) − Σ_{transversal, matching in N.quotient} Π_i |C i||`
+> `≤ Σ_R k^(arity R) · relationEditCount M N R · |V|^(k−1) + p(k)·m·#s^(k−1)`.
+
+The first summand is §8; the second is §7's diagonal routing. Chaining §6's `bridgeRaw` on the
+transversal sum then adds `(δlocal + p(k)·β)·#s^k` when the quotient count is further compared
+against a product-density estimate, and the normalized corollary divides the whole chain by
+`(|V|)_k` exactly as in §3a — guard-free, with positivity confined to the inversion lemma.
+
+One conversion lemma is needed and is deliberately a separate step: `CellwiseEditBound` speaks
+per cell box in relative form, while §8 consumes absolute per-symbol edit counts; summing the
+cellwise bound over the boxes of each arity yields
+`relationEditCount M N R ≤ ε · #s^(arity R)` (plus the off-`s` mass, absent when the carrier is
+`s`). That conversion — not a re-derivation of either side — is implementation step 11. With it,
+`cellwiseEditBound_majorityRound_of_isHomogeneousCell` instantiates the composite's edit term
+under cell homogeneity, which is exactly the "approximation yields counting" statement of the
+issue: homogeneity in, counting out, every constant either computed uniformly (`p(k)`,
+`Σ_R k^(arity R)`) or supplied locally (`δlocal`).
+
+The composite introduces **no new coefficient of its own** — it is a sum of the three audited
+terms — so it inherits the hard-stop verdicts of its parts: only `δlocal` is supplied.
+
+## 10. Would-be instance, with its discrepancy
 
 `abs_representativeInducedCount_sub_estimate_le` is the identified would-be instance. Its error is
 `(7ε + 3β)·#s³`, which is `(C·ε + p(3)·β)·#s³` with `C = 7`.
