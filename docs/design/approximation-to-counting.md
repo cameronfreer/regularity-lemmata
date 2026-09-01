@@ -111,20 +111,23 @@ Three observations the table makes visible:
 
 ## 3. Decision: normalization
 
-**Primitive: ordered injective tuples, normalized by the falling factorial `(|V|)_k`.**
+**Primitive: ordered injective tuples, normalized by the falling factorial of the carrier being
+counted — `(|s|)_k` for the `s`-restricted statements, since their injective tuples are drawn
+from `s`.**
 
 - It is what the pattern-count layer already does: `inducedEmbeddingCount` and
   `inducedEmbeddingCountOn` both filter on `Function.Injective`, so an all-tuple primitive would
   disagree with every existing consumer.
 - Under it the diagonal contributes nothing, so the transfer coefficient cannot silently absorb a
   diagonal term.
-- `injectiveRelationDensity` already commits to `(|V|)_k`, and its docstring says "never by
-  `|V|^n`".
+- `injectiveRelationDensity` already commits to the falling factorial (its docstring says "never
+  by `|V|^n`") — that is the full-carrier convention `(|V|)_k`, which the restricted form
+  recovers at `s = univ`, where `(|s|)_k` rewrites to `(|V|)_k`.
 
 **The conversion must be proved, not left to consumers.** Both halves exist:
 `injectiveTupleCount_add_card_nonInjectiveMaps` (exact split) and `card_nonInjectiveMaps_le` with
 `nonInjectiveMaps_ratio_le` (the bound). The bridge should export the conversion with a stated
-error so a consumer wanting `|V|^k` normalization is not guessing.
+error so a consumer wanting `#s^k` (or, at `s = univ`, `|V|^k`) normalization is not guessing.
 
 ### 3a. Two levels, stated separately
 
@@ -134,18 +137,19 @@ bridge is exposed at two levels, and §6's displayed statement is the first of t
 * a **denominator-free raw theorem**, comparing the injective *count* to the estimate, with the
   error in units of `#s^k` — no division anywhere, so signed weights and degenerate carriers need
   no guard;
-* a **normalized corollary**, dividing through by the falling factorial `(|V|)_k` to obtain the
-  density form.
+* a **normalized corollary**, dividing through by the falling factorial `(|s|)_k` to obtain the
+  density form. At `s = univ` this rewrites to `(|V|)_k`, recovering the existing full-carrier
+  convention.
 
-**The `|V| < k` endpoint.** When `|V| < k` there are no injective `k`-tuples, so the count is `0`
-and `(|V|)_k = 0`. Under the library's guard-free `x / 0 = 0` convention both sides of the
-normalized corollary are `0`, and the inequality holds — so **the corollary needs no positivity
-hypothesis**, exactly as `boxDensity_le_one` needs none. This is worth stating explicitly, because
-the natural instinct is to guard it.
+**The `|s| < k` endpoint.** When `|s| < k` there are no injective `k`-tuples through `s`, so the
+count is `0` and `(|s|)_k = 0`. Under the library's guard-free `x / 0 = 0` convention both sides
+of the normalized corollary are `0`, and the inequality holds — so **the corollary needs no
+positivity hypothesis**, exactly as `boxDensity_le_one` needs none. This is worth stating
+explicitly, because the natural instinct is to guard it.
 
 **Where positivity is genuinely needed** is the *converse* direction: recovering a count bound
-from a density bound requires multiplying by `(|V|)_k`, which is informative only when that is
-nonzero. `injectiveTupleCount_pos_of_le` supplies it from `k ≤ |V|`. The interface should place
+from a density bound requires multiplying by `(|s|)_k`, which is informative only when that is
+nonzero. `injectiveTupleCount_pos_of_le` supplies it from `k ≤ |s|`. The interface should place
 that hypothesis on the inversion lemma alone, never on the corollary.
 
 ## 4. Decision: the diagonal and repeated coordinates
@@ -267,8 +271,10 @@ if one is ever proved, would add a wrapper and change no existing signature.
 
 ### The normalized corollary
 
-Divides `bridgeRaw` through by `(|V|)_k`. Guard-free, no positivity hypothesis; see §3a for the
-`|V| < k` endpoint and for where positivity is genuinely required.
+Divides `bridgeRaw` through by `(|s|)_k` — the injective tuples are drawn from `s`, so the
+denominator is `s`'s falling factorial, rewriting to `(|V|)_k` at `s = univ`. Guard-free, no
+positivity hypothesis; see §3a for the `|s| < k` endpoint and for where positivity is genuinely
+required.
 
 ### What `hlocal` must not be
 
@@ -396,7 +402,7 @@ convenience wrapper, not the primitive.
 
 **Arity 0 is a genuine boundary, not a formality.** The pinning argument needs `n ≥ 1`; a
 nullary edit flips no tuple but changes every atom evaluation at once, so a single nullary
-disagreement can shift the count by the full `(|V|)_k` — no bound of the shape above can absorb
+disagreement can shift the count by the full `(|s|)_k` — no bound of the shape above can absorb
 it. The transfer therefore carries **nullary agreement as a hypothesis** (the arity-0 edit sets
 are empty), the same exemption `NullaryCompatible` and `nullaryCompatible_majorityRound` already
 encode. Since `majorityRound` never edits at arity 0, the hypothesis is free in the composite.
@@ -438,7 +444,7 @@ full-carrier composite is the specialization `s = univ`.
 The first summand is §8; the second is §7's diagonal routing. Chaining §6's `bridgeRaw` on the
 transversal sum then adds `(δlocal + p(k)·β)·#s^k` when the quotient count is further compared
 against a product-density estimate, and the normalized corollary divides the whole chain by
-`(|V|)_k` exactly as in §3a — guard-free, with positivity confined to the inversion lemma.
+`(|s|)_k` exactly as in §3a — guard-free, with positivity confined to the inversion lemma.
 
 One conversion lemma is needed and is deliberately a separate step: `CellwiseEditBound` speaks
 per cell box in relative form, while §8 consumes absolute per-symbol `s`-box edit counts. The
