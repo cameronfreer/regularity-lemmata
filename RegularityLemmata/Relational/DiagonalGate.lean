@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.BinaryStrongCounting
 import RegularityLemmata.Relational.Indivisible
+import RegularityLemmata.Partition.BoxPartition
 import RegularityLemmata.Partition.Equitable
 
 /-!
@@ -87,35 +88,20 @@ section BoxDecomposition
 
 variable {W : Type*} [Fintype W] [DecidableEq W]
 
-/-- **The full box is the disjoint union of the cell boxes.** Every vertex of `s` lies in a unique
-cell, so a function into `s` lands in a unique cell-tuple box. Index-generic. -/
+/-- **The full box is the disjoint union of the cell boxes.** The constant-partition
+specialization of the `ProductSpaces` substrate `biUnion_boxCells_tuples`
+(`Partition/BoxPartition.lean`): the box `fun _ ↦ s` with the box partition `fun _ ↦ Q`. -/
 theorem piFinset_const_eq_biUnion_cellTuples (Q : Finpartition s) :
     Fintype.piFinset (fun _ : W => s)
-      = (Fintype.piFinset fun _ : W => Q.parts).biUnion Fintype.piFinset := by
-  ext f
-  rw [Fintype.mem_piFinset, Finset.mem_biUnion]
-  constructor
-  · intro hf
-    choose C hC using fun i => (Q.existsUnique_mem (hf i)).exists
-    exact ⟨C, Fintype.mem_piFinset.mpr fun i => (hC i).1,
-      Fintype.mem_piFinset.mpr fun i => (hC i).2⟩
-  · rintro ⟨T, hT, hfT⟩
-    rw [Fintype.mem_piFinset] at hT hfT
-    exact fun i => Finset.mem_of_subset (Q.le (hT i)) (hfT i)
+      = (Fintype.piFinset fun _ : W => Q.parts).biUnion Fintype.piFinset :=
+  (biUnion_boxCells_tuples (A := fun _ : W => s) fun _ => Q).symm
 
-/-- The cell boxes over distinct cell tuples are pairwise disjoint. Index-generic. -/
+/-- The cell boxes over distinct cell tuples are pairwise disjoint: the constant-partition
+specialization of `boxCells_pairwiseDisjoint`. -/
 theorem piFinset_pairwiseDisjoint_cellTuples (Q : Finpartition s) :
     (↑(Fintype.piFinset fun _ : W => Q.parts) : Set (W → Finset V)).PairwiseDisjoint
-      Fintype.piFinset := by
-  intro T hT T' hT' hTT'
-  rw [Finset.mem_coe, Fintype.mem_piFinset] at hT hT'
-  simp only [Function.onFun]
-  rw [Finset.disjoint_left]
-  intro f hfT hfT'
-  rw [Fintype.mem_piFinset] at hfT hfT'
-  obtain ⟨i, hi⟩ := Function.ne_iff.mp hTT'
-  exact Finset.disjoint_left.mp
-    (Q.disjoint (Finset.mem_coe.mpr (hT i)) (Finset.mem_coe.mpr (hT' i)) hi) (hfT i) (hfT' i)
+      Fintype.piFinset :=
+  boxCells_pairwiseDisjoint (A := fun _ : W => s) fun _ => Q
 
 /-- **The `s`-restricted induced count is the sum of the box counts over all cell tuples.**
 Index-generic; `globalInducedCount_eq_inducedEmbeddingCountOn` is the `Fin 3` reading. -/
