@@ -179,7 +179,8 @@ hypothesis instances.
 `k`-tuple mass is: a cell `k`-tuple is bad when *some coordinate-pair position* `i < j` lands in
 `D`, so its volume is charged to that position; each of the `p(k)` positions carries at most
 (mass of `D`) `· #s^(k−2)` from the `k − 2` free coordinates, giving `p(k) · (β·#s²) · #s^(k−2)
-= p(k)·β·#s^k`. The arity-3 instance of this lift is `badTripleVolume_le`, with `p(3) = 3`. The
+= p(k)·β·#s^k`. `badTripleVolume_le` is recovered at `k = 3` by restricting to transversal
+tuples, with `p(3) = 3`. The
 generic lemma to prove is exactly this positional lift; its `p(k)` index set is the same `i < j`
 family as the diagonal gate's collision events, and it should reuse that characterization.
 

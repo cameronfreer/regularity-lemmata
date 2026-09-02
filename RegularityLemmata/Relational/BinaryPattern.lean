@@ -185,6 +185,19 @@ def inducedEmbeddingCountOn (P : FiniteRelModel L W) (M : FiniteRelModel L V)
     Function.Injective f ∧ PreservesAndReflects P M f).card
 
 omit [Fintype V] in
+/-- **The restricted falling-factorial ceiling.** Induced embeddings into the box `fun _ ↦ s` are
+injective tuples through `s`, so their number is at most `(|s|)_{|W|}`
+(`card_injectiveTuplesOn`). This is the `c ≤ (|s|)_k` hypothesis of the normalization
+conversion `div_descFactorial_sub_div_pow_le`. -/
+theorem inducedEmbeddingCountOn_le_descFactorial (P : FiniteRelModel L W) (M : FiniteRelModel L V)
+    (s : Finset V) :
+    inducedEmbeddingCountOn P M (fun _ => s) ≤ s.card.descFactorial (Fintype.card W) := by
+  rw [inducedEmbeddingCountOn, ← card_injectiveTuplesOn (ι := W) s]
+  exact Finset.card_le_card fun f hf => by
+    rw [Finset.mem_filter] at hf
+    exact Finset.mem_filter.mpr ⟨hf.1, hf.2.1⟩
+
+omit [Fintype V] in
 /-- Box monotonicity. -/
 theorem inducedEmbeddingCountOn_mono (P : FiniteRelModel L W) (M : FiniteRelModel L V)
     {A B : W → Finset V} (h : ∀ w, A w ⊆ B w) :
