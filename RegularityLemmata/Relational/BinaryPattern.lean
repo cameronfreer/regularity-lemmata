@@ -184,6 +184,11 @@ def inducedEmbeddingCountOn (P : FiniteRelModel L W) (M : FiniteRelModel L V)
   ((Fintype.piFinset A).filter fun f =>
     Function.Injective f ∧ PreservesAndReflects P M f).card
 
+/-- On a finite carrier, the count over the full box `fun _ ↦ univ` is `inducedEmbeddingCount`. -/
+theorem inducedEmbeddingCountOn_univ (P : FiniteRelModel L W) (M : FiniteRelModel L V) :
+    inducedEmbeddingCountOn P M (fun _ : W => Finset.univ) = inducedEmbeddingCount P M := by
+  rw [inducedEmbeddingCountOn, inducedEmbeddingCount, Fintype.piFinset_univ]
+
 omit [Fintype V] in
 /-- **The restricted falling-factorial ceiling.** Induced embeddings into the box `fun _ ↦ s` are
 injective tuples through `s`, so their number is at most `(|s|)_{|W|}`
