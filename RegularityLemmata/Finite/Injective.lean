@@ -16,9 +16,9 @@ import Mathlib.Tactic.Ring
 
 The number of injective tuples `Fin n → α` is the falling factorial
 `(Fintype.card α).descFactorial n` (bridged to mathlib's `Fintype.card_embedding_eq`).
-Non-injective ("collision") maps are characterized by a strictly ordered coordinate pair `i < j` with
-`T i = T j` (`not_injective_iff_exists_lt_eq`) and counted by an ordered-pair union bound: at most
-`|ι|² · |β|^(|ι| - 1)` of them, so collisions lose one ambient power of `|β|` — the form
+Non-injective ("collision") maps are characterized by a strictly ordered coordinate pair `i < j`
+with `T i = T j` (`not_injective_iff_exists_lt_eq`) and counted by an ordered-pair union bound:
+at most `|ι|² · |β|^(|ι| - 1)` of them, so collisions lose one ambient power of `|β|` — the form
 consumed by counting and removal arguments. Once `2n² ≤ |α|`, at least half of all
 `n`-tuples are injective.
 

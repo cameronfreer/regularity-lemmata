@@ -215,8 +215,9 @@ private theorem sum_collision_le {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤
 
 /-- **Generic diagonal bound, arity-parametric.** Any real weight dominated by the cell-tuple
 volume on the nontransversal `k`-tuples has total mass at most `(k choose 2)·m·|s|^(k−1)`:
-each nontransversal tuple has some strictly ordered collision `i < j` (`not_injective_iff_exists_lt_eq`),
-each of the `k.choose 2` collision events contributes at most `m·|s|^(k−1)`
+each nontransversal tuple has some strictly ordered collision `i < j`
+(`not_injective_iff_exists_lt_eq`), each of the `k.choose 2` collision events contributes at most
+`m·|s|^(k−1)`
 (`sum_collision_le`), and the events are counted by `Fintype.card_product_filter_lt`.
 
 Guard-free: no `2 ≤ k`, no nonempty carrier, no positive cell size, and no nonnegativity of the
