@@ -3,6 +3,8 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.BinaryStrongCounting
+import RegularityLemmata.Relational.Indivisible
+import RegularityLemmata.Partition.BoxPartition
 import RegularityLemmata.Partition.Equitable
 
 /-!
@@ -35,6 +37,14 @@ of the `k.choose 2` positions carries at most the `D`-pair mass times `|s|^(k−
 aggregated mass bound `≤ β·|s|²` yields `(k.choose 2)·β·|s|^k`. `badTripleVolume_le` is
 recovered at `k = 3` by restricting to transversal tuples. The hypothesis is the one aggregated
 bound; the `k.choose 2` is the lift, not a union bound over per-pair hypotheses.
+
+The gate also settles the **quotient counting theorem** of the approximation-to-counting
+interface: for `N` indivisible for `Q`, the `s`-restricted induced count of a `k`-vertex pattern
+equals the quotient-weighted count `quotientInducedCount` (`Relational/Indivisible.lean`) on the
+transversal cell tuples exactly, and the repeated-cell tuples contribute at most the diagonal
+charge (`IsIndivisibleFor.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le`; full carrier
+at `s = univ`). The box decomposition behind it is index-generic
+(`inducedEmbeddingCountOn_eq_sum_cellTuples`).
 
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
 initial equipartition supplies `m = |s| / #parts + 1` for the witness's coarse partition. The
@@ -72,6 +82,46 @@ def globalInducedCount (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
 
 variable {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} {Q : Finpartition s}
 
+/-! ### The box decomposition, index-generic -/
+
+section BoxDecomposition
+
+variable {W : Type*} [Fintype W] [DecidableEq W]
+
+/-- **The full box is the disjoint union of the cell boxes.** The constant-partition
+specialization of the `ProductSpaces` substrate `biUnion_boxCells_tuples`
+(`Partition/BoxPartition.lean`): the box `fun _ ↦ s` with the box partition `fun _ ↦ Q`. -/
+theorem piFinset_const_eq_biUnion_cellTuples (Q : Finpartition s) :
+    Fintype.piFinset (fun _ : W => s)
+      = (Fintype.piFinset fun _ : W => Q.parts).biUnion Fintype.piFinset :=
+  (biUnion_boxCells_tuples (A := fun _ : W => s) fun _ => Q).symm
+
+/-- The cell boxes over distinct cell tuples are pairwise disjoint: the constant-partition
+specialization of `boxCells_pairwiseDisjoint`. -/
+theorem piFinset_pairwiseDisjoint_cellTuples (Q : Finpartition s) :
+    (↑(Fintype.piFinset fun _ : W => Q.parts) : Set (W → Finset V)).PairwiseDisjoint
+      Fintype.piFinset :=
+  boxCells_pairwiseDisjoint (A := fun _ : W => s) fun _ => Q
+
+/-- **The `s`-restricted induced count is the sum of the box counts over all cell tuples.**
+Index-generic; `globalInducedCount_eq_inducedEmbeddingCountOn` is the `Fin 3` reading. -/
+theorem inducedEmbeddingCountOn_eq_sum_cellTuples (P : FiniteRelModel L W) (M : FiniteRelModel L V)
+    (Q : Finpartition s) :
+    inducedEmbeddingCountOn P M (fun _ : W => s)
+      = ∑ T ∈ Fintype.piFinset fun _ : W => Q.parts, inducedEmbeddingCountOn P M T := by
+  rw [inducedEmbeddingCountOn, piFinset_const_eq_biUnion_cellTuples Q, Finset.filter_biUnion,
+    Finset.card_biUnion fun T hT T' hT' hTT' =>
+      (piFinset_pairwiseDisjoint_cellTuples Q (Finset.mem_coe.mpr hT)
+        (Finset.mem_coe.mpr hT') hTT').mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)]
+  exact Finset.sum_congr rfl fun T _ => rfl
+
+/-- On a finite carrier, the count over the full box `fun _ ↦ univ` is `inducedEmbeddingCount`. -/
+theorem inducedEmbeddingCountOn_univ [Fintype V] (P : FiniteRelModel L W) (M : FiniteRelModel L V) :
+    inducedEmbeddingCountOn P M (fun _ : W => Finset.univ) = inducedEmbeddingCount P M := by
+  rw [inducedEmbeddingCountOn, inducedEmbeddingCount, Fintype.piFinset_univ]
+
+end BoxDecomposition
+
 /-! ### Exact global-count decomposition -/
 
 /-- **Global = transversal + nontransversal.** -/
@@ -84,46 +134,25 @@ theorem globalInducedCount_eq_transversal_add_nontransversal :
   exact (Finset.sum_filter_add_sum_filter_not (Fintype.piFinset fun _ => Q.parts)
     Function.Injective _).symm
 
-/-- **The full box is the disjoint union of the cell boxes.** Every vertex of `s` lies in a unique
-cell, so a function into `s` lands in a unique cell-triple box. -/
+/-- **The full box is the disjoint union of the cell boxes**, `Fin 3` reading of
+`piFinset_const_eq_biUnion_cellTuples`. -/
 theorem piFinset_const_eq_biUnion_cellTriples (Q : Finpartition s) :
     Fintype.piFinset (fun _ : Fin 3 => s)
-      = (Fintype.piFinset fun _ : Fin 3 => Q.parts).biUnion Fintype.piFinset := by
-  ext f
-  rw [Fintype.mem_piFinset, Finset.mem_biUnion]
-  constructor
-  · intro hf
-    choose C hC using fun i => (Q.existsUnique_mem (hf i)).exists
-    exact ⟨C, Fintype.mem_piFinset.mpr fun i => (hC i).1,
-      Fintype.mem_piFinset.mpr fun i => (hC i).2⟩
-  · rintro ⟨T, hT, hfT⟩
-    rw [Fintype.mem_piFinset] at hT hfT
-    exact fun i => Finset.mem_of_subset (Q.le (hT i)) (hfT i)
+      = (Fintype.piFinset fun _ : Fin 3 => Q.parts).biUnion Fintype.piFinset :=
+  piFinset_const_eq_biUnion_cellTuples Q
 
-/-- The cell boxes over distinct cell-triples are pairwise disjoint. -/
+/-- The cell boxes over distinct cell-triples are pairwise disjoint, `Fin 3` reading of
+`piFinset_pairwiseDisjoint_cellTuples`. -/
 theorem piFinset_pairwiseDisjoint_cellTriples (Q : Finpartition s) :
     (↑(Fintype.piFinset fun _ : Fin 3 => Q.parts) : Set (Fin 3 → Finset V)).PairwiseDisjoint
-      Fintype.piFinset := by
-  intro T hT T' hT' hTT'
-  rw [Finset.mem_coe, Fintype.mem_piFinset] at hT hT'
-  simp only [Function.onFun]
-  rw [Finset.disjoint_left]
-  intro f hfT hfT'
-  rw [Fintype.mem_piFinset] at hfT hfT'
-  obtain ⟨i, hi⟩ := Function.ne_iff.mp hTT'
-  exact Finset.disjoint_left.mp
-    (Q.disjoint (Finset.mem_coe.mpr (hT i)) (Finset.mem_coe.mpr (hT' i)) hi) (hfT i) (hfT' i)
+      Fintype.piFinset :=
+  piFinset_pairwiseDisjoint_cellTuples Q
 
 /-- **The global count is the library's actual induced-embedding count over the full box.** The
 partition-cell sum equals `inducedEmbeddingCountOn` on `fun _ => s`. -/
 theorem globalInducedCount_eq_inducedEmbeddingCountOn :
-    globalInducedCount P M Q = inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) := by
-  rw [inducedEmbeddingCountOn, piFinset_const_eq_biUnion_cellTriples Q, Finset.filter_biUnion,
-    Finset.card_biUnion fun T hT T' hT' hTT' =>
-      (piFinset_pairwiseDisjoint_cellTriples Q (Finset.mem_coe.mpr hT)
-        (Finset.mem_coe.mpr hT') hTT').mono (Finset.filter_subset _ _) (Finset.filter_subset _ _),
-    globalInducedCount]
-  exact Finset.sum_congr rfl fun T _ => rfl
+    globalInducedCount P M Q = inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) :=
+  (inducedEmbeddingCountOn_eq_sum_cellTuples P M Q).symm
 
 /-- **Partition-independence of the global count**: it does not depend on the cell partition (both
 sides equal the actual count over the full box). -/
@@ -138,8 +167,7 @@ theorem globalInducedCount_eq_inducedEmbeddingCount [Fintype V]
     {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V}
     (Q : Finpartition (Finset.univ : Finset V)) :
     globalInducedCount P M Q = inducedEmbeddingCount P M := by
-  rw [globalInducedCount_eq_inducedEmbeddingCountOn, inducedEmbeddingCountOn, inducedEmbeddingCount,
-    Fintype.piFinset_univ]
+  rw [globalInducedCount_eq_inducedEmbeddingCountOn, inducedEmbeddingCountOn_univ]
 
 /-! ### Arity-generic cell tuples and the collision decomposition -/
 
@@ -155,6 +183,29 @@ def nontransversalCellTuples {k : ℕ} (Q : Finpartition s) : Finset (Fin k → 
 theorem nontransversalCellTriples_eq_nontransversalCellTuples (Q : Finpartition s) :
     nontransversalCellTriples Q = nontransversalCellTuples Q := rfl
 
+/-- Ordered `k`-tuples of **distinct** cells of `Q`. `transversalCellTriples` is the `k = 3`
+instance. -/
+def transversalCellTuples {k : ℕ} (Q : Finpartition s) : Finset (Fin k → Finset V) :=
+  (Fintype.piFinset fun _ => Q.parts).filter Function.Injective
+
+@[simp] theorem mem_transversalCellTuples {k : ℕ} {T : Fin k → Finset V} :
+    T ∈ transversalCellTuples Q ↔ (∀ i, T i ∈ Q.parts) ∧ Function.Injective T := by
+  simp [transversalCellTuples, Fintype.mem_piFinset]
+
+theorem transversalCellTriples_eq_transversalCellTuples (Q : Finpartition s) :
+    transversalCellTriples Q = transversalCellTuples Q := rfl
+
+/-- **Transversal + nontransversal**, arity-generic: the `s`-restricted count splits exactly
+along injectivity of the cell tuple. -/
+theorem inducedEmbeddingCountOn_eq_transversal_add_nontransversal {k : ℕ}
+    (P : FiniteRelModel L (Fin k)) (M : FiniteRelModel L V) (Q : Finpartition s) :
+    inducedEmbeddingCountOn P M (fun _ : Fin k => s)
+      = (∑ T ∈ transversalCellTuples Q, inducedEmbeddingCountOn P M T)
+        + ∑ T ∈ nontransversalCellTuples Q, inducedEmbeddingCountOn P M T := by
+  rw [inducedEmbeddingCountOn_eq_sum_cellTuples P M Q, transversalCellTuples,
+    nontransversalCellTuples]
+  exact (Finset.sum_filter_add_sum_filter_not _ Function.Injective _).symm
+
 /-- The box volume of a `k`-tuple of cells: the product of the cell cardinalities.
 `cellTripleVolume` is the `k = 3` instance. -/
 def cellTupleVolume {k : ℕ} (T : Fin k → Finset V) : ℝ :=
@@ -168,6 +219,15 @@ omit [DecidableEq V] in
 theorem cellTripleVolume_eq_cellTupleVolume (T : Fin 3 → Finset V) :
     cellTripleVolume T = cellTupleVolume T := by
   rw [cellTripleVolume, cellTupleVolume, Fin.prod_univ_three]
+
+/-- Crude box bound, arity-generic: an induced count never exceeds the box volume. -/
+theorem inducedEmbeddingCountOn_le_cellTupleVolume {k : ℕ} (P : FiniteRelModel L (Fin k))
+    (M : FiniteRelModel L V) (T : Fin k → Finset V) :
+    (inducedEmbeddingCountOn P M T : ℝ) ≤ cellTupleVolume T := by
+  rw [inducedEmbeddingCountOn, cellTupleVolume]
+  have hle := (Finset.card_filter_le (Fintype.piFinset T)
+    fun f => Function.Injective f ∧ PreservesAndReflects P M f).trans_eq (Fintype.card_piFinset T)
+  exact_mod_cast hle
 
 /-- **One collision event.** For `i ≠ j`, the cell tuples with `T i = T j` have total box volume
 at most `m·|s|^(k−1)`: dropping coordinate `j` is injective on the event (coordinate `i` carries
@@ -438,6 +498,71 @@ theorem sum_badCellTuples_weight_le {k : ℕ} {D : Finset (Finset V × Finset V)
           gcongr
       _ = (k.choose 2 : ℝ) * β * ((s.card : ℝ) ^ 2 * (s.card : ℝ) ^ (k - 2)) := by ring
       _ = (k.choose 2) * β * (s.card : ℝ) ^ k := by rw [hpow]
+
+/-! ### The quotient counting theorem -/
+
+section QuotientCounting
+
+variable {k : ℕ}
+
+/-- **The transversal part of an indivisible model's count is the quotient-weighted count.**
+Transversal cell tuples correspond to injective tuples of cells, and on each the box count is
+all-or-nothing (`IsIndivisibleFor.inducedEmbeddingCountOn_cells`). -/
+theorem sum_transversalCellTuples_eq_quotientInducedCount {N : FiniteRelModel L V}
+    (h : N.IsIndivisibleFor Q) (P : FiniteRelModel L (Fin k)) :
+    ∑ T ∈ transversalCellTuples Q, inducedEmbeddingCountOn P N T = quotientInducedCount P N Q := by
+  rw [quotientInducedCount_eq_sum_ite h P]
+  refine Finset.sum_bij (fun T hT i => ⟨T i, (mem_transversalCellTuples.mp hT).1 i⟩)
+    (fun T hT => ?_) (fun T hT T' hT' heq => ?_) (fun C hC => ?_) (fun T hT => rfl)
+  · rw [Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, fun i j hij =>
+      (mem_transversalCellTuples.mp hT).2 (congrArg Subtype.val hij)⟩
+  · funext i
+    exact congrArg Subtype.val (congr_fun heq i)
+  · refine ⟨fun i => (C i : Finset V), mem_transversalCellTuples.mpr
+      ⟨fun i => (C i).2, fun i j hij => (Finset.mem_filter.mp hC).2 (Subtype.ext hij)⟩, rfl⟩
+
+/-- The quotient-weighted count never exceeds the `s`-restricted count of an indivisible
+model: the nontransversal part is nonnegative. -/
+theorem FiniteRelModel.IsIndivisibleFor.quotientInducedCount_le {N : FiniteRelModel L V}
+    (h : N.IsIndivisibleFor Q) (P : FiniteRelModel L (Fin k)) :
+    quotientInducedCount P N Q ≤ inducedEmbeddingCountOn P N (fun _ : Fin k => s) := by
+  rw [inducedEmbeddingCountOn_eq_transversal_add_nontransversal P N Q,
+    sum_transversalCellTuples_eq_quotientInducedCount h P]
+  exact Nat.le_add_right _ _
+
+/-- **Quotient counting.** For `N` indivisible for `Q` with cells of size at most `m`, the
+`s`-restricted induced count of a `k`-vertex pattern is the quotient-weighted count up to the
+diagonal charge `(k.choose 2)·m·|s|^(k−1)`: the transversal part is exact
+(`sum_transversalCellTuples_eq_quotientInducedCount`), and the repeated-cell tuples — reachable
+by injective host tuples, with no exact formula attempted — route entirely through the diagonal
+gate `sum_nontransversalCellTuples_weight_le`. The only constant is the gate's. Stated in
+`s`-restricted units; the full-carrier form is
+`abs_inducedEmbeddingCount_sub_quotientInducedCount_le` at `s = univ`. -/
+theorem FiniteRelModel.IsIndivisibleFor.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le
+    {N : FiniteRelModel L V} (h : N.IsIndivisibleFor Q) (P : FiniteRelModel L (Fin k)) {m : ℕ}
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P N (fun _ : Fin k => s) : ℝ) - quotientInducedCount P N Q|
+      ≤ (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) := by
+  rw [inducedEmbeddingCountOn_eq_transversal_add_nontransversal P N Q,
+    sum_transversalCellTuples_eq_quotientInducedCount h P]
+  push_cast
+  rw [add_sub_cancel_left, abs_of_nonneg (Finset.sum_nonneg fun _ _ => Nat.cast_nonneg _)]
+  exact sum_nontransversalCellTuples_weight_le hm _
+    fun T _ => inducedEmbeddingCountOn_le_cellTupleVolume P N T
+
+/-- **Quotient counting on the full carrier**: the `s = univ` specialization, with the diagonal
+charge in units of `|V|^(k−1)`. -/
+theorem FiniteRelModel.IsIndivisibleFor.abs_inducedEmbeddingCount_sub_quotientInducedCount_le
+    [Fintype V] {N : FiniteRelModel L V} {Q : Finpartition (Finset.univ : Finset V)}
+    (h : N.IsIndivisibleFor Q) (P : FiniteRelModel L (Fin k)) {m : ℕ}
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCount P N : ℝ) - quotientInducedCount P N Q|
+      ≤ (k.choose 2) * m * (Fintype.card V : ℝ) ^ (k - 1) := by
+  have := h.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le P hm
+  rwa [inducedEmbeddingCountOn_univ, Finset.card_univ] at this
+
+end QuotientCounting
 
 /-! ### The `Fin 3` instance: collision characterization and the `3·m·|s|²` bound -/
 
@@ -741,6 +866,60 @@ example {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
     ∑ T ∈ nontransversalCellTuples (k := k) Q, (-2 * cellTupleVolume T)
       ≤ (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
   sum_nontransversalCellTuples_weight_le hm _ fun T _ => by linarith [cellTupleVolume_nonneg T]
+
+-- **Quotient counting on the empty language.** Every model is indivisible for every partition
+-- (there are no symbols), and every cell tuple matches the (empty) pattern constraints.
+private theorem emptyModel_isIndivisibleFor {W : Type*} [DecidableEq W] {t : Finset W}
+    (Q : Finpartition t) : (emptyModel W).IsIndivisibleFor Q :=
+  fun _ R => R.elim
+
+-- With the discrete partition `⊥` every cell is a singleton: the six transversal cell triples
+-- each carry volume `1`, the quotient count is `6`, and the diagonal remainder is `0`.
+example : quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊥ : Finpartition (Finset.univ : Finset (Fin 3))) = 6 := by decide
+
+-- With the indiscrete partition `⊤` there is no transversal triple at all: the quotient count
+-- is `0`, and the whole count `6` is diagonal.
+example : quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 3))) = 0 := by decide
+
+-- **The quotient counting theorem, instantiated** at `⊥` (`m = 1`, exact) and `⊤` (`m = 3`).
+example : |(inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3))
+        (fun _ : Fin 3 => (Finset.univ : Finset (Fin 3))) : ℝ)
+      - quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+          (⊥ : Finpartition (Finset.univ : Finset (Fin 3)))|
+    ≤ (Nat.choose 3 2) * (1 : ℕ) * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ (3 - 1) :=
+  (emptyModel_isIndivisibleFor _).abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le _
+    (by decide)
+example : |(inducedEmbeddingCount (emptyModel (Fin 3)) (emptyModel (Fin 3)) : ℝ)
+      - quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+          (⊤ : Finpartition (Finset.univ : Finset (Fin 3)))|
+    ≤ (Nat.choose 3 2) * (3 : ℕ) * (Fintype.card (Fin 3) : ℝ) ^ (3 - 1) :=
+  (emptyModel_isIndivisibleFor _).abs_inducedEmbeddingCount_sub_quotientInducedCount_le _
+    (by decide)
+
+-- **The quotient count is a lower bound**, and it is exact at `⊥`.
+example : quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 3)))
+    ≤ inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (fun _ : Fin 3 => (Finset.univ : Finset (Fin 3))) :=
+  (emptyModel_isIndivisibleFor _).quotientInducedCount_le _
+example : quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (⊥ : Finpartition (Finset.univ : Finset (Fin 3)))
+    = inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3))
+      (fun _ : Fin 3 => (Finset.univ : Finset (Fin 3))) := by decide
+
+-- **`k = 0` is guard-free**: the empty pattern has exactly one embedding, the quotient count is
+-- `1` (the empty cell tuple is transversal and matches), and the diagonal charge is `0`.
+example : quotientInducedCount (emptyModel (Fin 0)) (emptyModel (Fin 3))
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 3))) = 1 := by decide
+example : |(inducedEmbeddingCountOn (emptyModel (Fin 0)) (emptyModel (Fin 3))
+        (fun _ : Fin 0 => (Finset.univ : Finset (Fin 3))) : ℝ)
+      - quotientInducedCount (emptyModel (Fin 0)) (emptyModel (Fin 3))
+          (⊤ : Finpartition (Finset.univ : Finset (Fin 3)))| ≤ 0 := by
+  simpa using
+    (emptyModel_isIndivisibleFor _).abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le
+      (emptyModel (Fin 0)) (m := 3) (by decide)
 
 -- **Empty-host bridge**: over the empty host there are no cell-triples to charge.
 example : nontransversalCellTriples (⊥ : Finpartition (∅ : Finset (Fin 0))) = ∅ := by decide
