@@ -21,9 +21,10 @@ box volume when every coarse cell has cardinality at most `m` — hence a `3·m�
 bound, with the factor `3` counting the collision events.
 
 The collision decomposition is **arity-generic**. For `k`-tuples of cells
-(`nontransversalCellTuples`, volume `cellTupleVolume`), non-injectivity has a canonical witness
-`i < j` (`not_injective_iff_exists_lt_eq`), each of the `k.choose 2` collision events contributes
-at most `m·|s|^(k−1)`, and the total nontransversal charge is `(k.choose 2)·m·|s|^(k−1)`
+(`nontransversalCellTuples`, volume `cellTupleVolume`), non-injectivity has some strictly ordered
+collision `i < j` (`not_injective_iff_exists_lt_eq`), each of the `k.choose 2` collision events
+contributes at most `m·|s|^(k−1)`, and the total nontransversal charge is
+`(k.choose 2)·m·|s|^(k−1)`
 (`sum_nontransversalCellTuples_weight_le`), guard-free in `k`. The `Fin 3` results are its
 `k = 3` instances, with `3.choose 2 = 3`.
 
@@ -214,7 +215,7 @@ private theorem sum_collision_le {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤
 
 /-- **Generic diagonal bound, arity-parametric.** Any real weight dominated by the cell-tuple
 volume on the nontransversal `k`-tuples has total mass at most `(k choose 2)·m·|s|^(k−1)`:
-each nontransversal tuple has a canonical collision `i < j` (`not_injective_iff_exists_lt_eq`),
+each nontransversal tuple has some strictly ordered collision `i < j` (`not_injective_iff_exists_lt_eq`),
 each of the `k.choose 2` collision events contributes at most `m·|s|^(k−1)`
 (`sum_collision_le`), and the events are counted by `Fintype.card_product_filter_lt`.
 

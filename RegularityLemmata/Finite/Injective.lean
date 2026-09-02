@@ -16,7 +16,7 @@ import Mathlib.Tactic.Ring
 
 The number of injective tuples `Fin n → α` is the falling factorial
 `(Fintype.card α).descFactorial n` (bridged to mathlib's `Fintype.card_embedding_eq`).
-Non-injective ("collision") maps are characterized by a canonical coordinate pair `i < j` with
+Non-injective ("collision") maps are characterized by a strictly ordered coordinate pair `i < j` with
 `T i = T j` (`not_injective_iff_exists_lt_eq`) and counted by an ordered-pair union bound: at most
 `|ι|² · |β|^(|ι| - 1)` of them, so collisions lose one ambient power of `|β|` — the form
 consumed by counting and removal arguments. Once `2n² ≤ |α|`, at least half of all
@@ -103,9 +103,10 @@ theorem exists_comp_perm_of_tupleRange_eq [DecidableEq α] {n : ℕ} {v w : Fin 
 /-! ### Non-injective (collision) maps -/
 
 /-- **Collision characterization.** A `Fin k`-indexed tuple fails to be injective exactly when
-two coordinates `i < j` collide. The strict order fixes a canonical witness for each collision
-event, which is what lets a nontransversal charge be counted by *unordered* coordinate pairs
-(`k.choose 2`) rather than ordered ones. -/
+two coordinates `i < j` collide. The strict order orients the collision witness (a tuple may have
+several collisions; the theorem provides some strictly ordered one), which is what lets a
+nontransversal charge be counted by *unordered* coordinate pairs (`k.choose 2`) rather than
+ordered ones. -/
 theorem not_injective_iff_exists_lt_eq {k : ℕ} {T : Fin k → α} :
     ¬ Function.Injective T ↔ ∃ i j, i < j ∧ T i = T j := by
   rw [Function.not_injective_iff]
@@ -276,11 +277,11 @@ example : injectiveTupleCount (Fin 4) 3 = Nat.descFactorial 4 3 := by decide
 example : (nonInjectiveMaps (Fin 2) (Fin 1)).card = 1 := by decide
 
 -- **Collision witnesses are reordered to `i < j`.** The collision `T 2 = T 0` is presented in the
--- wrong order; the characterization still applies, with the canonical witness `(0, 2)`.
+-- wrong order; the characterization still applies, with the strictly ordered witness `(0, 2)`.
 example {T : Fin 3 → ℕ} (h : T 2 = T 0) : ¬ Function.Injective T :=
   not_injective_iff_exists_lt_eq.mpr ⟨0, 2, by decide, h.symm⟩
 
--- The canonical witness of a concrete collision, extracted and checked.
+-- A strictly ordered witness of a concrete collision, extracted and checked.
 example : ∃ i j : Fin 3, i < j ∧ (![5, 7, 5] : Fin 3 → ℕ) i = ![5, 7, 5] j :=
   not_injective_iff_exists_lt_eq.mp (by decide)
 
