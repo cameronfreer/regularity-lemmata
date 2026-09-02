@@ -173,8 +173,10 @@ correlation, direction correlation, loop/profile sensitivity) are permanent.
   coarse ones over only the three required palette colors, not all `4^m`.
 - **Transversal versus diagonal.** Regularity controls pairs of *distinct* cells, so counts
   are proved first for transversal embeddings and the diagonal-cell mass is charged
-  separately by a derived constant. A count stated without that separation is not a global
-  count.
+  separately by a derived constant: `k.choose 2` collision events for `k`-tuples of cells,
+  each worth at most `m·|s|^(k−1)` (`sum_nontransversalCellTuples_weight_le`), with the
+  three-vertex `3·m·|s|²` charge as the `k = 3` instance. A count stated without that
+  separation is not a global count.
 
 ## Triadic conventions
 

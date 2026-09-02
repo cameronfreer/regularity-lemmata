@@ -16,8 +16,9 @@ import Mathlib.Tactic.Ring
 
 The number of injective tuples `Fin n → α` is the falling factorial
 `(Fintype.card α).descFactorial n` (bridged to mathlib's `Fintype.card_embedding_eq`).
-Non-injective ("collision") maps are counted by an ordered-pair union bound: at most
-`|ι|² · |β|^(|ι| - 1)` of them, so collisions lose one ambient power of `|β|` — the form
+Non-injective ("collision") maps are characterized by a strictly ordered coordinate pair `i < j`
+with `T i = T j` (`not_injective_iff_exists_lt_eq`) and counted by an ordered-pair union bound:
+at most `|ι|² · |β|^(|ι| - 1)` of them, so collisions lose one ambient power of `|β|` — the form
 consumed by counting and removal arguments. Once `2n² ≤ |α|`, at least half of all
 `n`-tuples are injective.
 
@@ -100,6 +101,22 @@ theorem exists_comp_perm_of_tupleRange_eq [DecidableEq α] {n : ℕ} {v w : Fin 
   exact (hfv i).symm
 
 /-! ### Non-injective (collision) maps -/
+
+/-- **Collision characterization.** A `Fin k`-indexed tuple fails to be injective exactly when
+two coordinates `i < j` collide. The strict order orients the collision witness (a tuple may have
+several collisions; the theorem provides some strictly ordered one), which is what lets a
+nontransversal charge be counted by *unordered* coordinate pairs (`k.choose 2`) rather than
+ordered ones. -/
+theorem not_injective_iff_exists_lt_eq {k : ℕ} {T : Fin k → α} :
+    ¬ Function.Injective T ↔ ∃ i j, i < j ∧ T i = T j := by
+  rw [Function.not_injective_iff]
+  constructor
+  · rintro ⟨a, b, hab, hne⟩
+    rcases lt_or_gt_of_ne hne with h | h
+    · exact ⟨a, b, h, hab⟩
+    · exact ⟨b, a, h, hab.symm⟩
+  · rintro ⟨i, j, hij, hT⟩
+    exact ⟨i, j, hT, hij.ne⟩
 
 /-- The finset of non-injective maps `ι → β`. -/
 def nonInjectiveMaps (ι β : Type*) [Fintype ι] [DecidableEq ι] [Fintype β]
@@ -258,6 +275,21 @@ example : injectiveTupleCount (Fin 4) 3 = Nat.descFactorial 4 3 := by decide
 
 -- The unique map `Fin 2 → Fin 1` collides.
 example : (nonInjectiveMaps (Fin 2) (Fin 1)).card = 1 := by decide
+
+-- **Collision witnesses are reordered to `i < j`.** The collision `T 2 = T 0` is presented in the
+-- wrong order; the characterization still applies, with the strictly ordered witness `(0, 2)`.
+example {T : Fin 3 → ℕ} (h : T 2 = T 0) : ¬ Function.Injective T :=
+  not_injective_iff_exists_lt_eq.mpr ⟨0, 2, by decide, h.symm⟩
+
+-- A strictly ordered witness of a concrete collision, extracted and checked.
+example : ∃ i j : Fin 3, i < j ∧ (![5, 7, 5] : Fin 3 → ℕ) i = ![5, 7, 5] j :=
+  not_injective_iff_exists_lt_eq.mp (by decide)
+
+-- **Degenerate arities**: on `Fin 0` and `Fin 1` every tuple is injective, so no witness exists.
+example (T : Fin 0 → ℕ) : ¬ ∃ i j : Fin 0, i < j ∧ T i = T j :=
+  fun h => (not_injective_iff_exists_lt_eq.mpr h) (fun a => a.elim0)
+example (T : Fin 1 → ℕ) : ¬ ∃ i j : Fin 1, i < j ∧ T i = T j :=
+  fun h => (not_injective_iff_exists_lt_eq.mpr h) (fun a b _ => Subsingleton.elim a b)
 
 -- Half-bound instantiated at `n = 1`, `α = Fin 2` (hypothesis `2·1² ≤ 2` tight).
 example : (Fintype.card (Fin 2) : ℝ) ^ 1 / 2 ≤ (injectiveTupleCount (Fin 2) 1 : ℝ) :=
