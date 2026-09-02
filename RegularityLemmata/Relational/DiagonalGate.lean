@@ -20,6 +20,13 @@ exactly into the transversal part and a nontransversal part (`Function.Injective
 box volume when every coarse cell has cardinality at most `m` — hence a `3·m·|s|²` nontransversal
 bound, with the factor `3` counting the collision events.
 
+The collision decomposition is **arity-generic**. For `k`-tuples of cells
+(`nontransversalCellTuples`, volume `cellTupleVolume`), non-injectivity has a canonical witness
+`i < j` (`not_injective_iff_exists_lt_eq`), each of the `k.choose 2` collision events contributes
+at most `m·|s|^(k−1)`, and the total nontransversal charge is `(k.choose 2)·m·|s|^(k−1)`
+(`sum_nontransversalCellTuples_weight_le`), guard-free in `k`. The `Fin 3` results are its
+`k = 3` instances, with `3.choose 2 = 3`.
+
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
 initial equipartition supplies `m = |s| / #parts + 1` for the witness's coarse partition. The
 global strong-counting corollary adds the `3·m·|s|²` diagonal charge to the summit bound.
@@ -27,7 +34,7 @@ global strong-counting corollary adds the `3·m·|s|²` diagonal charge to the s
 This file is independent of `AtMostBinary` until the final combination with the strong-counting
 summit; the factor `3` is derived, not assumed.
 
-The diagonal charge is proved **generically** (`sum_nontransversal_weight_le`): it constrains any
+The diagonal charge is proved for **weights** (`sum_nontransversal_weight_le`): it constrains any
 real weight dominated by the cell-triple volume, so it serves the actual and the predicted side
 alike. The induced count is one specialization
 (`sum_nontransversal_inducedEmbeddingCountOn_le`); "volume times a factor `≤ 1`", the shape of
@@ -125,104 +132,161 @@ theorem globalInducedCount_eq_inducedEmbeddingCount [Fintype V]
   rw [globalInducedCount_eq_inducedEmbeddingCountOn, inducedEmbeddingCountOn, inducedEmbeddingCount,
     Fintype.piFinset_univ]
 
-/-! ### `Fin 3` collision characterization -/
+/-! ### Arity-generic cell tuples and the collision decomposition -/
 
-/-- A `Fin 3`-indexed triple fails to be injective exactly when two coordinates collide. -/
+/-- Ordered `k`-tuples of cells of `Q` with a repeated cell (the complement of the transversal
+tuples inside all ordered cell-tuples). `nontransversalCellTriples` is the `k = 3` instance. -/
+def nontransversalCellTuples {k : ℕ} (Q : Finpartition s) : Finset (Fin k → Finset V) :=
+  (Fintype.piFinset fun _ => Q.parts).filter (fun T => ¬ Function.Injective T)
+
+@[simp] theorem mem_nontransversalCellTuples {k : ℕ} {T : Fin k → Finset V} :
+    T ∈ nontransversalCellTuples Q ↔ (∀ i, T i ∈ Q.parts) ∧ ¬ Function.Injective T := by
+  simp [nontransversalCellTuples, Fintype.mem_piFinset]
+
+theorem nontransversalCellTriples_eq_nontransversalCellTuples (Q : Finpartition s) :
+    nontransversalCellTriples Q = nontransversalCellTuples Q := rfl
+
+/-- The box volume of a `k`-tuple of cells: the product of the cell cardinalities.
+`cellTripleVolume` is the `k = 3` instance. -/
+def cellTupleVolume {k : ℕ} (T : Fin k → Finset V) : ℝ :=
+  ∏ i, ((T i).card : ℝ)
+
+omit [DecidableEq V] in
+theorem cellTupleVolume_nonneg {k : ℕ} (T : Fin k → Finset V) : 0 ≤ cellTupleVolume T :=
+  Finset.prod_nonneg fun _ _ => Nat.cast_nonneg _
+
+omit [DecidableEq V] in
+theorem cellTripleVolume_eq_cellTupleVolume (T : Fin 3 → Finset V) :
+    cellTripleVolume T = cellTupleVolume T := by
+  rw [cellTripleVolume, cellTupleVolume, Fin.prod_univ_three]
+
+/-- **One collision event.** For `i ≠ j`, the cell tuples with `T i = T j` have total box volume
+at most `m·|s|^(k−1)`: dropping coordinate `j` is injective on the event (coordinate `i` carries
+the same cell), the dropped cell has cardinality at most `m`, and the remaining `k − 1`
+coordinates range freely over the cells, with total volume `|s|^(k−1)`. -/
+private theorem sum_collision_le {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) {i j : Fin k}
+    (hij : i ≠ j) :
+    ∑ T ∈ (Fintype.piFinset fun _ : Fin k => Q.parts).filter (fun T => T i = T j),
+        cellTupleVolume T
+      ≤ m * (s.card : ℝ) ^ (k - 1) := by
+  classical
+  set event := (Fintype.piFinset fun _ : Fin k => Q.parts).filter (fun T => T i = T j)
+    with hevent
+  set drop : (Fin k → Finset V) → ({l : Fin k // l ≠ j} → Finset V) := fun T l => T l.val
+    with hdrop
+  have hsplit : ∀ T : Fin k → Finset V,
+      cellTupleVolume T = ((T j).card : ℝ) * ∏ l, ((drop T l).card : ℝ) := by
+    intro T
+    rw [cellTupleVolume, ← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ j)]
+    congr 1
+    exact Finset.prod_subtype (Finset.univ.erase j) (fun l => by simp) fun l => ((T l).card : ℝ)
+  have hinj : Set.InjOn drop event := by
+    intro T hT T' hT' h
+    rw [Finset.mem_coe, hevent, Finset.mem_filter] at hT hT'
+    funext l
+    by_cases hl : l = j
+    · subst hl
+      rw [← hT.2, ← hT'.2]
+      exact congr_fun h ⟨i, hij⟩
+    · exact congr_fun h ⟨l, hl⟩
+  have hfree : ∑ T' ∈ Fintype.piFinset (fun _ : {l : Fin k // l ≠ j} => Q.parts),
+      ∏ l, ((T' l).card : ℝ) = (s.card : ℝ) ^ (k - 1) := by
+    refine (Finset.sum_prod_piFinset Q.parts fun _ C => ((C.card : ℕ) : ℝ)).trans ?_
+    simp [sum_card_parts_cast, Fintype.card_subtype_compl]
+  calc ∑ T ∈ event, cellTupleVolume T
+      ≤ ∑ T ∈ event, (m : ℝ) * ∏ l, ((drop T l).card : ℝ) := by
+        refine Finset.sum_le_sum fun T hT => ?_
+        rw [hevent, Finset.mem_filter, Fintype.mem_piFinset] at hT
+        rw [hsplit T]
+        exact mul_le_mul_of_nonneg_right (by exact_mod_cast hm _ (hT.1 j))
+          (Finset.prod_nonneg fun _ _ => Nat.cast_nonneg _)
+    _ = (m : ℝ) * ∑ T' ∈ event.image drop, ∏ l, ((T' l).card : ℝ) := by
+        rw [← Finset.mul_sum, Finset.sum_image hinj]
+    _ ≤ (m : ℝ) * ∑ T' ∈ Fintype.piFinset (fun _ : {l : Fin k // l ≠ j} => Q.parts),
+          ∏ l, ((T' l).card : ℝ) := by
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum_of_subset_of_nonneg ?_
+          fun _ _ _ => Finset.prod_nonneg fun _ _ => Nat.cast_nonneg _) (Nat.cast_nonneg _)
+        intro T' hT'
+        obtain ⟨T, hT, rfl⟩ := Finset.mem_image.mp hT'
+        rw [hevent, Finset.mem_filter, Fintype.mem_piFinset] at hT
+        exact Fintype.mem_piFinset.mpr fun l => hT.1 l.val
+    _ = m * (s.card : ℝ) ^ (k - 1) := by rw [hfree]
+
+/-- **Generic diagonal bound, arity-parametric.** Any real weight dominated by the cell-tuple
+volume on the nontransversal `k`-tuples has total mass at most `(k choose 2)·m·|s|^(k−1)`:
+each nontransversal tuple has a canonical collision `i < j` (`not_injective_iff_exists_lt_eq`),
+each of the `k.choose 2` collision events contributes at most `m·|s|^(k−1)`
+(`sum_collision_le`), and the events are counted by `Fintype.card_product_filter_lt`.
+
+Guard-free: no `2 ≤ k`, no nonempty carrier, no positive cell size, and no nonnegativity of the
+weight — only the one-sided domination is used. At `k = 0` and `k = 1` every tuple is injective
+and `k.choose 2 = 0`, so both sides vanish. -/
+theorem sum_nontransversalCellTuples_weight_le {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m)
+    (weight : (Fin k → Finset V) → ℝ)
+    (hw : ∀ T ∈ nontransversalCellTuples Q, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ nontransversalCellTuples Q, weight T
+      ≤ (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) := by
+  classical
+  set pairs : Finset (Fin k × Fin k) := Finset.univ.filter (fun p => p.1 < p.2) with hpairs
+  have hpt : ∀ T : Fin k → Finset V,
+      (if ¬ Function.Injective T then cellTupleVolume T else 0)
+        ≤ ∑ p ∈ pairs, (if T p.1 = T p.2 then cellTupleVolume T else 0) := by
+    intro T
+    have hnn : ∀ p ∈ pairs, 0 ≤ (if T p.1 = T p.2 then cellTupleVolume T else 0) :=
+      fun p _ => by split_ifs <;> [exact cellTupleVolume_nonneg T; exact le_rfl]
+    by_cases h : Function.Injective T
+    · rw [ite_eq_right (not_not.mpr h)]
+      exact Finset.sum_nonneg hnn
+    · rw [ite_eq_left h]
+      obtain ⟨i, j, hij, hT⟩ := not_injective_iff_exists_lt_eq.mp h
+      have hmem : (i, j) ∈ pairs := by
+        rw [hpairs, Finset.mem_filter]
+        exact ⟨Finset.mem_univ _, hij⟩
+      calc cellTupleVolume T
+          = (if T (i, j).1 = T (i, j).2 then cellTupleVolume T else 0) := by rw [ite_eq_left hT]
+        _ ≤ ∑ p ∈ pairs, (if T p.1 = T p.2 then cellTupleVolume T else 0) :=
+          Finset.single_le_sum hnn hmem
+  have hcard : pairs.card = k.choose 2 := by
+    simpa [hpairs] using Fintype.card_product_filter_lt (α := Fin k)
+  calc ∑ T ∈ nontransversalCellTuples Q, weight T
+      ≤ ∑ T ∈ nontransversalCellTuples Q, cellTupleVolume T := Finset.sum_le_sum hw
+    _ = ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts,
+          (if ¬ Function.Injective T then cellTupleVolume T else 0) := by
+        rw [nontransversalCellTuples, Finset.sum_filter]
+    _ ≤ ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts,
+          ∑ p ∈ pairs, (if T p.1 = T p.2 then cellTupleVolume T else 0) :=
+        Finset.sum_le_sum fun T _ => hpt T
+    _ = ∑ p ∈ pairs, ∑ T ∈ (Fintype.piFinset fun _ : Fin k => Q.parts).filter
+          (fun T => T p.1 = T p.2), cellTupleVolume T := by
+        rw [Finset.sum_comm]
+        exact Finset.sum_congr rfl fun p _ => (Finset.sum_filter _ _).symm
+    _ ≤ ∑ _p ∈ pairs, (m : ℝ) * (s.card : ℝ) ^ (k - 1) := by
+        refine Finset.sum_le_sum fun p hp => ?_
+        rw [hpairs, Finset.mem_filter] at hp
+        exact sum_collision_le hm hp.2.ne
+    _ = (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) := by
+        rw [Finset.sum_const, nsmul_eq_mul, hcard]
+        ring
+
+/-! ### The `Fin 3` instance: collision characterization and the `3·m·|s|²` bound -/
+
+/-- A `Fin 3`-indexed triple fails to be injective exactly when two coordinates collide. The
+`k = 3` instance of `not_injective_iff_exists_lt_eq`, with the three `i < j` pairs enumerated. -/
 theorem not_injective_fin_three {α : Type*} {T : Fin 3 → α} :
     ¬ Function.Injective T ↔ T 0 = T 1 ∨ T 0 = T 2 ∨ T 1 = T 2 := by
-  rw [Function.not_injective_iff]
+  rw [not_injective_iff_exists_lt_eq]
   constructor
-  · rintro ⟨a, b, hab, hne⟩
-    fin_cases a <;> fin_cases b <;> simp_all
+  · rintro ⟨i, j, hij, hT⟩
+    fin_cases i <;> fin_cases j <;> simp_all
   · rintro (h | h | h)
-    · exact ⟨0, 1, h, by decide⟩
-    · exact ⟨0, 2, h, by decide⟩
-    · exact ⟨1, 2, h, by decide⟩
-
-/-! ### The `3·m·|s|²` nontransversal bound -/
-
-/-- The doubled-cell squared mass is at most `m·|s|²` when cells have size at most `m`. -/
-private theorem sum_sq_mul_card_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
-    ∑ p ∈ Q.parts ×ˢ Q.parts, ((p.1.card : ℝ) * p.1.card * p.2.card) ≤ m * (s.card : ℝ) ^ 2 := by
-  rw [Finset.sum_product]
-  have hstep : ∑ C ∈ Q.parts, ∑ D ∈ Q.parts, ((C.card : ℝ) * C.card * D.card)
-      = (∑ C ∈ Q.parts, (C.card : ℝ) * C.card) * s.card := by
-    rw [Finset.sum_mul]
-    exact Finset.sum_congr rfl fun C _ => by rw [← Finset.mul_sum, sum_card_parts_cast]
-  rw [hstep]
-  have hsq : ∑ C ∈ Q.parts, (C.card : ℝ) * C.card ≤ (m : ℝ) * s.card := by
-    calc ∑ C ∈ Q.parts, (C.card : ℝ) * C.card
-        ≤ ∑ C ∈ Q.parts, (m : ℝ) * C.card :=
-          Finset.sum_le_sum fun C hC =>
-            mul_le_mul_of_nonneg_right (by exact_mod_cast hm C hC) (Nat.cast_nonneg _)
-      _ = (m : ℝ) * s.card := by rw [← Finset.mul_sum, sum_card_parts_cast]
-  calc (∑ C ∈ Q.parts, (C.card : ℝ) * C.card) * s.card
-      ≤ ((m : ℝ) * s.card) * s.card := mul_le_mul_of_nonneg_right hsq (Nat.cast_nonneg _)
-    _ = m * (s.card : ℝ) ^ 2 := by ring
-
-/-- The `(0,1)` collision event has box volume at most `m·|s|²`. -/
-private theorem sum_collision_zero_one_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
-    ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 1),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      ≤ m * (s.card : ℝ) ^ 2 := by
-  have hre : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 1),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      = ∑ p ∈ Q.parts ×ˢ Q.parts, ((p.1.card : ℝ) * p.1.card * p.2.card) := by
-    refine Finset.sum_nbij' (fun T => (T 0, T 2)) (fun p => ![p.1, p.1, p.2])
-      (fun T hT => ?_) (fun p hp => ?_) (fun T hT => ?_) (fun p _ => ?_) (fun T hT => ?_)
-    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
-      exact Finset.mem_product.mpr ⟨hT.1 0, hT.1 2⟩
-    · rw [Finset.mem_product] at hp
-      rw [Finset.mem_filter, Fintype.mem_piFinset]
-      exact ⟨fun i => by fin_cases i <;> [exact hp.1; exact hp.1; exact hp.2], rfl⟩
-    · funext i; fin_cases i <;> [rfl; exact (Finset.mem_filter.mp hT).2; rfl]
-    · rfl
-    · rw [(Finset.mem_filter.mp hT).2]
-  rw [hre]; exact sum_sq_mul_card_le hm
-
-/-- The `(0,2)` collision event has box volume at most `m·|s|²`. -/
-private theorem sum_collision_zero_two_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
-    ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 2),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      ≤ m * (s.card : ℝ) ^ 2 := by
-  have hre : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 2),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      = ∑ p ∈ Q.parts ×ˢ Q.parts, ((p.1.card : ℝ) * p.1.card * p.2.card) := by
-    refine Finset.sum_nbij' (fun T => (T 0, T 1)) (fun p => ![p.1, p.2, p.1])
-      (fun T hT => ?_) (fun p hp => ?_) (fun T hT => ?_) (fun p _ => ?_) (fun T hT => ?_)
-    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
-      exact Finset.mem_product.mpr ⟨hT.1 0, hT.1 1⟩
-    · rw [Finset.mem_product] at hp
-      rw [Finset.mem_filter, Fintype.mem_piFinset]
-      exact ⟨fun i => by fin_cases i <;> [exact hp.1; exact hp.2; exact hp.1], rfl⟩
-    · funext i; fin_cases i <;> [rfl; rfl; exact (Finset.mem_filter.mp hT).2]
-    · rfl
-    · rw [(Finset.mem_filter.mp hT).2]; ring
-  rw [hre]; exact sum_sq_mul_card_le hm
-
-/-- The `(1,2)` collision event has box volume at most `m·|s|²`. -/
-private theorem sum_collision_one_two_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
-    ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 1 = T 2),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      ≤ m * (s.card : ℝ) ^ 2 := by
-  have hre : ∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 1 = T 2),
-        ((T 0).card * (T 1).card * (T 2).card : ℝ)
-      = ∑ p ∈ Q.parts ×ˢ Q.parts, ((p.1.card : ℝ) * p.1.card * p.2.card) := by
-    refine Finset.sum_nbij' (fun T => (T 1, T 0)) (fun p => ![p.2, p.1, p.1])
-      (fun T hT => ?_) (fun p hp => ?_) (fun T hT => ?_) (fun p _ => ?_) (fun T hT => ?_)
-    · rw [Finset.mem_filter, Fintype.mem_piFinset] at hT
-      exact Finset.mem_product.mpr ⟨hT.1 1, hT.1 0⟩
-    · rw [Finset.mem_product] at hp
-      rw [Finset.mem_filter, Fintype.mem_piFinset]
-      exact ⟨fun i => by fin_cases i <;> [exact hp.2; exact hp.1; exact hp.1], rfl⟩
-    · funext i; fin_cases i <;> [rfl; rfl; exact (Finset.mem_filter.mp hT).2]
-    · rfl
-    · rw [(Finset.mem_filter.mp hT).2]; ring
-  rw [hre]; exact sum_sq_mul_card_le hm
+    · exact ⟨0, 1, by decide, h⟩
+    · exact ⟨0, 2, by decide, h⟩
+    · exact ⟨1, 2, by decide, h⟩
 
 /-- **Generic diagonal bound.** The `3·m·|s|²` estimate is a statement about *volume*, not about
 induced counts: any real weight dominated by the cell-triple volume on the nontransversal triples
-obeys it. Three collision events, each contributing at most `m·|s|²`.
+obeys it. Three collision events, each contributing at most `m·|s|²`. The `k = 3` instance of
+`sum_nontransversalCellTuples_weight_le`, with `3.choose 2 = 3`.
 
 Domination is the only hypothesis — nonnegativity of the weight is never used, since the bound is
 one-sided. Consumers supply their own domination lemma: `inducedEmbeddingCountOn` does so via
@@ -234,50 +298,11 @@ theorem sum_nontransversal_weight_le {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card �
     (weight : (Fin 3 → Finset V) → ℝ)
     (hw : ∀ T ∈ nontransversalCellTriples Q, weight T ≤ cellTripleVolume T) :
     ∑ T ∈ nontransversalCellTriples Q, weight T ≤ 3 * m * (s.card : ℝ) ^ 2 := by
-  have hpt : ∀ T : Fin 3 → Finset V,
-      (if ¬ Function.Injective T then cellTripleVolume T else 0)
-      ≤ (if T 0 = T 1 then cellTripleVolume T else 0)
-        + (if T 0 = T 2 then cellTripleVolume T else 0)
-        + (if T 1 = T 2 then cellTripleVolume T else 0) := by
-    intro T
-    have hv : 0 ≤ cellTripleVolume T := cellTripleVolume_nonneg T
-    have e01 : 0 ≤ (if T 0 = T 1 then cellTripleVolume T else 0) := by
-      split_ifs <;> [exact hv; exact le_rfl]
-    have e02 : 0 ≤ (if T 0 = T 2 then cellTripleVolume T else 0) := by
-      split_ifs <;> [exact hv; exact le_rfl]
-    have e12 : 0 ≤ (if T 1 = T 2 then cellTripleVolume T else 0) := by
-      split_ifs <;> [exact hv; exact le_rfl]
-    by_cases h : Function.Injective T
-    · rw [ite_eq_right (not_not.mpr h)]; linarith
-    · rw [ite_eq_left h, not_injective_fin_three] at *
-      rcases h with h01 | h02 | h12
-      · rw [ite_eq_left h01]; linarith
-      · rw [ite_eq_left h02]; linarith
-      · rw [ite_eq_left h12]; linarith
-  calc ∑ T ∈ nontransversalCellTriples Q, weight T
-      ≤ ∑ T ∈ nontransversalCellTriples Q, cellTripleVolume T :=
-        Finset.sum_le_sum hw
-    _ = ∑ T ∈ Fintype.piFinset fun _ : Fin 3 => Q.parts,
-          (if ¬ Function.Injective T then cellTripleVolume T else 0) := by
-        rw [nontransversalCellTriples, Finset.sum_filter]
-    _ ≤ ∑ T ∈ Fintype.piFinset fun _ : Fin 3 => Q.parts,
-          ((if T 0 = T 1 then cellTripleVolume T else 0)
-            + (if T 0 = T 2 then cellTripleVolume T else 0)
-            + (if T 1 = T 2 then cellTripleVolume T else 0)) :=
-        Finset.sum_le_sum fun T _ => hpt T
-    _ = (∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 1),
-            cellTripleVolume T)
-          + (∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 0 = T 2),
-              cellTripleVolume T)
-          + (∑ T ∈ (Fintype.piFinset fun _ : Fin 3 => Q.parts).filter (fun T => T 1 = T 2),
-              cellTripleVolume T) := by
-        rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_filter, Finset.sum_filter,
-          Finset.sum_filter]
-    _ ≤ m * (s.card : ℝ) ^ 2 + m * (s.card : ℝ) ^ 2 + m * (s.card : ℝ) ^ 2 := by
-        simp only [cellTripleVolume]
-        exact add_le_add (add_le_add (sum_collision_zero_one_le hm) (sum_collision_zero_two_le hm))
-          (sum_collision_one_two_le hm)
-    _ = 3 * m * (s.card : ℝ) ^ 2 := by ring
+  have h := sum_nontransversalCellTuples_weight_le hm weight
+    fun T hT => (hw T hT).trans_eq (cellTripleVolume_eq_cellTupleVolume T)
+  rw [nontransversalCellTriples_eq_nontransversalCellTuples]
+  rw [show Nat.choose 3 2 = 3 from rfl] at h
+  simpa using h
 
 /-- **Derived diagonal bound.** When every cell of `Q` has cardinality at most `m`, the
 nontransversal induced count is at most `3·m·|s|²`. One specialization of
@@ -403,6 +428,62 @@ example : globalInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3))
 example {α : Type*} (T : Fin 3 → α) :
     ¬ Function.Injective T ↔ T 0 = T 1 ∨ T 0 = T 2 ∨ T 1 = T 2 :=
   not_injective_fin_three
+
+-- **Degenerate arities `k = 0` and `k = 1`**: every tuple is injective, so the nontransversal
+-- family is empty, and the generic bound is `0` on both sides.
+example : nontransversalCellTuples (k := 0)
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 2))) = ∅ := by decide
+example : nontransversalCellTuples (k := 1)
+    (⊤ : Finpartition (Finset.univ : Finset (Fin 2))) = ∅ := by decide
+example (m : ℕ) : ((Nat.choose 0 2 : ℕ) : ℝ) * m * (s.card : ℝ) ^ (0 - 1) = 0 := by simp
+example (m : ℕ) : ((Nat.choose 1 2 : ℕ) : ℝ) * m * (s.card : ℝ) ^ (1 - 1) = 0 := by simp
+example {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) (weight : (Fin 0 → Finset V) → ℝ)
+    (hw : ∀ T ∈ nontransversalCellTuples Q, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ nontransversalCellTuples Q, weight T ≤ 0 := by
+  simpa using sum_nontransversalCellTuples_weight_le hm weight hw
+example {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) (weight : (Fin 1 → Finset V) → ℝ)
+    (hw : ∀ T ∈ nontransversalCellTuples Q, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ nontransversalCellTuples Q, weight T ≤ 0 := by
+  simpa using sum_nontransversalCellTuples_weight_le hm weight hw
+
+-- **`k = 2`: the coefficient is one, and the bound is attained.** With the indiscrete partition
+-- of a two-vertex carrier the only cell pair is the diagonal `(univ, univ)`, of volume `4`, and
+-- the bound `1 · 2 · 2¹ = 4` is exact.
+example : nontransversalCellTuples (k := 2) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+    = {fun _ => Finset.univ} := by decide
+example : ∑ T ∈ nontransversalCellTuples (k := 2)
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 2))), cellTupleVolume T
+    = ((Nat.choose 2 2 : ℕ) : ℝ) * (2 : ℕ)
+        * ((Finset.univ : Finset (Fin 2)).card : ℝ) ^ (2 - 1) := by
+  rw [show nontransversalCellTuples (k := 2) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+    = {fun _ => Finset.univ} by decide, Finset.sum_singleton, cellTupleVolume]
+  norm_num
+
+-- **`k = 3` recovers the `3·m·|s|²` theorem**: the generic coefficient is `3.choose 2 = 3`.
+example (m : ℕ) : ((Nat.choose 3 2 : ℕ) : ℝ) * m * (s.card : ℝ) ^ (3 - 1)
+    = 3 * m * (s.card : ℝ) ^ 2 := by
+  norm_num [show Nat.choose 3 2 = 3 from rfl]
+example {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) (weight : (Fin 3 → Finset V) → ℝ)
+    (hw : ∀ T ∈ nontransversalCellTriples Q, weight T ≤ cellTripleVolume T) :
+    ∑ T ∈ nontransversalCellTriples Q, weight T ≤ 3 * m * (s.card : ℝ) ^ 2 :=
+  sum_nontransversal_weight_le hm weight hw
+
+-- **A collision presented in the wrong order** still lands in the nontransversal family: the
+-- witness is reordered to `i < j` by the characterization.
+example {k : ℕ} {T : Fin k → Finset V} (hT : ∀ i, T i ∈ Q.parts) {i j : Fin k} (hij : j < i)
+    (h : T i = T j) : T ∈ nontransversalCellTuples Q :=
+  mem_nontransversalCellTuples.mpr ⟨hT, not_injective_iff_exists_lt_eq.mpr ⟨j, i, hij, h.symm⟩⟩
+
+-- **Signed weights.** No nonnegativity is assumed: a weight that is `-1` everywhere (or any
+-- negative multiple of the volume) is dominated by the volume and obeys the same bound.
+example {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    ∑ _T ∈ nontransversalCellTuples (k := k) Q, (-1 : ℝ)
+      ≤ (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
+  sum_nontransversalCellTuples_weight_le hm _ fun T _ => by linarith [cellTupleVolume_nonneg T]
+example {k m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    ∑ T ∈ nontransversalCellTuples (k := k) Q, (-2 * cellTupleVolume T)
+      ≤ (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
+  sum_nontransversalCellTuples_weight_le hm _ fun T _ => by linarith [cellTupleVolume_nonneg T]
 
 -- **Empty-host bridge**: over the empty host there are no cell-triples to charge.
 example : nontransversalCellTriples (⊥ : Finpartition (∅ : Finset (Fin 0))) = ∅ := by decide
