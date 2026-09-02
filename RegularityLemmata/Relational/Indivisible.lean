@@ -29,12 +29,23 @@ in mathlib's order `Q ≤ P` means `Q` is *finer*, see `ARCHITECTURE.md`), and t
 `Fintype.piFinset` tiling of the tuples over `s` by cell boxes, which is what later counting
 arguments consume.
 
+**The packaged quotient.** `FiniteRelModel.quotient N Q : FiniteRelModel L Q.parts`
+interprets every symbol by `quotientRel` (in its finite-box, computable form). It is defined
+unconditionally, like `majorityRound`; under `N.IsIndivisibleFor Q` it agrees with `N` cellwise
+in both directions (`IsIndivisibleFor.quotient_holds_iff`, `IsIndivisibleFor.quotient_holds_part`),
+nullary symbols pass through unchanged (`quotient_holds_zero`, `nullaryCompatible_quotient`), and
+on a transversal tuple of cells the induced-embedding count of `N` is all-or-nothing — the full
+box volume `Π_i |C i|` or `0` according to whether the quotient matches the pattern
+(`IsIndivisibleFor.inducedEmbeddingCountOn_cells`). `quotientInducedCount` sums those box
+volumes over the matching transversal cell tuples; `Relational/DiagonalGate.lean` compares it
+with the `s`-restricted count up to the diagonal charge.
+
 **Deliberately not claimed.** Nothing here is stability-theoretic: no stability, order
 property, or Littlestone hypothesis appears, and no *existence* of a nontrivial indivisible
-partition is proved — indivisibility is always an assumption on the pair `(N, P)`. No
-blow-up model is constructed either; `quotientRel` is the induced relation on cells, not a
-`FiniteRelModel` on `P.parts`. Approximate (`ε`-) indivisibility is a separate notion and is
-not defined here.
+partition is proved — indivisibility is always an assumption on the pair `(N, P)`. The quotient
+is the induced structure on cells; no blow-up in the other direction (from a model on `P.parts`
+back to `V`) is constructed. Approximate (`ε`-) indivisibility is a separate notion and is not
+defined here.
 
 **Nullary arity.** Arity zero is free: a relation on the unique empty tuple is indivisible
 for every partition (`isIndivisible_of_arity_zero`), so `IsIndivisibleFor` says nothing at
@@ -258,6 +269,124 @@ theorem nullaryCompatible_iff_quotientRel {L : FirstOrder.Language} [FiniteRelat
   · have := h S (fun i ↦ i.elim0) fun i ↦ i.elim0
     rwa [quotientRel_zero, quotientRel_zero] at this
 
+/-! ### The packaged quotient model -/
+
+section QuotientModel
+
+variable {L : FirstOrder.Language} [FiniteRelational L]
+
+/-- **The quotient model.** `N` descended to the cells of `Q`: a symbol holds at a tuple of cells
+when some tuple of representatives satisfies it (`quotientRel`, in its finite-box form so that
+the interpretation is a computable `Bool`). Defined unconditionally, like `majorityRound`; its
+theorems acquire content under `N.IsIndivisibleFor Q`, where "some" and "every" representative
+tuple agree. Nullary symbols pass through unchanged (`quotient_holds_zero`). -/
+def FiniteRelModel.quotient (N : FiniteRelModel L V) (Q : Finpartition s) :
+    FiniteRelModel L Q.parts where
+  rel := fun {_n} S C ↦
+    decide (∃ x ∈ Fintype.piFinset (fun i ↦ (C i : Finset V)), N.Holds S x)
+
+/-- The quotient model interprets each symbol by `quotientRel`. -/
+theorem FiniteRelModel.quotient_holds_iff (N : FiniteRelModel L V) (Q : Finpartition s) {n : ℕ}
+    (S : L.Relations n) (C : Fin n → Q.parts) :
+    (N.quotient Q).Holds S C ↔ quotientRel Q (N.Holds S) C := by
+  show decide _ = true ↔ _
+  rw [decide_eq_true_iff, quotientRel]
+  simp only [Fintype.mem_piFinset]
+
+/-- **Cellwise agreement, cells to tuples.** For indivisible `N`, the quotient's truth at a tuple
+of cells is `N`'s truth at any tuple of representatives. -/
+theorem FiniteRelModel.IsIndivisibleFor.quotient_holds_iff {N : FiniteRelModel L V}
+    (h : N.IsIndivisibleFor Q) {n : ℕ} (S : L.Relations n) (C : Fin n → Q.parts)
+    {x : Fin n → V} (hx : ∀ i, x i ∈ (C i : Finset V)) :
+    (N.quotient Q).Holds S C ↔ N.Holds S x :=
+  (N.quotient_holds_iff Q S C).trans ((h.rel S).quotientRel_iff C hx)
+
+/-- **Cellwise agreement, tuples to cells.** For indivisible `N`, the quotient's truth at the
+tuple of parts of a tuple over `s` is `N`'s truth there. -/
+theorem FiniteRelModel.IsIndivisibleFor.quotient_holds_part {N : FiniteRelModel L V}
+    (h : N.IsIndivisibleFor Q) {n : ℕ} (S : L.Relations n) {x : Fin n → V}
+    (hx : ∀ i, x i ∈ s) :
+    (N.quotient Q).Holds S (fun i ↦ ⟨Q.part (x i), Q.part_mem.mpr (hx i)⟩) ↔ N.Holds S x :=
+  (N.quotient_holds_iff Q S _).trans ((h.rel S).quotientRel_part hx)
+
+/-- Nullary symbols pass through the quotient unchanged, with no indivisibility needed. -/
+theorem FiniteRelModel.quotient_holds_zero (N : FiniteRelModel L V) (Q : Finpartition s)
+    (S : L.Relations 0) (C : Fin 0 → Q.parts) :
+    (N.quotient Q).Holds S C ↔ N.Holds S Fin.elim0 :=
+  (N.quotient_holds_iff Q S C).trans (quotientRel_zero N Q S C)
+
+/-- A model and its quotient are nullary-compatible, unconditionally. -/
+theorem FiniteRelModel.nullaryCompatible_quotient (N : FiniteRelModel L V)
+    (Q : Finpartition s) : NullaryCompatible N (N.quotient Q) :=
+  fun S ↦ (N.quotient_holds_zero Q S Fin.elim0).symm
+
+/-! ### The exact count on transversal cell tuples -/
+
+variable {W : Type*} [Fintype W] [DecidableEq W]
+
+/-- **All-or-nothing.** On a transversal tuple of cells (distinct cells, `C` injective) the
+induced-embedding count of an indivisible model is either the full box volume `Π_i |C i|` or
+`0`, according to whether the quotient model matches the pattern at `C`: distinct cells are
+disjoint, so every tuple through the box is injective, and indivisibility makes the induced
+condition constant on the box. An equality, with no error term. -/
+theorem FiniteRelModel.IsIndivisibleFor.inducedEmbeddingCountOn_cells {N : FiniteRelModel L V}
+    (h : N.IsIndivisibleFor Q) (P : FiniteRelModel L W) {C : W → Q.parts}
+    (hC : Function.Injective C) :
+    inducedEmbeddingCountOn P N (fun i ↦ (C i : Finset V))
+      = if PreservesAndReflects P (N.quotient Q) C then ∏ i, ((C i : Finset V)).card else 0 := by
+  classical
+  rw [inducedEmbeddingCountOn]
+  have hkey : ∀ f ∈ Fintype.piFinset (fun i ↦ (C i : Finset V)),
+      (Function.Injective f ∧ PreservesAndReflects P N f)
+        ↔ PreservesAndReflects P (N.quotient Q) C := by
+    intro f hf
+    rw [Fintype.mem_piFinset] at hf
+    have hinj : Function.Injective f := by
+      intro i j hij
+      apply hC
+      apply Subtype.ext
+      by_contra hne
+      exact Finset.disjoint_left.mp
+        (Q.disjoint (Finset.mem_coe.mpr (C i).2) (Finset.mem_coe.mpr (C j).2) hne)
+        (hf i) (hij ▸ hf j)
+    refine ⟨fun hp S x ↦ ?_, fun hp ↦ ⟨hinj, fun S x ↦ ?_⟩⟩
+    · rw [h.quotient_holds_iff S.2 (C ∘ x) (x := f ∘ x) fun i ↦ hf (x i)]
+      exact hp.2 S x
+    · rw [← h.quotient_holds_iff S.2 (C ∘ x) (x := f ∘ x) fun i ↦ hf (x i)]
+      exact hp S x
+  split_ifs with hpar
+  · rw [Finset.filter_true_of_mem fun f hf ↦ (hkey f hf).mpr hpar, Fintype.card_piFinset]
+  · rw [Finset.filter_false_of_mem fun f hf hp ↦ hpar ((hkey f hf).mp hp), Finset.card_empty]
+
+/-- **The quotient-weighted count.** The transversal cell tuples at which the quotient model
+matches the pattern, each weighted by its box volume `Π_i |C i|` (product-of-cards weighting:
+`boxMass` with unit vertex weights). By `inducedEmbeddingCountOn_cells` this is exactly the
+transversal part of an indivisible model's induced count. -/
+def quotientInducedCount (P : FiniteRelModel L W) (N : FiniteRelModel L V)
+    (Q : Finpartition s) : ℕ :=
+  ∑ C ∈ (Finset.univ : Finset (W → Q.parts)).filter
+      (fun C ↦ Function.Injective C ∧ FiniteRelModel.PreservesAndReflects P (N.quotient Q) C),
+    ∏ i, ((C i : Finset V)).card
+
+/-- The quotient-weighted count is the sum, over all transversal cell tuples, of the
+all-or-nothing box count. -/
+theorem quotientInducedCount_eq_sum_ite {N : FiniteRelModel L V} (h : N.IsIndivisibleFor Q)
+    (P : FiniteRelModel L W) :
+    quotientInducedCount P N Q
+      = ∑ C ∈ (Finset.univ : Finset (W → Q.parts)).filter Function.Injective,
+          inducedEmbeddingCountOn P N (fun i ↦ (C i : Finset V)) := by
+  classical
+  rw [quotientInducedCount, Finset.sum_filter, Finset.sum_filter]
+  refine Finset.sum_congr rfl fun C _ ↦ ?_
+  by_cases hC : Function.Injective C
+  · rw [ite_eq_left hC, h.inducedEmbeddingCountOn_cells P hC]
+    by_cases hp : FiniteRelModel.PreservesAndReflects P (N.quotient Q) C
+    · rw [ite_eq_left ⟨hC, hp⟩, ite_eq_left hp]
+    · rw [ite_eq_right fun h' ↦ hp h'.2, ite_eq_right hp]
+  · rw [ite_eq_right hC, ite_eq_right fun h' ↦ hC h'.1]
+
+end QuotientModel
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -324,6 +453,67 @@ example (N : FiniteRelModel (singleRelLang 0) (Fin 4)) :
       ∀ C D : Fin 0 → parityPart.parts,
         (quotientRel parityPart (N.Holds S) C ↔ quotientRel parityPart (N.Holds S) D) :=
   nullaryCompatible_iff_quotientRel N N parityPart parityPart
+
+/-- "Same parity", binary-only, on `Fin 4`: indivisible for the parity partition. -/
+private def parityModel : FiniteRelModel (singleRelLang 2) (Fin 4) :=
+  ⟨fun {n} _ x ↦ if h : n = 2 then
+    decide ((x (Fin.cast h.symm 0) : ℕ) % 2 = (x (Fin.cast h.symm 1) : ℕ) % 2) else false⟩
+
+/-- The one binary symbol. -/
+private abbrev E : (singleRelLang 2).Relations 2 := ()
+
+/-- The model-level indivisibility, arity by arity: only arity `2` carries a symbol, and there
+the relation-level fact is decided. -/
+private theorem parityModel_isIndivisibleFor : parityModel.IsIndivisibleFor parityPart := by
+  intro n R
+  match n with
+  | 2 =>
+    intro x y hx hy hp
+    have key := (by decide : IsIndivisible parityPart
+      (fun x : Fin 2 → Fin 4 ↦ (x 0 : ℕ) % 2 = (x 1 : ℕ) % 2)) x y hx hy hp
+    simpa [FiniteRelModel.Holds, parityModel] using key
+  | 0 | 1 | _ + 3 => exact R.elim
+
+-- **The quotient model, computed.** Evens–evens is related in the quotient; evens–odds is not.
+-- (Cells are given with their membership proofs.)
+example : (parityModel.quotient parityPart).Holds E
+    ![⟨{0, 2}, by decide⟩, ⟨{0, 2}, by decide⟩] := by decide
+example : ¬ (parityModel.quotient parityPart).Holds E
+    ![⟨{0, 2}, by decide⟩, ⟨{1, 3}, by decide⟩] := by decide
+
+-- **Cellwise agreement**, statement-level: the quotient at the cells of a tuple over `s` is the
+-- model at the tuple.
+example (x : Fin 2 → Fin 4) :
+    (parityModel.quotient parityPart).Holds E
+        (fun i ↦ ⟨parityPart.part (x i), parityPart.part_mem.mpr (Finset.mem_univ _)⟩)
+      ↔ parityModel.Holds E x :=
+  parityModel_isIndivisibleFor.quotient_holds_part E fun _ ↦ Finset.mem_univ _
+
+-- **All-or-nothing on a transversal cell pair.** Induced counting reads the diagonal atoms, so
+-- the pattern must carry the loop: the "loops only" pattern matches the quotient at
+-- (evens, odds), where distinct cells are unrelated and every vertex is related to itself, and
+-- the count is the full box `2·2`; the "everything" pattern does not match there, so `0`.
+private def loopsOnly : FiniteRelModel (singleRelLang 2) (Fin 2) :=
+  ⟨fun {n} _ x ↦ if h : n = 2 then decide (x (Fin.cast h.symm 0) = x (Fin.cast h.symm 1))
+    else false⟩
+private def everything : FiniteRelModel (singleRelLang 2) (Fin 2) :=
+  ⟨fun {n} _ _ ↦ decide (n = 2)⟩
+
+example : inducedEmbeddingCountOn loopsOnly parityModel ![{0, 2}, {1, 3}] = 4 := by decide
+example : inducedEmbeddingCountOn everything parityModel ![{0, 2}, {1, 3}] = 0 := by decide
+example : inducedEmbeddingCountOn loopsOnly parityModel
+      (fun i ↦ ((![⟨{0, 2}, by decide⟩, ⟨{1, 3}, by decide⟩] : Fin 2 → parityPart.parts) i :
+        Finset (Fin 4)))
+    = if FiniteRelModel.PreservesAndReflects loopsOnly (parityModel.quotient parityPart)
+        ![⟨{0, 2}, by decide⟩, ⟨{1, 3}, by decide⟩]
+      then ∏ i, ((![⟨{0, 2}, by decide⟩, ⟨{1, 3}, by decide⟩] : Fin 2 → parityPart.parts) i :
+        Finset (Fin 4)).card else 0 :=
+  parityModel_isIndivisibleFor.inducedEmbeddingCountOn_cells loopsOnly (by decide)
+
+-- **Nullary pass-through** needs no indivisibility.
+example (N : FiniteRelModel (singleRelLang 0) (Fin 4)) :
+    NullaryCompatible N (N.quotient parityPart) :=
+  N.nullaryCompatible_quotient parityPart
 
 end Tests
 
