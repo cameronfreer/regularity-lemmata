@@ -31,7 +31,8 @@ finset: the injective ones by the restricted falling factorial `(|s|)_k`
 guard-free under `x / 0 = 0` (`div_pow_le_div_descFactorial`,
 `div_descFactorial_sub_div_pow_le`).
 
-Conventions: raw counts in `ℕ`, ratio bounds in `ℝ` with explicit positivity hypotheses.
+Conventions: raw counts in `ℕ`, ratio bounds in `ℝ`; positivity appears only when a denominator
+must be inverted, while the normalization conversions are totalized at zero.
 -/
 
 namespace RegularityLemmata

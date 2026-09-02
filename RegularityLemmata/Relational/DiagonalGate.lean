@@ -32,8 +32,8 @@ The same `i < j` family drives the **positional lift of the bad-pair mass**
 (`badCellTuples`, `sum_badCellTuples_weight_le_mass`, `sum_badCellTuples_weight_le`): a cell
 tuple with some coordinate-pair position in a bad pair set `D` is charged to that position, each
 of the `k.choose 2` positions carries at most the `D`-pair mass times `|s|^(k−2)`, and a single
-aggregated mass bound `≤ β·|s|²` yields `(k.choose 2)·β·|s|^k`. `badTripleVolume_le` is the
-`k = 3` instance. The hypothesis is the one aggregated bound; the `k.choose 2` is the lift, not a
+aggregated mass bound `≤ β·|s|²` yields `(k.choose 2)·β·|s|^k`. `badTripleVolume_le` is
+recovered at `k = 3` by restricting to transversal tuples. The hypothesis is the one aggregated bound; the `k.choose 2` is the lift, not a
 union bound over per-pair hypotheses.
 
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
@@ -361,8 +361,8 @@ private theorem sum_position_le {k : ℕ} {D : Finset (Finset V × Finset V)} {i
 the bad tuples has total mass at most `(k.choose 2)` times the `D`-pair mass times `|s|^(k−2)`:
 a bad tuple is charged to some strictly ordered position `i < j` with `(T i, T j) ∈ D`, and
 each of the `k.choose 2` positions carries at most the pair mass times the free volume
-(`sum_position_le`). This is the generic form of `selectedPairTripleMass_any_le`
-(`k = 3`, coefficient `3.choose 2 = 3`, free volume `|s|`).
+(`sum_position_le`). `selectedPairTripleMass_any_le` is recovered at `k = 3` by restricting to
+transversal tuples (coefficient `3.choose 2 = 3`, free volume `|s|`).
 
 Guard-free: no `2 ≤ k` (at `k < 2` there are no positions, and `k.choose 2 = 0`), no
 `D ⊆ Q.parts ×ˢ Q.parts`, no nonnegativity of the weight. -/
@@ -418,8 +418,8 @@ theorem sum_badCellTuples_weight_le_mass {k : ℕ} {D : Finset (Finset V × Fins
 `Σ_{(A,B) ∈ D} |A|·|B| ≤ β·|s|²` (the arity-3 `hmass`, verbatim), the bad cell tuples carry
 weight at most `(k.choose 2)·β·|s|^k`. The `k.choose 2` is the positional lift of
 `sum_badCellTuples_weight_le_mass`, never a union bound over per-pair hypotheses: a consumer
-holding per-pair bounds sums them into this one hypothesis first. The `k = 3` instance is
-`badTripleVolume_le`. Guard-free in `k`. -/
+holding per-pair bounds sums them into this one hypothesis first. `badTripleVolume_le` is
+recovered at `k = 3` by restricting to transversal tuples. Guard-free in `k`. -/
 theorem sum_badCellTuples_weight_le {k : ℕ} {D : Finset (Finset V × Finset V)} {β : ℝ}
     (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
     (weight : (Fin k → Finset V) → ℝ)
