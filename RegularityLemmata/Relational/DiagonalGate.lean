@@ -33,8 +33,8 @@ The same `i < j` family drives the **positional lift of the bad-pair mass**
 tuple with some coordinate-pair position in a bad pair set `D` is charged to that position, each
 of the `k.choose 2` positions carries at most the `D`-pair mass times `|s|^(k−2)`, and a single
 aggregated mass bound `≤ β·|s|²` yields `(k.choose 2)·β·|s|^k`. `badTripleVolume_le` is
-recovered at `k = 3` by restricting to transversal tuples. The hypothesis is the one aggregated bound; the `k.choose 2` is the lift, not a
-union bound over per-pair hypotheses.
+recovered at `k = 3` by restricting to transversal tuples. The hypothesis is the one aggregated
+bound; the `k.choose 2` is the lift, not a union bound over per-pair hypotheses.
 
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
 initial equipartition supplies `m = |s| / #parts + 1` for the witness's coarse partition. The
