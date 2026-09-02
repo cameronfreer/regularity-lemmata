@@ -28,6 +28,14 @@ contributes at most `m·|s|^(k−1)`, and the total nontransversal charge is
 (`sum_nontransversalCellTuples_weight_le`), guard-free in `k`. The `Fin 3` results are its
 `k = 3` instances, with `3.choose 2 = 3`.
 
+The same `i < j` family drives the **positional lift of the bad-pair mass**
+(`badCellTuples`, `sum_badCellTuples_weight_le_mass`, `sum_badCellTuples_weight_le`): a cell
+tuple with some coordinate-pair position in a bad pair set `D` is charged to that position, each
+of the `k.choose 2` positions carries at most the `D`-pair mass times `|s|^(k−2)`, and a single
+aggregated mass bound `≤ β·|s|²` yields `(k.choose 2)·β·|s|^k`. `badTripleVolume_le` is the
+`k = 3` instance. The hypothesis is the one aggregated bound; the `k.choose 2` is the lift, not a
+union bound over per-pair hypotheses.
+
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
 initial equipartition supplies `m = |s| / #parts + 1` for the witness's coarse partition. The
 global strong-counting corollary adds the `3·m·|s|²` diagonal charge to the summit bound.
@@ -270,6 +278,167 @@ theorem sum_nontransversalCellTuples_weight_le {k m : ℕ} (hm : ∀ C ∈ Q.par
         rw [Finset.sum_const, nsmul_eq_mul, hcard]
         ring
 
+/-! ### The positional lift of the bad-pair mass -/
+
+/-- Cell `k`-tuples with **some coordinate-pair position** `i < j` landing in the bad pair set
+`D` (over all ordered cell tuples; the transversal bad tuples are a subset). -/
+def badCellTuples {k : ℕ} (Q : Finpartition s) (D : Finset (Finset V × Finset V)) :
+    Finset (Fin k → Finset V) :=
+  (Fintype.piFinset fun _ => Q.parts).filter fun T => ∃ i j, i < j ∧ (T i, T j) ∈ D
+
+@[simp] theorem mem_badCellTuples {k : ℕ} {D : Finset (Finset V × Finset V)}
+    {T : Fin k → Finset V} :
+    T ∈ badCellTuples Q D ↔ (∀ i, T i ∈ Q.parts) ∧ ∃ i j, i < j ∧ (T i, T j) ∈ D := by
+  simp [badCellTuples, Fintype.mem_piFinset]
+
+/-- **One position.** For `i ≠ j`, the cell tuples whose `(i, j)` position lies in `D` have total
+volume at most the `D`-pair mass times `|s|^(k−2)`: the pair `(T i, T j)` together with the
+remaining coordinates determines `T`, the pair ranges over `D`, and the other `k − 2`
+coordinates range freely over the cells with total volume `|s|^(k−2)`. No hypothesis
+`D ⊆ Q.parts ×ˢ Q.parts` is needed: the map into `D ×ˢ (free box)` is merely injective. -/
+private theorem sum_position_le {k : ℕ} {D : Finset (Finset V × Finset V)} {i j : Fin k}
+    (hij : i ≠ j) :
+    ∑ T ∈ (Fintype.piFinset fun _ : Fin k => Q.parts).filter (fun T => (T i, T j) ∈ D),
+        cellTupleVolume T
+      ≤ (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) := by
+  classical
+  set event := (Fintype.piFinset fun _ : Fin k => Q.parts).filter (fun T => (T i, T j) ∈ D)
+    with hevent
+  set free := Fintype.piFinset (fun _ : {l : Fin k // l ≠ i ∧ l ≠ j} => Q.parts) with hfree
+  set emb : (Fin k → Finset V) →
+      (Finset V × Finset V) × ({l : Fin k // l ≠ i ∧ l ≠ j} → Finset V) :=
+    fun T => ((T i, T j), fun l => T l.val) with hemb
+  set G : (Finset V × Finset V) × ({l : Fin k // l ≠ i ∧ l ≠ j} → Finset V) → ℝ :=
+    fun q => (q.1.1.card : ℝ) * q.1.2.card * ∏ l, ((q.2 l).card : ℝ) with hG
+  have hsplit : ∀ T : Fin k → Finset V, cellTupleVolume T = G (emb T) := by
+    intro T
+    simp only [hG, hemb, cellTupleVolume]
+    rw [← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ i),
+      ← Finset.mul_prod_erase (Finset.univ.erase i) _
+        (Finset.mem_erase.mpr ⟨hij.symm, Finset.mem_univ j⟩), ← mul_assoc]
+    congr 1
+    exact Finset.prod_subtype ((Finset.univ.erase i).erase j)
+      (fun l => by simp [and_comm]) fun l => ((T l).card : ℝ)
+  have hinj : Set.InjOn emb event := by
+    intro T _ T' _ h
+    simp only [hemb, Prod.mk.injEq] at h
+    funext l
+    by_cases hl : l = i
+    · subst hl; exact h.1.1
+    by_cases hl' : l = j
+    · subst hl'; exact h.1.2
+    exact congr_fun h.2 ⟨l, hl, hl'⟩
+  have hcard : Fintype.card {l : Fin k // l ≠ i ∧ l ≠ j} = k - 2 := by
+    rw [Fintype.card_subtype]
+    have hfilt : (Finset.univ.filter fun l : Fin k => l ≠ i ∧ l ≠ j)
+        = (Finset.univ.erase i).erase j := by
+      ext l; simp [and_comm]
+    rw [hfilt, Finset.card_erase_of_mem (Finset.mem_erase.mpr ⟨hij.symm, Finset.mem_univ _⟩),
+      Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ, Fintype.card_fin]
+    omega
+  have hfreesum : ∑ T' ∈ free, ∏ l, ((T' l).card : ℝ) = (s.card : ℝ) ^ (k - 2) := by
+    rw [hfree]
+    refine (Finset.sum_prod_piFinset Q.parts fun _ C => ((C.card : ℕ) : ℝ)).trans ?_
+    simp [sum_card_parts_cast, hcard]
+  calc ∑ T ∈ event, cellTupleVolume T
+      = ∑ T ∈ event, G (emb T) := Finset.sum_congr rfl fun T _ => hsplit T
+    _ = ∑ q ∈ event.image emb, G q := (Finset.sum_image hinj).symm
+    _ ≤ ∑ q ∈ D ×ˢ free, G q := by
+        refine Finset.sum_le_sum_of_subset_of_nonneg ?_ fun q _ _ => ?_
+        · intro q hq
+          obtain ⟨T, hT, rfl⟩ := Finset.mem_image.mp hq
+          rw [hevent, Finset.mem_filter, Fintype.mem_piFinset] at hT
+          exact Finset.mem_product.mpr ⟨hT.2, Fintype.mem_piFinset.mpr fun l => hT.1 l.val⟩
+        · simp only [hG]
+          exact mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))
+            (Finset.prod_nonneg fun _ _ => Nat.cast_nonneg _)
+    _ = (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) := by
+        simp only [hG]
+        rw [Finset.sum_product, ← hfreesum, Finset.sum_mul]
+        exact Finset.sum_congr rfl fun p _ => by dsimp only; rw [← Finset.mul_sum]
+
+/-- **The positional lift, raw form.** Any real weight dominated by the cell-tuple volume on
+the bad tuples has total mass at most `(k.choose 2)` times the `D`-pair mass times `|s|^(k−2)`:
+a bad tuple is charged to some strictly ordered position `i < j` with `(T i, T j) ∈ D`, and
+each of the `k.choose 2` positions carries at most the pair mass times the free volume
+(`sum_position_le`). This is the generic form of `selectedPairTripleMass_any_le`
+(`k = 3`, coefficient `3.choose 2 = 3`, free volume `|s|`).
+
+Guard-free: no `2 ≤ k` (at `k < 2` there are no positions, and `k.choose 2 = 0`), no
+`D ⊆ Q.parts ×ˢ Q.parts`, no nonnegativity of the weight. -/
+theorem sum_badCellTuples_weight_le_mass {k : ℕ} {D : Finset (Finset V × Finset V)}
+    (weight : (Fin k → Finset V) → ℝ)
+    (hw : ∀ T ∈ badCellTuples Q D, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ badCellTuples Q D, weight T
+      ≤ (k.choose 2) * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) := by
+  classical
+  set pairs : Finset (Fin k × Fin k) := Finset.univ.filter (fun p => p.1 < p.2) with hpairs
+  have hpt : ∀ T : Fin k → Finset V,
+      (if ∃ i j, i < j ∧ (T i, T j) ∈ D then cellTupleVolume T else 0)
+        ≤ ∑ p ∈ pairs, (if (T p.1, T p.2) ∈ D then cellTupleVolume T else 0) := by
+    intro T
+    have hnn : ∀ p ∈ pairs, 0 ≤ (if (T p.1, T p.2) ∈ D then cellTupleVolume T else 0) :=
+      fun p _ => by split_ifs <;> [exact cellTupleVolume_nonneg T; exact le_rfl]
+    by_cases h : ∃ i j, i < j ∧ (T i, T j) ∈ D
+    · rw [ite_eq_left h]
+      obtain ⟨i, j, hij, hT⟩ := h
+      have hmem : (i, j) ∈ pairs := by
+        rw [hpairs, Finset.mem_filter]
+        exact ⟨Finset.mem_univ _, hij⟩
+      calc cellTupleVolume T
+          = (if (T (i, j).1, T (i, j).2) ∈ D then cellTupleVolume T else 0) := by
+            rw [ite_eq_left hT]
+        _ ≤ ∑ p ∈ pairs, (if (T p.1, T p.2) ∈ D then cellTupleVolume T else 0) :=
+          Finset.single_le_sum hnn hmem
+    · rw [ite_eq_right h]
+      exact Finset.sum_nonneg hnn
+  have hcard : pairs.card = k.choose 2 := by
+    simpa [hpairs] using Fintype.card_product_filter_lt (α := Fin k)
+  calc ∑ T ∈ badCellTuples Q D, weight T
+      ≤ ∑ T ∈ badCellTuples Q D, cellTupleVolume T := Finset.sum_le_sum hw
+    _ = ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts,
+          (if ∃ i j, i < j ∧ (T i, T j) ∈ D then cellTupleVolume T else 0) := by
+        rw [badCellTuples, Finset.sum_filter]
+    _ ≤ ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts,
+          ∑ p ∈ pairs, (if (T p.1, T p.2) ∈ D then cellTupleVolume T else 0) :=
+        Finset.sum_le_sum fun T _ => hpt T
+    _ = ∑ p ∈ pairs, ∑ T ∈ (Fintype.piFinset fun _ : Fin k => Q.parts).filter
+          (fun T => (T p.1, T p.2) ∈ D), cellTupleVolume T := by
+        rw [Finset.sum_comm]
+        exact Finset.sum_congr rfl fun p _ => (Finset.sum_filter _ _).symm
+    _ ≤ ∑ _p ∈ pairs, (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) := by
+        refine Finset.sum_le_sum fun p hp => ?_
+        rw [hpairs, Finset.mem_filter] at hp
+        exact sum_position_le hp.2.ne
+    _ = (k.choose 2) * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) := by
+        rw [Finset.sum_const, nsmul_eq_mul, hcard]
+        ring
+
+/-- **The positional lift, normalized.** With the **single aggregated** bad-pair mass bound
+`Σ_{(A,B) ∈ D} |A|·|B| ≤ β·|s|²` (the arity-3 `hmass`, verbatim), the bad cell tuples carry
+weight at most `(k.choose 2)·β·|s|^k`. The `k.choose 2` is the positional lift of
+`sum_badCellTuples_weight_le_mass`, never a union bound over per-pair hypotheses: a consumer
+holding per-pair bounds sums them into this one hypothesis first. The `k = 3` instance is
+`badTripleVolume_le`. Guard-free in `k`. -/
+theorem sum_badCellTuples_weight_le {k : ℕ} {D : Finset (Finset V × Finset V)} {β : ℝ}
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
+    (weight : (Fin k → Finset V) → ℝ)
+    (hw : ∀ T ∈ badCellTuples Q D, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ badCellTuples Q D, weight T ≤ (k.choose 2) * β * (s.card : ℝ) ^ k := by
+  refine (sum_badCellTuples_weight_le_mass weight hw).trans ?_
+  rcases lt_or_ge k 2 with hk | hk
+  · rw [Nat.choose_eq_zero_of_lt hk]
+    simp
+  · have hpow : (s.card : ℝ) ^ 2 * (s.card : ℝ) ^ (k - 2) = (s.card : ℝ) ^ k := by
+      rw [← pow_add]
+      congr 1
+      omega
+    calc (k.choose 2 : ℝ) * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2)
+        ≤ (k.choose 2 : ℝ) * (β * (s.card : ℝ) ^ 2) * (s.card : ℝ) ^ (k - 2) := by
+          gcongr
+      _ = (k.choose 2 : ℝ) * β * ((s.card : ℝ) ^ 2 * (s.card : ℝ) ^ (k - 2)) := by ring
+      _ = (k.choose 2) * β * (s.card : ℝ) ^ k := by rw [hpow]
+
 /-! ### The `Fin 3` instance: collision characterization and the `3·m·|s|²` bound -/
 
 /-- A `Fin 3`-indexed triple fails to be injective exactly when two coordinates collide. The
@@ -475,6 +644,92 @@ example {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) (weight : (Fin 3 → Fi
 example {k : ℕ} {T : Fin k → Finset V} (hT : ∀ i, T i ∈ Q.parts) {i j : Fin k} (hij : j < i)
     (h : T i = T j) : T ∈ nontransversalCellTuples Q :=
   mem_nontransversalCellTuples.mpr ⟨hT, not_injective_iff_exists_lt_eq.mpr ⟨j, i, hij, h.symm⟩⟩
+
+-- **Positional lift, degenerate arities `k = 0` and `k = 1`**: no coordinate-pair position
+-- exists, so the bad family is empty and the bound is `0` on both sides.
+example : badCellTuples (k := 0) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+    {((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))} = ∅ := by decide
+example : badCellTuples (k := 1) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+    {((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))} = ∅ := by decide
+example {D : Finset (Finset V × Finset V)} {β : ℝ}
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
+    (weight : (Fin 1 → Finset V) → ℝ)
+    (hw : ∀ T ∈ badCellTuples Q D, weight T ≤ cellTupleVolume T) :
+    ∑ T ∈ badCellTuples Q D, weight T ≤ 0 := by
+  simpa using sum_badCellTuples_weight_le hmass weight hw
+
+-- **Positional lift at `k = 2`: coefficient one, bound attained.** The single bad pair
+-- `(univ, univ)` has mass `4`, the only cell pair is bad with volume `4`, and the raw bound
+-- `1 · 4 · 2⁰ = 4` is exact.
+example : badCellTuples (k := 2) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+      {((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))}
+    = {fun _ => Finset.univ} := by decide
+example : ∑ T ∈ badCellTuples (k := 2) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+      {((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))}, cellTupleVolume T
+    = ((Nat.choose 2 2 : ℕ) : ℝ)
+        * (∑ p ∈ ({((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))} :
+            Finset (Finset (Fin 2) × Finset (Fin 2))), (p.1.card : ℝ) * p.2.card)
+        * ((Finset.univ : Finset (Fin 2)).card : ℝ) ^ (2 - 2) := by
+  rw [show badCellTuples (k := 2) (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+      {((Finset.univ : Finset (Fin 2)), (Finset.univ : Finset (Fin 2)))}
+    = {fun _ => Finset.univ} by decide, Finset.sum_singleton, Finset.sum_singleton,
+    cellTupleVolume]
+  norm_num
+
+-- **`k = 3` recovers the arity-3 bad-pair set**: a triple is bad exactly when one of its three
+-- coordinate pairs lies in `D`, in the order `badTripleVolume_le` states it.
+example {D : Finset (Finset V × Finset V)} {T : Fin 3 → Finset V} :
+    (∃ i j, i < j ∧ (T i, T j) ∈ D)
+      ↔ (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D := by
+  constructor
+  · rintro ⟨i, j, hij, hT⟩
+    fin_cases i <;> fin_cases j <;> simp_all
+  · rintro (h | h | h)
+    · exact ⟨0, 1, by decide, h⟩
+    · exact ⟨0, 2, by decide, h⟩
+    · exact ⟨1, 2, by decide, h⟩
+
+-- **`k = 3` recovers `badTripleVolume_le`**: the generic lift, restricted to transversal
+-- triples, gives the `3 · β · |s|³` bound with `3 = 3.choose 2`.
+example {D : Finset (Finset V × Finset V)} {β : ℝ}
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2) :
+    ∑ T ∈ (transversalCellTriples Q).filter
+        (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ 3 * β * (s.card : ℝ) ^ 3 := by
+  have h := sum_badCellTuples_weight_le (Q := Q) (k := 3) hmass cellTupleVolume fun T _ => le_rfl
+  rw [show Nat.choose 3 2 = 3 from rfl] at h
+  push_cast at h
+  calc ∑ T ∈ (transversalCellTriples Q).filter
+        (fun T => (T 0, T 1) ∈ D ∨ (T 0, T 2) ∈ D ∨ (T 1, T 2) ∈ D),
+        ((T 0).card * (T 1).card * (T 2).card : ℝ)
+      ≤ ∑ T ∈ badCellTuples (k := 3) Q D, ((T 0).card * (T 1).card * (T 2).card : ℝ) := by
+        refine Finset.sum_le_sum_of_subset_of_nonneg ?_ fun T _ _ => by positivity
+        intro T hT
+        rw [Finset.mem_filter, transversalCellTriples, Finset.mem_filter,
+          Fintype.mem_piFinset] at hT
+        rw [mem_badCellTuples]
+        refine ⟨hT.1.1, ?_⟩
+        rcases hT.2 with h01 | h02 | h12
+        · exact ⟨0, 1, by decide, h01⟩
+        · exact ⟨0, 2, by decide, h02⟩
+        · exact ⟨1, 2, by decide, h12⟩
+    _ = ∑ T ∈ badCellTuples (k := 3) Q D, cellTupleVolume T :=
+        Finset.sum_congr rfl fun T _ => by rw [cellTupleVolume, Fin.prod_univ_three]
+    _ ≤ 3 * β * (s.card : ℝ) ^ 3 := h
+
+-- **No containment hypothesis on `D`**: the lift takes an arbitrary pair set.
+example {D : Finset (Finset V × Finset V)} {k : ℕ} :
+    ∑ T ∈ badCellTuples (k := k) Q D, cellTupleVolume T
+      ≤ (k.choose 2) * (∑ p ∈ D, (p.1.card : ℝ) * p.2.card) * (s.card : ℝ) ^ (k - 2) :=
+  sum_badCellTuples_weight_le_mass _ fun _ _ => le_rfl
+
+-- **Signed weights on the positional lift.**
+example {D : Finset (Finset V × Finset V)} {k : ℕ} {β : ℝ}
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2) :
+    ∑ T ∈ badCellTuples (k := k) Q D, (-cellTupleVolume T)
+      ≤ (k.choose 2) * β * (s.card : ℝ) ^ k :=
+  sum_badCellTuples_weight_le hmass _ fun T _ => by linarith [cellTupleVolume_nonneg T]
 
 -- **Signed weights.** No nonnegativity is assumed: a weight that is `-1` everywhere (or any
 -- negative multiple of the volume) is dominated by the volume and obeys the same bound.
