@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.Counts
+import RegularityLemmata.Relational.BinaryPattern
 import RegularityLemmata.Finite.Edit
 
 /-!
@@ -26,6 +27,15 @@ edits are **not** averaged — those conventions behave differently across ariti
 Nullary symbols contribute budget `1` even on an empty carrier; the zero-symbol
 language (`FirstOrder.Language.empty`) has count, budget, and relative edit all
 zero — both are permanent tests.
+
+**Count across an edit** (`abs_inducedEmbeddingCountOn_sub_le_editMass`): two models on the
+same carrier with nullary agreement have `s`-restricted induced counts of a `k`-vertex pattern
+within `Σ_R k^(arity R) · editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s) · |s|^(k−1)` of each
+other. The coefficient is the atomic-incidence count — `k` and the arity profile together, `k²`
+for one binary symbol — not `p(k)`; it consumes the ordered, diagonal-inclusive `s`-box edit
+mass, and it needs nullary agreement genuinely (a nullary flip shifts the count by `(|s|)_k`;
+the adversarial test below shows the bound failing without it). Full carrier at `s = univ`:
+`abs_inducedEmbeddingCount_sub_le_editMass`.
 -/
 
 namespace RegularityLemmata
@@ -260,6 +270,152 @@ theorem relativeAggregateEdit_le_one (M N : FiniteRelModel L V) :
 
 end FiniteRelModel
 
+/-! ### Count across an edit -/
+
+section EditTransfer
+
+open FiniteRelModel
+
+variable {L : FirstOrder.Language} [FiniteRelational L] {V : Type*} [DecidableEq V] {k : ℕ}
+
+/-- **One symbol, one pattern tuple.** The `k`-tuples through `s` whose `x`-atom of the symbol
+`S` is edited number at most `|E_S|·|s|^(k−1)`, where `E_S` is the `s`-box edit set of `S`: for
+`n ≥ 1` the edited host tuple pins a coordinate (`card_filter_comp_mem_le`); at `n = 0` nullary
+agreement makes the edit set empty. This is where the arity-`0` boundary is discharged. -/
+private theorem card_filter_comp_mem_editSet_le (M N : FiniteRelModel L V)
+    (hnull : NullaryCompatible M N) (s : Finset V) {n : ℕ} (S : L.Relations n)
+    (x : Fin n → Fin k) :
+    ((Fintype.piFinset fun _ : Fin k => s).filter
+        fun f => f ∘ x ∈ editSet (M.Holds S) (N.Holds S) fun _ => s).card
+      ≤ editDistance (M.Holds S) (N.Holds S) (fun _ => s) * s.card ^ (k - 1) := by
+  classical
+  cases n with
+  | zero =>
+    have hE : editSet (M.Holds S) (N.Holds S) (fun _ : Fin 0 => s) = ∅ := by
+      rw [Finset.eq_empty_iff_forall_notMem]
+      intro y hy
+      rw [mem_editSet] at hy
+      apply hy.2
+      rw [show y = Fin.elim0 from funext fun i => i.elim0]
+      exact hnull S
+    simp [hE, editDistance]
+  | succ n => exact card_filter_comp_mem_le _ x 0
+
+/-- **Edit transfer, one direction of the symmetric difference.** The tuples through `s` that
+are induced embeddings of the pattern into `M` but not into `N` all have an edited atom, so
+they are covered by the per-symbol, per-pattern-tuple pinned sets. -/
+private theorem card_sdiff_embeddings_le (P : FiniteRelModel L (Fin k)) (M N : FiniteRelModel L V)
+    (hnull : NullaryCompatible M N) (s : Finset V) :
+    (((Fintype.piFinset fun _ : Fin k => s).filter
+          fun f => Function.Injective f ∧ PreservesAndReflects P M f)
+        \ ((Fintype.piFinset fun _ : Fin k => s).filter
+          fun f => Function.Injective f ∧ PreservesAndReflects P N f)).card
+      ≤ ∑ R : RelSymbol L,
+          k ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s)
+            * s.card ^ (k - 1) := by
+  classical
+  set box := Fintype.piFinset fun _ : Fin k => s with hbox
+  set pinned : RelSymbol L → Finset (Fin k → V) := fun R =>
+    (Finset.univ : Finset (Fin (R.1 : ℕ) → Fin k)).biUnion fun x =>
+      box.filter fun f => f ∘ x ∈ editSet (M.Holds R.2) (N.Holds R.2) fun _ => s
+    with hpinned
+  have hcover : (box.filter fun f => Function.Injective f ∧ PreservesAndReflects P M f)
+      \ (box.filter fun f => Function.Injective f ∧ PreservesAndReflects P N f)
+        ⊆ Finset.univ.biUnion pinned := by
+    intro f hf
+    rw [Finset.mem_sdiff, Finset.mem_filter, Finset.mem_filter] at hf
+    obtain ⟨⟨hfbox, hinj, hM⟩, hnot⟩ := hf
+    have hN : ¬ PreservesAndReflects P N f := fun h => hnot ⟨hfbox, hinj, h⟩
+    simp only [PreservesAndReflects, not_forall] at hN
+    obtain ⟨R, x, hRx⟩ := hN
+    rw [Finset.mem_biUnion]
+    refine ⟨R, Finset.mem_univ _, ?_⟩
+    rw [hpinned, Finset.mem_biUnion]
+    refine ⟨x, Finset.mem_univ _, Finset.mem_filter.mpr ⟨hfbox, ?_⟩⟩
+    rw [mem_editSet]
+    refine ⟨Fintype.mem_piFinset.mpr fun i => Fintype.mem_piFinset.mp hfbox (x i), fun h => ?_⟩
+    exact hRx ((hM R x).trans h)
+  calc _ ≤ (Finset.univ.biUnion pinned).card := Finset.card_le_card hcover
+    _ ≤ ∑ R : RelSymbol L, (pinned R).card := Finset.card_biUnion_le
+    _ ≤ ∑ R : RelSymbol L, ∑ x : Fin (R.1 : ℕ) → Fin k,
+          (box.filter fun f => f ∘ x ∈ editSet (M.Holds R.2) (N.Holds R.2) fun _ => s).card :=
+        Finset.sum_le_sum fun R _ => Finset.card_biUnion_le
+    _ ≤ ∑ R : RelSymbol L, ∑ _x : Fin (R.1 : ℕ) → Fin k,
+          editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s) * s.card ^ (k - 1) :=
+        Finset.sum_le_sum fun R _ => Finset.sum_le_sum fun x _ =>
+          card_filter_comp_mem_editSet_le M N hnull s R.2 x
+    _ = ∑ R : RelSymbol L,
+          k ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s)
+            * s.card ^ (k - 1) := by
+        refine Finset.sum_congr rfl fun R _ => ?_
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_fin,
+          Fintype.card_fin, smul_eq_mul, mul_assoc]
+
+/-- **Edit transfer.** Two models on the same carrier with nullary agreement have
+`s`-restricted induced counts of a `k`-vertex pattern within
+`Σ_R k^(arity R) · editDistance (M.Holds R) (N.Holds R) (fun _ ↦ s) · |s|^(k−1)` of each other.
+
+The coefficient is the atomic-incidence count `Σ_R k^(arity R)` — induced counting reads every
+atom on the pattern's vertices, ordered and diagonal alike, so it depends on `k` **and** on the
+language's arity profile (one binary symbol gives `k²`); it is neither `p(k)` nor a function of
+`k` alone. Ordered `s`-box edit mass with diagonals included, per `relationEditSet`'s
+conventions. Nullary agreement is a genuine hypothesis: a single nullary disagreement can shift
+the count by the full `(|s|)_k`, which no bound of this shape absorbs (see the adversarial test).
+Guard-free otherwise. Full carrier: `abs_inducedEmbeddingCount_sub_le_editMass`. -/
+theorem abs_inducedEmbeddingCountOn_sub_le_editMass (P : FiniteRelModel L (Fin k))
+    (M N : FiniteRelModel L V) (hnull : NullaryCompatible M N) (s : Finset V) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+        - inducedEmbeddingCountOn P N (fun _ : Fin k => s)|
+      ≤ (∑ R : RelSymbol L,
+          (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+        * (s.card : ℝ) ^ (k - 1) := by
+  classical
+  set A := (Fintype.piFinset fun _ : Fin k => s).filter
+    fun f => Function.Injective f ∧ PreservesAndReflects P M f with hA
+  set B := (Fintype.piFinset fun _ : Fin k => s).filter
+    fun f => Function.Injective f ∧ PreservesAndReflects P N f with hB
+  have hAB := card_sdiff_embeddings_le P M N hnull s
+  have hBA := card_sdiff_embeddings_le P N M (fun S => (hnull S).symm) s
+  rw [← hA, ← hB] at hAB
+  rw [← hB, ← hA] at hBA
+  have hsym : ∀ R : RelSymbol L, editDistance (N.Holds R.2) (M.Holds R.2) (fun _ => s)
+      = editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s) := fun R => editDistance_comm
+  simp only [hsym] at hBA
+  have hbound : (∑ R : RelSymbol L,
+        (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+      * (s.card : ℝ) ^ (k - 1)
+      = ((∑ R : RelSymbol L,
+          k ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s)
+            * s.card ^ (k - 1) : ℕ) : ℝ) := by
+    push_cast
+    rw [Finset.sum_mul]
+  have hsplitA : A.card = (A \ B).card + (A ∩ B).card := (Finset.card_sdiff_add_card_inter A B).symm
+  have hsplitB : B.card = (B \ A).card + (B ∩ A).card := (Finset.card_sdiff_add_card_inter B A).symm
+  rw [Finset.inter_comm] at hsplitB
+  show |(A.card : ℝ) - B.card| ≤ _
+  rw [hbound, abs_sub_le_iff]
+  constructor
+  · calc (A.card : ℝ) - B.card = ((A \ B).card : ℝ) - (B \ A).card := by
+          rw [hsplitA, hsplitB]; push_cast; ring
+      _ ≤ ((A \ B).card : ℝ) := by linarith [(Nat.cast_nonneg (B \ A).card : (0 : ℝ) ≤ _)]
+      _ ≤ _ := by exact_mod_cast hAB
+  · calc (B.card : ℝ) - A.card = ((B \ A).card : ℝ) - (A \ B).card := by
+          rw [hsplitA, hsplitB]; push_cast; ring
+      _ ≤ ((B \ A).card : ℝ) := by linarith [(Nat.cast_nonneg (A \ B).card : (0 : ℝ) ≤ _)]
+      _ ≤ _ := by exact_mod_cast hBA
+
+/-- **Edit transfer on the full carrier**: the `s = univ` specialization, in units of
+`relationEditCount` and `|V|^(k−1)`. -/
+theorem abs_inducedEmbeddingCount_sub_le_editMass [Fintype V] (P : FiniteRelModel L (Fin k))
+    (M N : FiniteRelModel L V) (hnull : NullaryCompatible M N) :
+    |(inducedEmbeddingCount P M : ℝ) - inducedEmbeddingCount P N|
+      ≤ (∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * relationEditCount M N R.2)
+        * (Fintype.card V : ℝ) ^ (k - 1) := by
+  have := abs_inducedEmbeddingCountOn_sub_le_editMass P M N hnull Finset.univ
+  rwa [inducedEmbeddingCountOn_univ, inducedEmbeddingCountOn_univ, Finset.card_univ] at this
+
+end EditTransfer
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -309,6 +465,66 @@ example :
         FiniteRelModel (singleRelLang 2) (Fin 2))
       (⟨fun {_} _ _ => false⟩ : FiniteRelModel (singleRelLang 2) (Fin 2)) = 2 := by
   decide
+
+/-! #### Edit transfer -/
+
+/-- The one binary symbol of `singleRelLang 2`. -/
+private abbrev E₂ : (singleRelLang 2).Relations 2 := ()
+
+/-- Every pair related on `Fin 3` (loops included). -/
+private def full3 : FiniteRelModel (singleRelLang 2) (Fin 3) := ⟨fun {n} _ _ ↦ decide (n = 2)⟩
+
+/-- `full3` with the single ordered pair `(0, 1)` switched off: edit mass `1`. -/
+private def flipped3 : FiniteRelModel (singleRelLang 2) (Fin 3) :=
+  ⟨fun {n} _ x ↦ if h : n = 2 then
+    decide (¬ (x (Fin.cast h.symm 0) = 0 ∧ x (Fin.cast h.symm 1) = 1)) else false⟩
+
+/-- The two-vertex pattern with every atom true (loops included). -/
+private def allAtoms2 : FiniteRelModel (singleRelLang 2) (Fin 2) := ⟨fun {n} _ _ ↦ decide (n = 2)⟩
+
+-- One edited ordered pair costs two induced embeddings (`(0,1)` and `(1,0)` both read the
+-- atom), within the bound `k²·1·|V|^(k−1) = 4·1·3 = 12`. The coefficient for one binary symbol
+-- is `k² = 4`, not `p(2) = 1`.
+example : relationEditCount full3 flipped3 E₂ = 1 := by decide
+example : inducedEmbeddingCount allAtoms2 full3 = 6 := by decide
+example : inducedEmbeddingCount allAtoms2 flipped3 = 4 := by decide
+example : ∑ R : RelSymbol (singleRelLang 2), (2 : ℕ) ^ (R.1 : ℕ) = 4 := by decide
+example : |(inducedEmbeddingCount allAtoms2 full3 : ℝ)
+      - inducedEmbeddingCount allAtoms2 flipped3|
+    ≤ (∑ R : RelSymbol (singleRelLang 2),
+        (2 : ℝ) ^ (R.1 : ℕ) * relationEditCount full3 flipped3 R.2)
+      * (Fintype.card (Fin 3) : ℝ) ^ (2 - 1) :=
+  abs_inducedEmbeddingCount_sub_le_editMass allAtoms2 full3 flipped3 fun R ↦ R.elim
+
+-- **`k = 0` is guard-free**: the empty pattern has one embedding in either model.
+private def emptyPattern : FiniteRelModel (singleRelLang 2) (Fin 0) := ⟨fun {_} _ _ ↦ false⟩
+
+example : inducedEmbeddingCount emptyPattern full3 = 1 := by decide
+example : |(inducedEmbeddingCount emptyPattern full3 : ℝ)
+      - inducedEmbeddingCount emptyPattern flipped3|
+    ≤ (∑ R : RelSymbol (singleRelLang 2),
+        ((0 : ℕ) : ℝ) ^ (R.1 : ℕ) * relationEditCount full3 flipped3 R.2)
+      * (Fintype.card (Fin 3) : ℝ) ^ (0 - 1) :=
+  abs_inducedEmbeddingCount_sub_le_editMass (k := 0) emptyPattern full3 flipped3 fun R ↦ R.elim
+
+-- **ADVERSARIAL: nullary agreement is load-bearing.** With one nullary symbol switched from
+-- true to false, the edit mass is `1` and the would-be bound `Σ_R 2^0 · 1 · 3^1 = 3`, but the
+-- two-vertex pattern reading the nullary atom has `6` embeddings in one model and `0` in the
+-- other: the shift is the full `(3)_2 = 6 > 3`. The hypothesis `NullaryCompatible` fails here,
+-- so the theorem does not apply — and no bound of its shape could.
+private def nullTrue : FiniteRelModel (singleRelLang 0) (Fin 3) := ⟨fun {_} _ _ ↦ true⟩
+private def nullFalse : FiniteRelModel (singleRelLang 0) (Fin 3) := ⟨fun {_} _ _ ↦ false⟩
+private def nullPattern : FiniteRelModel (singleRelLang 0) (Fin 2) := ⟨fun {_} _ _ ↦ true⟩
+/-- The one nullary symbol of `singleRelLang 0`. -/
+private abbrev E₀ : (singleRelLang 0).Relations 0 := ()
+
+example : ¬ NullaryCompatible nullTrue nullFalse := fun h ↦ absurd ((h E₀).mp rfl) (by decide)
+example : inducedEmbeddingCount nullPattern nullTrue = 6 := by decide
+example : inducedEmbeddingCount nullPattern nullFalse = 0 := by decide
+example : ∑ R : RelSymbol (singleRelLang 0),
+    2 ^ (R.1 : ℕ) * relationEditCount nullTrue nullFalse R.2 * Fintype.card (Fin 3) ^ (2 - 1)
+      = 3 := by decide
+example : ¬ (6 ≤ 3) := by decide
 
 end Tests
 

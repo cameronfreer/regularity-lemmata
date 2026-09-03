@@ -115,11 +115,6 @@ theorem inducedEmbeddingCountOn_eq_sum_cellTuples (P : FiniteRelModel L W) (M : 
         (Finset.mem_coe.mpr hT') hTT').mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)]
   exact Finset.sum_congr rfl fun T _ => rfl
 
-/-- On a finite carrier, the count over the full box `fun _ ↦ univ` is `inducedEmbeddingCount`. -/
-theorem inducedEmbeddingCountOn_univ [Fintype V] (P : FiniteRelModel L W) (M : FiniteRelModel L V) :
-    inducedEmbeddingCountOn P M (fun _ : W => Finset.univ) = inducedEmbeddingCount P M := by
-  rw [inducedEmbeddingCountOn, inducedEmbeddingCount, Fintype.piFinset_univ]
-
 end BoxDecomposition
 
 /-! ### Exact global-count decomposition -/

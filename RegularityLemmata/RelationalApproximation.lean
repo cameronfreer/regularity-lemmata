@@ -9,6 +9,7 @@ import RegularityLemmata.Relational.Language
 import RegularityLemmata.Relational.Model
 import RegularityLemmata.Relational.Transport
 import RegularityLemmata.Relational.Indivisible
+import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.CellwiseEdit
 
 /-!
@@ -29,7 +30,13 @@ curated stack and defines nothing; each listed module remains directly importabl
   restriction, and relabeling API. In particular, the facade exposes the complete
   `FiniteRelModel.binaryRel` adapter and its transport laws.
 * `Relational.Indivisible` — cellwise-constant (indivisible) relations and models over a
-  partition, the quotient reading, and `NullaryCompatible` for the exact arity-0 layer.
+  partition, the quotient reading and the packaged quotient model `FiniteRelModel.quotient`
+  with its all-or-nothing count, and `NullaryCompatible` for the exact arity-0 layer.
+* `Relational.Edit` — the per-symbol and aggregate edit calculus (ordered, diagonal-inclusive
+  per-symbol edit sets as the primitive; the frozen cross-arity aggregate) and the
+  **count-transfer surface**: `abs_inducedEmbeddingCountOn_sub_le_editMass`, which moves an
+  induced pattern count across an edit at cost `Σ_R k^(arity R)` times the `s`-box edit mass
+  times `|s|^(k−1)` under nullary agreement, and its full-carrier form.
 * `Relational.CellwiseEdit` — `CellwiseEditBound` (positive-arity cellwise `ε`-closeness, a
   packaged interface over the pinned edit machinery), the computable
   `FiniteRelModel.majorityRound`, the exact box-level identity

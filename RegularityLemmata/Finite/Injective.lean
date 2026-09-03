@@ -357,6 +357,38 @@ theorem card_nonInjectiveTuplesOn_le (s : Finset α) (k : ℕ) :
           (by rw [hpairs, Finset.mem_filter] at hp; exact hp.2.ne)
     _ = k.choose 2 * s.card ^ (k - 1) := by rw [Finset.sum_const, smul_eq_mul, hcard]
 
+/-- **Pinning.** Fixing the value of a `k`-tuple through `s` along a pattern tuple
+`x : Fin n → Fin k` to lie in a set `E` pins the tuple on the coordinate `x i₀`, so at most
+`|E|·|s|^(k−1)` tuples through `s` have `f ∘ x ∈ E`: the map `f ↦ (f ∘ x, f off `x i₀`)` is
+injective into `E ×ˢ (free box)`. The index `i₀` witnesses `n ≥ 1`; at `n = 0` no coordinate is
+pinned and no bound of this shape holds. -/
+theorem card_filter_comp_mem_le {n : ℕ} (E : Finset (Fin n → α)) (x : Fin n → Fin k)
+    (i₀ : Fin n) :
+    ((Fintype.piFinset fun _ : Fin k => s).filter fun f => f ∘ x ∈ E).card
+      ≤ E.card * s.card ^ (k - 1) := by
+  classical
+  set event := (Fintype.piFinset fun _ : Fin k => s).filter fun f => f ∘ x ∈ E with hevent
+  set box := Fintype.piFinset fun _ : {l : Fin k // l ≠ x i₀} => s with hbox
+  set emb : (Fin k → α) → (Fin n → α) × ({l : Fin k // l ≠ x i₀} → α) :=
+    fun f => (f ∘ x, fun (l : {l : Fin k // l ≠ x i₀}) => f l.val) with hemb
+  have hmaps : Set.MapsTo emb (↑event : Set (Fin k → α)) (↑(E ×ˢ box) :
+      Set ((Fin n → α) × ({l : Fin k // l ≠ x i₀} → α))) := by
+    intro f hf
+    rw [Finset.mem_coe, hevent, Finset.mem_filter, Fintype.mem_piFinset] at hf
+    exact Finset.mem_coe.mpr (Finset.mem_product.mpr
+      ⟨hf.2, Fintype.mem_piFinset.mpr fun (l : {l : Fin k // l ≠ x i₀}) => hf.1 l.val⟩)
+  have hinj : Set.InjOn emb event := by
+    intro f _ f' _ h
+    simp only [hemb, Prod.mk.injEq] at h
+    funext l
+    by_cases hl : l = x i₀
+    · subst hl
+      exact congr_fun h.1 i₀
+    · exact congr_fun h.2 ⟨l, hl⟩
+  refine (Finset.card_le_card_of_injOn emb hmaps hinj).trans (le_of_eq ?_)
+  rw [Finset.card_product, hbox, Fintype.card_piFinset, Finset.prod_const, Finset.card_univ]
+  simp [Fintype.card_subtype_compl]
+
 end CollisionOn
 
 /-! ### The injective/all-tuple normalization conversion -/
@@ -540,6 +572,15 @@ example {n k : ℕ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ (n.descFactorial k : �
       ∧ c / (n.descFactorial k : ℝ) ≤ c / (n : ℝ) ^ k + (k.choose 2 : ℝ) / n :=
   ⟨div_pow_le_div_descFactorial hc0 hc,
     by linarith [div_descFactorial_sub_div_pow_le hc0 hc]⟩
+
+-- **Pinning is attained**: pairs `f : Fin 2 → Fin 3` with `f 0 ∈ {0}` number `3 = 1 · 3¹`.
+example : ((Fintype.piFinset fun _ : Fin 2 => (Finset.univ : Finset (Fin 3))).filter
+    fun f => f ∘ (![0] : Fin 1 → Fin 2) ∈ ({![0]} : Finset (Fin 1 → Fin 3))).card = 3 := by
+  decide
+example : ((Fintype.piFinset fun _ : Fin 2 => (Finset.univ : Finset (Fin 3))).filter
+    fun f => f ∘ (![0] : Fin 1 → Fin 2) ∈ ({![0]} : Finset (Fin 1 → Fin 3))).card
+      ≤ ({![0]} : Finset (Fin 1 → Fin 3)).card * (Finset.univ : Finset (Fin 3)).card ^ (2 - 1) :=
+  card_filter_comp_mem_le _ _ 0
 
 -- Ordered range of an injective tuple.
 example : tupleRange (![0, 2] : Fin 2 → Fin 3) = {0, 2} := by decide
