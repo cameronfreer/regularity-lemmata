@@ -45,8 +45,10 @@ lemma, `abs_mul_mul_sub_mul_mul_le`, gives `|abc − a'b'c'| ≤ |a−a'| + |b�
 `3ε`, not `7ε` — and it is used for the density-shift charge in `BinaryStrongCounting`, not for
 this coefficient at all.
 
-At `k = 2` the coefficient is `1` and comes directly from `IsUniformPair`, with no fibre step and
-no exceptional set. At `k = 3` it is `7` and requires both. **These are different shapes, not two
+At `k = 2` the cell's own pair density gives an **equality** (`inducedEmbeddingCountOn_two`), so
+the own-cell partition estimate has `δlocal = 0`; a coefficient `1` arises only for a supplied
+coarser-density estimate, directly from `IsUniformPair`, with no fibre step and no exceptional
+set. At `k = 3` it is `7` and requires both. **These are different shapes, not two
 values of one formula**, which is precisely the condition the issue's hard stop names.
 
 **Recommendation, per the hard stop: supply the local coefficient, do not compute it.** Do not
@@ -263,7 +265,9 @@ bridgeRaw (k : ℕ) (δlocal β : ℝ)
 ### The wrappers
 
 ```
-bridgeTwo   : instantiates δlocal := ε       -- from IsUniformPair directly
+bridgeTwo   : instantiates δlocal := 0       -- own-cell partition estimate: an equality
+                                             -- (a supplied coarser-density estimate may use
+                                             --  δlocal := ε, from IsUniformPair directly)
 bridgeThree : instantiates δlocal := 7 * ε   -- from abs_directedTriangleCount_sub_le
 ```
 

@@ -215,6 +215,22 @@ theorem cellTripleVolume_eq_cellTupleVolume (T : Fin 3 → Finset V) :
     cellTripleVolume T = cellTupleVolume T := by
   rw [cellTripleVolume, cellTupleVolume, Fin.prod_univ_three]
 
+/-- **The cell boxes tile the `s`-box by volume**: `Σ_T vol T = |s|^k` over all cell tuples.
+The constant-partition specialization of the `ProductSpaces` substrate
+`boxMass_eq_sum_boxCells` with unit weights (`boxMass_one`). -/
+theorem sum_cellTupleVolume_eq (Q : Finpartition s) (k : ℕ) :
+    ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts, cellTupleVolume T = (s.card : ℝ) ^ k := by
+  have h := boxMass_eq_sum_boxCells (fun _ _ => (1 : ℝ)) (A := fun _ : Fin k => s) fun _ => Q
+  simp only [boxMass_one, Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h
+  exact h.symm
+
+/-- The transversal cell tuples carry volume at most `|s|^k`. -/
+theorem sum_transversalCellTuples_cellTupleVolume_le (Q : Finpartition s) (k : ℕ) :
+    ∑ T ∈ transversalCellTuples (k := k) Q, cellTupleVolume T ≤ (s.card : ℝ) ^ k := by
+  rw [← sum_cellTupleVolume_eq Q k, transversalCellTuples]
+  exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+    fun T _ _ => cellTupleVolume_nonneg T
+
 /-- Crude box bound, arity-generic: an induced count never exceeds the box volume. -/
 theorem inducedEmbeddingCountOn_le_cellTupleVolume {k : ℕ} (P : FiniteRelModel L (Fin k))
     (M : FiniteRelModel L V) (T : Fin k → Finset V) :

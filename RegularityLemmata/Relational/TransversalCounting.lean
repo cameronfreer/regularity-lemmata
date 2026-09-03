@@ -123,6 +123,26 @@ theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles [AtMostBinar
     binaryVertexProfile_eq_of_mem_of_le_profile hQ (hT i) hw hv
   exact fun hcontra => hne (hwv.symm.trans hcontra.symm)
 
+/-- `MatchesThreeProfiles` is the `Fin 3` instance of the index-generic `MatchesProfiles`. -/
+theorem matchesThreeProfiles_iff_matchesProfiles (T : Fin 3 → Finset V) :
+    MatchesThreeProfiles P M T ↔ MatchesProfiles P M T := Iff.rfl
+
+/-- A cell tuple refining the vertex-profile partition that does not match the pattern's
+profiles contributes zero induced embeddings: the index-generic form of
+`inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles`. -/
+theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesProfiles [AtMostBinary L]
+    {W : Type*} [Fintype W] [DecidableEq W] {P : FiniteRelModel L W}
+    (hQ : Q ≤ binaryProfilePartition M s) {T : W → Finset V} (hT : ∀ i, T i ∈ Q.parts)
+    (hmatch : ¬ MatchesProfiles P M T) :
+    inducedEmbeddingCountOn P M T = 0 := by
+  rw [MatchesProfiles] at hmatch
+  push Not at hmatch
+  obtain ⟨i, v, hv, hne⟩ := hmatch
+  refine inducedEmbeddingCountOn_eq_zero_of_profile_mismatch (i := i) fun w hw => ?_
+  have hwv : binaryVertexProfile M w = binaryVertexProfile M v :=
+    binaryVertexProfile_eq_of_mem_of_le_profile hQ (hT i) hw hv
+  exact fun hcontra => hne (hwv.symm.trans hcontra.symm)
+
 /-- Profile elimination for a SUB-BOX system: boxes chosen inside the cells of `Q` inherit
 the elimination, because all vertices of a cell share a profile. -/
 theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles_of_subset [AtMostBinary L]

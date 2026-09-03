@@ -31,8 +31,11 @@ corollary divides through by the restricted falling factorial `(|s|)_k`, guard-f
 `hlocal` concerns a **single** cell tuple: any formulation quantifying over the partition would
 restate the conclusion box by box. The bridge is abstract in the supplied local estimate and
 does not claim one exists for every `FiniteRelModel L`; the arity-specific wrappers discharge
-`hlocal` where the library has a local estimate (`bridgeTwo`, exact at arity `2`; `bridgeThree`,
-`δ = 7·ε` at arity `3` from `abs_inducedEmbeddingCountOn_three_sub_le`).
+`hlocal` where the library has a local estimate (`bridgeTwo`, exact at arity `2` with the cell's
+own pair density, `δ = 0`; `bridgeThree`, `δ = 7·ε` at arity `3` from
+`abs_inducedEmbeddingCountOn_three_sub_le`). The volume tiling and the generic profile
+substrate live upstream (`Relational/DiagonalGate.lean`, `Relational/BinaryPattern.lean`,
+`Relational/TransversalCounting.lean`).
 -/
 
 namespace RegularityLemmata
@@ -41,24 +44,6 @@ open FirstOrder FiniteRelModel
 
 variable {L : FirstOrder.Language} [FiniteRelational L] {V : Type*} [DecidableEq V]
   {s : Finset V} {Q : Finpartition s} {k : ℕ}
-
-/-! ### Volume tiling -/
-
-omit [FiniteRelational L] in
-/-- **The cell boxes tile the `s`-box by volume**: `Σ_T vol T = |s|^k` over all cell tuples. -/
-theorem sum_cellTupleVolume_eq (Q : Finpartition s) (k : ℕ) :
-    ∑ T ∈ Fintype.piFinset fun _ : Fin k => Q.parts, cellTupleVolume T = (s.card : ℝ) ^ k := by
-  simp only [cellTupleVolume]
-  refine (Finset.sum_prod_piFinset Q.parts fun _ C => ((C.card : ℕ) : ℝ)).trans ?_
-  simp [sum_card_parts_cast]
-
-omit [FiniteRelational L] in
-/-- The transversal cell tuples carry volume at most `|s|^k`. -/
-theorem sum_transversalCellTuples_cellTupleVolume_le (Q : Finpartition s) (k : ℕ) :
-    ∑ T ∈ transversalCellTuples (k := k) Q, cellTupleVolume T ≤ (s.card : ℝ) ^ k := by
-  rw [← sum_cellTupleVolume_eq Q k, transversalCellTuples]
-  exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
-    fun T _ _ => cellTupleVolume_nonneg T
 
 /-! ### The raw bridge -/
 
@@ -171,7 +156,7 @@ factorial `(|s|)_k` — the number of injective `k`-tuples through `s` — gives
 Guard-free under `x / 0 = 0`: at `|s| < k` both sides are `0`, and no positivity hypothesis is
 taken (positivity belongs to the inversion lemma `card_injectiveTuplesOn_pos_iff` alone). At
 `s = univ` the denominator is `(|V|)_k`, the `injectiveRelationDensity` convention. -/
-theorem abs_div_descFactorial_sub_le (P : FiniteRelModel L (Fin k))
+theorem abs_inducedEmbeddingCountOn_div_sub_sum_est_div_le (P : FiniteRelModel L (Fin k))
     (M : FiniteRelModel L V) (est : (Fin k → Finset V) → ℝ) (D : Finset (Finset V × Finset V))
     {δ β : ℝ} {m : ℕ} (hδ : 0 ≤ δ)
     (hlocal : ∀ T ∈ transversalCellTuples Q, T ∉ badCellTuples Q D →
@@ -188,46 +173,6 @@ theorem abs_div_descFactorial_sub_le (P : FiniteRelModel L (Fin k))
   exact div_le_div_of_nonneg_right
     (abs_inducedEmbeddingCountOn_sub_sum_est_le P M est D hδ hlocal hest hmass hm)
     (Nat.cast_nonneg _)
-
-/-! ### Profile matching, index-generic -/
-
-section Profiles
-
-variable {W : Type*}
-
-/-- Every vertex of the cell `T i` carries the pattern's required vertex profile at `i`.
-`MatchesThreeProfiles` is the `Fin 3` instance. -/
-def MatchesProfiles (P : FiniteRelModel L W) (M : FiniteRelModel L V) (T : W → Finset V) :
-    Prop :=
-  ∀ i, ∀ v ∈ T i, binaryVertexProfile M v = binaryVertexProfile P i
-
-omit [DecidableEq V] in
-theorem matchesThreeProfiles_iff_matchesProfiles (P : FiniteRelModel L (Fin 3))
-    (M : FiniteRelModel L V) (T : Fin 3 → Finset V) :
-    MatchesThreeProfiles P M T ↔ MatchesProfiles P M T := Iff.rfl
-
-variable [Fintype W] [DecidableEq W]
-
-instance (P : FiniteRelModel L W) (M : FiniteRelModel L V) : DecidablePred (MatchesProfiles P M) :=
-  fun T => inferInstanceAs
-    (Decidable (∀ i, ∀ v ∈ T i, binaryVertexProfile M v = binaryVertexProfile P i))
-
-/-- A cell tuple refining the vertex-profile partition that does not match the pattern's
-profiles contributes zero induced embeddings. Index-generic form of
-`inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles`. -/
-theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesProfiles [AtMostBinary L]
-    {P : FiniteRelModel L W} {M : FiniteRelModel L V} (hQ : Q ≤ binaryProfilePartition M s)
-    {T : W → Finset V} (hT : ∀ i, T i ∈ Q.parts) (hmatch : ¬ MatchesProfiles P M T) :
-    inducedEmbeddingCountOn P M T = 0 := by
-  rw [MatchesProfiles] at hmatch
-  push Not at hmatch
-  obtain ⟨i, v, hv, hne⟩ := hmatch
-  refine inducedEmbeddingCountOn_eq_zero_of_profile_mismatch (i := i) fun w hw => ?_
-  have hwv : binaryVertexProfile M w = binaryVertexProfile M v :=
-    binaryVertexProfile_eq_of_mem_of_le_profile hQ (hT i) hw hv
-  exact fun hcontra => hne (hwv.symm.trans hcontra.symm)
-
-end Profiles
 
 /-! ### The arity-2 wrapper: exact at the cell level -/
 
@@ -406,8 +351,8 @@ section Tests
 private def emptyModel (W : Type*) : FiniteRelModel FirstOrder.Language.empty W :=
   ⟨fun {_} R _ => R.elim⟩
 
--- **Volume tiling, computed**: the four cell pairs of the parity partition of `Fin 4` carry
--- total volume `16 = 4²`, and with `⊤` the single pair carries all of it.
+-- **Volume tiling on the indiscrete partition**, statement-level: with `⊤` the single cell pair
+-- carries the whole volume `4²` (`sum_cellTupleVolume_eq`, a `ProductSpaces` adapter).
 example : ∑ T ∈ Fintype.piFinset fun _ : Fin 2 =>
       (⊤ : Finpartition (Finset.univ : Finset (Fin 4))).parts, cellTupleVolume T
     = ((Finset.univ : Finset (Fin 4)).card : ℝ) ^ 2 :=
@@ -453,7 +398,7 @@ example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
       ≤ ((0 + (Nat.choose 4 2) * 0) * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ 4
           + (Nat.choose 4 2) * m * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ (4 - 1))
         / (((Finset.univ : Finset (Fin 3)).card.descFactorial 4 : ℕ) : ℝ) :=
-  abs_div_descFactorial_sub_le _ _ _ ∅ le_rfl (fun T _ _ => by simp)
+  abs_inducedEmbeddingCountOn_div_sub_sum_est_div_le _ _ _ ∅ le_rfl (fun T _ _ => by simp)
     (fun T _ => ⟨Nat.cast_nonneg _, inducedEmbeddingCountOn_le_cellTupleVolume _ _ T⟩)
     (by simp) hm
 
@@ -486,9 +431,9 @@ example [AtMostBinary L] {P : FiniteRelModel L (Fin 2)} {M : FiniteRelModel L V}
   abs_inducedEmbeddingCountOn_sub_pairInducedEstimate_le hQ hnull hm
 
 -- **Profile matching agrees with the `Fin 3` predicate** definitionally.
-example (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V) (T : Fin 3 → Finset V) :
+example {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} (T : Fin 3 → Finset V) :
     MatchesThreeProfiles P M T ↔ MatchesProfiles P M T :=
-  matchesThreeProfiles_iff_matchesProfiles P M T
+  matchesThreeProfiles_iff_matchesProfiles T
 
 end Tests
 
