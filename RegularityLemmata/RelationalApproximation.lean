@@ -42,13 +42,17 @@ curated stack and defines nothing; each listed module remains directly importabl
   packaged interface over the pinned edit machinery), the computable
   `FiniteRelModel.majorityRound`, the exact box-level identity
   `editDistance_majorityRound_eq_min`, the rounding theorem
-  `exists_isIndivisibleFor_of_isHomogeneousCell`, and its exact converse.
+  `exists_isIndivisibleFor_of_isHomogeneousCell`, its exact converse, and the exact
+  cellwise-to-aggregate conversion `CellwiseEditBound.editDistance_const_le`.
 
 * `Relational.AggregationBridge` — the **approximation-to-counting bridge**: the raw,
   denominator-free aggregation `abs_inducedEmbeddingCountOn_sub_sum_est_le` (a supplied
   single-tuple local estimate in, a global induced count out, with the positional lift and the
   diagonal charge computed), its normalized corollary over the restricted falling factorial
-  `(|s|)_k`, and the arity-2 (exact) and arity-3 (`δ = 7·ε`) wrappers.
+  `(|s|)_k`, the arity-2 (exact) and arity-3 (`δ = 7·ε`) wrappers, and the **composite**
+  approximation-to-counting theorem chaining edit transfer with quotient counting
+  (`abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass`, its cellwise-edit-bound
+  and majority-rounding forms, and the normalized composite).
 
 The triple a consumer typically concludes with is `N.IsIndivisibleFor P`,
 `NullaryCompatible M N`, and `CellwiseEditBound M N P ε`.

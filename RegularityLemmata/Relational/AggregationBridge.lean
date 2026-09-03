@@ -4,6 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.DiagonalGate
 import RegularityLemmata.Relational.TwoVertexCounting
+import RegularityLemmata.Relational.Edit
+import RegularityLemmata.Relational.CellwiseEdit
 
 /-!
 # The aggregation bridge: from local box estimates to a global induced count
@@ -33,7 +35,13 @@ restate the conclusion box by box. The bridge is abstract in the supplied local 
 does not claim one exists for every `FiniteRelModel L`; the arity-specific wrappers discharge
 `hlocal` where the library has a local estimate (`bridgeTwo`, exact at arity `2` with the cell's
 own pair density, `δ = 0`; `bridgeThree`, `δ = 7·ε` at arity `3` from
-`abs_inducedEmbeddingCountOn_three_sub_le`). The volume tiling and the generic profile
+`abs_inducedEmbeddingCountOn_three_sub_le`). The **composite** (§9) chains the edit
+transfer (`Relational/Edit.lean`) with quotient counting (`Relational/DiagonalGate.lean`):
+`abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass`, its instantiation under a
+`CellwiseEditBound` via the exact cellwise-to-aggregate conversion
+(`CellwiseEditBound.editDistance_const_le`), the majority-rounding corollary — homogeneity in,
+counting out — the chain with the raw bridge, and the normalized composite over `(|s|)_k`. The
+composite introduces no coefficient of its own. The volume tiling and the generic profile
 substrate live upstream (`Relational/DiagonalGate.lean`, `Relational/BinaryPattern.lean`,
 `Relational/TransversalCounting.lean`).
 -/
@@ -343,6 +351,125 @@ theorem abs_inducedEmbeddingCountOn_sub_coarseInducedEstimate_le [AtMostBinary L
 
 end Three
 
+/-! ### The composite: approximation to counting -/
+
+section Composite
+
+/-- **The composite theorem** (design §9): edit transfer moves the count from `M` to an
+indivisible approximant `N`, and quotient counting evaluates `N`'s count exactly up to the
+diagonal charge. Everything is in `s`-restricted units — restricted count, `s`-box edit mass,
+extension factor `|s|^(k−1)` — so the two terms compose with no off-`s` remainder. No new
+coefficient: the edit coefficient `Σ_R k^(arity R)` and the diagonal `k.choose 2` are the
+audited ones. Hypotheses: `N` indivisible for `Q`, nullary agreement, cells of size at most
+`m`. -/
+theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
+    (P : FiniteRelModel L (Fin k)) {M N : FiniteRelModel L V} (hN : N.IsIndivisibleFor Q)
+    (hnull : NullaryCompatible M N) {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) - quotientInducedCount P N Q|
+      ≤ (∑ R : RelSymbol L,
+          (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+          * (s.card : ℝ) ^ (k - 1)
+        + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
+  calc |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) - quotientInducedCount P N Q|
+      ≤ |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+            - inducedEmbeddingCountOn P N (fun _ : Fin k => s)|
+          + |(inducedEmbeddingCountOn P N (fun _ : Fin k => s) : ℝ)
+            - quotientInducedCount P N Q| := abs_sub_le _ _ _
+    _ ≤ _ := add_le_add (abs_inducedEmbeddingCountOn_sub_le_editMass P M N hnull s)
+          (hN.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le P hm)
+
+/-- **The composite under a cellwise edit bound.** With `CellwiseEditBound M N Q ε`, the
+`s`-box edit mass of each positive-arity symbol is at most `ε · |s|^(arity R)`
+(`CellwiseEditBound.editDistance_const_le`, exact over the partition boxes), and nullary
+agreement makes the arity-`0` edit mass `0`; so the edit term becomes
+`Σ_R k^(arity R) · ε · |s|^(arity R)`. This is "approximation yields counting": a cellwise
+approximation in, a global induced count out. -/
+theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound
+    (P : FiniteRelModel L (Fin k)) {M N : FiniteRelModel L V} (hN : N.IsIndivisibleFor Q)
+    (hnull : NullaryCompatible M N) {ε : ℝ} (hε : 0 ≤ ε) (hce : CellwiseEditBound M N Q ε)
+    {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) - quotientInducedCount P N Q|
+      ≤ (∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+          * (s.card : ℝ) ^ (k - 1)
+        + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) := by
+  have hsum : ∑ R : RelSymbol L,
+        (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s)
+      ≤ ∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)) := by
+    refine Finset.sum_le_sum fun R _ => mul_le_mul_of_nonneg_left ?_ (by positivity)
+    rcases Nat.eq_zero_or_pos (R.1 : ℕ) with h0 | hpos
+    · rw [editDistance_const_eq_zero_of_nullaryCompatible hnull s h0 R.2, Nat.cast_zero]
+      positivity
+    · exact hce.editDistance_const_le hpos R.2
+  have hpow : (0 : ℝ) ≤ (s.card : ℝ) ^ (k - 1) := by positivity
+  exact (abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass P hN hnull hm).trans
+    (add_le_add_left (mul_le_mul_of_nonneg_right hsum hpow) _)
+
+/-- **Homogeneity in, counting out.** Majority rounding of `M` over `Q` is indivisible,
+nullary-compatible, and cellwise within `ε` under cell homogeneity
+(`cellwiseEditBound_majorityRound_of_isHomogeneousCell`); the composite then reads the induced
+count of `M` off the quotient of its rounding. -/
+theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_majorityRound_le
+    (P : FiniteRelModel L (Fin k)) (M : FiniteRelModel L V) (Q : Finpartition s) {ε : ℝ}
+    (hε : 0 ≤ ε)
+    (hhom : ∀ (n : ℕ), 0 < n → ∀ (S : L.Relations n) (C : Fin n → Q.parts),
+      IsHomogeneousCell (M.Holds S) (fun i ↦ (C i : Finset V)) ε)
+    {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+        - quotientInducedCount P (M.majorityRound Q) Q|
+      ≤ (∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+          * (s.card : ℝ) ^ (k - 1)
+        + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
+  abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound P
+    (majorityRound_isIndivisibleFor M Q) (nullaryCompatible_majorityRound M Q) hε
+    (cellwiseEditBound_majorityRound_of_isHomogeneousCell M Q hhom) hm
+
+/-- **The composite chained with the raw bridge.** When the approximant's transversal count is
+further compared with a supplied estimate, the bridge's `(δ + (k.choose 2)·β) · |s|^k` is added:
+edit transfer from `M` to `N`, then `abs_inducedEmbeddingCountOn_sub_sum_est_le` for `N`. -/
+theorem abs_inducedEmbeddingCountOn_sub_sum_est_le_of_editMass (P : FiniteRelModel L (Fin k))
+    {M N : FiniteRelModel L V} (hnull : NullaryCompatible M N)
+    (est : (Fin k → Finset V) → ℝ) (D : Finset (Finset V × Finset V))
+    {δ β : ℝ} {m : ℕ} (hδ : 0 ≤ δ)
+    (hlocal : ∀ T ∈ transversalCellTuples Q, T ∉ badCellTuples Q D →
+      |(inducedEmbeddingCountOn P N T : ℝ) - est T| ≤ δ * cellTupleVolume T)
+    (hest : ∀ T ∈ transversalCellTuples Q, 0 ≤ est T ∧ est T ≤ cellTupleVolume T)
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+        - ∑ T ∈ transversalCellTuples Q, est T|
+      ≤ (∑ R : RelSymbol L,
+          (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+          * (s.card : ℝ) ^ (k - 1)
+        + ((δ + (k.choose 2) * β) * (s.card : ℝ) ^ k
+          + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1)) :=
+  calc |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+          - ∑ T ∈ transversalCellTuples Q, est T|
+      ≤ |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
+            - inducedEmbeddingCountOn P N (fun _ : Fin k => s)|
+          + |(inducedEmbeddingCountOn P N (fun _ : Fin k => s) : ℝ)
+            - ∑ T ∈ transversalCellTuples Q, est T| := abs_sub_le _ _ _
+    _ ≤ _ := add_le_add (abs_inducedEmbeddingCountOn_sub_le_editMass P M N hnull s)
+          (abs_inducedEmbeddingCountOn_sub_sum_est_le P N est D hδ hlocal hest hmass hm)
+
+/-- **The normalized composite.** The composite divided through by `(|s|)_k`, guard-free under
+`x / 0 = 0`; at `s = univ` the denominator is `(|V|)_k`. -/
+theorem abs_inducedEmbeddingCountOn_div_sub_quotientInducedCount_div_le
+    (P : FiniteRelModel L (Fin k)) {M N : FiniteRelModel L V} (hN : N.IsIndivisibleFor Q)
+    (hnull : NullaryCompatible M N) {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) / (s.card.descFactorial k : ℝ)
+        - (quotientInducedCount P N Q : ℝ) / (s.card.descFactorial k : ℝ)|
+      ≤ ((∑ R : RelSymbol L,
+          (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+          * (s.card : ℝ) ^ (k - 1)
+        + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1)) / (s.card.descFactorial k : ℝ) := by
+  rw [← sub_div, abs_div,
+    abs_of_nonneg (Nat.cast_nonneg (s.card.descFactorial k) : (0 : ℝ) ≤ _)]
+  exact div_le_div_of_nonneg_right
+    (abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass P hN hnull hm)
+    (Nat.cast_nonneg _)
+
+end Composite
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -429,6 +556,45 @@ example [AtMostBinary L] {P : FiniteRelModel L (Fin 2)} {M : FiniteRelModel L V}
     |(inducedEmbeddingCountOn P M (fun _ : Fin 2 => s) : ℝ) - pairInducedEstimate P M Q|
       ≤ m * (s.card : ℝ) :=
   abs_inducedEmbeddingCountOn_sub_pairInducedEstimate_le hQ hnull hm
+
+-- **The composite on the empty language** reduces to quotient counting: every model is
+-- indivisible and nullary-compatible with every other, and the edit mass is an empty sum.
+example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn (emptyModel (Fin 3)) (emptyModel (Fin 3))
+          (fun _ : Fin 3 => Finset.univ) : ℝ)
+        - quotientInducedCount (emptyModel (Fin 3)) (emptyModel (Fin 3)) Q|
+      ≤ (Nat.choose 3 2) * m * ((Finset.univ : Finset (Fin 3)).card : ℝ) ^ (3 - 1) := by
+  have h := abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
+    (emptyModel (Fin 3)) (M := emptyModel (Fin 3)) (N := emptyModel (Fin 3))
+    (fun _ R => R.elim) (fun R => R.elim) hm
+  haveI : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
+  simpa using h
+
+-- **Homogeneity in, counting out**, statement-level: the majority-rounding corollary.
+example [AtMostBinary L] (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
+    (Q : Finpartition s) {ε : ℝ} (hε : 0 ≤ ε)
+    (hhom : ∀ (n : ℕ), 0 < n → ∀ (S : L.Relations n) (C : Fin n → Q.parts),
+      IsHomogeneousCell (M.Holds S) (fun i ↦ (C i : Finset V)) ε)
+    {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) : ℝ)
+        - quotientInducedCount P (M.majorityRound Q) Q|
+      ≤ (∑ R : RelSymbol L, (3 : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+          * (s.card : ℝ) ^ (3 - 1)
+        + (Nat.choose 3 2) * m * (s.card : ℝ) ^ (3 - 1) :=
+  abs_inducedEmbeddingCountOn_sub_quotientInducedCount_majorityRound_le P M Q hε hhom hm
+
+-- **`k = 0` composite is guard-free**: both sides `0` on the empty language.
+example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn (emptyModel (Fin 0)) (emptyModel (Fin 3))
+          (fun _ : Fin 0 => Finset.univ) : ℝ)
+        - quotientInducedCount (emptyModel (Fin 0)) (emptyModel (Fin 3)) Q| ≤ 0 := by
+  have h := abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
+    (emptyModel (Fin 0)) (M := emptyModel (Fin 3)) (N := emptyModel (Fin 3))
+    (fun _ R => R.elim) (fun R => R.elim) hm
+  haveI : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
+  simpa using h
 
 -- **Profile matching agrees with the `Fin 3` predicate** definitionally.
 example {P : FiniteRelModel L (Fin 3)} {M : FiniteRelModel L V} (T : Fin 3 → Finset V) :
