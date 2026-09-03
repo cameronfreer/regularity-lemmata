@@ -568,7 +568,7 @@ example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
   have h := abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
     (emptyModel (Fin 3)) (M := emptyModel (Fin 3)) (N := emptyModel (Fin 3))
     (fun _ R => R.elim) (fun R => R.elim) hm
-  haveI : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
+  have : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
   simpa using h
 
 -- **Homogeneity in, counting out**, statement-level: the majority-rounding corollary.
@@ -593,7 +593,7 @@ example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
   have h := abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
     (emptyModel (Fin 0)) (M := emptyModel (Fin 3)) (N := emptyModel (Fin 3))
     (fun _ R => R.elim) (fun R => R.elim) hm
-  haveI : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
+  have : IsEmpty (RelSymbol FirstOrder.Language.empty) := ⟨fun R => R.2.elim⟩
   simpa using h
 
 -- **Profile matching agrees with the `Fin 3` predicate** definitionally.

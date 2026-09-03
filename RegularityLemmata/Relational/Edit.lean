@@ -278,6 +278,7 @@ open FiniteRelModel
 
 variable {L : FirstOrder.Language} [FiniteRelational L] {V : Type*} [DecidableEq V] {k : ℕ}
 
+omit [DecidableEq V] in
 /-- **Nullary agreement empties the arity-0 edit set.** Two nullary-compatible models have edit
 distance `0` at every arity-`0` symbol, on any box. Stated with `n = 0` as a hypothesis so that
 it applies to a symbol whose arity is a coerced index. -/
