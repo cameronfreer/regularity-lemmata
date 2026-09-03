@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import RegularityLemmata.Finite.Weight
 import RegularityLemmata.Finite.Average
 import RegularityLemmata.Finite.AlmostConstant
+import RegularityLemmata.Finite.AnalyticHomogeneous
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.RelationKernel
 import RegularityLemmata.Partition.RectKernel
@@ -37,6 +38,10 @@ each listed module remains directly importable.
   `ε`-almost `δ`-constant sets and rectangles, the separation theorem, and the level-set
   staircase reducing `[0,1]`-valued average control to set-density control. Stability-free —
   no ladders, trees, or ranks.
+* `Finite.AnalyticHomogeneous` — Conant–Terry's `(δ, ε)`-homogeneous rectangles
+  (`RectKernel.IsHomogeneousPair`: row and column concentration at respective common values
+  for `ε`-almost all rows and columns) and both directions of their Proposition A.5 relating
+  homogeneity to almost-constancy.
 * `Partition.RectKernel` — decomposition along independent partitions of the two carriers, and
   the stepped prediction (`steppedRectSum`).
 * `Partition.RectKernelEnergy` — kernel energy against a partition pair and the exact

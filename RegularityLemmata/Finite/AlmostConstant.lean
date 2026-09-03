@@ -202,6 +202,86 @@ theorem isAlmostConstantPair_singleton [DecidableEq X] [DecidableEq Y] (f : Rect
     obtain ⟨rfl, rfl⟩ := hxy'
     simpa using hδ
 
+/-! ### Centers and the transpose
+
+The "main observation" in Conant–Terry's proof of Proposition A.5: a function is `δ`-constant
+iff its values lie within `δ / 2` of a common center. Stated for arbitrary real-valued `φ`
+(a *reformulated variant* of the paper's `[0,1]` remark), with the empty set taking the
+center `0`; the range-aware companion keeps the center in `[0,1]`. -/
+
+/-- The midpoint of the max and the min of a `δ`-constant function on a nonempty set is
+within `δ / 2` of every value. -/
+private theorem IsDeltaConstantOn.exists_max_min_center (h : IsDeltaConstantOn φ δ V)
+    (hV : V.Nonempty) :
+    ∃ vmax ∈ V, ∃ vmin ∈ V, ∀ v ∈ V, |φ v - (φ vmax + φ vmin) / 2| < δ / 2 := by
+  obtain ⟨vmax, hmax, hmaxle⟩ := V.exists_max_image φ hV
+  obtain ⟨vmin, hmin, hminle⟩ := V.exists_min_image φ hV
+  refine ⟨vmax, hmax, vmin, hmin, fun v hv ↦ ?_⟩
+  have h1 := h vmax hmax vmin hmin
+  have h2 := hmaxle v hv
+  have h3 := hminle v hv
+  rw [abs_lt] at h1 ⊢
+  constructor <;> linarith [h1.1, h1.2]
+
+/-- **`δ`-constancy is closeness to a common center at radius `δ / 2`.** Forward: the
+midpoint of the max and the min (the empty set takes `0`); backward: the triangle
+inequality. -/
+theorem isDeltaConstantOn_iff_exists_center :
+    IsDeltaConstantOn φ δ V ↔ ∃ r : ℝ, ∀ v ∈ V, |φ v - r| < δ / 2 := by
+  constructor
+  · intro h
+    rcases V.eq_empty_or_nonempty with rfl | hV
+    · exact ⟨0, fun v hv ↦ absurd hv (Finset.notMem_empty v)⟩
+    · obtain ⟨vmax, -, vmin, -, hc⟩ := h.exists_max_min_center hV
+      exact ⟨_, hc⟩
+  · rintro ⟨r, hr⟩ v hv v' hv'
+    have h1 := hr v hv
+    have h2 := hr v' hv'
+    rw [abs_lt] at h1 h2 ⊢
+    constructor <;> linarith [h1.1, h1.2, h2.1, h2.2]
+
+/-- The range-aware companion: a `[0,1]`-valued `δ`-constant function has a center in
+`[0,1]` (the midpoint of its max and min; `0` on the empty set). -/
+theorem IsDeltaConstantOn.exists_center_mem_Icc (h : IsDeltaConstantOn φ δ V)
+    (hφ : ∀ v ∈ V, φ v ∈ Set.Icc (0 : ℝ) 1) :
+    ∃ r ∈ Set.Icc (0 : ℝ) 1, ∀ v ∈ V, |φ v - r| < δ / 2 := by
+  rcases V.eq_empty_or_nonempty with rfl | hV
+  · exact ⟨0, ⟨le_rfl, zero_le_one⟩, fun v hv ↦ absurd hv (Finset.notMem_empty v)⟩
+  · obtain ⟨vmax, hmax, vmin, hmin, hc⟩ := h.exists_max_min_center hV
+    have hM := hφ vmax hmax
+    have hm := hφ vmin hmin
+    exact ⟨_, ⟨by linarith [hM.1, hm.1], by linarith [hM.2, hm.2]⟩, hc⟩
+
+/-- One direction of the transpose law: the witness is swapped coordinatewise. -/
+private theorem isAlmostConstantPair_op_of_isAlmostConstantPair {f : RectKernel X Y}
+    {A : Finset X} {B : Finset Y} (h : IsAlmostConstantPair f δ ε A B) :
+    IsAlmostConstantPair (RectKernel.op f) δ ε B A := by
+  classical
+  rcases h with hAB | ⟨W, hWAB, hcard, hconst⟩
+  · left
+    rw [Finset.product_eq_empty] at hAB ⊢
+    exact hAB.symm
+  · right
+    refine ⟨W.image Prod.swap, ?_, ?_, ?_⟩
+    · intro p hp
+      obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hp
+      have hq' := Finset.mem_product.mp (hWAB hq)
+      exact Finset.mem_product.mpr ⟨hq'.2, hq'.1⟩
+    · rw [Finset.card_product] at hcard
+      rwa [Finset.card_image_of_injective _ Prod.swap_injective, Finset.card_product,
+        Nat.mul_comm]
+    · intro p hp p' hp'
+      obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hp
+      obtain ⟨q', hq', rfl⟩ := Finset.mem_image.mp hp'
+      exact hconst q hq q' hq'
+
+/-- **Exact transpose law** for almost-constant rectangles: swapping the kernel and the two
+sides is a `Finset.product` swap of the witness. -/
+theorem isAlmostConstantPair_op_iff {f : RectKernel X Y} {A : Finset X} {B : Finset Y} :
+    IsAlmostConstantPair (RectKernel.op f) δ ε B A ↔ IsAlmostConstantPair f δ ε A B :=
+  ⟨fun h ↦ isAlmostConstantPair_op_of_isAlmostConstantPair h,
+   fun h ↦ isAlmostConstantPair_op_of_isAlmostConstantPair h⟩
+
 /-! ### Separation (Conant–Terry Proposition 2.2) -/
 
 /-- **Separation.** A function that is not `2ε`-almost `δ`-constant admits a threshold with

@@ -250,6 +250,20 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Proposition 2.2, with `exists_separation_mem_Icc_of_not_isAlmostConstantOn` as the exact
   **range-aware companion** recovering the paper's `[0,1]` setting.
 
+  Its Appendix A supplies `Finite/AnalyticHomogeneous.lean`: **Definition A.1** (the
+  `(δ, ε)`-homogeneous rectangle, due to Chavarria–Conant–Pillay, cited below) as
+  `RectKernel.IsHomogeneousPair`, and **Proposition A.5** in both directions
+  (`RectKernel.isHomogeneousPair_of_isAlmostConstantPair`,
+  `RectKernel.isAlmostConstantPair_of_isHomogeneousPair`). All three are **reformulated
+  variants**, not exact formalizations: the constants are preserved, but the statements
+  extend the domains (real-valued kernels, arbitrary real parameters, and (b) with no
+  hypothesis at all), localize the range assumption to the rectangle in (a) only, and
+  totalize empty rectangles. The paper's "main observation" in the proof of A.5 — a
+  `δ`-constant function is within `δ / 2` of a common center — is
+  `isDeltaConstantOn_iff_exists_center` in `Finite/AlmostConstant.lean`, in the same
+  reformulated sense, with `IsDeltaConstantOn.exists_center_mem_Icc` as its range-aware
+  companion; `isAlmostConstantPair_op_iff` is library-original.
+
   The average-slicing and common-block theorems (`Partition/AverageSlicing.lean`,
   `Partition/CommonBlocks.lean`) are shaped by their Lemmas 4.3 and 4.6: an equipartition
   into exact-size blocks on which a finite `[0,1]`-valued family keeps its averages, and its
@@ -261,3 +275,7 @@ they were developed as stability-neutral infrastructure. No third-party source t
   paper's Hoeffding-with-permutation-encoding argument; the control is two-sided where the
   paper's is one-sided. The stable-regularity theorems themselves are upstream
   (stability-flavored) material, not part of this library.
+- N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
+  (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
+  (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
+  restatement with strict inequalities.
