@@ -119,6 +119,7 @@ import RegularityLemmata.Relational.StrongCountingLifting
 import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 import RegularityLemmata.Relational.BinaryStrongCounting
 import RegularityLemmata.Relational.DiagonalGate
+import RegularityLemmata.Relational.AggregationBridge
 import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
