@@ -174,6 +174,19 @@ theorem preservesAndReflects_transport_three [AtMostBinary L]
     | exact hswap 0 2 h02
     | exact hswap 1 2 h12
 
+/-! ### Profile matching on a box -/
+
+/-- Every vertex of the cell `T i` carries the pattern's required vertex profile at `i`.
+`MatchesThreeProfiles` (`Relational/TransversalCounting.lean`) is the `Fin 3` instance. -/
+def MatchesProfiles (P : FiniteRelModel L W) (M : FiniteRelModel L V) (T : W → Finset V) :
+    Prop :=
+  ∀ i, ∀ v ∈ T i, binaryVertexProfile M v = binaryVertexProfile P i
+
+instance [Fintype W] [DecidableEq V] (P : FiniteRelModel L W) (M : FiniteRelModel L V) :
+    DecidablePred (MatchesProfiles P M) :=
+  fun T => inferInstanceAs
+    (Decidable (∀ i, ∀ v ∈ T i, binaryVertexProfile M v = binaryVertexProfile P i))
+
 /-! ### Box-restricted induced counts -/
 
 variable [Fintype W] [DecidableEq W] [Fintype V] [DecidableEq V]

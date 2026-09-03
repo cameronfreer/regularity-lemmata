@@ -119,6 +119,7 @@ import RegularityLemmata.Relational.StrongCountingLifting
 import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 import RegularityLemmata.Relational.BinaryStrongCounting
 import RegularityLemmata.Relational.DiagonalGate
+import RegularityLemmata.Relational.AggregationBridge
 import RegularityLemmata.Relational.GraphCounting
 import RegularityLemmata.Relational.BinaryDiagRegularity
 import RegularityLemmata.Relational.BinaryDiagStrong
@@ -137,8 +138,8 @@ infrastructure, built on mathlib.
 This root imports the library's public surface. Five curated facades bundle stacks a consumer
 often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels),
 `RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds),
-`RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, and cellwise
-edit bounds), `RegularityLemmata.FiniteRamsey` (multicolour pair Ramsey, binary-tree subtree
+`RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, cellwise
+edit bounds, edit transfer, and the aggregation bridge), `RegularityLemmata.FiniteRamsey` (multicolour pair Ramsey, binary-tree subtree
 embeddings, and the additive two-colour subtree theorem), and
 `RegularityLemmata.ProductSpaces` (raw weights, heterogeneous weighted boxes, predicate mass and
 density, coordinate partitions, unions with a symmetric-difference error, and the coordinate-split

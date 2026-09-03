@@ -82,7 +82,8 @@ Five curated **facades** import a stack whole:
   Mathlib's VC dimension under restriction, support-sensitive Sauer–Shelah bounds, and
   polynomial bounded-subset estimates.
 - `RegularityLemmata.RelationalApproximation` — homogeneous cells, finite relational models,
-  indivisibility, and cellwise edit bounds with the majority-rounding theorems.
+  indivisibility, cellwise edit bounds with the majority-rounding theorems, the edit calculus
+  with count transfer, and the approximation-to-counting aggregation bridge.
 - `RegularityLemmata.FiniteRamsey` — the independent finite Ramsey APIs: multicolour Ramsey for
   ordered-pair colourings, finite full binary trees as words, arbitrary-root subtree embeddings
   and their proper extensions through the leaf level, and the additive two-colour subtree
