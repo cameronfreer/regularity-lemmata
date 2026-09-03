@@ -78,14 +78,15 @@ Those are API-stability and compositionality arguments, not capability arguments
   carries content. The genuinely generic structure in that family is metric, and it is shipped
   under its honest names, `CellwiseEditBound.symm` and `CellwiseEditBound.trans`.
 * **No blow-up object and no uniqueness.** `majorityRound` is a model on the same carrier `V`,
-  not a structure on `P.parts`; no quotient `FiniteRelModel` is built. Nothing claims the
-  approximating model is unique, or best among the routes considered.
+  not a structure on `P.parts`; the quotient of an indivisible model onto `P.parts` is
+  `FiniteRelModel.quotient` in `Relational/Indivisible.lean`, and the two are composed only in
+  `Relational/AggregationBridge.lean`. Nothing claims the approximating model is unique, or best
+  among the routes considered.
 
-**Placement.** This is the first file in the library that *constructs* a `FiniteRelModel`, and
-the construction is computable — no `noncomputable`, no `Classical.dec` in the definition. It is
-a separate file rather than an addition to `Relational/Indivisible.lean`, whose frozen docstring
-records that approximate indivisibility is not defined there and that no blow-up model is
-constructed; both statements stay true.
+**Placement.** The construction is computable — no `noncomputable`, no `Classical.dec` in the
+definition. It is a separate file rather than an addition to `Relational/Indivisible.lean`, which
+holds the quotient model and whose docstring records that approximate indivisibility is not
+defined there; the rounding (on `V`) and the quotient (on `P.parts`) stay in separate files.
 -/
 
 namespace RegularityLemmata

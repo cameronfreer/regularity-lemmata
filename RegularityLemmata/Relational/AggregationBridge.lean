@@ -381,25 +381,34 @@ theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass
 /-- **The composite under a cellwise edit bound.** With `CellwiseEditBound M N Q ε`, the
 `s`-box edit mass of each positive-arity symbol is at most `ε · |s|^(arity R)`
 (`CellwiseEditBound.editDistance_const_le`, exact over the partition boxes), and nullary
-agreement makes the arity-`0` edit mass `0`; so the edit term becomes
-`Σ_R k^(arity R) · ε · |s|^(arity R)`. This is "approximation yields counting": a cellwise
-approximation in, a global induced count out. -/
+agreement makes the arity-`0` edit mass exactly `0`; so the edit term is bounded by
+`Σ_{R, arity R > 0} k^(arity R) · ε · |s|^(arity R)`, a sum over the positive-arity symbols only
+(the nullary symbols contribute nothing, and are not charged). This is "approximation yields
+counting": a cellwise approximation in, a global induced count out. -/
 theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound
     (P : FiniteRelModel L (Fin k)) {M N : FiniteRelModel L V} (hN : N.IsIndivisibleFor Q)
-    (hnull : NullaryCompatible M N) {ε : ℝ} (hε : 0 ≤ ε) (hce : CellwiseEditBound M N Q ε)
+    (hnull : NullaryCompatible M N) {ε : ℝ} (hce : CellwiseEditBound M N Q ε)
     {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
     |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) - quotientInducedCount P N Q|
-      ≤ (∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+      ≤ (∑ R ∈ (Finset.univ : Finset (RelSymbol L)).filter (fun R => 0 < (R.1 : ℕ)),
+          (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
           * (s.card : ℝ) ^ (k - 1)
         + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) := by
+  classical
   have hsum : ∑ R : RelSymbol L,
         (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s)
-      ≤ ∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)) := by
-    refine Finset.sum_le_sum fun R _ => mul_le_mul_of_nonneg_left ?_ (by positivity)
-    rcases Nat.eq_zero_or_pos (R.1 : ℕ) with h0 | hpos
-    · rw [editDistance_const_eq_zero_of_nullaryCompatible hnull s h0 R.2, Nat.cast_zero]
-      positivity
-    · exact hce.editDistance_const_le hpos R.2
+      ≤ ∑ R ∈ (Finset.univ : Finset (RelSymbol L)).filter (fun R => 0 < (R.1 : ℕ)),
+          (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)) := by
+    rw [← Finset.sum_filter_add_sum_filter_not Finset.univ (fun R : RelSymbol L => 0 < (R.1 : ℕ))]
+    have hzero : ∑ R ∈ (Finset.univ : Finset (RelSymbol L)).filter (fun R => ¬ 0 < (R.1 : ℕ)),
+        (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s) = 0 := by
+      refine Finset.sum_eq_zero fun R hR => ?_
+      rw [Finset.mem_filter, not_lt, Nat.le_zero] at hR
+      rw [editDistance_const_eq_zero_of_nullaryCompatible hnull s hR.2 R.2, Nat.cast_zero,
+        mul_zero]
+    rw [hzero, add_zero]
+    refine Finset.sum_le_sum fun R hR => mul_le_mul_of_nonneg_left ?_ (by positivity)
+    exact hce.editDistance_const_le (Finset.mem_filter.mp hR).2 R.2
   have hpow : (0 : ℝ) ≤ (s.card : ℝ) ^ (k - 1) := by positivity
   exact (abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass P hN hnull hm).trans
     (add_le_add_left (mul_le_mul_of_nonneg_right hsum hpow) _)
@@ -410,17 +419,17 @@ nullary-compatible, and cellwise within `ε` under cell homogeneity
 count of `M` off the quotient of its rounding. -/
 theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCount_majorityRound_le
     (P : FiniteRelModel L (Fin k)) (M : FiniteRelModel L V) (Q : Finpartition s) {ε : ℝ}
-    (hε : 0 ≤ ε)
     (hhom : ∀ (n : ℕ), 0 < n → ∀ (S : L.Relations n) (C : Fin n → Q.parts),
       IsHomogeneousCell (M.Holds S) (fun i ↦ (C i : Finset V)) ε)
     {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
     |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ)
         - quotientInducedCount P (M.majorityRound Q) Q|
-      ≤ (∑ R : RelSymbol L, (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+      ≤ (∑ R ∈ (Finset.univ : Finset (RelSymbol L)).filter (fun R => 0 < (R.1 : ℕ)),
+          (k : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
           * (s.card : ℝ) ^ (k - 1)
         + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1) :=
   abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound P
-    (majorityRound_isIndivisibleFor M Q) (nullaryCompatible_majorityRound M Q) hε
+    (majorityRound_isIndivisibleFor M Q) (nullaryCompatible_majorityRound M Q)
     (cellwiseEditBound_majorityRound_of_isHomogeneousCell M Q hhom) hm
 
 /-- **The composite chained with the raw bridge.** When the approximant's transversal count is
@@ -466,6 +475,31 @@ theorem abs_inducedEmbeddingCountOn_div_sub_quotientInducedCount_div_le
     abs_of_nonneg (Nat.cast_nonneg (s.card.descFactorial k) : (0 : ℝ) ≤ _)]
   exact div_le_div_of_nonneg_right
     (abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass P hN hnull hm)
+    (Nat.cast_nonneg _)
+
+/-- **The normalized whole chain.** The edit-to-estimate chain
+`abs_inducedEmbeddingCountOn_sub_sum_est_le_of_editMass` divided through by `(|s|)_k`, including
+the bridge's `(δ + (k.choose 2)·β) · |s|^k` term, guard-free under `x / 0 = 0`. -/
+theorem abs_inducedEmbeddingCountOn_div_sub_sum_est_div_le_of_editMass
+    (P : FiniteRelModel L (Fin k)) {M N : FiniteRelModel L V} (hnull : NullaryCompatible M N)
+    (est : (Fin k → Finset V) → ℝ) (D : Finset (Finset V × Finset V))
+    {δ β : ℝ} {m : ℕ} (hδ : 0 ≤ δ)
+    (hlocal : ∀ T ∈ transversalCellTuples Q, T ∉ badCellTuples Q D →
+      |(inducedEmbeddingCountOn P N T : ℝ) - est T| ≤ δ * cellTupleVolume T)
+    (hest : ∀ T ∈ transversalCellTuples Q, 0 ≤ est T ∧ est T ≤ cellTupleVolume T)
+    (hmass : ∑ p ∈ D, ((p.1.card : ℝ) * p.2.card) ≤ β * (s.card : ℝ) ^ 2)
+    (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
+    |(inducedEmbeddingCountOn P M (fun _ : Fin k => s) : ℝ) / (s.card.descFactorial k : ℝ)
+        - (∑ T ∈ transversalCellTuples Q, est T) / (s.card.descFactorial k : ℝ)|
+      ≤ ((∑ R : RelSymbol L,
+          (k : ℝ) ^ (R.1 : ℕ) * editDistance (M.Holds R.2) (N.Holds R.2) (fun _ => s))
+          * (s.card : ℝ) ^ (k - 1)
+        + ((δ + (k.choose 2) * β) * (s.card : ℝ) ^ k
+          + (k.choose 2) * m * (s.card : ℝ) ^ (k - 1))) / (s.card.descFactorial k : ℝ) := by
+  rw [← sub_div, abs_div,
+    abs_of_nonneg (Nat.cast_nonneg (s.card.descFactorial k) : (0 : ℝ) ≤ _)]
+  exact div_le_div_of_nonneg_right
+    (abs_inducedEmbeddingCountOn_sub_sum_est_le_of_editMass P hnull est D hδ hlocal hest hmass hm)
     (Nat.cast_nonneg _)
 
 end Composite
@@ -573,16 +607,22 @@ example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
 
 -- **Homogeneity in, counting out**, statement-level: the majority-rounding corollary.
 example [AtMostBinary L] (P : FiniteRelModel L (Fin 3)) (M : FiniteRelModel L V)
-    (Q : Finpartition s) {ε : ℝ} (hε : 0 ≤ ε)
+    (Q : Finpartition s) {ε : ℝ}
     (hhom : ∀ (n : ℕ), 0 < n → ∀ (S : L.Relations n) (C : Fin n → Q.parts),
       IsHomogeneousCell (M.Holds S) (fun i ↦ (C i : Finset V)) ε)
     {m : ℕ} (hm : ∀ C ∈ Q.parts, C.card ≤ m) :
     |(inducedEmbeddingCountOn P M (fun _ : Fin 3 => s) : ℝ)
         - quotientInducedCount P (M.majorityRound Q) Q|
-      ≤ (∑ R : RelSymbol L, (3 : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
+      ≤ (∑ R ∈ (Finset.univ : Finset (RelSymbol L)).filter (fun R => 0 < (R.1 : ℕ)),
+          (3 : ℝ) ^ (R.1 : ℕ) * (ε * (s.card : ℝ) ^ (R.1 : ℕ)))
           * (s.card : ℝ) ^ (3 - 1)
         + (Nat.choose 3 2) * m * (s.card : ℝ) ^ (3 - 1) :=
-  abs_inducedEmbeddingCountOn_sub_quotientInducedCount_majorityRound_le P M Q hε hhom hm
+  abs_inducedEmbeddingCountOn_sub_quotientInducedCount_majorityRound_le P M Q hhom hm
+
+-- **The nullary symbols are not charged**: with one nullary symbol and nothing else, the
+-- positive-arity sum is empty, so the cellwise composite's edit term is `0` for any `ε`.
+example : ((Finset.univ : Finset (RelSymbol (singleRelLang 0))).filter
+    (fun R => 0 < (R.1 : ℕ))) = ∅ := by decide
 
 -- **`k = 0` composite is guard-free**: both sides `0` on the empty language.
 example (Q : Finpartition (Finset.univ : Finset (Fin 3))) {m : ℕ}
