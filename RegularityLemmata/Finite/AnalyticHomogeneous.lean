@@ -44,7 +44,7 @@ assumption (to the rectangle, in (a) only, where it places the common value in `
 totalize empty rectangles. The paper's "main observation" (a `δ`-constant function is within
 `δ / 2` of a common center) is `isDeltaConstantOn_iff_exists_center` in
 `Finite/AlmostConstant.lean`; (a) is then a row-wise Markov count and (b) a union-of-fibers
-count. No stability content: nothing here mentions ladders, trees, or ranks.
+count.
 -/
 
 namespace RegularityLemmata

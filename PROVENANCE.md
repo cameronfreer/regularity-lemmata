@@ -263,10 +263,6 @@ they were developed as stability-neutral infrastructure. No third-party source t
   `isDeltaConstantOn_iff_exists_center` in `Finite/AlmostConstant.lean`, in the same
   reformulated sense, with `IsDeltaConstantOn.exists_center_mem_Icc` as its range-aware
   companion; `isAlmostConstantPair_op_iff` is library-original.
-- N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
-  (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
-  (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
-  restatement with strict inequalities.
 
   The average-slicing and common-block theorems (`Partition/AverageSlicing.lean`,
   `Partition/CommonBlocks.lean`) are shaped by their Lemmas 4.3 and 4.6: an equipartition
@@ -279,3 +275,7 @@ they were developed as stability-neutral infrastructure. No third-party source t
   paper's Hoeffding-with-permutation-encoding argument; the control is two-sided where the
   paper's is one-sided. The stable-regularity theorems themselves are upstream
   (stability-flavored) material, not part of this library.
+- N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
+  (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
+  (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
+  restatement with strict inequalities.

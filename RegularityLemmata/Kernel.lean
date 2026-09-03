@@ -39,9 +39,9 @@ each listed module remains directly importable.
   staircase reducing `[0,1]`-valued average control to set-density control. Stability-free —
   no ladders, trees, or ranks.
 * `Finite.AnalyticHomogeneous` — Conant–Terry's `(δ, ε)`-homogeneous rectangles
-  (`RectKernel.IsHomogeneousPair`: row and column concentration at a common value for
-  `ε`-almost all rows and columns) and both directions of their Proposition A.5 relating
-  homogeneity to almost-constancy. Stability-free.
+  (`RectKernel.IsHomogeneousPair`: row and column concentration at respective common values
+  for `ε`-almost all rows and columns) and both directions of their Proposition A.5 relating
+  homogeneity to almost-constancy.
 * `Partition.RectKernel` — decomposition along independent partitions of the two carriers, and
   the stepped prediction (`steppedRectSum`).
 * `Partition.RectKernelEnergy` — kernel energy against a partition pair and the exact
