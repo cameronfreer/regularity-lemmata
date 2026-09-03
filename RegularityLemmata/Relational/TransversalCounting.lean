@@ -123,6 +123,7 @@ theorem inducedEmbeddingCountOn_eq_zero_of_not_matchesThreeProfiles [AtMostBinar
     binaryVertexProfile_eq_of_mem_of_le_profile hQ (hT i) hw hv
   exact fun hcontra => hne (hwv.symm.trans hcontra.symm)
 
+omit [DecidableEq V] in
 /-- `MatchesThreeProfiles` is the `Fin 3` instance of the index-generic `MatchesProfiles`. -/
 theorem matchesThreeProfiles_iff_matchesProfiles (T : Fin 3 → Finset V) :
     MatchesThreeProfiles P M T ↔ MatchesProfiles P M T := Iff.rfl
