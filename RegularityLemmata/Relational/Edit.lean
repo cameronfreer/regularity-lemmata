@@ -278,6 +278,21 @@ open FiniteRelModel
 
 variable {L : FirstOrder.Language} [FiniteRelational L] {V : Type*} [DecidableEq V] {k : ℕ}
 
+omit [DecidableEq V] in
+/-- **Nullary agreement empties the arity-0 edit set.** Two nullary-compatible models have edit
+distance `0` at every arity-`0` symbol, on any box. Stated with `n = 0` as a hypothesis so that
+it applies to a symbol whose arity is a coerced index. -/
+theorem editDistance_const_eq_zero_of_nullaryCompatible {M N : FiniteRelModel L V}
+    (hnull : NullaryCompatible M N) (s : Finset V) {n : ℕ} (hn : n = 0) (S : L.Relations n) :
+    editDistance (M.Holds S) (N.Holds S) (fun _ : Fin n => s) = 0 := by
+  subst hn
+  rw [editDistance, Finset.card_eq_zero, Finset.eq_empty_iff_forall_notMem]
+  intro y hy
+  rw [mem_editSet] at hy
+  apply hy.2
+  rw [show y = Fin.elim0 from funext fun i => i.elim0]
+  exact hnull S
+
 /-- **One symbol, one pattern tuple.** The `k`-tuples through `s` whose `x`-atom of the symbol
 `S` is edited number at most `|E_S|·|s|^(k−1)`, where `E_S` is the `s`-box edit set of `S`: for
 `n ≥ 1` the edited host tuple pins a coordinate (`card_filter_comp_mem_le`); at `n = 0` nullary
@@ -291,13 +306,8 @@ private theorem card_filter_comp_mem_editSet_le (M N : FiniteRelModel L V)
   classical
   cases n with
   | zero =>
-    have hE : editSet (M.Holds S) (N.Holds S) (fun _ : Fin 0 => s) = ∅ := by
-      rw [Finset.eq_empty_iff_forall_notMem]
-      intro y hy
-      rw [mem_editSet] at hy
-      apply hy.2
-      rw [show y = Fin.elim0 from funext fun i => i.elim0]
-      exact hnull S
+    have hE : editSet (M.Holds S) (N.Holds S) (fun _ : Fin 0 => s) = ∅ :=
+      Finset.card_eq_zero.mp (editDistance_const_eq_zero_of_nullaryCompatible hnull s rfl S)
     simp [hE, editDistance]
   | succ n => exact card_filter_comp_mem_le _ x 0
 

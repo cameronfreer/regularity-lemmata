@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.Indivisible
+import RegularityLemmata.Partition.BoxPartition
 import RegularityLemmata.Finite.HomogeneousCell
 import RegularityLemmata.Finite.Edit
 
@@ -77,14 +78,15 @@ Those are API-stability and compositionality arguments, not capability arguments
   carries content. The genuinely generic structure in that family is metric, and it is shipped
   under its honest names, `CellwiseEditBound.symm` and `CellwiseEditBound.trans`.
 * **No blow-up object and no uniqueness.** `majorityRound` is a model on the same carrier `V`,
-  not a structure on `P.parts`; no quotient `FiniteRelModel` is built. Nothing claims the
-  approximating model is unique, or best among the routes considered.
+  not a structure on `P.parts`; the quotient of an indivisible model onto `P.parts` is
+  `FiniteRelModel.quotient` in `Relational/Indivisible.lean`, and the two are composed only in
+  `Relational/AggregationBridge.lean`. Nothing claims the approximating model is unique, or best
+  among the routes considered.
 
-**Placement.** This is the first file in the library that *constructs* a `FiniteRelModel`, and
-the construction is computable — no `noncomputable`, no `Classical.dec` in the definition. It is
-a separate file rather than an addition to `Relational/Indivisible.lean`, whose frozen docstring
-records that approximate indivisibility is not defined there and that no blow-up model is
-constructed; both statements stay true.
+**Placement.** The construction is computable — no `noncomputable`, no `Classical.dec` in the
+definition. It is a separate file rather than an addition to `Relational/Indivisible.lean`, which
+holds the quotient model and whose docstring records that approximate indivisibility is not
+defined there; the rounding (on `V`) and the quotient (on `P.parts`) stay in separate files.
 -/
 
 namespace RegularityLemmata
@@ -401,6 +403,53 @@ theorem isHomogeneousCell_of_cellwiseEditBound {M N : FiniteRelModel L V}
     rw [tupleDensity_eq_count_div, hcard, div_le_iff₀ hpos]
     linarith
 
+/-! ### From cellwise to aggregate: the `s`-box edit mass -/
+
+section Aggregate
+
+variable {s : Finset V}
+
+/-- **The `s`-box edit set tiles by cell boxes.** The edit distance on the constant box
+`fun _ ↦ s` is the sum of the edit distances on the cell boxes of `P`, with no off-`s`
+remainder: the constant-partition specialization of the `ProductSpaces` substrate
+`biUnion_boxCells_tuples` / `boxCells_pairwiseDisjoint`. -/
+theorem editDistance_const_eq_sum_cellBoxes {n : ℕ} (R₁ R₂ : (Fin n → V) → Prop)
+    [DecidablePred R₁] [DecidablePred R₂] (P : Finpartition s) :
+    editDistance R₁ R₂ (fun _ : Fin n ↦ s)
+      = ∑ C ∈ Fintype.piFinset (fun _ : Fin n ↦ P.parts), editDistance R₁ R₂ C := by
+  classical
+  simp only [editDistance, editSet]
+  rw [show Fintype.piFinset (fun _ : Fin n ↦ s)
+      = (Fintype.piFinset fun _ : Fin n ↦ P.parts).biUnion Fintype.piFinset from
+      (biUnion_boxCells_tuples (A := fun _ : Fin n ↦ s) fun _ ↦ P).symm,
+    Finset.filter_biUnion, Finset.card_biUnion]
+  intro C hC D hD hCD
+  exact (boxCells_pairwiseDisjoint (A := fun _ : Fin n ↦ s) (fun _ ↦ P)
+    (Finset.mem_coe.mpr hC) (Finset.mem_coe.mpr hD) hCD).mono
+    (Finset.filter_subset _ _) (Finset.filter_subset _ _)
+
+/-- **Cellwise to aggregate.** A cellwise edit bound `ε` on the boxes of `P` aggregates to the
+absolute `s`-box edit count `ε · |s|^n` for every positive-arity symbol — **exact** over the
+partition boxes, since the cell boxes tile the `s`-box by volume (`boxMass_eq_sum_boxCells`
+with unit weights). This is the conversion the edit-transfer theorem
+(`abs_inducedEmbeddingCountOn_sub_le_editMass`) consumes. -/
+theorem CellwiseEditBound.editDistance_const_le {M N : FiniteRelModel L V} {P : Finpartition s}
+    {ε : ℝ} (h : CellwiseEditBound M N P ε) {n : ℕ} (hn : 0 < n) (S : L.Relations n) :
+    (editDistance (M.Holds S) (N.Holds S) (fun _ : Fin n ↦ s) : ℝ) ≤ ε * (s.card : ℝ) ^ n := by
+  classical
+  rw [editDistance_const_eq_sum_cellBoxes _ _ P, Nat.cast_sum]
+  have hvol : ∑ C ∈ Fintype.piFinset (fun _ : Fin n ↦ P.parts), ∏ i, ((C i).card : ℝ)
+      = (s.card : ℝ) ^ n := by
+    have h := boxMass_eq_sum_boxCells (fun _ _ ↦ (1 : ℝ)) (A := fun _ : Fin n ↦ s) fun _ ↦ P
+    simp only [boxMass_one, Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h
+    exact h.symm
+  rw [← hvol, Finset.mul_sum]
+  refine Finset.sum_le_sum fun C hC ↦ ?_
+  rw [Fintype.mem_piFinset] at hC
+  exact h n hn S fun i ↦ ⟨C i, hC i⟩
+
+end Aggregate
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -530,6 +579,23 @@ example :
 example :
     ¬ (((1 : ℕ) : ℝ) ≤ (1 / 2) * ∏ _i : Fin 1, ((({0} : Finset (Fin 2))).card : ℝ)) := by
   norm_num
+
+-- **Cellwise to aggregate, statement-level**: majority rounding is within `1/2` cellwise, so
+-- its `s`-box edit mass at every positive arity is at most `|s|^n / 2`.
+example (M : FiniteRelModel (singleRelLang 2) (Fin 4))
+    (P : Finpartition (Finset.univ : Finset (Fin 4))) (S : (singleRelLang 2).Relations 2) :
+    (editDistance (M.Holds S) ((M.majorityRound P).Holds S) (fun _ : Fin 2 ↦ Finset.univ) : ℝ)
+      ≤ 1 / 2 * ((Finset.univ : Finset (Fin 4)).card : ℝ) ^ 2 :=
+  (cellwiseEditBound_majorityRound_half M P).editDistance_const_le (by decide) S
+
+-- **The tiling is exact, computed**: with the indiscrete partition the single cell box is the
+-- whole box, so both sides are the same edit count.
+example (M N : FiniteRelModel (singleRelLang 2) (Fin 3)) (S : (singleRelLang 2).Relations 2) :
+    editDistance (M.Holds S) (N.Holds S) (fun _ : Fin 2 ↦ (Finset.univ : Finset (Fin 3)))
+      = ∑ C ∈ Fintype.piFinset (fun _ : Fin 2 ↦
+          (⊤ : Finpartition (Finset.univ : Finset (Fin 3))).parts),
+          editDistance (M.Holds S) (N.Holds S) C :=
+  editDistance_const_eq_sum_cellBoxes _ _ _
 
 end Tests
 
