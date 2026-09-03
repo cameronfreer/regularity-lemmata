@@ -8,6 +8,7 @@ import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Average
 import RegularityLemmata.Finite.RectangleCounting
 import RegularityLemmata.Finite.AlmostConstant
+import RegularityLemmata.Finite.AnalyticHomogeneous
 import RegularityLemmata.Finite.Edit
 import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.WeightedChoiceBudget
