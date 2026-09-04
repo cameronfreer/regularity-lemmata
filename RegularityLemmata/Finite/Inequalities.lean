@@ -326,7 +326,7 @@ theorem exp_neg_le_one_sub_add_sq_half {x : ℝ} (hx : 0 ≤ x) :
   calc (1 : ℝ) ≤ (1 - x + x ^ 2 / 2) * (1 + x + x ^ 2 / 2) := by nlinarith [sq_nonneg (x ^ 2)]
     _ ≤ (1 - x + x ^ 2 / 2) * Real.exp x := mul_le_mul_of_nonneg_left hexp hq
 
--- The inequality is tight at `x = 0` and strict for `x > 0`, statement-level and computed.
+-- The inequality is tight at `x = 0` (both sides `1`) and holds at `x = 1`, statement-level.
 example : Real.exp (-(0 : ℝ)) ≤ 1 - 0 + 0 ^ 2 / 2 := exp_neg_le_one_sub_add_sq_half le_rfl
 example : Real.exp (-(1 : ℝ)) ≤ 1 - 1 + 1 ^ 2 / 2 := exp_neg_le_one_sub_add_sq_half zero_le_one
 

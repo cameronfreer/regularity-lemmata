@@ -260,31 +260,34 @@ theorem log_hedgePotential_succ_le [Nonempty ι] (hη : 0 ≤ η)
 /-! ### The regret bound -/
 
 /-- **Telescoped**: `log Φ T ≤ log |ι| − η ∑_{t<T} ⟨p_t, ℓ_t⟩ + η² T / 2`. -/
-theorem log_hedgePotential_le [Nonempty ι] (hη : 0 ≤ η)
-    (hℓ : ∀ t i, 0 ≤ ℓ t i ∧ ℓ t i ≤ 1) (T : ℕ) :
+theorem log_hedgePotential_le [Nonempty ι] (hη : 0 ≤ η) {T : ℕ}
+    (hℓ : ∀ t < T, ∀ i, 0 ≤ ℓ t i ∧ ℓ t i ≤ 1) :
     Real.log (hedgePotential η ℓ T)
       ≤ Real.log (Fintype.card ι) - η * ∑ t ∈ range T, hedgeExpectedLoss η ℓ t
         + η ^ 2 * T / 2 := by
   induction T with
   | zero => simp
   | succ T ih =>
-    have := log_hedgePotential_succ_le (η := η) (ℓ := ℓ) (t := T) hη (hℓ T)
+    have := log_hedgePotential_succ_le (η := η) (ℓ := ℓ) (t := T) hη (hℓ T (Nat.lt_succ_self T))
+    have ih' := ih fun t ht => hℓ t (ht.trans (Nat.lt_succ_self T))
     rw [sum_range_succ]
     push_cast
     linarith
 
-/-- **The Hedge regret bound.** For losses in `[0, 1]` and any `η > 0`, against every fixed
-expert `i₀`:
+/-- **The Hedge regret bound.** For losses in `[0, 1]` over the horizon `t < T` and any
+`η > 0`, against every fixed expert `i₀`:
 
 `∑_{t<T} ⟨p_t, ℓ_t⟩ ≤ ∑_{t<T} ℓ t i₀ + log |ι| / η + η T / 2`,
 
-with no upper hypothesis on `η`. From the telescoped potential bound and
-`Φ T ≥ hedgeWeight η ℓ T i₀ = exp (−η ∑_{t<T} ℓ t i₀)`. -/
-theorem hedge_regret [Nonempty ι] (hη : 0 < η) (hℓ : ∀ t i, 0 ≤ ℓ t i ∧ ℓ t i ≤ 1) (i₀ : ι)
-    (T : ℕ) :
+with no upper hypothesis on `η` and no hypothesis on rounds `≥ T`. From the telescoped
+potential bound and `Φ T ≥ hedgeWeight η ℓ T i₀ = exp (−η ∑_{t<T} ℓ t i₀)`. The expert `i₀`
+itself witnesses `Nonempty ι`, so no instance is assumed. -/
+theorem hedge_regret (hη : 0 < η) {T : ℕ} (hℓ : ∀ t < T, ∀ i, 0 ≤ ℓ t i ∧ ℓ t i ≤ 1)
+    (i₀ : ι) :
     ∑ t ∈ range T, hedgeExpectedLoss η ℓ t
       ≤ ∑ t ∈ range T, ℓ t i₀ + Real.log (Fintype.card ι) / η + η * T / 2 := by
-  have hup := log_hedgePotential_le hη.le hℓ T
+  have : Nonempty ι := ⟨i₀⟩
+  have hup := log_hedgePotential_le hη.le hℓ
   have hlow : -η * ∑ t ∈ range T, ℓ t i₀ ≤ Real.log (hedgePotential η ℓ T) := by
     rw [← Real.log_exp (-η * ∑ t ∈ range T, ℓ t i₀)]
     exact Real.log_le_log (Real.exp_pos _) hedgeWeight_le_hedgePotential
@@ -309,20 +312,21 @@ theorem sum_hedgeWeight_pos [NeZero m] : 0 < ∑ i, hedgeWeight η ℓm t i :=
 theorem hedgeProb_sum_one_fin [NeZero m] : ∑ i, hedgeProb η ℓm t i = 1 :=
   hedgeProb_sum_one
 
-/-- The regret bound over `m` experts, reading `log m`. -/
-theorem hedge_regret_fin [NeZero m] (hη : 0 < η) (hℓ : ∀ t i, 0 ≤ ℓm t i ∧ ℓm t i ≤ 1)
-    (i₀ : Fin m) (T : ℕ) :
+/-- The regret bound over `m` experts, reading `log m`; `i₀ : Fin m` already forces `m ≠ 0`. -/
+theorem hedge_regret_fin (hη : 0 < η) {T : ℕ} (hℓ : ∀ t < T, ∀ i, 0 ≤ ℓm t i ∧ ℓm t i ≤ 1)
+    (i₀ : Fin m) :
     ∑ t ∈ range T, hedgeExpectedLoss η ℓm t
       ≤ ∑ t ∈ range T, ℓm t i₀ + Real.log m / η + η * T / 2 := by
-  have := hedge_regret hη hℓ i₀ T
+  have := hedge_regret hη hℓ i₀
   rwa [Fintype.card_fin] at this
 
 end Fin
 
-/-! ### Tests and adversarial examples
+/-! ### Tests and adversarial examples: concrete symbolic pins
 
-`Real.exp` is not computable, so the executable pins are closed forms on a concrete loss
-sequence, discharged by `simp`/`norm_num`, plus the endpoints. -/
+`Real.exp` is not computable, so these are **concrete symbolic pins**, not executable ones:
+closed forms on a concrete loss sequence, kernel-checked by `simp`/`norm_num`, plus the
+endpoints. -/
 
 section Tests
 
@@ -378,19 +382,31 @@ example (η : ℝ) (t : ℕ) (i : Fin 3) : hedgeProb η (fun _ _ => (0 : ℝ)) t
 example (T : ℕ) :
     ∑ t ∈ range T, hedgeExpectedLoss 1 twoLoss t
       ≤ ∑ t ∈ range T, twoLoss t 1 + Real.log 2 / 1 + 1 * T / 2 := by
-  have := hedge_regret_fin (ℓm := twoLoss) one_pos twoLoss_mem 1 T
+  have := hedge_regret_fin (ℓm := twoLoss) one_pos (T := T) (fun t _ => twoLoss_mem t) 1
   simpa using this
 example : ∑ t ∈ range 0, hedgeExpectedLoss 1 twoLoss t
     ≤ ∑ t ∈ range 0, twoLoss t 1 + Real.log 2 / 1 + 1 * (0 : ℕ) / 2 :=
-  hedge_regret_fin (ℓm := twoLoss) one_pos twoLoss_mem 1 0
+  hedge_regret_fin (ℓm := twoLoss) one_pos (T := 0) (fun t _ => twoLoss_mem t) 1
 
 -- **Arbitrary `η`**: the bound is stated at `η = 5`, beyond the `η < 2` an unrelaxed
 -- telescoping would have imposed.
 example (T : ℕ) :
     ∑ t ∈ range T, hedgeExpectedLoss 5 twoLoss t
       ≤ ∑ t ∈ range T, twoLoss t 0 + Real.log 2 / 5 + 5 * T / 2 := by
-  have := hedge_regret_fin (ℓm := twoLoss) (by norm_num : (0 : ℝ) < 5) twoLoss_mem 0 T
+  have := hedge_regret_fin (ℓm := twoLoss) (by norm_num : (0 : ℝ) < 5) (T := T)
+    (fun t _ => twoLoss_mem t) 0
   simpa using this
+
+-- **Finite horizon**: the bound at `T = 1` is unaffected by an out-of-range loss at round `1`.
+private def wildLater : ℕ → Fin 2 → ℝ
+  | 0, i => if i = 0 then 1 else 0
+  | _ + 1, _ => 7
+example : ∑ t ∈ range 1, hedgeExpectedLoss 1 wildLater t
+    ≤ ∑ t ∈ range 1, wildLater t 1 + Real.log 2 / 1 + 1 * (1 : ℕ) / 2 :=
+  hedge_regret_fin (ℓm := wildLater) one_pos (T := 1)
+    (fun t ht i => by
+      obtain rfl : t = 0 := by omega
+      simp only [wildLater]; split_ifs <;> norm_num) 1
 
 -- **The empty-expert endpoint**: no distribution, potential `0`, expected loss `0`.
 example (η : ℝ) (ℓ : ℕ → Fin 0 → ℝ) (t : ℕ) : hedgePotential η ℓ t = 0 :=
