@@ -15,6 +15,7 @@ import RegularityLemmata.Finite.WeightedChoiceBudget
 import RegularityLemmata.Finite.DensityBuckets
 import RegularityLemmata.Finite.IndependentSet
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Finite.Hedge
 import RegularityLemmata.Finite.RelationFiber
 import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel

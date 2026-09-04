@@ -102,6 +102,15 @@ they were developed as stability-neutral infrastructure. No third-party source t
 
 ## Publications
 
+- N. Littlestone, M. K. Warmuth, *The weighted majority algorithm*, Inf. Comput. 108
+  (1994) 212–261; Y. Freund, R. E. Schapire, *A decision-theoretic generalization of
+  on-line learning and an application to boosting*, J. Comput. Syst. Sci. 55 (1997)
+  119–139 — the multiplicative-weights (Hedge) forecaster and its regret bound
+  (`Finite/Hedge.lean`). The formalization is this repository's own: an arbitrary finite
+  expert type as the primitive, raw weights with the distribution derived rather than
+  bundled, an explicit empty-expert endpoint, and the regret proof telescoping the relaxed
+  logarithmic increment so that the learning rate carries no upper bound.
+
 - E. Szemerédi, *Regular partitions of graphs*, Colloq. Internat. CNRS 260, 1978.
 - A. Frieze, R. Kannan, *Quick approximation to matrices and applications*,
   Combinatorica 19 (1999).
