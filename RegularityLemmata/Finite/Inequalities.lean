@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Basic
+import Mathlib.Analysis.Complex.Exponential
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.NormNum
@@ -308,5 +309,25 @@ example : |(0.9 : ℝ) * 0.9 - 0.8 * 0.8| ≤ |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ)
 example : |(0.9 : ℝ) * 0.9 * 0.9 - 0.8 * 0.8 * 0.8|
     ≤ |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| + |(0.9 : ℝ) - 0.8| :=
   abs_mul_mul_sub_mul_mul_le (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+
+/-! ### The exponential inequality behind multiplicative weights -/
+
+/-- **`exp (−x) ≤ 1 − x + x²/2` for `x ≥ 0`.** The reverse-direction companion of Mathlib's
+series bound `Real.quadratic_le_exp_of_nonneg` (`1 + x + x²/2 ≤ exp x`), from which it follows
+since `(1 − x + x²/2)·(1 + x + x²/2) = 1 + x⁴/4 ≥ 1`. This is the single analytic ingredient of
+the Hedge regret bound (`Finite/Hedge.lean`); Mathlib's pin has only the forward bound. Recorded
+on the plausibly-Mathlib-shaped list (#54). -/
+theorem exp_neg_le_one_sub_add_sq_half {x : ℝ} (hx : 0 ≤ x) :
+    Real.exp (-x) ≤ 1 - x + x ^ 2 / 2 := by
+  have hq : 0 ≤ 1 - x + x ^ 2 / 2 := by nlinarith [sq_nonneg (x - 1)]
+  have hexp := Real.quadratic_le_exp_of_nonneg hx
+  have hpos : 0 < Real.exp x := Real.exp_pos x
+  rw [Real.exp_neg, inv_le_iff_one_le_mul₀ hpos]
+  calc (1 : ℝ) ≤ (1 - x + x ^ 2 / 2) * (1 + x + x ^ 2 / 2) := by nlinarith [sq_nonneg (x ^ 2)]
+    _ ≤ (1 - x + x ^ 2 / 2) * Real.exp x := mul_le_mul_of_nonneg_left hexp hq
+
+-- The inequality is tight at `x = 0` (both sides `1`) and holds at `x = 1`, statement-level.
+example : Real.exp (-(0 : ℝ)) ≤ 1 - 0 + 0 ^ 2 / 2 := exp_neg_le_one_sub_add_sq_half le_rfl
+example : Real.exp (-(1 : ℝ)) ≤ 1 - 1 + 1 ^ 2 / 2 := exp_neg_le_one_sub_add_sq_half zero_le_one
 
 end RegularityLemmata
