@@ -25,7 +25,10 @@ The library's finite Ramsey results behind one import.
   extension of an arbitrary internal embedding through it.
 * `Finite/BinaryTreeRamsey.lean` — the additive two-colour subtree theorem: a colouring of the
   internal nodes of a height-`a + b + 1` tree admits a colour-`0` subtree of height `a + 1` or a
-  colour-`1` subtree of height `b + 1`.
+  colour-`1` subtree of height `b + 1`; and its multicolour form `binaryTreeRamsey` (companion
+  Lemma 2.6 in colouring form): an `m`-colouring of a height-`(∑ i, t i) + 1` tree admits a
+  colour-`i` subtree of height `t i + 1` for some `i`, with the whole-tree and equal-height
+  (`m * t + 1`) forms.
 
 ## What they share, and what they do not
 

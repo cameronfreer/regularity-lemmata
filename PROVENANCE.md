@@ -230,8 +230,11 @@ they were developed as stability-neutral infrastructure. No third-party source t
   G. Conant and C. Terry, *Encoding orders and trees in real-valued functions*
   ([arXiv:2607.21761](https://arxiv.org/abs/2607.21761)), **Lemma 2.6**, the tree-Ramsey
   ingredient used in their proof of Theorem 1.11. Their Lemma 2.6 is the multicolour
-  generalization; what is formalized here is its two-colour case, and Theorem 1.11 is a
-  downstream application rather than a Ramsey statement.
+  generalization, formalized as `binaryTreeRamsey` — a **reformulated variant**: the
+  colouring form of their cover statement, with heights in successor form (subtrees `t i + 1`,
+  host `(∑ i, t i) + 1`, their `t = t₁ + … + t_m − m + 1`); the cover equivalence is not
+  formalized, so the label is not "exact". Theorem 1.11 is a downstream application rather
+  than a Ramsey statement.
 
   What is this repository's own is the formulation: the word-indexed node types and branch
   relation of `Finite/FullBinaryTree.lean`, the single-law `InternalEmbedding` with
