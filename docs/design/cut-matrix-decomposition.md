@@ -170,8 +170,9 @@ Potential: `Φ(R) = rectSqMass R wX wY A B := ∑ x ∈ A, ∑ y ∈ B, wX x * w
    is why no positive-mass hypothesis appears.
 3. **Decrement identity** (L5), pure algebra with `c := rectAverage R wX wY S T`:
    `Φ(R − c·𝟙_{S×T}) = Φ(R) − 2c·rectSum R S T + c²·mass S·mass T = Φ(R) − c²·mass S·mass T`,
-   the last step because `c · mass S · mass T = rectSum R S T` when the mass is positive
-   (`rectAverage_mul_mass`, exists). The gain is `rectBlockEnergy R wX wY S T`.
+   the last step because `c · mass S · mass T = rectSum R S T` under nonnegative weights with
+   no positivity needed (`rectAverage_mul_mass`, exists — on zero mass both sides are `0`).
+   The gain is `rectBlockEnergy R wX wY S T`.
 4. **Gain is at least `ε² M`**: `c²·mass S·mass T = (rectSum)²/(mass S·mass T) ≥ (ε M)²/M`,
    using `mass S · mass T ≤ M` (`finsetMass_mono`, nonnegativity).
 5. **Coefficient bound**: `c² · mass S · mass T ≤ Φ(R) ≤ M` (Cauchy–Schwarz,
