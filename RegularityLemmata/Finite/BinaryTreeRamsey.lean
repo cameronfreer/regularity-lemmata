@@ -395,9 +395,43 @@ example (a b : ℕ) (e : InternalEmbedding a b) : (extendProper e).toInternal = 
 
 /-! #### The multicolour theorem -/
 
--- **`m = 2` recovers the two-colour theorem** after simplification: with `t = ![a, b]` the
--- recursion is entered at `n = a + b` (`Fin.sum_univ_two`), and the colour index `i : Fin 2`
--- splits into the disjunction, with the returned height rewritten to `a + 1` or `b + 1`.
+-- **`m = 2` recovers the two-colour theorem through the public API.** With `t = ![a, b]` the
+-- host height is `(∑ i, ![a, b] i) + 1`, which is `a + b + 1` after `Fin.sum_univ_two` but not
+-- definitionally so; the colouring is restricted along the height identity on the way in and
+-- the embedding rebuilt on the way out (`omega` on lengths plus proof irrelevance), exactly as
+-- the `a = 0` example above does. The source heights `![a, b] 0 + 1` and `![a, b] 1 + 1` are
+-- `a + 1` and `b + 1` definitionally.
+example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
+    (∃ e : InternalEmbedding (a + 1) (a + b + 1), ∀ x, colour (e x) = 0) ∨
+    (∃ e : InternalEmbedding (b + 1) (a + b + 1), ∀ x, colour (e x) = 1) := by
+  have hsum : (∑ i, ![a, b] i) = a + b := by simp [Fin.sum_univ_two]
+  have hnode : ∀ x : InternalNode ((∑ i, ![a, b] i) + 1), x.1.length < a + b + 1 :=
+    fun x => by have := x.2; omega
+  obtain ⟨i, e, he⟩ := binaryTreeRamsey 2 ![a, b] (fun x => colour ⟨x.1, hnode x⟩)
+  rcases fin_two_cases i with rfl | rfl
+  · exact Or.inl ⟨⟨fun x => ⟨(e x).1, hnode (e x)⟩, fun d x y h => e.branch d x y h⟩, he⟩
+  · exact Or.inr ⟨⟨fun x => ⟨(e x).1, hnode (e x)⟩, fun d x y h => e.branch d x y h⟩, he⟩
+
+-- **The whole-tree form is recovered the same way** from `binaryTreeRamsey_proper`: leaves are
+-- transported along the height identity as well (a leaf of the host of height
+-- `(∑ i, ![a, b] i) + 1` has length exactly `a + b + 1`).
+example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
+    (∃ e : ProperEmbedding (a + 1) (a + b + 1), ∀ x, colour (e.internal x) = 0) ∨
+    (∃ e : ProperEmbedding (b + 1) (a + b + 1), ∀ x, colour (e.internal x) = 1) := by
+  have hsum : (∑ i, ![a, b] i) = a + b := by simp [Fin.sum_univ_two]
+  have hnode : ∀ x : InternalNode ((∑ i, ![a, b] i) + 1), x.1.length < a + b + 1 :=
+    fun x => by have := x.2; omega
+  have hleaf : ∀ l : LeafNode ((∑ i, ![a, b] i) + 1), l.1.length = a + b + 1 :=
+    fun l => by have := l.2; omega
+  obtain ⟨i, e, he⟩ := binaryTreeRamsey_proper 2 ![a, b] (fun x => colour ⟨x.1, hnode x⟩)
+  rcases fin_two_cases i with rfl | rfl
+  · exact Or.inl ⟨⟨fun x => ⟨(e.internal x).1, hnode _⟩, fun l => ⟨(e.leaf l).1, hleaf _⟩,
+      fun d x y h => e.branch_internal d x y h, fun d x l h => e.branch_leaf d x l h⟩, he⟩
+  · exact Or.inr ⟨⟨fun x => ⟨(e.internal x).1, hnode _⟩, fun l => ⟨(e.leaf l).1, hleaf _⟩,
+      fun d x y h => e.branch_internal d x y h, fun d x l h => e.branch_leaf d x l h⟩, he⟩
+
+-- The private recursion agrees with the two-colour theorem's disjunction directly, without any
+-- height transport: entered at `n = a + b`, the returned height rewrites to `a + 1` or `b + 1`.
 example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     (∃ e : InternalEmbedding (a + 1) (a + b + 1), ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding (b + 1) (a + b + 1), ∀ x, colour (e x) = 1) := by
@@ -425,11 +459,18 @@ example (m : ℕ) (colour : InternalNode (m * 0 + 1) → Fin m) :
 example (t : Fin 0 → ℕ) (colour : InternalNode ((∑ i, t i) + 1) → Fin 0) : False :=
   (colour (root _)).elim0
 
--- **`m = 1` is the identity**: one colour, subtree height `t + 1` equal to the host height.
+-- **`m = 1`: existence at equal heights.** One colour, so the subtree height `t + 1` equals
+-- the host height; the theorem asserts existence of some embedding of that height.
 example (t : ℕ) (colour : InternalNode ((∑ i : Fin 1, ![t] i) + 1) → Fin 1) :
     ∃ (i : Fin 1) (e : InternalEmbedding (![t] i + 1) ((∑ i : Fin 1, ![t] i) + 1)),
       ∀ x, colour (e x) = i :=
   binaryTreeRamsey 1 ![t] colour
+
+-- **`m = 1`: the identity embedding is a witness**, exhibited separately: with one colour every
+-- node has it, so `InternalEmbedding.id` is monochromatic at the only colour.
+example (h : ℕ) (colour : InternalNode h → Fin 1) :
+    ∀ x, colour (InternalEmbedding.id h x) = 0 :=
+  fun _ => Subsingleton.elim _ _
 
 -- **A concrete three-colouring** of the height-`4` tree by depth modulo `3`: not constant, so
 -- the theorem is not answered by a whole-tree embedding at any colour.
