@@ -38,8 +38,12 @@ masses in partition formulas come out as cardinalities.
 * `restrict` restricts the kernel **and the weights** by subtype inclusion, with **no
   renormalization**.
 
-Partitions, stepification, energy, variance, and cut discrepancy are deliberately absent;
-they belong to the next tranche.
+**The boundary.** This module holds the **partition-free** quantities of a kernel on a
+rectangle: sums, averages, bounds, the pointwise mass-weighted square (`rectSqMass`), the block
+energy of one rectangle (`rectBlockEnergy`), and the witness lemma
+(`finsetMass_mul_pos_of_lt_abs_rectSum`). Everything indexed by a partition — stepification,
+the partition energy and its variance identities, cut discrepancy, and the Frieze–Kannan
+iteration — lives in the `Partition/RectKernel*` modules.
 -/
 
 namespace RegularityLemmata
@@ -152,6 +156,17 @@ theorem rectAverage_smul_weight_left {c : ℝ} (hc : c ≠ 0) (f : RectKernel X 
   rcases eq_or_ne (finsetMass wX A * finsetMass wY B) 0 with h | h
   · rw [h, mul_zero, div_zero, div_zero]
   · rw [mul_div_mul_left _ _ hc]
+
+/-- **Linearity over a finite family of kernels.** The rectangle sum of a pointwise finite sum
+is the finite sum of the rectangle sums, for arbitrary weights. -/
+theorem rectSum_finset_sum {ι : Type*} (s : Finset ι) (h : ι → RectKernel X Y) (wX : X → ℝ)
+    (wY : Y → ℝ) (A : Finset X) (B : Finset Y) :
+    rectSum (fun x y => ∑ k ∈ s, h k x y) wX wY A B = ∑ k ∈ s, rectSum (h k) wX wY A B := by
+  simp only [rectSum, Finset.mul_sum]
+  have hinner : ∀ x, (∑ y ∈ B, ∑ k ∈ s, wX x * wY y * h k x y)
+      = ∑ k ∈ s, ∑ y ∈ B, wX x * wY y * h k x y := fun x => Finset.sum_comm
+  simp only [hinner]
+  exact Finset.sum_comm
 
 /-! ### Transpose, pullback, restriction -/
 
@@ -325,6 +340,106 @@ theorem rectAverage_mem_Icc {a b : ℝ} (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : �
   rw [rectAverage, Set.mem_Icc, le_div_iff₀ hm, div_le_iff₀ hm]
   exact ⟨by linarith, by linarith⟩
 
+/-! ### Positive mass from a rectangle-sum witness
+
+Partition-free form of the Frieze–Kannan witness lemma: a rectangle whose sum exceeds
+`ε · (mass A · mass B)` in absolute value forces the total mass to be positive, because under
+nonnegative weights zero total mass makes every rectangle sum inside the carriers vanish. No
+`0 < ε` is needed. -/
+
+/-- Zero total mass with nonnegative weights annihilates every rectangle sum inside the
+carriers. -/
+theorem rectSum_eq_zero_of_finsetMass_mul_eq_zero (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B)
+    (h : finsetMass wX A * finsetMass wY B = 0) : rectSum f wX wY S T = 0 := by
+  rcases mul_eq_zero.mp h with hA | hB
+  · have hz : ∀ x ∈ A, wX x = 0 := fun x hx =>
+      (Finset.sum_eq_zero_iff_of_nonneg hwX).mp hA x hx
+    exact Finset.sum_eq_zero fun x hx => Finset.sum_eq_zero fun y _ => by
+      rw [hz x (hS hx), zero_mul, zero_mul]
+  · have hz : ∀ y ∈ B, wY y = 0 := fun y hy =>
+      (Finset.sum_eq_zero_iff_of_nonneg hwY).mp hB y hy
+    exact Finset.sum_eq_zero fun x _ => Finset.sum_eq_zero fun y hy => by
+      rw [hz y (hT hy), mul_zero, zero_mul]
+
+/-- **A witness forces positive mass.** -/
+theorem finsetMass_mul_pos_of_lt_abs_rectSum (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) {ε : ℝ}
+    (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectSum f wX wY S T|) :
+    0 < finsetMass wX A * finsetMass wY B := by
+  rcases eq_or_lt_of_le (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)) with h | h
+  · exfalso
+    rw [← h, mul_zero, rectSum_eq_zero_of_finsetMass_mul_eq_zero hwX hwY hS hT h.symm,
+      abs_zero] at hwit
+    exact lt_irrefl _ hwit
+  · exact h
+
+/-! ### The pointwise square and the block energy
+
+Two partition-free quantities: the **pointwise mass-weighted square** `rectSqMass`, defined
+through `rectSum` applied to the pointwise square so that its algebra is `rectSum`'s, and the
+**block energy** `rectBlockEnergy`, the mass-weighted square of a rectangle's average.
+`Partition/RectKernelEnergy.lean` sums the block energy over a partition pair; the cut-matrix
+decomposition (`docs/design/cut-matrix-decomposition.md`) uses the square as its potential and
+the block energy as its per-round gain. -/
+
+/-- The raw rectangle sum of the pointwise square, `∑ x ∈ A, ∑ y ∈ B, wX x * wY y * f x y ^ 2`. -/
+noncomputable def rectSqMass (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
+    (A : Finset X) (B : Finset Y) : ℝ :=
+  rectSum (fun x y => f x y ^ 2) wX wY A B
+
+theorem rectSqMass_def :
+    rectSqMass f wX wY A B = ∑ x ∈ A, ∑ y ∈ B, wX x * wY y * f x y ^ 2 := rfl
+
+theorem rectSqMass_nonneg (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    0 ≤ rectSqMass f wX wY A B :=
+  rectSum_nonneg hwX hwY fun _ _ _ _ => sq_nonneg _
+
+/-- The pointwise square of an absolutely `C`-bounded kernel has mass at most `C²` times the
+rectangle mass. Guard-free. -/
+theorem rectSqMass_le (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {C : ℝ}
+    (hf : IsAbsBoundedOnRectangle f C A B) :
+    rectSqMass f wX wY A B ≤ C ^ 2 * (finsetMass wX A * finsetMass wY B) := by
+  rw [rectSqMass, ← rectSum_const (C ^ 2) wX wY A B, rectSum, rectSum]
+  refine Finset.sum_le_sum fun x hx => Finset.sum_le_sum fun y hy => ?_
+  refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (hwX x hx) (hwY y hy))
+  have := hf x hx y hy
+  nlinarith [abs_nonneg (f x y), sq_abs (f x y), abs_le.mp this]
+
+theorem rectSqMass_op : rectSqMass f.op wY wX B A = rectSqMass f wX wY A B :=
+  rectSum_op _ wX wY A B
+
+/-- The energy of one rectangle: its average squared, weighted by its mass. -/
+noncomputable def rectBlockEnergy (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
+    (A : Finset X) (B : Finset Y) : ℝ :=
+  rectAverage f wX wY A B ^ 2 * (finsetMass wX A * finsetMass wY B)
+
+theorem rectBlockEnergy_nonneg (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    0 ≤ rectBlockEnergy f wX wY A B :=
+  mul_nonneg (sq_nonneg _)
+    (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY))
+
+/-- **The mass upper bound.** For an absolutely unit-bounded kernel the block energy is at
+most the block's mass. Guard-free: at zero mass both sides are `0`. -/
+theorem rectBlockEnergy_le_mass (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
+    (hf : IsAbsUnitBoundedOnRectangle f A B) :
+    rectBlockEnergy f wX wY A B ≤ finsetMass wX A * finsetMass wY B := by
+  have habs := abs_rectAverage_le (by norm_num : (0:ℝ) ≤ 1) hwX hwY hf
+  have hsq : rectAverage f wX wY A B ^ 2 ≤ 1 := by
+    have := abs_le.mp habs
+    nlinarith [this.1, this.2]
+  calc rectBlockEnergy f wX wY A B
+      ≤ 1 * (finsetMass wX A * finsetMass wY B) :=
+        mul_le_mul_of_nonneg_right hsq
+          (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY))
+    _ = finsetMass wX A * finsetMass wY B := one_mul _
+
+/-- `op` exchanges the two sides of the block energy. -/
+theorem rectBlockEnergy_op (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
+    (A : Finset X) (B : Finset Y) :
+    rectBlockEnergy f.op wY wX B A = rectBlockEnergy f wX wY A B := by
+  rw [rectBlockEnergy, rectBlockEnergy, rectAverage_op, mul_comm (finsetMass wY B)]
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -378,6 +493,35 @@ example : rectAverage (fun _ _ => (7 : ℝ)) wL wR Finset.univ Finset.univ = 7 :
   refine rectAverage_const 7 ?_ ?_
   · rw [finsetMass, Fin.sum_univ_two]; norm_num [wL]
   · rw [finsetMass, Fin.sum_univ_three]; norm_num [wR, Matrix.cons_val_two, Matrix.tail_cons]
+
+-- **The pointwise square is `rectSum` of the square, definitionally**, and it vanishes on an
+-- empty side.
+example (f : RectKernel (Fin 2) (Fin 3)) (wX : Fin 2 → ℝ) (wY : Fin 3 → ℝ) (A : Finset (Fin 2)) :
+    rectSqMass f wX wY A ∅ = 0 := by simp [rectSqMass, rectSum]
+
+-- **The square of a `±1` kernel is its mass**: the chequerboard has `rectSqMass = 4` at unit
+-- weights on the full `2 × 2` rectangle, while its `rectSum` is `0`.
+example : rectSqMass (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1) (fun _ => 1) (fun _ => 1)
+    Finset.univ Finset.univ = 4 := by
+  simp [rectSqMass, rectSum]; norm_num
+example : rectSum (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1) (fun _ => 1) (fun _ => 1)
+    Finset.univ Finset.univ = 0 := by
+  simp [rectSum, Fin.sum_univ_two]
+
+-- **A witness forces positive mass**, statement-level, with no `0 < ε`.
+example (f : RectKernel (Fin 2) (Fin 3)) (wX : Fin 2 → ℝ) (wY : Fin 3 → ℝ) {A : Finset (Fin 2)}
+    {B : Finset (Fin 3)} (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ}
+    (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectSum f wX wY A B|) :
+    0 < finsetMass wX A * finsetMass wY B :=
+  finsetMass_mul_pos_of_lt_abs_rectSum hwX hwY (Finset.Subset.refl A) (Finset.Subset.refl B)
+    hwit
+
+-- **Zero mass annihilates rectangle sums** even on a nonempty carrier with a nonzero kernel:
+-- weights identically `0`.
+example (f : RectKernel (Fin 2) (Fin 2)) :
+    rectSum f (fun _ => 0) (fun _ => 0) Finset.univ Finset.univ = 0 :=
+  rectSum_eq_zero_of_finsetMass_mul_eq_zero (fun _ _ => le_rfl) (fun _ _ => le_rfl)
+    (Finset.Subset.refl _) (Finset.Subset.refl _) (by simp [finsetMass])
 
 end Tests
 

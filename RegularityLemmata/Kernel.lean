@@ -28,9 +28,13 @@ each listed module remains directly importable.
   hypotheses, never fields, so zero-mass cells and conditioning stay honest.
 * `Finite.RectKernel` — heterogeneous rectangular kernels `X → Y → ℝ` with carrier weights on
   both sides: weighted rectangle sums and averages (`rectSum`, `rectAverage`), transpose,
-  pullback, restriction, and the boundedness predicates.
+  pullback, restriction, the boundedness predicates, the partition-free witness lemma
+  (`finsetMass_mul_pos_of_lt_abs_rectSum`), the pointwise mass-weighted square (`rectSqMass`),
+  and the block energy of one rectangle (`rectBlockEnergy`).
 * `Finite.RelationKernel` — relation indicators as kernels: the bridge between the kernel core
-  and the pair-density core.
+  and the pair-density core, and the rectangle indicators `rectIndicator` with their finite
+  weighted combinations `rectCombination` (the building blocks of the cut-matrix
+  decomposition).
 * `Finite.Average` — one-variable averages (`averageOn`), guard-free at `∅`, with `densityOn`
   as their indicator shadow and both rectangle-fiber factorizations of `rectAverageCount`. One
   averaging vocabulary shared by kernel averages, fiber averages, and densities.

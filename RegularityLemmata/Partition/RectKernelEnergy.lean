@@ -52,32 +52,11 @@ namespace RegularityLemmata
 variable {X Y : Type*} {f : RectKernel X Y} {wX : X → ℝ} {wY : Y → ℝ}
 variable {A : Finset X} {B : Finset Y}
 
-/-! ### Block energy -/
+/-! ### Block energy
 
-/-- The energy of one rectangle: its average squared, weighted by its mass. -/
-noncomputable def rectBlockEnergy (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
-    (A : Finset X) (B : Finset Y) : ℝ :=
-  rectAverage f wX wY A B ^ 2 * (finsetMass wX A * finsetMass wY B)
-
-theorem rectBlockEnergy_nonneg (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
-    0 ≤ rectBlockEnergy f wX wY A B :=
-  mul_nonneg (sq_nonneg _)
-    (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY))
-
-/-- **The mass upper bound.** For an absolutely unit-bounded kernel the block energy is at
-most the block's mass. Guard-free: at zero mass both sides are `0`. -/
-theorem rectBlockEnergy_le_mass (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
-    (hf : IsAbsUnitBoundedOnRectangle f A B) :
-    rectBlockEnergy f wX wY A B ≤ finsetMass wX A * finsetMass wY B := by
-  have habs := abs_rectAverage_le (by norm_num : (0:ℝ) ≤ 1) hwX hwY hf
-  have hsq : rectAverage f wX wY A B ^ 2 ≤ 1 := by
-    have := abs_le.mp habs
-    nlinarith [this.1, this.2]
-  calc rectBlockEnergy f wX wY A B
-      ≤ 1 * (finsetMass wX A * finsetMass wY B) :=
-        mul_le_mul_of_nonneg_right hsq
-          (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY))
-    _ = finsetMass wX A * finsetMass wY B := one_mul _
+`rectBlockEnergy` — the mass-weighted square of one rectangle's average — mentions no
+partition and lives in `Finite/RectKernel.lean` (with `rectBlockEnergy_nonneg`,
+`rectBlockEnergy_le_mass`, and `rectBlockEnergy_op`); this file sums it over a partition pair. -/
 
 /-! ### Energy over a pair of partitions -/
 
@@ -202,13 +181,8 @@ theorem rectBlockEnergy_le_rectEnergyNum [DecidableEq X] [DecidableEq Y]
 
 /-! ### Transpose transport -/
 
-/-- `op` exchanges the two sides of the block energy. -/
-theorem rectBlockEnergy_op (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
-    (A : Finset X) (B : Finset Y) :
-    rectBlockEnergy f.op wY wX B A = rectBlockEnergy f wX wY A B := by
-  rw [rectBlockEnergy, rectBlockEnergy, rectAverage_op, mul_comm (finsetMass wY B)]
-
-/-- …and of the total energy. -/
+/-- `op` exchanges the two sides of the total energy (the block-energy law is
+`rectBlockEnergy_op` in `Finite/RectKernel.lean`). -/
 theorem rectEnergyNum_op [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
     (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) :
     rectEnergyNum f.op wY wX Q P = rectEnergyNum f wX wY P Q := by

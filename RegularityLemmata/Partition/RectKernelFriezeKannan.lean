@@ -310,16 +310,10 @@ theorem finsetMass_mul_pos_of_lt_abs_rectError [DecidableEq X] [DecidableEq Y]
     (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ}
     (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectError f wX wY P Q S T|) :
     0 < finsetMass wX A * finsetMass wY B := by
-  rcases eq_or_lt_of_le (mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)) with
-    h0 | h
-  · exfalso
-    have hE : rectError f wX wY P Q S T = 0 := by
-      rcases mul_eq_zero.mp h0.symm with hA0 | hB0
-      · exact rectError_eq_zero_of_left_mass_zero f wX wY P Q hS hwX hA0
-      · exact rectError_eq_zero_of_right_mass_zero f wX wY P Q hT hwY hB0
-    rw [hE, abs_zero, ← h0, mul_zero] at hwit
-    exact lt_irrefl 0 hwit
-  · exact h
+  -- The partition-free witness lemma, applied to the residual: the rectangle error is the
+  -- residual's rectangle sum on `S ×ˢ T`.
+  rw [← rectSum_rectResidual_eq_rectError f wX wY P Q hS hT] at hwit
+  exact finsetMass_mul_pos_of_lt_abs_rectSum hwX hwY hS hT hwit
 
 /-- **Layer 3, the raw energy increment.** A witness rectangle whose error exceeds
 `ε · (mass A · mass B)` forces the cut refinement to gain at least `ε²` times the total
