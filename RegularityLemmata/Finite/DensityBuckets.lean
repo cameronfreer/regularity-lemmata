@@ -22,6 +22,11 @@ aligned within `α`, for every relation of a finite family and in BOTH orientati
   behavior is pinned by permanent tests: density `0` lies in bucket `0`; density `1`
   lies in the top bucket, ALONE when `1/α` is an integer; and a boundary value `k·α`
   belongs to bucket `k`, not `k − 1` (half-open on the right).
+* `le_add_of_ceil_div_pred_eq` — the **predecessor-ceiling** bucket `⌈x / c⌉₊ - 1`, which
+  cuts `[0, 1]` into exactly `⌈1/c⌉₊` buckets (one fewer than the half-open buckets whenever
+  `1/c` is an integer): equal buckets and `0 ≤ y` give the **one-sided** closeness `x ≤ y + c`.
+  It is one-sided because the truncated subtraction merges ceilings `0` and `1`, and it is
+  not strict, both pinned by tests.
 * `exists_bucketAligned_subfamily` — the extraction: with at least
   `multicolorRamseyBound` pieces (for the color space of paired bucket vectors),
   there are `t` pieces such that for every relation index and every two
@@ -85,6 +90,35 @@ theorem densityBucket_lt_of_le_one {α x : ℝ} (hα : 0 < α) (hx1 : x ≤ 1) :
     densityBucket α x < ⌊1 / α⌋₊ + 1 := by
   rw [densityBucket, Nat.lt_add_one_iff]
   exact Nat.floor_le_floor (by gcongr)
+
+/-! ### Predecessor-ceiling buckets -/
+
+/-- **Closeness from equal predecessor-ceiling buckets.** If the `c`-buckets `⌈x / c⌉₊ - 1` and
+`⌈y / c⌉₊ - 1` agree and `0 ≤ y`, then `x ≤ y + c`.
+
+The conclusion is **one-sided**: with only `0 ≤ y` the symmetric claim `y ≤ x + c` is false
+(`x = -100`, `y = 0`, `c = 1` satisfies the hypothesis, since the truncated subtraction merges the
+ceilings `0` and `1` into one bucket). It also cannot be strengthened to `x < y + c`: `x = c`,
+`y = 0` gives equality. This is the closeness fact for the consumer's bucketing of `[0, 1]` into
+exactly `⌈1 / c⌉₊` buckets, as opposed to the `⌊1 / c⌋₊ + 1` half-open buckets of
+`densityBucket`. Mathlib's pin has `Nat.ceil_eq_iff` and the floor-equality lemma
+`Int.abs_sub_lt_one_of_floor_eq_floor` but no predecessor-ceiling variant. -/
+theorem le_add_of_ceil_div_pred_eq {x y c : ℝ} (hc : 0 < c) (hy : 0 ≤ y)
+    (h : ⌈x / c⌉₊ - 1 = ⌈y / c⌉₊ - 1) : x ≤ y + c := by
+  rcases Nat.lt_or_ge ⌈y / c⌉₊ 2 with hy2 | hy2
+  · -- Both ceilings are at most `1`, the merged bucket: `x ≤ c ≤ y + c`.
+    have hx1 : ⌈x / c⌉₊ ≤ 1 := by omega
+    have hxc : x / c ≤ (1 : ℕ) := Nat.ceil_le.mp hx1
+    rw [Nat.cast_one, div_le_iff₀ hc, one_mul] at hxc
+    linarith
+  · -- Both ceilings equal some `q ≥ 2`: `x ≤ q·c` and `(q − 1)·c < y`.
+    have hq : ⌈x / c⌉₊ = ⌈y / c⌉₊ := by omega
+    have hq0 : ⌈y / c⌉₊ ≠ 0 := by omega
+    obtain ⟨hy1, -⟩ := (Nat.ceil_eq_iff hq0).mp rfl
+    obtain ⟨-, hx2⟩ := (Nat.ceil_eq_iff hq0).mp hq
+    rw [div_le_iff₀ hc] at hx2
+    rw [lt_div_iff₀ hc, Nat.cast_sub (by omega), Nat.cast_one, sub_mul, one_mul] at hy1
+    linarith
 
 /-! ### The extraction -/
 
@@ -191,6 +225,34 @@ example (x : ℝ) (h0 : 0 ≤ x)
     (h : densityBucket (1/4 : ℝ) x = densityBucket (1/4 : ℝ) 1) :
     |x - 1| < 1/4 :=
   abs_sub_lt_of_densityBucket_eq (by norm_num) h0 (by norm_num) h
+
+-- **Predecessor-ceiling closeness is one-sided.** `x = -100`, `y = 0`, `c = 1` satisfies the
+-- hypothesis (both ceilings are `0`, and so are both truncated predecessors), the conclusion
+-- `x ≤ y + c` holds, and the symmetric `y ≤ x + c` fails.
+private theorem ceil_neg_hundred : ⌈(-100 : ℝ) / 1⌉₊ = 0 := Nat.ceil_eq_zero.mpr (by norm_num)
+private theorem ceil_zero : ⌈(0 : ℝ) / 1⌉₊ = 0 := Nat.ceil_eq_zero.mpr (by norm_num)
+private theorem ceil_half : ⌈(1 / 2 : ℝ) / 1⌉₊ = 1 :=
+  (Nat.ceil_eq_iff one_ne_zero).mpr ⟨by norm_num, by norm_num⟩
+private theorem ceil_one : ⌈(1 : ℝ) / 1⌉₊ = 1 :=
+  (Nat.ceil_eq_iff one_ne_zero).mpr ⟨by norm_num, by norm_num⟩
+
+example : ⌈(-100 : ℝ) / 1⌉₊ - 1 = ⌈(0 : ℝ) / 1⌉₊ - 1 := by rw [ceil_neg_hundred, ceil_zero]
+example : (-100 : ℝ) ≤ 0 + 1 :=
+  le_add_of_ceil_div_pred_eq one_pos le_rfl (by rw [ceil_neg_hundred, ceil_zero])
+example : ¬ ((0 : ℝ) ≤ -100 + 1) := by norm_num
+
+-- **The merged `0`-bucket**: `x = 0` has ceiling `0` and `y = c / 2` has ceiling `1`; the
+-- truncated predecessors agree, and the conclusion `0 ≤ c / 2 + c` holds (at `c = 1`).
+example : ⌈(0 : ℝ) / 1⌉₊ - 1 = ⌈(1 / 2 : ℝ) / 1⌉₊ - 1 := by rw [ceil_zero, ceil_half]
+example : (0 : ℝ) ≤ 1 / 2 + 1 :=
+  le_add_of_ceil_div_pred_eq one_pos (by norm_num) (by rw [ceil_zero, ceil_half])
+
+-- **Equality can occur**: `x = c`, `y = 0` (ceilings `1` and `0`, predecessors both `0`) gives
+-- `x = y + c` exactly, so the conclusion cannot be strengthened to `x < y + c`.
+example : ⌈(1 : ℝ) / 1⌉₊ - 1 = ⌈(0 : ℝ) / 1⌉₊ - 1 := by rw [ceil_one, ceil_zero]
+example : (1 : ℝ) ≤ 0 + 1 :=
+  le_add_of_ceil_div_pred_eq one_pos le_rfl (by rw [ceil_one, ceil_zero])
+example : ¬ ((1 : ℝ) < 0 + 1) := by norm_num
 
 end Tests
 
