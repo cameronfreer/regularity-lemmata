@@ -194,19 +194,28 @@ algebra is `rectSum`'s. Facts:
    `R` is *not* unit-bounded after the first round, so this bound must come from `Φ(R) ≤ M`
    (monotone under the iteration), never from `abs_rectSum_le`.
 6. **Iteration** (L6), starting at `t = 0` and carrying the accumulated state. The invariant
-   after `t` rounds is: a family of `t` recorded rectangles (inside the carriers, coefficients
-   bounded by `1/ε`) whose residual `Rₜ` satisfies the **strict** potential bound
-   `Φ(Rₜ) ≤ Φ(f) − t·ε²·M` — strict in the sense that each *failing* round drops the potential
-   by strictly more than `ε²·M` (from the strict witness inequality `|rectSum Rₜ S T| > ε·M`).
+   after `t` rounds, stated explicitly:
+
+   > `Inv t`: there are `t` recorded rectangles `(cₖ, Sₖ, Tₖ)`, each with `Sₖ ⊆ A`, `Tₖ ⊆ B`,
+   > `|cₖ| ≤ 1/ε`, whose residual `Rₜ := f − rectCombination c S T` satisfies
+   > `Φ(Rₜ) + t · ε² · M ≤ Φ(f)`, **and, if `t ≥ 1`, the strict form
+   > `Φ(Rₜ) + t · ε² · M < Φ(f)`**.
+
+   `Inv 0` holds with the empty family and `Φ(f) ≤ Φ(f)`. The step from `Inv t` to
+   `Inv (t + 1)` applies only when round `t` *fails* (a witness `|rectSum Rₜ S T| > ε·M`): the
+   decrement identity gives `Φ(Rₜ₊₁) = Φ(Rₜ) − c²·d` and the gain bound gives
+   `c²·d = (rectSum)²/d > (ε·M)²/M = ε²·M` (strictly, from the strict witness inequality, with
+   `d ≤ M` and `M > 0`), so `Φ(Rₜ₊₁) + (t + 1)·ε²·M < Φ(Rₜ) + t·ε²·M ≤ Φ(f)`. The strict form
+   is therefore established at `t = 1` and preserved thereafter.
    At each round either every rectangle is within `ε·M` (stop; the recorded family is the
    decomposition) or a witness exists and the round `t + 1` state is built by appending the
    term (`Fin.snoc`). The round limit is imposed **separately**: the induction runs to a
    fixed `N`, and the summit argues that `N = ⌈1/ε²⌉₊` consecutive failures are impossible.
 7. **Summit**. Split on `M`. If `M = 0` (nonnegative weights): every `rectSum` over
    sub-rectangles is `0`, so the empty decomposition (`n = 0`) satisfies the bound at once.
-   If `M > 0`: `N := ⌈1/ε²⌉₊` consecutive failing rounds would give
-   `Φ(R_N) < Φ(f) − N·ε²·M ≤ M − M = 0` (using `N ≥ 1/ε²`, i.e. `N·ε² ≥ 1`, and `Φ(f) ≤ M`),
-   contradicting `Φ ≥ 0`; so some round `t ≤ N` stops, with `n = t ≤ N` terms. This is what
+   If `M > 0`: `N := ⌈1/ε²⌉₊ ≥ 1` consecutive failing rounds would establish `Inv N` in its
+   strict form, `Φ(R_N) + N·ε²·M < Φ(f) ≤ M`, while `N·ε² ≥ 1` gives `N·ε²·M ≥ M`, so
+   `Φ(R_N) < 0`, contradicting `Φ ≥ 0`; so some round `t ≤ N` stops, with `n = t ≤ N` terms. This is what
    supplies the budget `⌈1/ε²⌉₊` with **no `+ 1`**: the `+ 1` of the partition iteration came
    from instantiating a non-strict invariant at the budget itself, which is exactly what is
    avoided here.
@@ -223,7 +232,7 @@ the FK tranche established.
 | L2 | `rectCutNorm` with `_le_iff`, `_nonneg`, `_op`, `_smul_weight_left` | a new partition-free module `Finite/RectKernelCutNorm` (approved placement: partition-free declarations live in `Finite`); the bridge `rectCutDiscrepancy_eq_rectCutNorm_rectResidual` alone stays in `Partition/RectKernelCut` |
 | L3 | `rectIndicator S T := relationKernel (fun x y => x ∈ S ∧ y ∈ T)`, unit-interval bounded, `rectSum (rectIndicator S T) wX wY S' T' = mass (S' ∩ S) · mass (T' ∩ T)`, and `rectCombination` with `rectSum_rectCombination` (linearity) | `Finite/RelationKernel` (beside `relationKernel`, which already exists there) |
 | L4 | `finsetMass_mul_pos_of_lt_abs_rectSum` — the partition-free "witness forces positive mass" | `Finite/RectKernel` (the partition version stays with its name and statement; it becomes a corollary) |
-| L5 | `rectSqMass_sub_smul_rectIndicator` (arbitrary-coefficient quadratic expansion) and `rectSqMass_sub_rectAverage_smul_rectIndicator` (its average specialization by the `d = 0` / `d ≠ 0` split), both hypothesis-free apart from containment; `rectBlockEnergy_le_rectSqMass` (Cauchy–Schwarz on a rectangle, nonnegative weights) | `Finite/RectKernel`, after **relocating `rectBlockEnergy`** (with `_nonneg`, `_le_mass`, `_op`) down from `Partition/RectKernelEnergy` — approved: names and statements preserved, recorded under Changed |
+| L5 | `rectSqMass_sub_smul_rectIndicator` (arbitrary-coefficient quadratic expansion) and `rectSqMass_sub_rectAverage_smul_rectIndicator` (its average specialization by the `d = 0` / `d ≠ 0` split), both hypothesis-free apart from containment; `rectBlockEnergy_le_rectSqMass` (Cauchy–Schwarz on a rectangle, nonnegative weights) | `Finite/RelationKernel`, beside `rectIndicator` — **not** `Finite/RectKernel`, which cannot mention `rectIndicator` without an import cycle (`Finite/RelationKernel` imports `Finite/RectKernel`). `rectBlockEnergy` (with `_nonneg`, `_le_mass`, `_op`) is relocated down to `Finite/RectKernel`, where it needs no indicator — approved: names and statements preserved, recorded under Changed |
 | L6 | the greedy iteration `rectCutIterate` (private to the summit file) | the new partition-free module `Finite/RectKernelCutDecomposition` |
 
 The Mathlib pin should be searched for a finset-indexed weighted Cauchy–Schwarz before L5 is
@@ -248,8 +257,12 @@ Placement (approved direction: partition-free declarations move *down*, names an
 preserved, relocations recorded under Changed):
 
 - `Finite/RectKernel`: `rectSqMass` (L1), the partition-free witness lemma (L4), the relocated
-  `rectBlockEnergy` and the decrement identities (L5).
-- `Finite/RelationKernel`: `rectIndicator`, `rectCombination` (L3), beside `relationKernel`.
+  `rectBlockEnergy` and its Cauchy–Schwarz bound `rectBlockEnergy_le_rectSqMass` (L5, the
+  part that mentions no indicator).
+- `Finite/RelationKernel` (imports `Finite/RectKernel`): `rectIndicator`, `rectCombination`
+  (L3), and the two decrement identities (L5), which mention `rectIndicator`. The import
+  direction is `RectKernel → RelationKernel → RectKernelCutNorm → RectKernelCutDecomposition`,
+  acyclic by construction; nothing in `Finite/RectKernel` may name an indicator.
 - `Finite/RectKernelCutNorm` (new): `rectCutNorm` and its laws (L2).
 - `Finite/RectKernelCutDecomposition` (new): the iteration and the summit (L6, §3.3), with the
   normalized and `op` corollaries.
