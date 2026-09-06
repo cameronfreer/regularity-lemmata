@@ -310,9 +310,6 @@ tranche 4 adds `Finite/RectKernelCutDecomposition`.
 - If the term count needs `⌈1/ε²⌉₊ + 1` (§3.3), stop and report; do not weaken silently.
 - If the coefficient bound `1/ε` cannot be obtained without a positive-mass or `ε ≤ 1`
   hypothesis, stop: the statement is meant to be guard-free like the summit.
-- If `rectBlockEnergy`'s relocation is refused, L5 goes beside it in
-  `Partition/RectKernelEnergy` and the substrate tranche imports partitions — acceptable but
-  worth a note.
 
 ## 9. Release placement
 
