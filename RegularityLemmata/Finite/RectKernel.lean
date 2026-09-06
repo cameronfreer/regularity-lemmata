@@ -38,8 +38,12 @@ masses in partition formulas come out as cardinalities.
 * `restrict` restricts the kernel **and the weights** by subtype inclusion, with **no
   renormalization**.
 
-Partitions, stepification, energy, variance, and cut discrepancy are deliberately absent;
-they belong to the next tranche.
+**The boundary.** This module holds the **partition-free** quantities of a kernel on a
+rectangle: sums, averages, bounds, the pointwise mass-weighted square (`rectSqMass`), the block
+energy of one rectangle (`rectBlockEnergy`), and the witness lemma
+(`finsetMass_mul_pos_of_lt_abs_rectSum`). Everything indexed by a partition — stepification,
+the partition energy and its variance identities, cut discrepancy, and the Frieze–Kannan
+iteration — lives in the `Partition/RectKernel*` modules.
 -/
 
 namespace RegularityLemmata
@@ -372,13 +376,12 @@ theorem finsetMass_mul_pos_of_lt_abs_rectSum (hwX : ∀ x ∈ A, 0 ≤ wX x)
 
 /-! ### The pointwise square and the block energy
 
-Two partition-free quantities the cut-matrix decomposition (design freeze
-`docs/design/cut-matrix-decomposition.md`) needs beside the partition energy of
-`Partition/RectKernelEnergy.lean`: the **pointwise mass-weighted square** `rectSqMass`, defined
+Two partition-free quantities: the **pointwise mass-weighted square** `rectSqMass`, defined
 through `rectSum` applied to the pointwise square so that its algebra is `rectSum`'s, and the
-**block energy** `rectBlockEnergy` — the mass-weighted square of a rectangle's average — which
-mentions no partition and lives here (relocated from the partition energy module, name and
-statement unchanged). -/
+**block energy** `rectBlockEnergy`, the mass-weighted square of a rectangle's average.
+`Partition/RectKernelEnergy.lean` sums the block energy over a partition pair; the cut-matrix
+decomposition (`docs/design/cut-matrix-decomposition.md`) uses the square as its potential and
+the block energy as its per-round gain. -/
 
 /-- The raw rectangle sum of the pointwise square, `∑ x ∈ A, ∑ y ∈ B, wX x * wY y * f x y ^ 2`. -/
 noncomputable def rectSqMass (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)

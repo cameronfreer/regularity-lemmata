@@ -172,14 +172,11 @@ theorem rectSum_rectCombination (c : Fin n → ℝ) (S : Fin n → Finset α) (T
     (wX : α → ℝ) (wY : β → ℝ) (S' : Finset α) (T' : Finset β) :
     rectSum (rectCombination c S T) wX wY S' T'
       = ∑ k, c k * (finsetMass wX (S' ∩ S k) * finsetMass wY (T' ∩ T k)) := by
-  rw [show rectCombination c S T
-      = fun a b => ∑ k ∈ Finset.univ, (fun a b => c k * rectIndicator (S k) (T k) a b) a b
-      from rfl, rectSum_finset_sum]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [← rectSum_rectIndicator, rectSum, rectSum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun x _ => ?_
-  rw [Finset.mul_sum]
-  exact Finset.sum_congr rfl fun y _ => by ring
+  unfold rectCombination
+  rw [rectSum_finset_sum]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [rectSum_smul, rectSum_rectIndicator]
 
 end RectCombination
 
