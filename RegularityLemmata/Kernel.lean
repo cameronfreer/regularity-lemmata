@@ -8,6 +8,7 @@ import RegularityLemmata.Finite.AlmostConstant
 import RegularityLemmata.Finite.AnalyticHomogeneous
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.RelationKernel
+import RegularityLemmata.Finite.RectKernelCutNorm
 import RegularityLemmata.Partition.RectKernel
 import RegularityLemmata.Partition.RectKernelEnergy
 import RegularityLemmata.Partition.RectKernelCut
@@ -35,6 +36,10 @@ each listed module remains directly importable.
   and the pair-density core, and the rectangle indicators `rectIndicator` with their finite
   weighted combinations `rectCombination` (the building blocks of the cut-matrix
   decomposition).
+* `Finite.RectKernelCutNorm` — the partition-free cut norm `rectCutNorm` (the largest absolute
+  weighted rectangle sum over test rectangles), with its elimination `iff`, `op`, positive
+  rescaling, the trivial `C · mass` bound, and the zero-mass endpoint; the cut discrepancy is
+  its value on the stepped residual (`rectCutDiscrepancy_eq_rectCutNorm_rectResidual`).
 * `Finite.Average` — one-variable averages (`averageOn`), guard-free at `∅`, with `densityOn`
   as their indicator shadow and both rectangle-fiber factorizations of `rectAverageCount`. One
   averaging vocabulary shared by kernel averages, fiber averages, and densities.

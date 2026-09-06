@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Finite.RectKernelCutNorm
 import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.RectKernel
 
@@ -89,6 +90,15 @@ theorem rectCutDiscrepancy_nonneg [DecidableEq X] [DecidableEq Y] (P : Finpartit
   have h : |rectError f wX wY P Q ∅ ∅| ≤ rectCutDiscrepancy f wX wY P Q :=
     Finset.le_sup' (fun p => |rectError f wX wY P Q p.1 p.2|) hmem
   exact le_trans (abs_nonneg _) h
+
+/-! ### The bridge to the partition-free cut norm
+
+The cut discrepancy is the cut norm (`Finite/RectKernelCutNorm.lean`) of the stepped residual:
+on every test rectangle inside the carriers the residual's rectangle sum is the stepped error
+(`rectSum_rectResidual_eq_rectError`, arbitrary signed weights), and both quantities are the
+same finite supremum. The two summits — the step-partition theorem and the cut-matrix
+decomposition — therefore bound the same functional, one on the stepped residual and one on
+the rectangle-combination residual. Stated after `rectResidual` below. -/
 
 /-! ### Reindexing a weighted point sum by cells
 
@@ -207,6 +217,17 @@ be, so the unmultiplied statement is false as written. Multiplying by the trace 
 repairs it, because nonnegativity forces the trace mass of a zero-mass cell to vanish too.
 That is precisely where signed weights would break the argument: a signed fine cell can have
 zero total mass with a nonzero-mass trace inside it. -/
+
+/-- **The two summits measure the same thing on the residual**: the cut discrepancy equals the
+partition-free cut norm of the stepped residual. Pure repackaging, valid for arbitrary signed
+weights. -/
+theorem rectCutDiscrepancy_eq_rectCutNorm_rectResidual [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) :
+    rectCutDiscrepancy f wX wY P Q = rectCutNorm (rectResidual f wX wY P Q) wX wY A B := by
+  rw [rectCutDiscrepancy, rectCutNorm]
+  refine Finset.sup'_congr _ rfl fun p hp => ?_
+  rw [Finset.mem_product, Finset.mem_powerset, Finset.mem_powerset] at hp
+  rw [rectSum_rectResidual_eq_rectError f wX wY P Q hp.1 hp.2]
 
 /-- Trace masses add over the fine cells inside a coarse cell.
 

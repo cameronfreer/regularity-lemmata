@@ -21,6 +21,7 @@ import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Finite.RelationKernel
+import RegularityLemmata.Finite.RectKernelCutNorm
 import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Finite.HomogeneousCell
 import RegularityLemmata.Partition.Basic
