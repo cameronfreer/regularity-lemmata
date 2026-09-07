@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Inequalities
+import RegularityLemmata.Finite.RectKernelCutNorm
 import RegularityLemmata.Partition.Basic
 import RegularityLemmata.Partition.RectKernel
 
@@ -193,6 +194,25 @@ theorem rectSum_rectResidual_eq_rectError [DecidableEq X] [DecidableEq Y]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun y _ => by rw [rectResidual_apply]; ring
+
+/-! ### The bridge to the partition-free cut norm
+
+The cut discrepancy is the cut norm (`Finite/RectKernelCutNorm.lean`) of the stepped residual:
+on every test rectangle inside the carriers the residual's rectangle sum is the stepped error
+(`rectSum_rectResidual_eq_rectError` above, arbitrary signed weights), and both quantities are
+the same finite supremum. Hypothesis-free algebra, like the identity it repackages. The two
+summits — the step-partition theorem and the cut-matrix decomposition — therefore bound the same
+functional, one on the stepped residual and one on the rectangle-combination residual. -/
+/-- **The two summits measure the same thing on the residual**: the cut discrepancy equals the
+partition-free cut norm of the stepped residual. Pure repackaging, valid for arbitrary signed
+weights. -/
+theorem rectCutDiscrepancy_eq_rectCutNorm_rectResidual [DecidableEq X] [DecidableEq Y]
+    (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) :
+    rectCutDiscrepancy f wX wY P Q = rectCutNorm (rectResidual f wX wY P Q) wX wY A B := by
+  rw [rectCutDiscrepancy, rectCutNorm]
+  refine Finset.sup'_congr _ rfl fun p hp => ?_
+  rw [Finset.mem_product, Finset.mem_powerset, Finset.mem_powerset] at hp
+  rw [rectSum_rectResidual_eq_rectError f wX wY P Q hp.1 hp.2]
 
 /-! ### The tower identity
 
@@ -885,6 +905,38 @@ example (f : RectKernel (Fin 2) (Fin 3)) (P : Finpartition (Finset.univ : Finset
     (Q : Finpartition (Finset.univ : Finset (Fin 3))) :
     0 ≤ rectCutDiscrepancy f cL cR P Q :=
   rectCutDiscrepancy_nonneg P Q
+
+/-! #### The bridge to the cut norm -/
+
+/-- The `±1` chequerboard on `Fin 2 × Fin 2`. -/
+private def cheqCut : RectKernel (Fin 2) (Fin 2) := fun x y => if x = y then 1 else -1
+
+-- **The two summits agree on the residual**, on a concrete `2 × 2` instance: against the
+-- indiscrete partition pair the cut discrepancy of the chequerboard is the cut norm of its
+-- stepped residual.
+example : rectCutDiscrepancy cheqCut (fun _ => 1) (fun _ => 1)
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+      (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+    = rectCutNorm (rectResidual cheqCut (fun _ => 1) (fun _ => 1)
+        (⊤ : Finpartition (Finset.univ : Finset (Fin 2)))
+        (⊤ : Finpartition (Finset.univ : Finset (Fin 2))))
+      (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ :=
+  rectCutDiscrepancy_eq_rectCutNorm_rectResidual _ _ _ _ _
+
+-- **Arbitrary signed weights**, statement-level: the bridge takes no sign or mass hypothesis.
+example [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
+    (P : Finpartition A) (Q : Finpartition B) {c : ℝ}
+    (h : rectCutNorm (rectResidual f wX wY P Q) wX wY A B ≤ c) :
+    rectCutDiscrepancy f wX wY P Q ≤ c := by
+  rwa [rectCutDiscrepancy_eq_rectCutNorm_rectResidual]
+
+-- …and with weights that cancel to zero total mass, the bridge still holds as an equation.
+example [DecidableEq Y] (f : RectKernel (Fin 2) Y) (wY : Y → ℝ)
+    (P : Finpartition (Finset.univ : Finset (Fin 2))) (Q : Finpartition B) :
+    rectCutDiscrepancy f (fun i => if i = 0 then (1 : ℝ) else -1) wY P Q
+      = rectCutNorm (rectResidual f (fun i => if i = 0 then (1 : ℝ) else -1) wY P Q)
+        (fun i => if i = 0 then (1 : ℝ) else -1) wY Finset.univ B :=
+  rectCutDiscrepancy_eq_rectCutNorm_rectResidual _ _ _ _ _
 
 end Tests
 
