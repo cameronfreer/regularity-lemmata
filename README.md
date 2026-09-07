@@ -22,7 +22,7 @@ instantiated and its constants inspected.
 | --- | --- |
 | **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, relation fibers and trace families with support-sensitive VC/Sauer–Shelah and bounded-subset estimates, abstract weighted selection. |
 | **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, **balanced slicing** (exact equal-size blocks simultaneously typical for a supplied trace family), **average-preserving slicing and common blocks** (exact-size blocks keeping every `[0,1]`-function's average, per piece at one common size, with named thresholds and geometric races), leftover and chunk absorption into equipartitions. |
-| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, and the cut-norm contraction of stepping with constant 1. |
+| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, the cut-norm contraction of stepping with constant 1, the partition-free cut norm, and the Frieze–Kannan cut-matrix decomposition (at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass`). |
 | **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
 | **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
 | **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting; **indivisibility** (cellwise-constant models, with the quotient reading and exact nullary compatibility) and **cellwise edit bounds** with a computable majority rounding whose box-level edit count is computed exactly. |
@@ -78,7 +78,9 @@ Five curated **facades** import a stack whole:
 - `RegularityLemmata.Kernel` — the rectangular weighted-kernel layer (raw weights, kernels,
   relation and rectangle indicators, the partition-free cut norm, one-variable averages and
   almost-constancy, stepping, energy and the refinement-variance identity, cut discrepancy,
-  and the Frieze–Kannan summit).
+  the Frieze–Kannan step-partition summit, and the cut-matrix decomposition). Three worked
+  specializations compiled against this facade alone live under `examples/` (an ordinary
+  matrix, a weighted bipartite graph, a signed residual).
 - `RegularityLemmata.FiniteSetSystems` — heterogeneous relation fibers, finite trace families,
   Mathlib's VC dimension under restriction, support-sensitive Sauer–Shelah bounds, and
   polynomial bounded-subset estimates.

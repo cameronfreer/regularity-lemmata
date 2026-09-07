@@ -27,6 +27,7 @@ lake build 2>&1 | tee "$LOG"
 # directory appears in Phase 1). Missing REQUIRED paths still fail via the root file.
 lib_paths=(RegularityLemmata.lean RegularityLemmataGates.lean scripts)
 [ -d RegularityLemmata ] && lib_paths+=(RegularityLemmata)
+[ -d examples ] && lib_paths+=(examples)
 
 echo "== Gate 2: no sorry/admit/axiom in library source =="
 forbid -n --glob '*.lean' -e '\bsorry\b' -e '\badmit\b' -e '^\s*axiom\b' \
