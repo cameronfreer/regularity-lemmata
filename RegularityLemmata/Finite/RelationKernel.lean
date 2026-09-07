@@ -180,6 +180,74 @@ theorem rectSum_rectCombination (c : Fin n → ℝ) (S : Fin n → Finset α) (T
 
 end RectCombination
 
+/-! ### The decrement identities
+
+The algebra of one round of the cut-matrix decomposition: subtracting a multiple of a
+rectangle indicator from a kernel changes the pointwise square by a quadratic in the
+coefficient, and at the rectangle's own average the change is exactly minus the block energy.
+Both identities are **hypothesis-free apart from rectangle containment** and hold for arbitrary
+signed weights; positivity enters only the estimates (`Finite/RectKernel.lean`). -/
+
+section Decrement
+
+variable [DecidableEq α] [DecidableEq β] {wX : α → ℝ} {wY : β → ℝ} {A : Finset α}
+  {B : Finset β} {S : Finset α} {T : Finset β}
+
+/-- Multiplying by a rectangle indicator restricts the rectangle sum to the rectangle, when the
+rectangle lies inside the carriers. -/
+theorem rectSum_mul_rectIndicator (f : RectKernel α β) (hS : S ⊆ A) (hT : T ⊆ B) :
+    rectSum (fun x y => f x y * rectIndicator S T x y) wX wY A B = rectSum f wX wY S T := by
+  rw [rectSum, rectSum, ← Finset.inter_eq_right.mpr hS, ← Finset.inter_eq_right.mpr hT,
+    ← Finset.filter_mem_eq_inter, ← Finset.filter_mem_eq_inter, Finset.sum_filter]
+  refine Finset.sum_congr rfl fun x _ => ?_
+  split_ifs with hx
+  · rw [Finset.sum_filter]
+    refine Finset.sum_congr rfl fun y _ => ?_
+    rw [rectIndicator_apply]
+    split_ifs with hy <;> simp_all
+  · refine Finset.sum_eq_zero fun y _ => ?_
+    rw [rectIndicator_apply]
+    split_ifs with hy <;> simp_all
+
+/-- **The quadratic expansion**, arbitrary coefficient `a`:
+`Φ(f − a·𝟙_{S×T}) = Φ(f) − 2a · rectSum f S T + a² · mass S · mass T`. -/
+theorem rectSqMass_sub_smul_rectIndicator (f : RectKernel α β) (hS : S ⊆ A) (hT : T ⊆ B)
+    (a : ℝ) :
+    rectSqMass (fun x y => f x y - a * rectIndicator S T x y) wX wY A B
+      = rectSqMass f wX wY A B - 2 * a * rectSum f wX wY S T
+        + a ^ 2 * (finsetMass wX S * finsetMass wY T) := by
+  have hpt : ∀ x y, (f x y - a * rectIndicator S T x y) ^ 2
+      = f x y ^ 2 - 2 * a * (f x y * rectIndicator S T x y) + a ^ 2 * rectIndicator S T x y := by
+    intro x y
+    rw [rectIndicator_apply]
+    split_ifs <;> ring
+  rw [rectSqMass, rectSqMass]
+  simp_rw [hpt]
+  rw [rectSum_add, rectSum_sub, rectSum_smul, rectSum_smul, rectSum_mul_rectIndicator f hS hT,
+    rectSum_rectIndicator, Finset.inter_eq_right.mpr hS, Finset.inter_eq_right.mpr hT]
+
+/-- **The decrement at the average**: subtracting the rectangle's own average drops the
+pointwise square by exactly the block energy, `Φ(f − c·𝟙_{S×T}) = Φ(f) − c²·d` with
+`c = rectAverage f S T`. Signed weights are admitted: when the rectangle mass `d` vanishes the
+totalized average is `0` and nothing changes; when `d ≠ 0`, `c · d = rectSum f S T` by
+cancellation. -/
+theorem rectSqMass_sub_rectAverage_smul_rectIndicator (f : RectKernel α β) (hS : S ⊆ A)
+    (hT : T ⊆ B) :
+    rectSqMass (fun x y => f x y - rectAverage f wX wY S T * rectIndicator S T x y) wX wY A B
+      = rectSqMass f wX wY A B - rectBlockEnergy f wX wY S T := by
+  rw [rectSqMass_sub_smul_rectIndicator f hS hT, rectBlockEnergy]
+  rcases eq_or_ne (finsetMass wX S * finsetMass wY T) 0 with h0 | h0
+  · rw [rectAverage, h0, div_zero]
+    ring
+  · have hc : rectAverage f wX wY S T * (finsetMass wX S * finsetMass wY T)
+        = rectSum f wX wY S T := by
+      rw [rectAverage]
+      exact div_mul_cancel₀ _ h0
+    rw [← hc]
+    ring
+
+end Decrement
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -261,6 +329,50 @@ example (x y : Fin 2) :
 example : (rectIndicator ({0} : Finset (Fin 2)) ({1, 2} : Finset (Fin 3))).op
     = rectIndicator ({1, 2} : Finset (Fin 3)) ({0} : Finset (Fin 2)) :=
   rectIndicator_op _ _
+
+/-! #### The decrement identities -/
+
+/-- The `±1` chequerboard on `Fin 2 × Fin 2`. -/
+private def cheqR : RectKernel (Fin 2) (Fin 2) := fun x y => if x = y then 1 else -1
+
+-- **One round on the chequerboard**: subtracting the cell `{0} × {0}` at its average `1` drops
+-- the pointwise square from `4` by the block energy `1`, statement-level from the identity.
+example : rectSqMass (fun x y => cheqR x y
+      - rectAverage cheqR (fun _ => 1) (fun _ => 1) {0} {0} * rectIndicator {0} {0} x y)
+      (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ
+    = rectSqMass cheqR (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ
+      - rectBlockEnergy cheqR (fun _ => 1) (fun _ => 1) {0} {0} :=
+  rectSqMass_sub_rectAverage_smul_rectIndicator cheqR (Finset.subset_univ _)
+    (Finset.subset_univ _)
+
+-- **Signed weights that cancel to zero total mass** are admitted by the expansion: with weights
+-- `1, −1` on both sides the full rectangle has mass `0 · 0`, and the identity still holds as
+-- stated — it fails if anyone strengthens the hypotheses to nonnegativity.
+example (f : RectKernel (Fin 2) (Fin 2)) (a : ℝ) :
+    rectSqMass (fun x y => f x y - a * rectIndicator Finset.univ Finset.univ x y)
+      (fun i => if i = 0 then (1 : ℝ) else -1) (fun i => if i = 0 then (1 : ℝ) else -1)
+      Finset.univ Finset.univ
+    = rectSqMass f (fun i => if i = 0 then (1 : ℝ) else -1) (fun i => if i = 0 then (1 : ℝ) else -1)
+        Finset.univ Finset.univ
+      - 2 * a * rectSum f (fun i => if i = 0 then (1 : ℝ) else -1)
+          (fun i => if i = 0 then (1 : ℝ) else -1) Finset.univ Finset.univ
+      + a ^ 2 * (finsetMass (fun i : Fin 2 => if i = 0 then (1 : ℝ) else -1) Finset.univ
+          * finsetMass (fun i : Fin 2 => if i = 0 then (1 : ℝ) else -1) Finset.univ) :=
+  rectSqMass_sub_smul_rectIndicator f (Finset.Subset.refl _) (Finset.Subset.refl _) a
+
+-- …and at the average with zero rectangle mass, the totalized average is `0`, so the update is
+-- the identity: the decrement is the block energy `0`.
+example (f : RectKernel (Fin 2) (Fin 2)) :
+    rectSqMass (fun x y => f x y - rectAverage f (fun i => if i = 0 then (1 : ℝ) else -1)
+        (fun i => if i = 0 then (1 : ℝ) else -1) Finset.univ Finset.univ
+        * rectIndicator Finset.univ Finset.univ x y)
+      (fun i => if i = 0 then (1 : ℝ) else -1) (fun i => if i = 0 then (1 : ℝ) else -1)
+      Finset.univ Finset.univ
+    = rectSqMass f (fun i => if i = 0 then (1 : ℝ) else -1) (fun i => if i = 0 then (1 : ℝ) else -1)
+        Finset.univ Finset.univ
+      - rectBlockEnergy f (fun i => if i = 0 then (1 : ℝ) else -1)
+          (fun i => if i = 0 then (1 : ℝ) else -1) Finset.univ Finset.univ :=
+  rectSqMass_sub_rectAverage_smul_rectIndicator f (Finset.Subset.refl _) (Finset.Subset.refl _)
 
 end Tests
 
