@@ -76,8 +76,9 @@ densities and edits; `RegularityLemmata.Partition.Basic` and
 Five curated **facades** import a stack whole:
 
 - `RegularityLemmata.Kernel` — the rectangular weighted-kernel layer (raw weights, kernels,
-  relation indicators, one-variable averages and almost-constancy, stepping, energy and the
-  refinement-variance identity, cut discrepancy, and the Frieze–Kannan summit).
+  relation and rectangle indicators, the partition-free cut norm, one-variable averages and
+  almost-constancy, stepping, energy and the refinement-variance identity, cut discrepancy,
+  and the Frieze–Kannan summit).
 - `RegularityLemmata.FiniteSetSystems` — heterogeneous relation fibers, finite trace families,
   Mathlib's VC dimension under restriction, support-sensitive Sauer–Shelah bounds, and
   polynomial bounded-subset estimates.

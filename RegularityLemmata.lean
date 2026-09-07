@@ -21,7 +21,6 @@ import RegularityLemmata.Finite.VCTrace
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.PairDensity
 import RegularityLemmata.Finite.RelationKernel
-import RegularityLemmata.Finite.RectKernelCutNorm
 import RegularityLemmata.Finite.HomogeneousPair
 import RegularityLemmata.Finite.HomogeneousCell
 import RegularityLemmata.Partition.Basic
@@ -139,10 +138,12 @@ A Lean 4 library of reusable finite regularity, counting, approximation, and rem
 infrastructure, built on mathlib.
 
 This root imports the library's public surface. Five curated facades bundle stacks a consumer
-often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels),
+often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels, the
+partition-free cut norm, stepping, energy, cut discrepancy, and the Frieze–Kannan summit),
 `RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds),
 `RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, cellwise
-edit bounds, edit transfer, and the aggregation bridge), `RegularityLemmata.FiniteRamsey` (multicolour pair Ramsey, binary-tree subtree
+edit bounds, edit transfer, and the aggregation bridge), `RegularityLemmata.FiniteRamsey`
+(multicolour pair Ramsey, binary-tree subtree
 embeddings, and the additive two-colour subtree theorem), and
 `RegularityLemmata.ProductSpaces` (raw weights, heterogeneous weighted boxes, predicate mass and
 density, coordinate partitions, unions with a symmetric-difference error, and the coordinate-split
