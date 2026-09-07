@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Weight
+import RegularityLemmata.Finite.Inequalities
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Order.Interval.Set.Basic
@@ -440,6 +441,104 @@ theorem rectBlockEnergy_op (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ
     rectBlockEnergy f.op wY wX B A = rectBlockEnergy f wX wY A B := by
   rw [rectBlockEnergy, rectBlockEnergy, rectAverage_op, mul_comm (finsetMass wY B)]
 
+/-! ### Cauchy–Schwarz on a rectangle, and the coefficient estimate
+
+The two estimates of the cut-matrix decomposition's round (design freeze
+`docs/design/cut-matrix-decomposition.md`, §4): the block energy of a rectangle is at most its
+pointwise square (mass-weighted Cauchy–Schwarz, `sq_sum_mul_le_sum_mul_sum_sq_mul`), and a
+witness rectangle whose sum exceeds `ε` times the total mass, on a kernel whose pointwise square
+is at most the total mass, has average bounded by `1/ε`. Nonnegative weights and the positive
+threshold `0 < ε` enter here — the witness lemma `finsetMass_mul_pos_of_lt_abs_rectSum` itself
+stays unconstrained in `ε`. -/
+
+/-- The pointwise square is monotone in the rectangle under nonnegative weights. -/
+theorem rectSqMass_mono (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {S : Finset X}
+    {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) :
+    rectSqMass f wX wY S T ≤ rectSqMass f wX wY A B := by
+  rw [rectSqMass, rectSqMass, rectSum, rectSum]
+  calc ∑ x ∈ S, ∑ y ∈ T, wX x * wY y * f x y ^ 2
+      ≤ ∑ x ∈ S, ∑ y ∈ B, wX x * wY y * f x y ^ 2 :=
+        Finset.sum_le_sum fun x hx => Finset.sum_le_sum_of_subset_of_nonneg hT fun y hy _ =>
+          mul_nonneg (mul_nonneg (hwX x (hS hx)) (hwY y hy)) (sq_nonneg _)
+    _ ≤ ∑ x ∈ A, ∑ y ∈ B, wX x * wY y * f x y ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg hS fun x hx _ => Finset.sum_nonneg fun y hy =>
+          mul_nonneg (mul_nonneg (hwX x hx) (hwY y hy)) (sq_nonneg _)
+
+/-- **Cauchy–Schwarz on a rectangle**: `(rectSum f)² ≤ mass · rectSqMass f`, nonnegative
+weights. -/
+theorem sq_rectSum_le_mul_rectSqMass (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectSum f wX wY A B ^ 2 ≤ (finsetMass wX A * finsetMass wY B) * rectSqMass f wX wY A B := by
+  classical
+  have h := sq_sum_mul_le_sum_mul_sum_sq_mul (fun p : X × Y => f p.1 p.2)
+    (fun p => wX p.1 * wY p.2) (A ×ˢ B) fun p hp =>
+      mul_nonneg (hwX p.1 (Finset.mem_product.mp hp).1) (hwY p.2 (Finset.mem_product.mp hp).2)
+  have e1 : ∑ p ∈ A ×ˢ B, f p.1 p.2 * (wX p.1 * wY p.2) = rectSum f wX wY A B := by
+    rw [rectSum, Finset.sum_product]
+    exact Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => by ring
+  have e2 : ∑ p ∈ A ×ˢ B, wX p.1 * wY p.2 = finsetMass wX A * finsetMass wY B := by
+    rw [finsetMass, finsetMass, Finset.sum_mul_sum, Finset.sum_product]
+  have e3 : ∑ p ∈ A ×ˢ B, f p.1 p.2 ^ 2 * (wX p.1 * wY p.2) = rectSqMass f wX wY A B := by
+    rw [rectSqMass, rectSum, Finset.sum_product]
+    exact Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => by ring
+  rwa [e1, e2, e3] at h
+
+/-- **The block energy is at most the pointwise square.** Guard-free at zero mass, where the
+block energy is `0`. -/
+theorem rectBlockEnergy_le_rectSqMass (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) :
+    rectBlockEnergy f wX wY A B ≤ rectSqMass f wX wY A B := by
+  have hd0 : 0 ≤ finsetMass wX A * finsetMass wY B :=
+    mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)
+  rcases eq_or_lt_of_le hd0 with h0 | hpos
+  · rw [rectBlockEnergy, ← h0, mul_zero]
+    exact rectSqMass_nonneg hwX hwY
+  · have hcs := sq_rectSum_le_mul_rectSqMass (f := f) hwX hwY
+    rw [rectBlockEnergy, rectAverage, div_pow, div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
+    nlinarith [hcs, hpos]
+
+/-- **The coefficient estimate.** A witness rectangle `S ×ˢ T` inside the carriers with
+`ε · M < |rectSum f S T|`, on a kernel whose pointwise square is at most the total mass `M`, has
+absolute average at most `1/ε`. From `|c|·d > ε·M` and `c²·d ≤ M`, where `d` is the witness
+rectangle's mass; the positive threshold `0 < ε` is used here and only here. -/
+theorem abs_rectAverage_le_inv_of_lt_abs_rectSum (hwX : ∀ x ∈ A, 0 ≤ wX x)
+    (hwY : ∀ y ∈ B, 0 ≤ wY y) {S : Finset X} {T : Finset Y} (hS : S ⊆ A) (hT : T ⊆ B) {ε : ℝ}
+    (hε : 0 < ε) (hwit : ε * (finsetMass wX A * finsetMass wY B) < |rectSum f wX wY S T|)
+    (hsq : rectSqMass f wX wY A B ≤ finsetMass wX A * finsetMass wY B) :
+    |rectAverage f wX wY S T| ≤ 1 / ε := by
+  have hwS : ∀ x ∈ S, 0 ≤ wX x := fun x hx => hwX x (hS hx)
+  have hwT : ∀ y ∈ T, 0 ≤ wY y := fun y hy => hwY y (hT hy)
+  set M := finsetMass wX A * finsetMass wY B with hM
+  set d := finsetMass wX S * finsetMass wY T with hd
+  set c := rectAverage f wX wY S T with hc
+  have hM0 : 0 ≤ M := mul_nonneg (finsetMass_nonneg hwX) (finsetMass_nonneg hwY)
+  have hdpos : 0 < d := by
+    rcases eq_or_lt_of_le (mul_nonneg (finsetMass_nonneg hwS) (finsetMass_nonneg hwT)) with
+      h0 | h
+    · exfalso
+      rw [rectSum_eq_zero_of_finsetMass_mul_eq_zero hwS hwT (Finset.Subset.refl S)
+        (Finset.Subset.refl T) h0.symm, abs_zero] at hwit
+      nlinarith [mul_nonneg hε.le hM0]
+    · exact h
+  have hcd : |c| * d = |rectSum f wX wY S T| := by
+    rw [hc, rectAverage, ← hd, abs_div, abs_of_pos hdpos, div_mul_cancel₀ _ hdpos.ne']
+  have hsq' : rectSum f wX wY S T ^ 2 ≤ d * M :=
+    (sq_rectSum_le_mul_rectSqMass hwS hwT).trans
+      (mul_le_mul_of_nonneg_left ((rectSqMass_mono hwX hwY hS hT).trans hsq) hdpos.le)
+  have hcM : |c| ^ 2 * d ≤ M := by
+    have : (|c| * d) ^ 2 ≤ d * M := by rw [hcd, sq_abs]; exact hsq'
+    have h2 : |c| ^ 2 * d * d ≤ M * d := by nlinarith [this]
+    exact le_of_mul_le_mul_right h2 hdpos
+  have h1 : ε * M < |c| * d := by rw [hcd]; exact hwit
+  rw [le_div_iff₀ hε]
+  rcases eq_or_lt_of_le (abs_nonneg c) with hc0 | hcpos
+  · rw [← hc0, zero_mul]; exact zero_le_one
+  · have h3 : ε * |c| * (|c| * d) < 1 * (|c| * d) := by
+      calc ε * |c| * (|c| * d) = ε * (|c| ^ 2 * d) := by ring
+        _ ≤ ε * M := mul_le_mul_of_nonneg_left hcM hε.le
+        _ < |c| * d := h1
+        _ = 1 * (|c| * d) := (one_mul _).symm
+    have := lt_of_mul_lt_mul_right h3 (mul_pos hcpos hdpos).le
+    linarith
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -522,6 +621,34 @@ example (f : RectKernel (Fin 2) (Fin 2)) :
     rectSum f (fun _ => 0) (fun _ => 0) Finset.univ Finset.univ = 0 :=
   rectSum_eq_zero_of_finsetMass_mul_eq_zero (fun _ _ => le_rfl) (fun _ _ => le_rfl)
     (Finset.Subset.refl _) (Finset.Subset.refl _) (by simp [finsetMass])
+
+-- **Cauchy–Schwarz on the chequerboard**: block energy `0` (average `0`) against pointwise
+-- square `4`, and the one-cell block `{0} × {0}` has block energy `1` equal to its square.
+example : rectBlockEnergy (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
+    (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ
+    ≤ rectSqMass (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
+    (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ :=
+  rectBlockEnergy_le_rectSqMass (fun _ _ => zero_le_one) (fun _ _ => zero_le_one)
+
+-- **The coefficient estimate is a sanity check at `c = 1`**: the constant-`1` kernel on
+-- `Fin 2 × Fin 2` with witness the full rectangle at `ε = 1/2` (`ε·M = 2 < 4 = |rectSum|`,
+-- `rectSqMass = 4 = M`) has average `1 ≤ 1/ε = 2`.
+example : |rectAverage (fun (_ _ : Fin 2) => (1 : ℝ)) (fun _ => 1) (fun _ => 1)
+    Finset.univ Finset.univ| ≤ 1 / (1 / 2 : ℝ) :=
+  abs_rectAverage_le_inv_of_lt_abs_rectSum (fun _ _ => zero_le_one) (fun _ _ => zero_le_one)
+    (Finset.Subset.refl _) (Finset.Subset.refl _) (by norm_num)
+    (by simp [rectSum, finsetMass]) (by simp [rectSqMass, rectSum, finsetMass])
+
+-- **A residual exceeding `1` pointwise** is still coefficient-bounded through the potential:
+-- the kernel with a single entry `−2` and `0` elsewhere on `Fin 2 × Fin 2` has
+-- `rectSqMass = 4 = M` at unit weights, and its witness cell `{0} × {0}` at `ε = 1/2`
+-- (`ε·M = 2 < 2`? — no; take `ε = 1/4`: `1 < 2`) has average `−2`, with `|−2| ≤ 1/ε = 4`.
+example : |rectAverage (fun (x y : Fin 2) => if x = 0 ∧ y = 0 then (-2 : ℝ) else 0)
+    (fun _ => 1) (fun _ => 1) ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2))| ≤ 1 / (1 / 4 : ℝ) :=
+  abs_rectAverage_le_inv_of_lt_abs_rectSum (A := Finset.univ) (B := Finset.univ)
+    (fun _ _ => zero_le_one) (fun _ _ => zero_le_one) (Finset.subset_univ _) (Finset.subset_univ _)
+    (by norm_num) (by simp [rectSum, finsetMass]; norm_num)
+    (by simp [rectSqMass, rectSum, finsetMass, Fin.sum_univ_two]; norm_num)
 
 end Tests
 
