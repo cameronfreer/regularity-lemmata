@@ -520,13 +520,12 @@ theorem abs_rectAverage_le_inv_of_lt_abs_rectSum (hwX : ∀ x ∈ A, 0 ≤ wX x)
     · exact h
   have hcd : |c| * d = |rectSum f wX wY S T| := by
     rw [hc, rectAverage, ← hd, abs_div, abs_of_pos hdpos, div_mul_cancel₀ _ hdpos.ne']
-  have hsq' : rectSum f wX wY S T ^ 2 ≤ d * M :=
-    (sq_rectSum_le_mul_rectSqMass hwS hwT).trans
-      (mul_le_mul_of_nonneg_left ((rectSqMass_mono hwX hwY hS hT).trans hsq) hdpos.le)
+  -- `c²·d` is the block energy of the witness rectangle, at most its pointwise square, at most
+  -- the carriers' pointwise square, at most `M`.
   have hcM : |c| ^ 2 * d ≤ M := by
-    have : (|c| * d) ^ 2 ≤ d * M := by rw [hcd, sq_abs]; exact hsq'
-    have h2 : |c| ^ 2 * d * d ≤ M * d := by nlinarith [this]
-    exact le_of_mul_le_mul_right h2 hdpos
+    rw [sq_abs]
+    exact (rectBlockEnergy_le_rectSqMass (f := f) hwS hwT).trans
+      ((rectSqMass_mono hwX hwY hS hT).trans hsq)
   have h1 : ε * M < |c| * d := by rw [hcd]; exact hwit
   rw [le_div_iff₀ hε]
   rcases eq_or_lt_of_le (abs_nonneg c) with hc0 | hcpos
@@ -623,12 +622,18 @@ example (f : RectKernel (Fin 2) (Fin 2)) :
     (Finset.Subset.refl _) (Finset.Subset.refl _) (by simp [finsetMass])
 
 -- **Cauchy–Schwarz on the chequerboard**: block energy `0` (average `0`) against pointwise
--- square `4`, and the one-cell block `{0} × {0}` has block energy `1` equal to its square.
+-- square `4` on the full rectangle, and equality on the one-cell block `{0} × {0}`, where both
+-- sides are `1`.
 example : rectBlockEnergy (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
     (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ
     ≤ rectSqMass (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
     (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ :=
   rectBlockEnergy_le_rectSqMass (fun _ _ => zero_le_one) (fun _ _ => zero_le_one)
+example : rectBlockEnergy (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
+    (fun _ => 1) (fun _ => 1) {0} {0}
+    = rectSqMass (fun (x y : Fin 2) => if x = y then (1 : ℝ) else -1)
+    (fun _ => 1) (fun _ => 1) {0} {0} := by
+  simp [rectBlockEnergy, rectAverage, rectSqMass, rectSum, finsetMass]
 
 -- **The coefficient estimate is a sanity check at `c = 1`**: the constant-`1` kernel on
 -- `Fin 2 × Fin 2` with witness the full rectangle at `ε = 1/2` (`ε·M = 2 < 4 = |rectSum|`,
@@ -641,8 +646,8 @@ example : |rectAverage (fun (_ _ : Fin 2) => (1 : ℝ)) (fun _ => 1) (fun _ => 1
 
 -- **A residual exceeding `1` pointwise** is still coefficient-bounded through the potential:
 -- the kernel with a single entry `−2` and `0` elsewhere on `Fin 2 × Fin 2` has
--- `rectSqMass = 4 = M` at unit weights, and its witness cell `{0} × {0}` at `ε = 1/2`
--- (`ε·M = 2 < 2`? — no; take `ε = 1/4`: `1 < 2`) has average `−2`, with `|−2| ≤ 1/ε = 4`.
+-- `rectSqMass = 4 = M` at unit weights, and its witness cell `{0} × {0}` at `ε = 1/4`
+-- (`ε·M = 1 < 2 = |rectSum|`) has average `−2`, with `|−2| ≤ 1/ε = 4`.
 example : |rectAverage (fun (x y : Fin 2) => if x = 0 ∧ y = 0 then (-2 : ℝ) else 0)
     (fun _ => 1) (fun _ => 1) ({0} : Finset (Fin 2)) ({0} : Finset (Fin 2))| ≤ 1 / (1 / 4 : ℝ) :=
   abs_rectAverage_le_inv_of_lt_abs_rectSum (A := Finset.univ) (B := Finset.univ)
