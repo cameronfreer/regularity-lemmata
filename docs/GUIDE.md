@@ -38,10 +38,11 @@ named, because importing it is the advertised way in.
   where it is genuinely needed (complement identities, cancelling a mass), never categorically.
   A recurring consequence: a nonempty set can have zero mass, so positive-mass hypotheses are
   stated as `0 < finsetMass w A`, not as nonemptiness.
-- **Diagonal separation.** Counts used for removal are counts of *injective* tuples. A count
-  over all tuples is stated separately, and the collision mass between the two is bounded
-  explicitly and loses one ambient power of the host size. A count stated without that
-  separation is not a global count.
+- **Diagonal separation.** Ordered counts over all tuples (diagonals included) and counts of
+  injective tuples are separate APIs with separate names, and both are global counts. Removal
+  arguments use the injective count. The conversion between the two is explicit: the collision
+  mass is at most `(k choose 2)·|s|^(k−1)`, one ambient power of the host size below the count,
+  so the `|s|^k` and falling-factorial normalizations differ by a bounded additive term.
 
 ## What can I reuse, by release?
 
@@ -55,7 +56,7 @@ named, because importing it is the advertised way in.
 | v0.6.0 | The heterogeneous weighted-box stack complete (`ProductSpaces` facade): coordinate splits, box unions with symmetric-difference error, box partitions. |
 | v0.7.0 | Approximation-to-counting complete: the arity-generic diagonal gate, quotient counting, count transfer across an edit, the aggregation bridge, and the composite theorem from a cellwise approximation to an induced count. Analytic homogeneity. |
 | v0.8.0 | The Hedge forecaster and its regret bound `hedge_regret`. |
-| v0.9.0 | Multicolour tree Ramsey `binaryTreeRamsey_proper` and its constant-colour form. |
+| v0.9.0 | Multicolour tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
 | v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
 | next | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`. |
 
@@ -255,15 +256,21 @@ asserts nothing about symbols of arity greater than two.
   `10τ` for regularity (`7τ + 3τ`), `3η + 3δ/η²` for the density shift, and `3m|s|²` for the
   non-transversal triples (`Relational/BinaryStrongRegularityCharge`,
   `Relational/BinaryStrongCounting`, `Relational/DiagonalGate` — public despite its name).
-- *Counting from a cellwise approximation, any arity.* The approximation-to-counting bridge
-  (`RelationalApproximation` facade): given a model indivisible over a partition and a cellwise
-  `ε`-close approximation with nullary compatibility, the induced count of any `k`-pattern is
-  within an explicit error of the quotient count, with the local coefficient supplied by the
-  caller and the collision term `(k choose 2)·m·|s|^(k−1)` computed
-  (`abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound`,
-  `Relational/AggregationBridge`). Majority rounding produces such an approximation from a
-  homogeneous partition, with the exact edit identity `editDistance_majorityRound_eq_min`
-  (`Relational/CellwiseEdit`).
+- *Counting from a cellwise approximation, any arity, any fixed pattern.* Given a model `N`
+  indivisible over a partition `Q`, nullary-compatible with `M`, and cellwise `ε`-close to it,
+  the induced count of any `k`-pattern in `M` is within an explicit error of the quotient count
+  of `N`: the sum over positive-arity symbols `R` of `k^(arity R)·ε·|s|^(arity R)`, times
+  `|s|^(k−1)`, plus the diagonal charge `(k choose 2)·m·|s|^(k−1)` for parts of size at most
+  `m` (`abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound`,
+  `Relational/AggregationBridge`). Nothing is supplied by the caller beyond the three
+  hypotheses. Majority rounding produces such an approximation from a homogeneous partition,
+  with the exact edit identity `editDistance_majorityRound_eq_min` (`Relational/CellwiseEdit`).
+- *Aggregating a supplied local estimate.* Separately, the aggregation bridge
+  `abs_inducedEmbeddingCountOn_sub_sum_est_le` takes a caller-supplied estimate `est T` that is
+  within `δ·vol T` of the induced count on every good transversal cell tuple `T`, together with
+  an aggregate bad-pair mass at most `β·|s|²`, and returns the global count within
+  `(δ + (k choose 2)·β)·|s|^k + (k choose 2)·m·|s|^(k−1)` of the sum of the estimates. The
+  library computes no local coefficient `δ`; the arity-2 and arity-3 wrappers supply theirs.
 - *Hypergraph precursors.* Ordered injective realizations of `r`-uniform hypergraphs
   (`orderedCount_eq`, `Hypergraph/Uniform`), polyad regularity local to a parent polyad after
   Nagle–Rödl–Schacht, an arity-generic `δ⁴` polyad energy increment
@@ -283,16 +290,17 @@ graphs, re-exported with the conversions between this library's counts and Mathl
    `docs/design/induced-removal.md`; the gates that constrain it (deletion alone cannot
    remove induced copies; recolouring creates copies) are under the gates umbrella.
 4. The triadic approximation is a precursor, not the Rödl–Schacht theorem.
-5. Counting for general fixed patterns, higher arities, and general hypergraph removal are
-   outside the current API. Deferred statements are recorded as prose, never as `Prop`
-   placeholders.
+5. Regularity-based counting for general fixed patterns and for arities above two, and
+   general hypergraph removal, are outside the current API. Counting from a supplied cellwise
+   approximation exists at every arity and for every fixed pattern (above). Deferred
+   statements are recorded as prose, never as `Prop` placeholders.
 
 ## Independent tools
 
 - **Finite Ramsey** (`FiniteRamsey` facade): multicolour Ramsey for ordered pairs by greedy
   pigeonhole with bound `(r+1)^(r·s+1)`, and the binary-tree subtree theorems: two colours at
   height `a + b + 1`, `m` colours in the additive form, embeddings with arbitrary root and
-  preserved branch direction, proper embeddings covering the leaves. No lower bound is
+  preserved branch direction, proper embeddings mapping source leaves to target leaves. No lower bound is
   formalized, so no optimality is claimed.
 - **Density buckets** (`Finite/DensityBuckets`): half-open buckets with a Ramsey extraction of
   a bucket-aligned subfamily, and the one-sided predecessor-ceiling closeness lemma.
