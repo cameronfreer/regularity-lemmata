@@ -3,9 +3,9 @@ import RegularityLemmata.Kernel
 /-!
 # Consumer check: the `Kernel` facade
 
-The three kernel uses a downstream project is expected to make, through the advertised facade
-alone: the step-partition summit, the cut-matrix decomposition, and the bridge between their
-error measures.
+Two kernel uses a downstream project is expected to make, through the advertised facade alone:
+the cut-matrix decomposition, consumed as stated, and the bridge identifying the cut discrepancy
+of a partition pair with the cut norm of its stepped residual.
 -/
 
 open RegularityLemmata

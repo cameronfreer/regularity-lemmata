@@ -6,13 +6,13 @@ and `Finite.DensityBuckets` directly. It is the release checklist's proof that a
 project can build against a published commit with the library's own Mathlib pin, and it is not
 a target of the main package (nothing here is imported by the library or built by its gate).
 
-`lakefile.toml` pins `rev` to the release candidate; `lake-manifest.json` records the resolved
+`lakefile.toml` pins `rev` to the release candidate's full SHA; `lake-manifest.json` records the resolved
 full SHA. The release checklist rebuilds the fixture against the actual release commit, from a
 copy outside the repository:
 
 ```
-cp -r consumer /home/freer/scratch/tmp/consumer-check && cd /home/freer/scratch/tmp/consumer-check
-sed -i 's/^rev = .*/rev = "<release commit>"/' lakefile.toml
+dir=$(mktemp -d -p /home/freer/scratch/tmp consumer-check-XXXX) && cp -r consumer/. "$dir" && cd "$dir"
+sed -i 's/^rev = .*/rev = "<release commit, full SHA>"/' lakefile.toml
 rm -f lake-manifest.json && lake update && lake exe cache get && lake build
 python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='RegularityLemmata'])"
 ```

@@ -8,7 +8,7 @@ defaultTargets = ["RegularityLemmataConsumer"]
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "78dbd0c"
+rev = "78dbd0c55e7d3cadb7b6f049dc8016e77d771624"
 
 [[lean_lib]]
 name = "RegularityLemmataConsumer"
