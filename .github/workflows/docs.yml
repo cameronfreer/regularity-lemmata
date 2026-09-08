@@ -1,0 +1,82 @@
+# Copyright (c) 2026 Cameron Freer. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generated API documentation (doc-gen4) on GitHub Pages, versioned per release:
+# each published release is deployed under docs/<tag>/ and also as docs/latest/.
+name: Docs
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit to document"
+        required: true
+        default: "main"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      # actions/checkout v7.0.0, pinned to an immutable revision
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+          persist-credentials: false
+
+      - name: Install elan
+        # elan v4.2.3 installer, pinned to an immutable revision
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/b6cec7e10fe4965a605aaf60d1cb4a5837f0462b/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Cache .lake
+        # actions/cache v6.1.0, pinned to an immutable revision
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: docbuild/.lake
+          key: docs-lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
+
+      - name: Build documentation
+        working-directory: docbuild
+        run: |
+          lake update
+          lake exe cache get
+          lake build RegularityLemmata:docs
+
+      - name: Choose the version directory
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "dir=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=${{ github.event.inputs.ref }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy versioned docs
+        # peaceiris/actions-gh-pages v4.0.0, pinned to an immutable revision
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docbuild/.lake/build/doc
+          destination_dir: docs/${{ steps.ver.outputs.dir }}
+          keep_files: true
+
+      - name: Deploy latest
+        if: github.event_name == 'release'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docbuild/.lake/build/doc
+          destination_dir: docs/latest
+          keep_files: true

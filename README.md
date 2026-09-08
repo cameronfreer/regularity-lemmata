@@ -131,6 +131,8 @@ CI enforces the repository's proof and axiom policies on every commit.
 | File | Contents |
 | --- | --- |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
+| [`CHANGELOG.md`](CHANGELOG.md) | Release notes, aggregated from the GitHub Releases, newest first. |
+| Generated API documentation | Built by doc-gen4 on each published release and served from GitHub Pages, versioned per tag (`docs/<tag>/`, with `docs/latest/`); the build recipe is `docbuild/`. |
 | [`docs/design/`](docs/design/) | Design documents for work that is not yet a theorem, including its permanent obstruction gates. |
 | [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |

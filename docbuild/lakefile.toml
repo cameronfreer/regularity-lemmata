@@ -1,0 +1,24 @@
+# Documentation build for RegularityLemmata with doc-gen4.
+#
+# A separate Lake package, so the library's own manifest never acquires doc-gen4 as a
+# dependency and its Lean/Mathlib pins are untouched. The library is required by path; doc-gen4
+# is pinned to the tag matching `../lean-toolchain`. The manifest and `.lake/` are not committed:
+# `lake update` resolves doc-gen4 at the tag and the library at `../`. From this directory:
+#
+#   lake update && lake exe cache get && lake build RegularityLemmata:docs   # .lake/build/doc
+#
+# The docs workflow runs exactly this on each published release. A local run regenerates the
+# documentation of every imported Mathlib module as well (about 7000 jobs, several gigabytes);
+# keep such builds outside the repository, e.g. by copying this directory under a scratch
+# location and pointing `path` at the checkout.
+name = "docbuild"
+version = "0.0.0"
+
+[[require]]
+name = "RegularityLemmata"
+path = "../"
+
+[[require]]
+name = "«doc-gen4»"
+scope = "leanprover"
+version = "git#v4.34.0-rc1"
