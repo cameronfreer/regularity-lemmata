@@ -64,20 +64,43 @@ structure StrongWitness (E : ErrorSchedule) (δ : ℝ) (P₀ : Finpartition s) w
 noncomputable def monoStepBound (E : ErrorSchedule) (m : ℕ) : ℕ :=
   (Finset.range (m + 1)).sup fun j => regularityBound ⌈1 / (E j) ^ 5⌉₊ j
 
+/-- The one-round bound is below its monotone majorant:
+`regularityBound ⌈1 / E m ^ 5⌉₊ m ≤ monoStepBound E m`. The majorant is the `sup` over
+`j ≤ m` of the one-round bound at `j`, and `j = m` is one of the terms. `E` is the error
+schedule and `m` the current part count; the exponent `5` is the one-round Szemerédi-style
+exponent inherited from `regularityBound`. Coarse by design: the majorant is a `sup`, not
+a closed form. House lemma, no source. Consumed by `le_monoStepBound` and `strong_iterate`
+(and by the palette and diagonal analogues in `Relational/BinaryStrong.lean` and
+`Relational/BinaryDiagStrong.lean`). -/
 theorem stepBound_le_monoStepBound (E : ErrorSchedule) (m : ℕ) :
     regularityBound ⌈1 / (E m) ^ 5⌉₊ m ≤ monoStepBound E m := by
   unfold monoStepBound
   exact Finset.le_sup (f := fun j => regularityBound ⌈1 / (E j) ^ 5⌉₊ j)
     (Finset.self_mem_range_succ m)
 
+/-- The monotone step bound dominates the identity: `m ≤ monoStepBound E m`. Follows from
+`le_regularityBound` through `stepBound_le_monoStepBound`; it holds for every `m`,
+including `m = 0`. House lemma, no source. Consumed by `le_monoStepBound_iterate` and
+`monoStepBound_iterate_le_iterate`. -/
 theorem le_monoStepBound (E : ErrorSchedule) (m : ℕ) : m ≤ monoStepBound E m :=
   le_trans (le_regularityBound _ _) (stepBound_le_monoStepBound E m)
 
+/-- `monoStepBound E` is monotone in the part count: `m ≤ m'` gives
+`monoStepBound E m ≤ monoStepBound E m'`, because the `sup` over `range (m + 1)` is a
+`sup` over a subset of `range (m' + 1)`. This is the property `regularityBound ⌈1/E(k)⁵⌉ k`
+itself lacks for an arbitrary schedule, and the reason the majorant exists. House lemma,
+no source. Consumed by `monoStepBound_iterate_mono`. -/
 theorem monoStepBound_mono (E : ErrorSchedule) {m m' : ℕ} (h : m ≤ m') :
     monoStepBound E m ≤ monoStepBound E m' := by
   unfold monoStepBound
   exact Finset.sup_mono (Finset.range_subset_range.mpr (Nat.succ_le_succ h))
 
+/-- Every iterate of the monotone step bound is monotone in its argument: for `m ≤ m'`,
+`(monoStepBound E)^[i] m ≤ (monoStepBound E)^[i] m'`. Induction on `i` from
+`monoStepBound_mono`. This is what lets the restart of `strong_iterate` compose a bound
+from an intermediate partition with the bound on that partition's part count. House
+lemma, no source. Consumed by `strong_iterate`, `le_monoStepBound_iterate`, and
+`monoStepBound_iterate_le_iterate`. -/
 theorem monoStepBound_iterate_mono (E : ErrorSchedule) (i : ℕ) {m m' : ℕ} (h : m ≤ m') :
     (monoStepBound E)^[i] m ≤ (monoStepBound E)^[i] m' := by
   induction i generalizing m m' with
@@ -86,6 +109,11 @@ theorem monoStepBound_iterate_mono (E : ErrorSchedule) (i : ℕ) {m m' : ℕ} (h
     rw [Function.iterate_succ_apply, Function.iterate_succ_apply]
     exact IH (monoStepBound_mono E h)
 
+/-- Every iterate of the monotone step bound dominates the identity:
+`m ≤ (monoStepBound E)^[i] m` for every fuel `i` and part count `m`. At `i = 0` this is
+reflexivity; the step uses `le_monoStepBound` and `monoStepBound_iterate_mono`. House
+lemma, no source. Consumed by `strong_iterate` for the coarse-count bound on the branch
+that stops early, and by `monoStepBound_iterate_le_iterate`. -/
 theorem le_monoStepBound_iterate (E : ErrorSchedule) (i : ℕ) (m : ℕ) :
     m ≤ (monoStepBound E)^[i] m := by
   induction i with
@@ -94,6 +122,11 @@ theorem le_monoStepBound_iterate (E : ErrorSchedule) (i : ℕ) (m : ℕ) :
     rw [Function.iterate_succ_apply]
     exact le_trans IH (monoStepBound_iterate_mono E i (le_monoStepBound E m))
 
+/-- The iterates of the monotone step bound are monotone in the fuel: for `i ≤ j`,
+`(monoStepBound E)^[i] m ≤ (monoStepBound E)^[j] m`. This is the property that lets early
+stopping in `strong_iterate` be charged against the full-fuel closed-form bound, and it is
+also why the coarse-count bound of `exists_strongWitness` is antitone in the gap `δ`. House
+lemma, no source. Consumed by `strong_iterate` and its palette and diagonal analogues. -/
 theorem monoStepBound_iterate_le_iterate (E : ErrorSchedule) {i j : ℕ} (hij : i ≤ j)
     (m : ℕ) : (monoStepBound E)^[i] m ≤ (monoStepBound E)^[j] m := by
   induction j with
@@ -204,6 +237,12 @@ noncomputable def refinementVarianceNum (Q P : Finpartition s) : ℝ :=
       ((p.1.card : ℝ) * p.2.card)
         * (pairDensity R p.1 p.2 - pairDensity R pd.1 pd.2) ^ 2
 
+/-- The refinement variance is nonnegative: `0 ≤ refinementVarianceNum R Q P`, as a sum of
+mass weights `|p₁| |p₂|` times squared density shifts. Raw (mass units, not divided by
+`|s|²`); no relation between `Q` and `P` is assumed, and on an empty carrier or with no
+sub-blocks the sum is `0`. House lemma, no source. Not consumed elsewhere in the
+repository; it records the sign of the quantity `refinementVarianceNum_eq` identifies
+with the energy gain. -/
 theorem refinementVarianceNum_nonneg {Q P : Finpartition s} :
     0 ≤ refinementVarianceNum R Q P :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => by positivity

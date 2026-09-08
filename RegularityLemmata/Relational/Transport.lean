@@ -38,14 +38,24 @@ truth of the image tuple). -/
 def pullback (M : FiniteRelModel L V) (f : W → V) : FiniteRelModel L W :=
   ⟨fun {_} R x => M.rel R (f ∘ x)⟩
 
+/-- The frozen pullback direction, as a simp lemma:
+`(M.pullback f).Holds R x ↔ M.Holds R (f ∘ x)`. Definitional. Consumed by
+`binaryRel_pullback`. -/
 @[simp] theorem pullback_holds (M : FiniteRelModel L V) (f : W → V) {n : ℕ}
     (R : L.Relations n) (x : Fin n → W) :
     (M.pullback f).Holds R x ↔ M.Holds R (f ∘ x) :=
   Iff.rfl
 
+/-- Pullback along the identity map is the identity on models: `M.pullback id = M`. Proved by
+`ext_holds` from the frozen direction `(M.pullback f).Holds R x ↔ M.Holds R (f ∘ x)`. House
+lemma, no source; the relational analogue of `RectKernel.pullback_id`. -/
 theorem pullback_id (M : FiniteRelModel L V) : M.pullback id = M :=
   ext_holds fun _ _ => Iff.rfl
 
+/-- Pullback is functorial (contravariantly): `(M.pullback f).pullback g = M.pullback (f ∘ g)`
+for `f : W → V` and `g : X → W`. No injectivity is assumed of either map; see the module's
+falsification note. Proved by `ext_holds` from the frozen direction. House lemma, no
+source. -/
 theorem pullback_comp (M : FiniteRelModel L V) (f : W → V) (g : X → W) :
     (M.pullback f).pullback g = M.pullback (f ∘ g) :=
   ext_holds fun _ _ => Iff.rfl
@@ -60,6 +70,8 @@ theorem restrict_eq_pullback (M : FiniteRelModel L V) (S : Finset V) :
     M.restrict S = M.pullback Subtype.val :=
   rfl
 
+/-- Unfolding lemma for restriction: `(M.restrict S).Holds R x ↔ M.Holds R (fun i => (x i : V))`,
+the frozen pullback direction along the subtype inclusion. Definitional. -/
 theorem restrict_holds (M : FiniteRelModel L V) (S : Finset V) {n : ℕ}
     (R : L.Relations n) (x : Fin n → {y // y ∈ S}) :
     (M.restrict S).Holds R x ↔ M.Holds R fun i => (x i : V) :=
@@ -74,14 +86,23 @@ theorem relabel_eq_pullback (M : FiniteRelModel L V) (e : V ≃ W) :
     M.relabel e = M.pullback e.symm :=
   rfl
 
+/-- Unfolding lemma for relabeling: `(M.relabel e).Holds R x ↔ M.Holds R (fun i => e.symm (x i))`,
+the frozen pullback direction along `e.symm`. Definitional. Consumed by the relabeling
+invariance proofs in `Relational/Counts.lean` and `Relational/PatternCounts.lean`. -/
 theorem relabel_holds (M : FiniteRelModel L V) (e : V ≃ W) {n : ℕ}
     (R : L.Relations n) (x : Fin n → W) :
     (M.relabel e).Holds R x ↔ M.Holds R fun i => e.symm (x i) :=
   Iff.rfl
 
+/-- Relabeling along the identity equivalence is the identity on models:
+`M.relabel (Equiv.refl V) = M`. Special case of `pullback_id` since
+`(Equiv.refl V).symm = id`. House lemma, no source. -/
 theorem relabel_refl (M : FiniteRelModel L V) : M.relabel (Equiv.refl V) = M :=
   ext_holds fun _ _ => Iff.rfl
 
+/-- Relabeling along a composite equivalence factors: `M.relabel (e.trans f)` equals
+`(M.relabel e).relabel f` for `e : V ≃ W` and `f : W ≃ X`. Special case of `pullback_comp`
+since `(e.trans f).symm = e.symm ∘ f.symm`. House lemma, no source. -/
 theorem relabel_trans (M : FiniteRelModel L V) (e : V ≃ W) (f : W ≃ X) :
     M.relabel (e.trans f) = (M.relabel e).relabel f :=
   ext_holds fun _ _ => Iff.rfl

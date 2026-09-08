@@ -42,9 +42,20 @@ of three. Still a function of `(C, ε, l)` only. -/
 noncomputable def familyTripleSeed (C ε : ℝ) (l : ℕ) : ℕ :=
   3 * ((familyInitialBound C ε l + 2) / 3)
 
+/-- The seed is a multiple of three: `3 ∣ familyTripleSeed C ε l`, definitionally, since
+the seed is `3 * ((familyInitialBound C ε l + 2) / 3)`. Consumed by
+`three_dvd_familyRegularityBoundTriple` and by
+`exists_familyRegular_equipartition_triple` to seed the divisibility invariant. -/
 theorem three_dvd_familyTripleSeed (C ε : ℝ) (l : ℕ) : 3 ∣ familyTripleSeed C ε l :=
   ⟨_, rfl⟩
 
+/-- Rounding up never loses parts: `familyInitialBound C ε l ≤ familyTripleSeed C ε l`.
+Here `C` is the chunk threshold (`familyChunkThreshold = 100` at the summit), `ε` the
+tolerance, and `l` the requested part count; no hypothesis on `ε` is needed because the
+statement is a natural-number inequality about `⌈·⌉₊`-valued floors. Together with
+`familyTripleSeed_le` it pins the seed to the interval `[floor, floor + 2]`. House lemma,
+no source. Consumed by `two_le_familyTripleSeed`, `le_familyTripleSeed_of_le`, and
+`exists_familyRegular_equipartition_triple`. -/
 theorem le_familyTripleSeed (C ε : ℝ) (l : ℕ) :
     familyInitialBound C ε l ≤ familyTripleSeed C ε l := by
   rw [familyTripleSeed]
@@ -56,9 +67,18 @@ theorem familyTripleSeed_le (C ε : ℝ) (l : ℕ) :
   rw [familyTripleSeed]
   omega
 
+/-- The seed is at least `2`: `2 ≤ familyTripleSeed C ε l`, inherited from the initial
+floor through `le_familyTripleSeed`. In fact the seed is at least `3`, being a positive
+multiple of three; only the floor's bound is exported. Consumed by
+`exists_familyRegular_equipartition_triple` to show the seed is nonzero, as
+`Finpartition.exists_equipartition_card_eq` requires. -/
 theorem two_le_familyTripleSeed (C ε : ℝ) (l : ℕ) : 2 ≤ familyTripleSeed C ε l :=
   le_trans (two_le_familyInitialBound C ε l) (le_familyTripleSeed C ε l)
 
+/-- The requested part count is met by the seed: `l ≤ familyTripleSeed C ε l`, from
+`le_familyInitialBound` through `le_familyTripleSeed`. House lemma, no source. Not
+consumed elsewhere; `exists_familyRegular_equipartition_triple` obtains `l ≤ #Q.parts`
+from the floor instead. -/
 theorem le_familyTripleSeed_of_le (C ε : ℝ) (l : ℕ) : l ≤ familyTripleSeed C ε l :=
   le_trans (le_familyInitialBound C ε l) (le_familyTripleSeed C ε l)
 
@@ -78,10 +98,20 @@ theorem three_dvd_familyRegularityBoundAux {m : ℕ} (h : 3 ∣ m) (t : ℕ) :
 noncomputable def familyRegularityBoundTriple (K : ℕ) (ε : ℝ) (l : ℕ) : ℕ :=
   familyRegularityBoundAux (familyFuel K ε) (familyTripleSeed familyChunkThreshold ε l)
 
+/-- The seeded final bound is a multiple of three: `3 ∣ familyRegularityBoundTriple K ε l`.
+The seed is divisible by three (`three_dvd_familyTripleSeed`) and the recursion preserves
+divisibility (`three_dvd_familyRegularityBoundAux`), for every `K`, `ε`, and `l`. House
+lemma, no source. Exercised by the tests at the end of this file; the summit exports it as
+its `3 ∣ #Q.parts` clause for grouping cells into owners of three. -/
 theorem three_dvd_familyRegularityBoundTriple (K : ℕ) (ε : ℝ) (l : ℕ) :
     3 ∣ familyRegularityBoundTriple K ε l :=
   three_dvd_familyRegularityBoundAux (three_dvd_familyTripleSeed _ _ _) _
 
+/-- The seeded final bound dominates its seed:
+`familyTripleSeed familyChunkThreshold ε l ≤ familyRegularityBoundTriple K ε l`, since the
+`familyFuel`-fold iterate of `familyStepBound` never decreases (`le_familyRegularityBoundAux`).
+The `C` argument of the seed is the frozen `familyChunkThreshold`. House lemma, no source.
+Consumed by `exists_familyRegular_equipartition_triple` to fit the seed inside the host. -/
 theorem le_familyRegularityBoundTriple (K : ℕ) (ε : ℝ) (l : ℕ) :
     familyTripleSeed familyChunkThreshold ε l ≤ familyRegularityBoundTriple K ε l :=
   le_familyRegularityBoundAux _ _

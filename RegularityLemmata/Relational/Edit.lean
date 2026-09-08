@@ -80,16 +80,24 @@ noncomputable def relativeInjectiveRelationEdit (M N : FiniteRelModel L V)
   (injectiveRelationEditCount M N R : ℝ) / ((Fintype.card V).descFactorial n : ℝ)
 
 omit [DecidableEq V] in
+/-- The per-symbol edit count is symmetric: `relationEditCount M N R = relationEditCount N M R`.
+Raw count, diagonals included. Inherited from `editDistance_comm` on the full box (house
+lemma, no source). Consumed by `aggregateEditCount_comm`. -/
 theorem relationEditCount_comm (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : relationEditCount M N R = relationEditCount N M R :=
   editDistance_comm
 
 omit [DecidableEq V] in
+/-- A model has per-symbol edit count `0` from itself; simp lemma from `editDistance_self`. -/
 @[simp] theorem relationEditCount_self (M : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : relationEditCount M M R = 0 :=
   editDistance_self
 
 omit [DecidableEq V] in
+/-- Triangle inequality for the per-symbol edit count: `relationEditCount M P R` is at most
+`relationEditCount M N R + relationEditCount N P R`. Raw counts, diagonals included. Sharp
+(equality at `N = M`). Inherited from `editDistance_triangle` on the full box (house lemma,
+no source). Consumed by `aggregateEditCount_triangle`. -/
 theorem relationEditCount_triangle (M N P : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) :
     relationEditCount M P R
@@ -97,11 +105,20 @@ theorem relationEditCount_triangle (M N P : FiniteRelModel L V) {n : ℕ}
   editDistance_triangle
 
 omit [DecidableEq V] in
+/-- The per-symbol edit count of an `n`-ary symbol `R` is at most `|V|^n`, the number of
+ordered `n`-tuples (diagonals included). Raw count. Sharp: complementary models attain it.
+For a nullary symbol the bound is `1` even on an empty carrier, since `|V|^0 = 1`. From
+`editDistance_le_card` and the cardinality of `Fin n → V` (house lemma, no source).
+Consumed by `relativeRelationEdit_le_one` and `aggregateEditCount_le_budget`. -/
 theorem relationEditCount_le_pow (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : relationEditCount M N R ≤ Fintype.card V ^ n := by
   refine le_trans editDistance_le_card (le_of_eq ?_)
   rw [Fintype.piFinset_univ, Finset.card_univ, Fintype.card_fun, Fintype.card_fin]
 
+/-- The injective per-symbol edit count of an `n`-ary symbol is at most the falling factorial
+`(|V|)_n`, the number of injective `n`-tuples. Raw count. Sharp: complementary models attain
+it. When `n > |V|` both sides are `0`. From `injectiveTupleCount_eq_descFactorial` (house
+lemma, no source). Consumed by `relativeInjectiveRelationEdit_le_one`. -/
 theorem injectiveRelationEditCount_le_descFactorial (M N : FiniteRelModel L V)
     {n : ℕ} (R : L.Relations n) :
     injectiveRelationEditCount M N R ≤ (Fintype.card V).descFactorial n := by
@@ -109,6 +126,9 @@ theorem injectiveRelationEditCount_le_descFactorial (M N : FiniteRelModel L V)
     injectiveRelationEditCount, injectiveRelationEditSet]
   exact Finset.card_le_card (Finset.filter_subset _ _)
 
+/-- The injective per-symbol edit count is symmetric in the two models. Raw count over
+injective tuples only. House lemma, no source; the injective counterpart of
+`relationEditCount_comm`. -/
 theorem injectiveRelationEditCount_comm (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) :
     injectiveRelationEditCount M N R = injectiveRelationEditCount N M R := by
@@ -119,12 +139,17 @@ theorem injectiveRelationEditCount_comm (M N : FiniteRelModel L V) {n : ℕ}
   · exact fun h hiff => h hiff.symm
   · exact fun h hiff => h hiff.symm
 
+/-- A model has injective per-symbol edit count `0` from itself; simp lemma. -/
 @[simp] theorem injectiveRelationEditCount_self (M : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : injectiveRelationEditCount M M R = 0 := by
   rw [injectiveRelationEditCount, injectiveRelationEditSet, Finset.card_eq_zero,
     Finset.filter_eq_empty_iff]
   exact fun _ _ h => h Iff.rfl
 
+/-- Triangle inequality for the injective per-symbol edit count: an injective tuple on which
+`M` and `P` disagree lies in the `M`/`N` or the `N`/`P` injective disagreement set. Raw
+counts over injective tuples. Sharp (equality at `N = M`). House lemma, no source; the
+injective counterpart of `relationEditCount_triangle`. -/
 theorem injectiveRelationEditCount_triangle (M N P : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) :
     injectiveRelationEditCount M P R
@@ -139,11 +164,18 @@ theorem injectiveRelationEditCount_triangle (M N P : FiniteRelModel L V) {n : �
   · exact Or.inr ⟨hx.1, fun h23 => hx.2 (h12.trans h23)⟩
   · exact Or.inl ⟨hx.1, h12⟩
 
+/-- The relative injective per-symbol edit, `injectiveRelationEditCount / (|V|)_n`, is
+nonnegative. Totalized at zero when `(|V|)_n = 0` (that is, when `n > |V|`). House lemma,
+no source. -/
 theorem relativeInjectiveRelationEdit_nonneg (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : 0 ≤ relativeInjectiveRelationEdit M N R := by
   rw [relativeInjectiveRelationEdit]
   positivity
 
+/-- The relative injective per-symbol edit, normalized by the falling factorial `(|V|)_n`, is
+at most `1`. Totalized at zero when `(|V|)_n = 0`, where the value is `0`; otherwise it is
+`injectiveRelationEditCount_le_descFactorial` divided through. Sharp (complementary models
+attain `1` when `n ≤ |V|`). House lemma, no source. -/
 theorem relativeInjectiveRelationEdit_le_one (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : relativeInjectiveRelationEdit M N R ≤ 1 := by
   rw [relativeInjectiveRelationEdit]
@@ -190,12 +222,19 @@ theorem relationEditCount_le_injective_add_collisions
   exact Nat.add_le_add_left (Finset.card_filter_le _ _) _
 
 omit [DecidableEq V] in
+/-- The relative per-symbol edit, `relationEditCount / |V|^n`, is nonnegative. Totalized at
+zero on an empty carrier with `n ≥ 1`; a nullary symbol divides by `|V|^0 = 1`. House lemma,
+no source. -/
 theorem relativeRelationEdit_nonneg (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : 0 ≤ relativeRelationEdit M N R := by
   rw [relativeRelationEdit]
   positivity
 
 omit [DecidableEq V] in
+/-- The relative per-symbol edit, normalized by `|V|^n` (diagonals included), is at most `1`.
+Totalized at zero on an empty carrier with `n ≥ 1`, where the value is `0`; otherwise it is
+`relationEditCount_le_pow` divided through. Sharp (complementary models attain `1`). House
+lemma, no source. -/
 theorem relativeRelationEdit_le_one (M N : FiniteRelModel L V) {n : ℕ}
     (R : L.Relations n) : relativeRelationEdit M N R ≤ 1 := by
   rw [relativeRelationEdit, ← Nat.cast_pow]
@@ -223,21 +262,34 @@ noncomputable def relativeAggregateEdit (M N : FiniteRelModel L V) : ℝ :=
   (aggregateEditCount M N : ℝ) / (aggregateTupleBudget L V : ℝ)
 
 omit [DecidableEq V] in
+/-- The aggregate edit count is at most the aggregate tuple budget
+`Σ_s |V|^(arity s)`: the frozen cross-arity weighting gives every symbol-tuple incidence
+weight one, so this is `relationEditCount_le_pow` summed over `RelSymbol L`. Raw counts.
+Sharp: complementary models attain it. Nullary symbols contribute budget `1` even on an empty
+carrier; the zero-symbol language has both sides `0`. House lemma, no source. Consumed by
+`relativeAggregateEdit_le_one`. -/
 theorem aggregateEditCount_le_budget (M N : FiniteRelModel L V) :
     aggregateEditCount M N ≤ aggregateTupleBudget L V :=
   Finset.sum_le_sum fun s _ => relationEditCount_le_pow M N s.2
 
 omit [DecidableEq V] in
+/-- The aggregate edit count is symmetric in the two models: `relationEditCount_comm` summed
+over `RelSymbol L`. Raw count. House lemma, no source. -/
 theorem aggregateEditCount_comm (M N : FiniteRelModel L V) :
     aggregateEditCount M N = aggregateEditCount N M :=
   Finset.sum_congr rfl fun s _ => relationEditCount_comm M N s.2
 
 omit [DecidableEq V] in
+/-- A model has aggregate edit count `0` from itself; simp lemma. -/
 @[simp] theorem aggregateEditCount_self (M : FiniteRelModel L V) :
     aggregateEditCount M M = 0 :=
   Finset.sum_eq_zero fun s _ => relationEditCount_self M s.2
 
 omit [DecidableEq V] in
+/-- Triangle inequality for the aggregate edit count: `relationEditCount_triangle` summed
+over `RelSymbol L`, so `aggregateEditCount M P` is at most
+`aggregateEditCount M N + aggregateEditCount N P`. Raw counts under the frozen unit
+weighting. Sharp (equality at `N = M`). House lemma, no source. -/
 theorem aggregateEditCount_triangle (M N P : FiniteRelModel L V) :
     aggregateEditCount M P ≤ aggregateEditCount M N + aggregateEditCount N P := by
   rw [aggregateEditCount, aggregateEditCount, aggregateEditCount,
@@ -253,12 +305,20 @@ theorem aggregateEditCount_eq_zero_iff (M N : FiniteRelModel L V) :
   exact ⟨fun h s => h s (Finset.mem_univ s), fun h s _ => h s⟩
 
 omit [DecidableEq V] in
+/-- The relative aggregate edit, `aggregateEditCount / aggregateTupleBudget`, is nonnegative.
+Totalized at zero when the budget is `0` (the zero-symbol language, or an empty carrier with
+no nullary symbol). House lemma, no source. -/
 theorem relativeAggregateEdit_nonneg (M N : FiniteRelModel L V) :
     0 ≤ relativeAggregateEdit M N := by
   rw [relativeAggregateEdit]
   positivity
 
 omit [DecidableEq V] in
+/-- The relative aggregate edit, normalized by the aggregate tuple budget
+`Σ_s |V|^(arity s)` (not by `|V|^arityBound`, and not an average of per-symbol relative
+edits), is at most `1`. Totalized at zero when the budget is `0`, where the value is `0`;
+otherwise it is `aggregateEditCount_le_budget` divided through. Sharp (complementary models
+attain `1` when the budget is positive). House lemma, no source. -/
 theorem relativeAggregateEdit_le_one (M N : FiniteRelModel L V) :
     relativeAggregateEdit M N ≤ 1 := by
   rw [relativeAggregateEdit]

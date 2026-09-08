@@ -77,13 +77,28 @@ section Schedule
 
 variable {K t : ℕ} {τ : ℝ}
 
+/-- The internal tolerance is at most half the target: `supplierTolerance K t τ ≤ τ / 2`.
+Both sides are absolute tolerances in the same units as `τ`; the bound is the left branch
+of the `min` and needs no hypothesis (for `τ ≤ 0` it holds with a nonpositive tolerance).
+House lemma, no source. Consumed by `two_mul_supplierTolerance_le`. -/
 theorem supplierTolerance_le_half_target : supplierTolerance K t τ ≤ τ / 2 :=
   min_le_left _ _
 
+/-- The internal tolerance is at most the Markov budget of step 6a:
+`supplierTolerance K t τ ≤ 1 / (64 (K + 1) t)`, the right branch of the `min`. Here `K` is
+the palette count and `t` the target piece count; the formula itself is a frozen constant
+(`ARCHITECTURE.md`). Totalized at zero: with `t = 0` the right side is `1 / 0 = 0`, and
+the inequality still holds as stated. Consumed by `supplierTolerance_le_half` and by
+`exists_pieceFamily`, which hands it to `exists_pieceFamily_of_familyRegular`. -/
 theorem supplierTolerance_le_bound :
     supplierTolerance K t τ ≤ 1 / (64 * ((K : ℝ) + 1) * (t : ℝ)) :=
   min_le_right _ _
 
+/-- Positivity of the internal tolerance: `0 < supplierTolerance K t τ` whenever `0 < t`
+and `0 < τ`. Both hypotheses are necessary, since each branch of the `min` vanishes when
+its argument does (`τ / 2 = 0` at `τ = 0`, and `1 / (64 (K + 1) t) = 0` at `t = 0` under
+the totalized division). House lemma, no source. Consumed by `exists_pieceFamily` to feed
+the family regularity summit. -/
 theorem supplierTolerance_pos (ht : 0 < t) (hτ : 0 < τ) : 0 < supplierTolerance K t τ := by
   have htR : (0 : ℝ) < (t : ℝ) := by exact_mod_cast ht
   refine lt_min (by linarith) ?_
@@ -99,13 +114,27 @@ theorem supplierTolerance_le_half (ht : 0 < t) : supplierTolerance K t τ ≤ 1 
   rw [div_le_div_iff₀ (by positivity) (by norm_num)]
   nlinarith
 
+/-- Twice the internal tolerance is within the target: `2 * supplierTolerance K t τ ≤ τ`.
+This is `supplierTolerance_le_half_target` rearranged into the shape the piece extraction
+of step 6a asks for (the `ρ`-uniformity of the cells is spent twice, once per direction).
+House lemma, no source. Consumed by `exists_pieceFamily` via
+`exists_pieceFamily_of_familyRegular`. -/
 theorem two_mul_supplierTolerance_le : 2 * supplierTolerance K t τ ≤ τ := by
   have := supplierTolerance_le_half_target (K := K) (t := t) (τ := τ)
   linarith
 
+/-- The requested part count `supplierParts t = 4 t` is positive whenever `0 < t`.
+Consumed by `exists_pieceFamily` to show the produced partition has at least one part,
+which is what makes the common size `|A| / #parts` meaningful. -/
 theorem supplierParts_pos (ht : 0 < t) : 0 < supplierParts t := by
   rw [supplierParts]; omega
 
+/-- The part-count bound is positive: `0 < supplierBound K t τ`, with no hypothesis on
+`K`, `t`, or `τ`. In fact it is at least `2`, since the family regularity bound dominates
+its initial floor `familyInitialBound`, which is at least `2` (`two_le_familyInitialBound`);
+only positivity is exported here. Because `supplierThreshold K t τ = supplierBound K t τ`
+definitionally, this is also positivity of the host threshold. Consumed by
+`supplierRetention_pos` and `exists_pieceFamily`. -/
 theorem supplierBound_pos : 0 < supplierBound K t τ := by
   have h2 : 2 ≤ familyInitialBound familyChunkThreshold (supplierTolerance K t τ)
       (supplierParts t) := two_le_familyInitialBound _ _ _
@@ -113,6 +142,11 @@ theorem supplierBound_pos : 0 < supplierBound K t τ := by
   rw [supplierBound]
   omega
 
+/-- The retention floor `supplierRetention K t τ = t / (2 B)` is positive whenever `0 < t`,
+where `B = supplierBound K t τ` is positive unconditionally (`supplierBound_pos`). The
+hypothesis `0 < t` is necessary: at `t = 0` the floor is `0`, which is why gate G-S2 in the
+module docstring keeps `0 < t` on the summit. House lemma, no source. Consumed by
+`pieceSupplier` to discharge the `0 < κ` clause of the frozen existential. -/
 theorem supplierRetention_pos (ht : 0 < t) : 0 < supplierRetention K t τ := by
   have htR : (0 : ℝ) < (t : ℝ) := by exact_mod_cast ht
   have hB : (0 : ℝ) < (supplierBound K t τ : ℝ) := by
