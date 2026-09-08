@@ -84,7 +84,7 @@ counting substrate rather than with its first consumer.
 
 ## Import surfaces
 
-Two library roots, one namespace:
+Two library roots, one namespace (plus the `examples/` library, below):
 
 - **`RegularityLemmata`** (the default `import RegularityLemmata`) is the public surface:
   settled API only. Curated **facade** modules — `RegularityLemmata.Kernel` and
@@ -96,6 +96,11 @@ Two library roots, one namespace:
   member stays directly importable — but the public root does not import it, and **no module
   imported by the public root may import a module that only the gates umbrella imports**.
   Promotion out of the umbrella is an ordinary reviewed move of one import line.
+- **`RegularityLemmataExamples`** (`examples/`, a default build target) holds worked
+  specializations of library theorems — each a compiled file importing only advertised
+  facades, so the gate checks that the public surface suffices for the intended use. Examples
+  are documentation with a compiler behind it, not API: nothing may import them, and they
+  define no reusable declarations.
 
 ## Relational substrate conventions
 

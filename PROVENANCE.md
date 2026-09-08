@@ -116,14 +116,22 @@ they were developed as stability-neutral infrastructure. No third-party source t
   Combinatorica 19 (1999).
 
   **The rectangular weighted-kernel development** (`Finite/RectKernel.lean`,
-  `Partition/RectKernel.lean`, `Partition/RectKernelEnergy.lean`,
-  `Partition/RectKernelCut.lean`, `Partition/RectKernelFriezeKannan.lean`; design freeze in
-  `docs/design/rectangular-kernels.md`) divides credit three ways.
+  `Finite/RelationKernel.lean`, `Finite/RectKernelCutNorm.lean`,
+  `Finite/RectKernelCutDecomposition.lean`, `Partition/RectKernel.lean`,
+  `Partition/RectKernelEnergy.lean`, `Partition/RectKernelCut.lean`,
+  `Partition/RectKernelFriezeKannan.lean`; design freezes in
+  `docs/design/rectangular-kernels.md` and `docs/design/cut-matrix-decomposition.md`) divides
+  credit three ways.
 
   **Classical source.** The weak-regularity architecture is theirs: weak approximation in cut
-  discrepancy via a greedy energy increment, with the `ε²`-per-round gain and the resulting
-  single-exponential round count. What is formalized here is a **step-partition summit**; the
-  separate cut-matrix decomposition interface is not implemented.
+  discrepancy via a greedy energy increment, with the `ε²`-per-round gain, hence an `O(ε⁻²)`
+  round count and a partition size single-exponential in `ε⁻²`. Both of their statements are
+  formalized here, in this repository's weighted rectangular formulations: the
+  **step-partition summit** (`rect_frieze_kannan_cutDiscrepancy`: `O(ε⁻²)` rounds, part
+  counts single-exponential in `ε⁻²`) and the separate **cut-matrix decomposition**
+  (`kernel_frieze_kannan_cutDecomposition`: `O(ε⁻²)` weighted rectangles — at most `⌈1/ε²⌉₊`
+  — with coefficients at most `1/ε` and a residual of cut norm at most `ε · mass`), the latter
+  by their greedy residual iteration rather than through the partition theorem.
 
   **This repository's formulation.** Raw carrier weights on **two heterogeneous carriers**
   rather than one normalized vertex set; **independent** left and right partitions whose part

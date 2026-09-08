@@ -155,7 +155,9 @@ substrates compose without an adapter.
    because downstream stable regularity consumes the step, not the decomposition.
 3. **The cut-matrix decomposition** — a bounded kernel as a sum of `O(ε⁻²)` weighted rectangle
    indicators plus a residual of cut norm at most `ε`, recorded during the greedy residual
-   iteration rather than forced through the partition theorem.
+   iteration rather than forced through the partition theorem. **Done**:
+   `kernel_frieze_kannan_cutDecomposition` in `Finite/RectKernelCutDecomposition.lean`, design
+   record `docs/design/cut-matrix-decomposition.md`.
 
 Tensor/box FK stays gated until item 2 lands.
 

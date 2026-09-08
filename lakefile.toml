@@ -1,6 +1,6 @@
 name = "RegularityLemmata"
 version = "0.10.0"
-defaultTargets = ["RegularityLemmata", "RegularityLemmataGates"]
+defaultTargets = ["RegularityLemmata", "RegularityLemmataGates", "RegularityLemmataExamples"]
 
 [[require]]
 name = "mathlib"
@@ -15,6 +15,13 @@ name = "RegularityLemmata"
 # while CI still builds and audits them.
 [[lean_lib]]
 name = "RegularityLemmataGates"
+
+# Worked specializations, compiled against the advertised imports only (the `Kernel` facade).
+# Built by default so the gate compiles them; not part of the public surface.
+[[lean_lib]]
+name = "RegularityLemmataExamples"
+srcDir = "examples"
+roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual"]
 
 [[lean_exe]]
 name = "axiom_audit"

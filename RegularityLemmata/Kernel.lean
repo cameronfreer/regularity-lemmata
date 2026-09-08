@@ -9,6 +9,7 @@ import RegularityLemmata.Finite.AnalyticHomogeneous
 import RegularityLemmata.Finite.RectKernel
 import RegularityLemmata.Finite.RelationKernel
 import RegularityLemmata.Finite.RectKernelCutNorm
+import RegularityLemmata.Finite.RectKernelCutDecomposition
 import RegularityLemmata.Partition.RectKernel
 import RegularityLemmata.Partition.RectKernelEnergy
 import RegularityLemmata.Partition.RectKernelCut
@@ -40,6 +41,12 @@ each listed module remains directly importable.
   weighted rectangle sum over test rectangles), with its elimination `iff`, `op`, positive
   rescaling, the trivial `C · mass` bound, and the zero-mass endpoint; the cut discrepancy is
   its value on the stepped residual (`rectCutDiscrepancy_eq_rectCutNorm_rectResidual`).
+* `Finite.RectKernelCutDecomposition` — **the cut-matrix decomposition**
+  `kernel_frieze_kannan_cutDecomposition`: an absolutely unit-bounded kernel is a combination of
+  at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, plus a residual of cut norm
+  at most `ε · mass`, by a private strict-invariant greedy residual iteration; with the
+  normalized and `op` forms. A different reusable output from the
+  step-partition summit: one rectangle per round, no partition, no product term count.
 * `Finite.Average` — one-variable averages (`averageOn`), guard-free at `∅`, with `densityOn`
   as their indicator shadow and both rectangle-fiber factorizations of `rectAverageCount`. One
   averaging vocabulary shared by kernel averages, fiber averages, and densities.
