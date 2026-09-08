@@ -101,8 +101,9 @@ noncomputable def familyRegularityBoundTriple (K : ℕ) (ε : ℝ) (l : ℕ) : �
 /-- The seeded final bound is a multiple of three: `3 ∣ familyRegularityBoundTriple K ε l`.
 The seed is divisible by three (`three_dvd_familyTripleSeed`) and the recursion preserves
 divisibility (`three_dvd_familyRegularityBoundAux`), for every `K`, `ε`, and `l`. House
-lemma, no source. Exercised by the tests at the end of this file; the summit exports it as
-its `3 ∣ #Q.parts` clause for grouping cells into owners of three. -/
+lemma, no source. This concerns the numerical bound only: divisibility of the actual part
+count is maintained separately by `familyRegularity_iterate_dvd`, which is where the summit's
+`3 ∣ #Q.parts` clause comes from. Exercised by the tests at the end of this file. -/
 theorem three_dvd_familyRegularityBoundTriple (K : ℕ) (ε : ℝ) (l : ℕ) :
     3 ∣ familyRegularityBoundTriple K ε l :=
   three_dvd_familyRegularityBoundAux (three_dvd_familyTripleSeed _ _ _) _
