@@ -1,8 +1,9 @@
 # Copyright (c) 2026 Cameron Freer. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Generated API documentation (doc-gen4) on GitHub Pages, versioned per release:
-# each published release is deployed under docs/<tag>/ and also as docs/latest/.
+# Generated API documentation (doc-gen4) on GitHub Pages, versioned per release. The layout
+# and the size budget are handled by scripts/deploy_docs.sh: one shared dependency tree per
+# Mathlib pin, a small directory per version, `latest` as a redirect.
 name: Docs
 
 on:
@@ -11,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Tag or commit to document"
+        description: "Tag or commit to document (also the version directory name)"
         required: true
         default: "main"
 
@@ -26,12 +27,18 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 240
+    env:
+      DOCS_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.ref }}
     steps:
       # actions/checkout v7.0.0, pinned to an immutable revision
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.inputs.ref || github.ref }}
+          ref: ${{ env.DOCS_VERSION }}
           persist-credentials: false
+
+      - name: Validate the version name
+        run: |
+          [[ "$DOCS_VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid version name" >&2; exit 1; }
 
       - name: Install elan
         # elan v4.2.3 installer, pinned to an immutable revision
@@ -40,43 +47,46 @@ jobs:
             | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Cache .lake
+      - name: Cache the documentation build
         # actions/cache v6.1.0, pinned to an immutable revision
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: docbuild/.lake
           key: docs-lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
 
-      - name: Build documentation
+      - name: Build the documentation
         working-directory: docbuild
         run: |
           lake update
           lake exe cache get
           lake build RegularityLemmata:docs
 
-      - name: Choose the version directory
-        id: ver
+      - name: Check out gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            echo "dir=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          url="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$url" gh-pages >/dev/null; then
+            git clone --quiet --depth 1 --branch gh-pages "$url" pages
           else
-            echo "dir=${{ github.event.inputs.ref }}" >> "$GITHUB_OUTPUT"
+            git init --quiet pages && git -C pages switch --quiet --orphan gh-pages
+            git -C pages remote add origin "$url"
           fi
 
-      - name: Deploy versioned docs
-        # peaceiris/actions-gh-pages v4.0.0, pinned to an immutable revision
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docbuild/.lake/build/doc
-          destination_dir: docs/${{ steps.ver.outputs.dir }}
-          keep_files: true
+      - name: Lay out the version
+        env:
+          DOCS_SRC: docbuild/.lake/build/doc
+          PAGES_DIR: pages
+        run: |
+          DEPS_KEY=$(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0][:12])")
+          export DEPS_KEY
+          bash scripts/deploy_docs.sh
 
-      - name: Deploy latest
-        if: github.event_name == 'release'
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docbuild/.lake/build/doc
-          destination_dir: docs/latest
-          keep_files: true
+      - name: Publish
+        working-directory: pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "docs: $DOCS_VERSION" || { echo "nothing to publish"; exit 0; }
+          git push --quiet origin gh-pages

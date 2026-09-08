@@ -1,0 +1,21 @@
+# Modules that must be reachable only from RegularityLemmataGates, never from the public root.
+# Maintained by hand; scripts/check_roots.py fails if this list and the import graph disagree.
+RegularityLemmata.Relational.CloneProxyProbe
+RegularityLemmata.Relational.ForbiddenForkGate
+RegularityLemmata.Relational.GenericTripleEstimate
+RegularityLemmata.Relational.InducedRemovalGates
+RegularityLemmata.Relational.OrientationProbe
+RegularityLemmata.Relational.PlacementStrata
+RegularityLemmata.Relational.PositivityGate
+RegularityLemmata.Relational.ProxyAggregateMass
+RegularityLemmata.Relational.ProxyCostBudget
+RegularityLemmata.Relational.ProxyEventIndex
+RegularityLemmata.Relational.ProxyGroupingGate
+RegularityLemmata.Relational.ProxyHierarchyBridge
+RegularityLemmata.Relational.ProxyMove
+RegularityLemmata.Relational.ProxyNormalizedCostGate
+RegularityLemmata.Relational.ProxySelectionConstants
+RegularityLemmata.Relational.ProxySelectionSetup
+RegularityLemmata.Relational.RepresentativeSelection
+RegularityLemmata.Relational.Transversalization
+RegularityLemmata.Relational.WeakenedCountingGate
