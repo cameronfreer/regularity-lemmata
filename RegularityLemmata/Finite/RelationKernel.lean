@@ -178,6 +178,23 @@ theorem rectSum_rectCombination (c : Fin n → ℝ) (S : Fin n → Finset α) (T
   intro k _
   rw [rectSum_smul, rectSum_rectIndicator]
 
+/-- Appending one weighted rectangle to a combination adds its term pointwise. -/
+theorem rectCombination_snoc (c : Fin n → ℝ) (S : Fin n → Finset α) (T : Fin n → Finset β)
+    (a : ℝ) (S₀ : Finset α) (T₀ : Finset β) :
+    rectCombination (Fin.snoc c a) (Fin.snoc S S₀) (Fin.snoc T T₀)
+      = fun x y => rectCombination c S T x y + a * rectIndicator S₀ T₀ x y := by
+  funext x y
+  simp only [rectCombination_apply, Fin.sum_univ_castSucc, Fin.snoc_castSucc, Fin.snoc_last]
+
+/-- The combination transposes with its rectangles swapped. -/
+theorem rectCombination_op (c : Fin n → ℝ) (S : Fin n → Finset α) (T : Fin n → Finset β) :
+    (rectCombination c S T).op = rectCombination c T S := by
+  funext y x
+  simp only [RectKernel.op, rectCombination_apply]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [← rectIndicator_op]
+  rfl
+
 end RectCombination
 
 /-! ### The decrement identities

@@ -44,8 +44,8 @@ each listed module remains directly importable.
 * `Finite.RectKernelCutDecomposition` — **the cut-matrix decomposition**
   `kernel_frieze_kannan_cutDecomposition`: an absolutely unit-bounded kernel is a combination of
   at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, plus a residual of cut norm
-  at most `ε · mass`, by the strict-invariant greedy residual iteration (`CutIterInv`,
-  `cutIterInv_step`); with the normalized and `op` forms. A different reusable output from the
+  at most `ε · mass`, by a private strict-invariant greedy residual iteration; with the
+  normalized and `op` forms. A different reusable output from the
   step-partition summit: one rectangle per round, no partition, no product term count.
 * `Finite.Average` — one-variable averages (`averageOn`), guard-free at `∅`, with `densityOn`
   as their indicator shadow and both rectangle-fiber factorizations of `rectAverageCount`. One

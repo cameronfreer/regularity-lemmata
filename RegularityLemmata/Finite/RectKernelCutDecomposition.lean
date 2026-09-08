@@ -23,7 +23,7 @@ so its term count is `O(ε⁻²)`; its residual is measured by the partition-fre
 `rectCutDiscrepancy_eq_rectCutNorm_rectResidual`. Design freeze:
 `docs/design/cut-matrix-decomposition.md`.
 
-**The iteration.** The potential is the pointwise mass-weighted square `rectSqMass` of the
+**The iteration (private; only the summit and its corollaries are API).** The potential is the pointwise mass-weighted square `rectSqMass` of the
 residual. The invariant after `t` rounds (`CutIterInv`) records `t` rectangles inside the
 carriers with coefficients bounded by `1/ε` whose residual `Rₜ` satisfies
 `Φ(Rₜ) + t·ε²·M ≤ Φ(f)`, **strictly** once `t ≥ 1`. A failing round — a witness rectangle with
@@ -44,22 +44,12 @@ namespace RegularityLemmata
 
 variable {X Y : Type*} [DecidableEq X] [DecidableEq Y] {A : Finset X} {B : Finset Y}
 
-/-! ### Appending a rectangle to a combination -/
-
-/-- Appending one weighted rectangle to a combination adds its term pointwise. -/
-theorem rectCombination_snoc {n : ℕ} (c : Fin n → ℝ) (S : Fin n → Finset X)
-    (T : Fin n → Finset Y) (a : ℝ) (S₀ : Finset X) (T₀ : Finset Y) :
-    rectCombination (Fin.snoc c a) (Fin.snoc S S₀) (Fin.snoc T T₀)
-      = fun x y => rectCombination c S T x y + a * rectIndicator S₀ T₀ x y := by
-  funext x y
-  simp only [rectCombination_apply, Fin.sum_univ_castSucc, Fin.snoc_castSucc, Fin.snoc_last]
-
 /-! ### The invariant and the greedy step -/
 
 /-- **The iteration invariant** after `t` rounds: `t` recorded rectangles inside the carriers,
 coefficients bounded by `1/ε`, and the potential bound `Φ(Rₜ) + t·ε²·M ≤ Φ(f)` on the residual,
 strict once at least one round has been performed. -/
-def CutIterInv (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (A : Finset X) (B : Finset Y)
+private def CutIterInv (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (A : Finset X) (B : Finset Y)
     (ε : ℝ) (t : ℕ) : Prop :=
   ∃ (c : Fin t → ℝ) (S : Fin t → Finset X) (T : Fin t → Finset Y),
     (∀ k, S k ⊆ A ∧ T k ⊆ B) ∧ (∀ k, |c k| ≤ 1 / ε) ∧
@@ -71,7 +61,7 @@ def CutIterInv (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (A : Finse
       < rectSqMass f wX wY A B)
 
 /-- **`Inv 0`**: the empty family, with the residual `f` itself. -/
-theorem cutIterInv_zero (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (A : Finset X)
+private theorem cutIterInv_zero (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (A : Finset X)
     (B : Finset Y) (ε : ℝ) : CutIterInv f wX wY A B ε 0 := by
   refine ⟨fun i => i.elim0, fun i => i.elim0, fun i => i.elim0, fun i => i.elim0,
     fun i => i.elim0, ?_, fun h => absurd h (by omega)⟩
@@ -81,7 +71,7 @@ theorem cutIterInv_zero (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ) (
 (the recorded family is the decomposition) or a witness rectangle exists and `Inv (t + 1)` holds
 with that rectangle appended at the residual's own average. Needs nonnegative weights, `0 < ε`,
 and `Φ(f) ≤ M` (for the coefficient bound); **no boundedness of the residual**. -/
-theorem cutIterInv_step (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
+private theorem cutIterInv_step (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
     (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y) {ε : ℝ} (hε : 0 < ε)
     (hΦ : rectSqMass f wX wY A B ≤ finsetMass wX A * finsetMass wY B) {t : ℕ}
     (h : CutIterInv f wX wY A B ε t) :
@@ -251,15 +241,6 @@ theorem kernel_frieze_kannan_cutDecomposition_normalized (f : RectKernel X Y) (w
   · rw [div_le_iff₀ hpos]
     exact hcut
 
-/-- The combination transposes with its rectangles swapped. -/
-theorem rectCombination_op {n : ℕ} (c : Fin n → ℝ) (S : Fin n → Finset X)
-    (T : Fin n → Finset Y) : (rectCombination c S T).op = rectCombination c T S := by
-  funext y x
-  simp only [RectKernel.op, rectCombination_apply]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [← rectIndicator_op]
-  rfl
-
 /-- **`op` transport**: a decomposition of `f.op` on `B ×ˢ A` with the rectangles swapped. -/
 theorem kernel_frieze_kannan_cutDecomposition_op (f : RectKernel X Y) (wX : X → ℝ)
     (wY : Y → ℝ) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
@@ -300,7 +281,8 @@ example : ⌈1 / (1 / 5 : ℝ) ^ 2⌉₊ = 25 := by norm_num
 -- (`Finite/RectKernelCutNorm.lean`), so at `ε = 1/5` the **empty** decomposition fails the
 -- target `ε·M = 4/5 < 1`: the summit must record at least one rectangle. (At `ε = 1/2` the
 -- target is `2`, and the empty decomposition already succeeds.)
-example : ¬ (rectCutNorm cheqD (fun _ => 1) (fun _ => 1) Finset.univ Finset.univ
+private theorem cheqD_empty_fails : ¬ (rectCutNorm cheqD (fun _ => 1) (fun _ => 1)
+    Finset.univ Finset.univ
     ≤ (1 / 5 : ℝ) * (finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ
       * finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ)) := by
   intro h
@@ -309,17 +291,27 @@ example : ¬ (rectCutNorm cheqD (fun _ => 1) (fun _ => 1) Finset.univ Finset.uni
   simp [cheqD, rectSum, finsetMass] at hcell h
   linarith
 
--- The summit, instantiated on the chequerboard at `ε = 1/5`: at most `25` rectangles,
--- coefficients at most `5`, residual cut norm at most `4/5`.
+-- The summit, instantiated on the chequerboard at `ε = 1/5`, **returns a nonempty family**:
+-- at most `25` rectangles but at least one, coefficients at most `5`, residual cut norm at
+-- most `4/5`. An empty family would leave the residual `cheqD`, contradicting the obstruction.
 example : ∃ (n : ℕ) (c : Fin n → ℝ) (S : Fin n → Finset (Fin 2)) (T : Fin n → Finset (Fin 2)),
-    n ≤ ⌈1 / (1 / 5 : ℝ) ^ 2⌉₊ ∧ (∀ k, |c k| ≤ 1 / (1 / 5 : ℝ)) ∧
+    0 < n ∧ n ≤ ⌈1 / (1 / 5 : ℝ) ^ 2⌉₊ ∧ (∀ k, |c k| ≤ 1 / (1 / 5 : ℝ)) ∧
     (∀ k, S k ⊆ Finset.univ ∧ T k ⊆ Finset.univ) ∧
     rectCutNorm (fun x y => cheqD x y - rectCombination c S T x y) (fun _ => 1) (fun _ => 1)
       Finset.univ Finset.univ
       ≤ (1 / 5 : ℝ) * (finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ
-        * finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ) :=
-  kernel_frieze_kannan_cutDecomposition cheqD _ _ (fun _ _ => zero_le_one)
-    (fun _ _ => zero_le_one) cheqD_bounded (by norm_num)
+        * finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ) := by
+  obtain ⟨n, c, S, T, hn, hc, hST, hcut⟩ := kernel_frieze_kannan_cutDecomposition cheqD
+    (fun _ => 1) (fun _ => 1) (fun _ _ => zero_le_one) (fun _ _ => zero_le_one) cheqD_bounded
+    (ε := 1 / 5) (by norm_num)
+  refine ⟨n, c, S, T, ?_, hn, hc, hST, hcut⟩
+  rcases Nat.eq_zero_or_pos n with h0 | h0
+  · exfalso
+    subst h0
+    rw [rectCombination_zero] at hcut
+    simp only [sub_zero] at hcut
+    exact cheqD_empty_fails hcut
+  · exact h0
 
 -- **`ε ≥ 1`: the empty decomposition suffices** by the trivial bound, so the summit's
 -- existential is met with `n = 0`; pinned directly.
