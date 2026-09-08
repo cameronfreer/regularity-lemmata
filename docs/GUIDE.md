@@ -262,8 +262,8 @@ asserts nothing about symbols of arity greater than two.
   of `N`: the sum over positive-arity symbols `R` of `k^(arity R)·ε·|s|^(arity R)`, times
   `|s|^(k−1)`, plus the diagonal charge `(k choose 2)·m·|s|^(k−1)` for parts of size at most
   `m` (`abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound`,
-  `Relational/AggregationBridge`). Nothing is supplied by the caller beyond the three
-  hypotheses. Majority rounding produces such an approximation from a homogeneous partition,
+  `Relational/AggregationBridge`). No separate local-error coefficient is required. Majority
+  rounding produces such an approximation from a homogeneous partition,
   with the exact edit identity `editDistance_majorityRound_eq_min` (`Relational/CellwiseEdit`).
 - *Aggregating a supplied local estimate.* Separately, the aggregation bridge
   `abs_inducedEmbeddingCountOn_sub_sum_est_le` takes a caller-supplied estimate `est T` that is
