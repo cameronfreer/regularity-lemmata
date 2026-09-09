@@ -24,6 +24,11 @@ variable {α : Type*} [DecidableEq α]
 def traceComplementClosure (A : Finset α) (F : Finset (Finset α)) : Finset (Finset α) :=
   F ∪ F.image (fun T ↦ A \ T)
 
+/-- A member `T` of the trace family `F` and its complement `A \ T` relative to the parent
+cell `A` both belong to `traceComplementClosure A F`. The parent `A` is the first argument;
+no relation between `T` and `A` is assumed (`A \ T` is the relative complement whatever `T`
+is). House lemma, no source; consumed by `SliceCert.abs_block_density_sub_le` in
+`Partition/BalancedSlicing.lean`. -/
 theorem mem_traceComplementClosure (A : Finset α) (F : Finset (Finset α))
     {T : Finset α} (hT : T ∈ F) :
     T ∈ traceComplementClosure A F ∧ A \ T ∈ traceComplementClosure A F := by
@@ -31,6 +36,12 @@ theorem mem_traceComplementClosure (A : Finset α) (F : Finset (Finset α))
   · exact Finset.mem_union_left _ hT
   · exact Finset.mem_union_right _ (Finset.mem_image.mpr ⟨T, hT, rfl⟩)
 
+/-- Closing a trace family under complements at most doubles its size:
+`|traceComplementClosure A F| ≤ 2 * |F|`. Coarse: the factor `2` is the union bound on
+`F ∪ image (A \ ·) F`, with no credit for families already closed under complements or for
+traces whose complements coincide. House lemma, no source; consumed by
+`card_biUnion_traceClosure_le` below and by `exists_balanced_slicing` in
+`Partition/BalancedSlicing.lean`. -/
 theorem card_traceComplementClosure_le (A : Finset α) (F : Finset (Finset α)) :
     (traceComplementClosure A F).card ≤ 2 * F.card := by
   calc

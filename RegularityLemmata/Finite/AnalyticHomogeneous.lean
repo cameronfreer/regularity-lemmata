@@ -76,12 +76,20 @@ def RectKernel.IsHomogeneousPair (f : RectKernel X Y) (δ ε : ℝ) (A : Finset 
 
 /-! ### Monotonicity and totalization -/
 
+/-- Monotonicity in the closeness radius: `IsAlmostNearOn φ r δ ε V` implies
+`IsAlmostNearOn φ r δ' ε V` whenever `δ ≤ δ'`. The witness subset is reused unchanged; the
+open `δ`-ball around `r` sits inside the open `δ'`-ball. No sign condition on `δ`, `ε`.
+House lemma, no source; consumed by `RectKernel.IsRowConcentrated.mono_delta`. -/
 theorem IsAlmostNearOn.mono_delta (h : IsAlmostNearOn φ r δ ε V) (hδ : δ ≤ δ') :
     IsAlmostNearOn φ r δ' ε V := by
   rcases h with rfl | ⟨W, hWV, hcard, hnear⟩
   · exact Or.inl rfl
   · exact Or.inr ⟨W, hWV, hcard, fun v hv ↦ lt_of_lt_of_le (hnear v hv) hδ⟩
 
+/-- Monotonicity in the exceptional fraction: `IsAlmostNearOn φ r δ ε V` implies
+`IsAlmostNearOn φ r δ ε' V` whenever `ε ≤ ε'`. The witness subset is reused; its strict mass
+bound `(1 - ε) * |V| < |W|` weakens to `(1 - ε') * |V| < |W|`. No sign condition on `δ`,
+`ε`, `ε'`. House lemma, no source; consumed by `RectKernel.IsRowConcentrated.mono_eps`. -/
 theorem IsAlmostNearOn.mono_eps (h : IsAlmostNearOn φ r δ ε V) (hε : ε ≤ ε') :
     IsAlmostNearOn φ r δ ε' V := by
   rcases h with rfl | ⟨W, hWV, hcard, hnear⟩
@@ -89,9 +97,15 @@ theorem IsAlmostNearOn.mono_eps (h : IsAlmostNearOn φ r δ ε V) (hε : ε ≤ 
   · refine Or.inr ⟨W, hWV, lt_of_le_of_lt ?_ hcard, hnear⟩
     exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg _)
 
+/-- Totalization: `IsAlmostNearOn φ r δ ε ∅` holds for every `φ`, `r`, `δ`, `ε`, including
+`ε = 0` and `δ ≤ 0`, by the first disjunct of the definition. House lemma, no source. -/
 theorem isAlmostNearOn_empty (φ : α → ℝ) (r δ ε : ℝ) : IsAlmostNearOn φ r δ ε (∅ : Finset α) :=
   Or.inl rfl
 
+/-- Monotonicity of row concentration in the closeness radius: `δ ≤ δ'` transports
+`RectKernel.IsRowConcentrated f r δ ε A B` to radius `δ'`, row by row through
+`IsAlmostNearOn.mono_delta`. The set of good rows is unchanged. No sign condition on the
+parameters. House lemma, no source; consumed by `RectKernel.IsHomogeneousPair.mono_delta`. -/
 theorem RectKernel.IsRowConcentrated.mono_delta (h : RectKernel.IsRowConcentrated f r δ ε A B)
     (hδ : δ ≤ δ') : RectKernel.IsRowConcentrated f r δ' ε A B := by
   rcases h with hA | hB | ⟨A', hA'A, hcard, hrows⟩
@@ -99,6 +113,12 @@ theorem RectKernel.IsRowConcentrated.mono_delta (h : RectKernel.IsRowConcentrate
   · exact Or.inr (Or.inl hB)
   · exact Or.inr (Or.inr ⟨A', hA'A, hcard, fun a ha ↦ (hrows a ha).mono_delta hδ⟩)
 
+/-- Monotonicity of row concentration in the exceptional fraction: `ε ≤ ε'` transports
+`RectKernel.IsRowConcentrated f r δ ε A B` to fraction `ε'`. Note that `ε` plays two roles
+in the predicate (the fraction of bad rows and the fraction of bad columns within a good
+row); both weaken at once, the row count via the mass clause and the columns via
+`IsAlmostNearOn.mono_eps`. No sign condition on the parameters. House lemma, no source;
+consumed by `RectKernel.IsHomogeneousPair.mono_eps`. -/
 theorem RectKernel.IsRowConcentrated.mono_eps (h : RectKernel.IsRowConcentrated f r δ ε A B)
     (hε : ε ≤ ε') : RectKernel.IsRowConcentrated f r δ ε' A B := by
   rcases h with hA | hB | ⟨A', hA'A, hcard, hrows⟩
@@ -107,19 +127,34 @@ theorem RectKernel.IsRowConcentrated.mono_eps (h : RectKernel.IsRowConcentrated 
   · refine Or.inr (Or.inr ⟨A', hA'A, lt_of_le_of_lt ?_ hcard, fun a ha ↦ (hrows a ha).mono_eps hε⟩)
     exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg _)
 
+/-- Totalization on the row side: `RectKernel.IsRowConcentrated f r δ ε ∅ B` holds for every
+`r`, `δ`, `ε`, `B`, by the first disjunct of the definition. House lemma, no source. -/
 theorem rectKernel_isRowConcentrated_empty_left (f : RectKernel X Y) (r δ ε : ℝ)
     (B : Finset Y) : RectKernel.IsRowConcentrated f r δ ε ∅ B :=
   Or.inl rfl
 
+/-- Totalization on the column side: `RectKernel.IsRowConcentrated f r δ ε A ∅` holds for
+every `r`, `δ`, `ε`, `A`, by the second disjunct. This is the case a row-only totalization
+would get wrong at `ε ≤ 0` with `A ≠ ∅` (see the module docstring and the `Tests` section).
+House lemma, no source. -/
 theorem rectKernel_isRowConcentrated_empty_right (f : RectKernel X Y) (r δ ε : ℝ)
     (A : Finset X) : RectKernel.IsRowConcentrated f r δ ε A ∅ :=
   Or.inr (Or.inl rfl)
 
+/-- Monotonicity of `(δ, ε)`-homogeneity in `δ`: `δ ≤ δ'` transports
+`RectKernel.IsHomogeneousPair f δ ε A B` to `δ'`, keeping the same row value `r` and column
+value `s` in `[0,1]`. Both clauses go through `RectKernel.IsRowConcentrated.mono_delta`.
+No sign condition on the parameters. House lemma, no source (the paper takes this for
+granted). -/
 theorem RectKernel.IsHomogeneousPair.mono_delta (h : RectKernel.IsHomogeneousPair f δ ε A B)
     (hδ : δ ≤ δ') : RectKernel.IsHomogeneousPair f δ' ε A B :=
   ⟨let ⟨r, hr, hrow⟩ := h.1; ⟨r, hr, hrow.mono_delta hδ⟩,
    let ⟨s, hs, hcol⟩ := h.2; ⟨s, hs, hcol.mono_delta hδ⟩⟩
 
+/-- Monotonicity of `(δ, ε)`-homogeneity in `ε`: `ε ≤ ε'` transports
+`RectKernel.IsHomogeneousPair f δ ε A B` to `ε'`, keeping the same `r` and `s` in `[0,1]`.
+Both clauses go through `RectKernel.IsRowConcentrated.mono_eps`. No sign condition on the
+parameters. House lemma, no source (the paper takes this for granted). -/
 theorem RectKernel.IsHomogeneousPair.mono_eps (h : RectKernel.IsHomogeneousPair f δ ε A B)
     (hε : ε ≤ ε') : RectKernel.IsHomogeneousPair f δ ε' A B :=
   ⟨let ⟨r, hr, hrow⟩ := h.1; ⟨r, hr, hrow.mono_eps hε⟩,
@@ -131,10 +166,19 @@ theorem RectKernel.isHomogeneousPair_op_iff :
       RectKernel.IsHomogeneousPair f δ ε A B :=
   ⟨fun h ↦ ⟨h.2, h.1⟩, fun h ↦ ⟨h.2, h.1⟩⟩
 
+/-- Totalization on the row side: `RectKernel.IsHomogeneousPair f δ ε ∅ B` holds for every
+`δ`, `ε`, `B`, with `r = s = 0` as the (irrelevant) common values. The row clause is
+`rectKernel_isRowConcentrated_empty_left`; the column clause, stated on the transpose with
+`∅` as its column side, is `rectKernel_isRowConcentrated_empty_right`. House lemma, no
+source. -/
 theorem rectKernel_isHomogeneousPair_empty_left (f : RectKernel X Y) (δ ε : ℝ) (B : Finset Y) :
     RectKernel.IsHomogeneousPair f δ ε ∅ B :=
   ⟨⟨0, ⟨le_rfl, zero_le_one⟩, Or.inl rfl⟩, ⟨0, ⟨le_rfl, zero_le_one⟩, Or.inr (Or.inl rfl)⟩⟩
 
+/-- Totalization on the column side: `RectKernel.IsHomogeneousPair f δ ε A ∅` holds for
+every `δ`, `ε`, `A`, with `r = s = 0`. Mirror image of
+`rectKernel_isHomogeneousPair_empty_left` under `RectKernel.isHomogeneousPair_op_iff`.
+House lemma, no source. -/
 theorem rectKernel_isHomogeneousPair_empty_right (f : RectKernel X Y) (δ ε : ℝ)
     (A : Finset X) : RectKernel.IsHomogeneousPair f δ ε A ∅ :=
   ⟨⟨0, ⟨le_rfl, zero_le_one⟩, Or.inr (Or.inl rfl)⟩, ⟨0, ⟨le_rfl, zero_le_one⟩, Or.inl rfl⟩⟩

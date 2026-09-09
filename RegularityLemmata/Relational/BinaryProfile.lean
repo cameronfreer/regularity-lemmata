@@ -45,6 +45,11 @@ variable [DecidableEq V]
 def binaryProfilePartition (M : FiniteRelModel L V) (s : Finset V) : Finpartition s :=
   Finpartition.ofSetSetoid (binaryProfileSetoid M) s
 
+/-- The cells of `binaryProfilePartition M s` are the profile classes
+`{b ∈ s | binaryVertexProfile M a = binaryVertexProfile M b}` for `a ∈ s`. On `s = ∅` the
+image is empty, so there are no cells. House lemma, no source; unfolds mathlib's
+`Finpartition.ofSetSetoid_parts`. Consumed by `binaryVertexProfile_eq_of_mem_part` and
+`exists_eq_singleton_of_unique_profile`. -/
 theorem binaryProfilePartition_parts (M : FiniteRelModel L V) (s : Finset V) :
     (binaryProfilePartition M s).parts
       = s.image fun a => {b ∈ s | binaryVertexProfile M a = binaryVertexProfile M b} := by
@@ -93,14 +98,28 @@ def refineByBinaryProfile (M : FiniteRelModel L V) {s : Finset V} (P : Finpartit
     Finpartition s :=
   P ⊓ binaryProfilePartition M s
 
+/-- `refineByBinaryProfile M P ≤ P`: the common refinement refines `P`. House lemma, no
+source (`inf_le_left`). Consumed by `exists_binaryPalette_regular_refinement` and
+`exists_binaryPaletteStrongWitness`. -/
 theorem refineByBinaryProfile_le (M : FiniteRelModel L V) {s : Finset V}
     (P : Finpartition s) : refineByBinaryProfile M P ≤ P :=
   inf_le_left
 
+/-- `refineByBinaryProfile M P ≤ binaryProfilePartition M s`: the common refinement refines
+the vertex-profile partition, so unary relations and binary loops are constant on its cells.
+House lemma, no source (`inf_le_right`). Consumed by
+`exists_binaryPalette_regular_refinement` and `exists_binaryPaletteStrongWitness`. -/
 theorem refineByBinaryProfile_le_profile (M : FiniteRelModel L V) {s : Finset V}
     (P : Finpartition s) : refineByBinaryProfile M P ≤ binaryProfilePartition M s :=
   inf_le_right
 
+/-- `#(refineByBinaryProfile M P).parts ≤ #P.parts * Fintype.card (BinaryVertexProfile L)`:
+the cell count of the common refinement is at most the product of the two cell counts, and
+the profile partition has at most as many cells as there are profiles. Coarse: the product
+bound counts every pairwise intersection, empty ones included, and the profile count
+counts unrealized profiles. Host-independent, which is what the summit needs. House
+lemma, no source. Consumed by `exists_binaryPalette_regular_refinement` and its diagonal
+variant in `BinaryDiagRegularity.lean`. -/
 theorem card_parts_refineByBinaryProfile_le (M : FiniteRelModel L V) {s : Finset V}
     (P : Finpartition s) :
     (refineByBinaryProfile M P).parts.card

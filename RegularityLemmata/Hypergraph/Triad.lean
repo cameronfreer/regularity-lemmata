@@ -93,10 +93,16 @@ noncomputable def blockDensity (H : UniformHypergraph 3 α) (κ : RSet 2 α → 
     (key : Fin 3 → Fin K) : ℝ :=
   densityOn (polyadBlock κ key) (triadObs H)
 
+/-- `0 ≤ blockDensity H κ key`: a block density is a count divided by a count. Holds on an
+unrealized key too, where the density is totalized at zero. House lemma, no source;
+inherited from `densityOn_nonneg`. -/
 theorem blockDensity_nonneg (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (key : Fin 3 → Fin K) : 0 ≤ blockDensity H κ key :=
   densityOn_nonneg
 
+/-- `blockDensity H κ key ≤ 1`: the realized triples of a block are a subset of the block.
+Holds on an unrealized key, where the density is totalized at zero. House lemma, no
+source; inherited from `densityOn_le_one`. -/
 theorem blockDensity_le_one (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (key : Fin 3 → Fin K) : blockDensity H κ key ≤ 1 :=
   densityOn_le_one
@@ -141,6 +147,8 @@ def editCount (H G : UniformHypergraph 3 α) : ℕ :=
   (H.symmDiff G).edges.card
 
 omit [Fintype α] in
+/-- `editCount H G = editCount G H`: the symmetric difference is symmetric, so the unordered
+edit count is. House lemma, no source. -/
 theorem editCount_comm (H G : UniformHypergraph 3 α) :
     editCount H G = editCount G H := by
   rw [editCount, editCount]
@@ -150,6 +158,8 @@ theorem editCount_comm (H G : UniformHypergraph 3 α) :
   tauto
 
 omit [Fintype α] in
+/-- `editCount H H = 0`: a hypergraph is at edit distance zero from itself. House lemma,
+no source. -/
 theorem editCount_self (H : UniformHypergraph 3 α) : editCount H H = 0 := by
   rw [editCount, Finset.card_eq_zero]
   ext e
@@ -207,6 +217,8 @@ def IsBadTriad (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ
     (key : Fin 3 → Fin K) : Prop :=
   IsBadPolyad κ (triadObs H) δ key
 
+/-- Unfolding lemma: `IsBadTriad H κ δ key` is `¬ IsLocalDiscRegular κ (triadObs H) key δ`.
+Consumed by rewriting in `TriadIncrement.lean`. -/
 theorem isBadTriad_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ)
     (key : Fin 3 → Fin K) :
     IsBadTriad H κ δ key ↔ ¬ IsLocalDiscRegular κ (triadObs H) key δ :=
@@ -231,6 +243,8 @@ noncomputable def badTriadMassNum (H : UniformHypergraph 3 α) (κ : RSet 2 α �
   badPolyadMassNum κ (triadObs H) δ
 
 open Classical in
+/-- Unfolding lemma: `badTriadMassNum H κ δ` is the sum of `#(polyadBlock κ key)` over the
+bad keys, in `Fin 3` normal form. Consumed by `badTriadMassNum_le_of_mass_le`. -/
 theorem badTriadMassNum_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
     badTriadMassNum H κ δ
       = ∑ key ∈ Finset.univ.filter (fun key => IsBadTriad H κ δ key),
@@ -242,14 +256,22 @@ noncomputable def badTriadMass (H : UniformHypergraph 3 α) (κ : RSet 2 α → 
     (δ : ℝ) : ℝ :=
   badPolyadMass κ (triadObs H) δ
 
+/-- Unfolding lemma: `badTriadMass H κ δ = badTriadMassNum H κ δ / |V|^3` (division
+totalized at zero). Consumed by `badTriadMassNum_le_of_mass_le`. -/
 theorem badTriadMass_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
     badTriadMass H κ δ = badTriadMassNum H κ δ / (Fintype.card α : ℝ) ^ 3 :=
   rfl
 
+/-- `0 ≤ badTriadMassNum H κ δ`: the raw bad mass is a sum of block cardinalities.
+Holds for every `δ`, including negative `δ` and the empty carrier. House lemma, no
+source; the `j = 2` instance of `badPolyadMassNum_nonneg`. -/
 theorem badTriadMassNum_nonneg (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : 0 ≤ badTriadMassNum H κ δ :=
   badPolyadMassNum_nonneg κ (triadObs H) δ
 
+/-- `0 ≤ badTriadMass H κ δ`: the normalized bad mass is a nonnegative numerator over the
+nonnegative `|V|^3`. Holds for every `δ` and on the empty carrier, where the quotient is
+totalized at zero. House lemma, no source; the `j = 2` instance of `badPolyadMass_nonneg`. -/
 theorem badTriadMass_nonneg (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : 0 ≤ badTriadMass H κ δ :=
   badPolyadMass_nonneg κ (triadObs H) δ
@@ -259,6 +281,11 @@ theorem badTriadMassNum_le_count (H : UniformHypergraph 3 α) (κ : RSet 2 α �
     (δ : ℝ) : badTriadMassNum H κ δ ≤ (injectiveTupleCount α 3 : ℝ) :=
   badPolyadMassNum_le_count κ (triadObs H) δ
 
+/-- `badTriadMass H κ δ ≤ 1`: the bad mass is at most the injective triple count, which is
+at most `|V|^3`. Coarse: the frozen `|V|^3` normalization exceeds the injective count
+`|V|(|V|-1)(|V|-2)`, so equality never holds for `|V| ≥ 1`; on the empty carrier the
+left side is totalized at zero. House lemma, no source; the `j = 2` instance of
+`badPolyadMass_le_one`. -/
 theorem badTriadMass_le_one (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) : badTriadMass H κ δ ≤ 1 :=
   badPolyadMass_le_one κ (triadObs H) δ
@@ -269,12 +296,18 @@ noncomputable def badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α �
   badPolyadTuples κ (triadObs H) δ
 
 open Classical in
+/-- Unfolding lemma: `badTriadTuples H κ δ` is the union of `polyadBlock κ key` over the
+bad keys. Consumed by `editTriples_subset_badTriadTuples`. -/
 theorem badTriadTuples_def (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K) (δ : ℝ) :
     badTriadTuples H κ δ
       = (Finset.univ.filter fun key => IsBadTriad H κ δ key).biUnion (polyadBlock κ) :=
   rfl
 
 open Classical in
+/-- `#(badTriadTuples H κ δ)` equals the sum of `#(polyadBlock κ key)` over the bad keys:
+the blocks of distinct keys are disjoint, so the union counts without overlap. The count is
+ordered and diagonal-free (blocks contain only injective triples). House lemma, no source;
+the `j = 2` instance of `card_badPolyadTuples`. -/
 theorem card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) :
     (badTriadTuples H κ δ).card
@@ -282,6 +315,10 @@ theorem card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin
           (polyadBlock κ key).card :=
   card_badPolyadTuples κ (triadObs H) δ
 
+/-- The real cast of `#(badTriadTuples H κ δ)` is the raw bad mass `badTriadMassNum H κ δ`:
+the tuple-set and key-sum views of the exceptional mass agree. Consumed by
+`editCount_triadCleaned_le`. House lemma, no source; the `j = 2` instance of
+`cast_card_badPolyadTuples`. -/
 theorem cast_card_badTriadTuples (H : UniformHypergraph 3 α) (κ : RSet 2 α → Fin K)
     (δ : ℝ) :
     ((badTriadTuples H κ δ).card : ℝ) = badTriadMassNum H κ δ :=
