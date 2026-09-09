@@ -8,8 +8,8 @@ import RegularityLemmata.Graph.FamilyRefinement
 /-!
 # Strong regularity for a finite family, via energy-gap stopping
 
-The family counterpart of `Graph/Strong.lean`. A **family strong witness** for a finite
-directed family `Rk : Fin K → α → α → Prop`, an error schedule `E`, and a gap `δ` is a
+The family counterpart of `RegularityLemmata/Graph/Strong.lean`. A **family strong witness** for a
+finite directed family `Rk : Fin K → α → α → Prop`, an error schedule `E`, and a gap `δ` is a
 coarse partition and a fine refinement that is `E(#coarse)`-regular **for every relation of
 the family at once**, gaining at most `δ` of family energy over the coarse partition.
 
@@ -36,8 +36,8 @@ from the coarse parent exceeding `η` carry mass at most `(δ/η²)·|s|²`, mat
 `StrongWitness.deviant_mass_le` with **no factor of `K`**, since each component receives the
 full gap `δ`.
 
-`BinaryPaletteStrongWitness` (`Relational/BinaryStrong.lean`) is **not** an instance of
-this: palette colors partition every ordered pair, so its energy ceiling is `1` and its
+`BinaryPaletteStrongWitness` (`RegularityLemmata/Relational/BinaryStrong.lean`) is **not** an
+instance of this: palette colors partition every ordered pair, so its energy ceiling is `1` and its
 fuel `⌈1/δ⌉`, both genuinely sharper than the family ceiling `K` and fuel `⌈K/δ⌉` available
 here. Only its per-color handoff is routed through this file's API.
 
@@ -60,7 +60,8 @@ does **not** pick up a factor of the index count.
 
 This is the shared content of every "aggregate gap bounds each component's gap" lemma in
 the library: the family energy over `Fin K` here, and the palette energy over
-`BinaryPairPalette L` in `Relational/BinaryStrong.lean`. It is stated for an arbitrary
+`BinaryPairPalette L` in `RegularityLemmata/Relational/BinaryStrong.lean`. It is stated for an
+arbitrary
 finite index type because neither consumer needs anything more. -/
 theorem summand_le_add_of_sum_le_add {ι : Type*} [Fintype ι]
     {f g : ι → ℝ} (hmono : ∀ i, g i ≤ f i) {δ : ℝ}

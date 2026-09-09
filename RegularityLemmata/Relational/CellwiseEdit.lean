@@ -46,9 +46,9 @@ Those are API-stability and compositionality arguments, not capability arguments
   the rounded model. This mirrors `FiniteRelModel.isIndivisibleFor_iff_pos`.
 * **Ordered tuples, diagonals included.** Boxes are `Fintype.piFinset`, so repeated entries
   `x i = x j` are counted and `C` may repeat a cell. No exceptional set is subtracted and no
-  injectivity is assumed, matching `Relational/Edit.lean`'s per-symbol edit count and
-  `Relational/Indivisible.lean`'s exception-free tiling. An injective-restricted variant is a
-  different statement and must not be conflated with this one.
+  injectivity is assumed, matching `RegularityLemmata/Relational/Edit.lean`'s per-symbol edit count
+  and `RegularityLemmata/Relational/Indivisible.lean`'s exception-free tiling. An
+  injective-restricted variant is a different statement and must not be conflated with this one.
 * **The casts.** The comparison type is `ℝ`, dictated by `ε`. There is one outer cast on the
   edit count and one cast **per factor** in the product, `∏ i, ((C i).card : ℝ)` rather than a
   single cast of the product. The per-factor form is the right-hand shape of the pinned
@@ -79,14 +79,15 @@ Those are API-stability and compositionality arguments, not capability arguments
   under its honest names, `CellwiseEditBound.symm` and `CellwiseEditBound.trans`.
 * **No blow-up object and no uniqueness.** `majorityRound` is a model on the same carrier `V`,
   not a structure on `P.parts`; the quotient of an indivisible model onto `P.parts` is
-  `FiniteRelModel.quotient` in `Relational/Indivisible.lean`, and the two are composed only in
-  `Relational/AggregationBridge.lean`. Nothing claims the approximating model is unique, or best
-  among the routes considered.
+  `FiniteRelModel.quotient` in `RegularityLemmata/Relational/Indivisible.lean`, and the two are
+  composed only in `RegularityLemmata/Relational/AggregationBridge.lean`. Nothing claims the
+  approximating model is unique, or best among the routes considered.
 
 **Placement.** The construction is computable — no `noncomputable`, no `Classical.dec` in the
-definition. It is a separate file rather than an addition to `Relational/Indivisible.lean`, which
-holds the quotient model and whose docstring records that approximate indivisibility is not
-defined there; the rounding (on `V`) and the quotient (on `P.parts`) stay in separate files.
+definition. It is a separate file rather than an addition to
+`RegularityLemmata/Relational/Indivisible.lean`, which holds the quotient model and whose docstring
+records that approximate indivisibility is not defined there; the rounding (on `V`) and the quotient
+(on `P.parts`) stay in separate files.
 -/
 
 namespace RegularityLemmata

@@ -12,7 +12,7 @@ import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 The energy-increment iteration for `RectKernel`, and the rectangular summit: separate left
 and right part-count bounds, with the same-carrier product bound derived through the adapter
-of `Partition/RectKernelCut.lean` rather than taken as primitive.
+of `RegularityLemmata/Partition/RectKernelCut.lean` rather than taken as primitive.
 
 The design freeze is `docs/design/rectangular-kernels.md`. Constants are frozen there:
 contraction **1**, triangle **2**, and the call at `ε/2`.
@@ -26,7 +26,8 @@ separate until that point is the reason the rectangular formulation exists; merg
 earlier is exactly where sharpness is lost.
 
 The one-cut refinement itself is carrier-only machinery and lives upstream, in
-`Partition/Basic.lean` as `cutRefinePartition`; nothing about it mentions a kernel.
+`RegularityLemmata/Partition/Basic.lean` as `cutRefinePartition`; nothing about it mentions a
+kernel.
 
 ## Provenance
 
@@ -45,9 +46,10 @@ counts; guard-free `x / 0 = 0` conventions throughout, so that zero-mass cells a
 carriers need no side conditions; and the common-refinement adapter that converts the
 two-coordinate statement into a same-carrier one.
 
-The internal antecedent is the **Boolean** development in `Graph/FriezeKannan.lean`, which is
-unchanged and is not superseded, deprecated, or re-derived here. This file recovers that
-theorem's *discrepancy* conclusion through the adapter, not its sharper complexity bound.
+The internal antecedent is the **Boolean** development in
+`RegularityLemmata/Graph/FriezeKannan.lean`, which is unchanged and is not superseded, deprecated,
+or re-derived here. This file recovers that theorem's *discrepancy* conclusion through the adapter,
+not its sharper complexity bound.
 -/
 
 namespace RegularityLemmata
@@ -106,8 +108,9 @@ theorem biUnion_selectedRight [DecidableEq Y] (Q : Finpartition B) {T : Finset Y
 witness rectangle, is the mass-weighted sum of the residual's averages over the selected cell
 pairs.
 
-Pure bookkeeping: the bridge of `Partition/RectKernelCut.lean`, additivity of a rectangle sum
-over disjoint unions, and the cancellation gate `rectAverage_mul_mass` — which needs no
+Pure bookkeeping: the bridge of `RegularityLemmata/Partition/RectKernelCut.lean`, additivity of a
+rectangle sum over disjoint unions, and the cancellation gate `rectAverage_mul_mass` — which needs
+no
 positive-mass hypothesis, so neither does this. -/
 theorem rectError_eq_sum_selected [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
     (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) {S : Finset X}
@@ -395,8 +398,9 @@ termination through `rectEnergy_le_one`. The energy step itself needed no such h
 ceiling, `t` rounds reach a *pair* of refinements whose stepped prediction is uniformly
 `ε · (mass A · mass B)`-accurate on every test rectangle.
 
-The round-budget arithmetic mirrors `Graph/FriezeKannan.lean`'s `fk_iterate`, including its
-strict-increment handling: the `t = 0` case is closed by contradiction against the energy
+The round-budget arithmetic mirrors `RegularityLemmata/Graph/FriezeKannan.lean`'s `fk_iterate`,
+including its strict-increment handling: the `t = 0` case is closed by contradiction against the
+energy
 ceiling, which is what makes `⌈1/ε²⌉₊ + 1` rather than `⌈1/ε²⌉₊` the right fuel. -/
 theorem rectFkIterate [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y) (wX : X → ℝ)
     (wY : Y → ℝ) (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
@@ -499,12 +503,13 @@ theorem rect_frieze_kannan_cutDiscrepancy [DecidableEq X] [DecidableEq Y] (f : R
 /-! ### Step 6, continued: the same-carrier specialization
 
 **Where the factor `4` comes from, and nowhere else.** Running the paired iteration at `ε/2`
-costs `2^t` on each coordinate separately; the adapter of `Partition/RectKernelCut.lean` then
-multiplies the two, and `2^t · 2^t = 4^t` appears for the first time.
+costs `2^t` on each coordinate separately; the adapter of
+`RegularityLemmata/Partition/RectKernelCut.lean` then multiplies the two, and `2^t · 2^t = 4^t`
+appears for the first time.
 
-The existing Boolean same-carrier summit in `Graph/FriezeKannan.lean` remains the **sharper
-direct result** and is untouched: it obtains `4 ^ (⌈1/ε²⌉₊ + 1)` directly, whereas the route
-below pays `⌈4/ε²⌉₊ + 1` rounds because it calls at `ε/2`. This theorem is an adapter, not a
+The existing Boolean same-carrier summit in `RegularityLemmata/Graph/FriezeKannan.lean` remains the
+**sharper direct result** and is untouched: it obtains `4 ^ (⌈1/ε²⌉₊ + 1)` directly, whereas the
+route below pays `⌈4/ε²⌉₊ + 1` rounds because it calls at `ε/2`. This theorem is an adapter, not a
 replacement. -/
 theorem rect_frieze_kannan_same_carrier [DecidableEq X] (f : RectKernel X X) (w₁ w₂ : X → ℝ)
     (P₀ Q₀ : Finpartition A) (hw₁ : ∀ x ∈ A, 0 ≤ w₁ x) (hw₂ : ∀ x ∈ A, 0 ≤ w₂ x)

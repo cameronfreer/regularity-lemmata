@@ -20,7 +20,7 @@ prescribed set of `j`-sets.
 The regularity predicates over these test surfaces (the local per-parent
 `IsDiscRegularAt`/`IsPolyadRegularAt`, their common-density globalizations, and the
 repository-specific coarse `IsBlockUnionRegular`) live in
-`Hypergraph/PolyadRegularity.lean`; this file provides the set-level combinatorics
+`RegularityLemmata/Hypergraph/PolyadRegularity.lean`; this file provides the set-level combinatorics
 they consume, including the permutation transport of blocks and atoms
 (`comp_perm_mem_polyadBlock`, `comp_perm_mem_discAtom`, and the cardinality/density
 invariances).

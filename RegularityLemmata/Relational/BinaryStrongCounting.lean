@@ -8,7 +8,8 @@ import RegularityLemmata.Relational.BinaryStrongRegularityCharge
 # Strong transversal counting: the density-shift charge and the summit
 
 Phase 10 unit 7 (design freeze in `ARCHITECTURE.md`), second half of the summit, built on the
-common-index expansions and the regularity charge in `Relational/BinaryStrongRegularityCharge.lean`.
+common-index expansions and the regularity charge in
+`RegularityLemmata/Relational/BinaryStrongRegularityCharge.lean`.
 
 The **density-shift charge** compares the fine step estimate (`fineInducedEstimate`, using each
 fine cell's own palette densities) with the coarse step estimate (`coarseInducedEstimate`, using

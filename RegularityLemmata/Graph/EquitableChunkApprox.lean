@@ -11,8 +11,8 @@ import RegularityLemmata.Graph.Increment
 `ARCHITECTURE.md` supplier route decision (2026-07-22), implementation sequence step 3,
 **approximation half**: how much of a nonuniformity witness the chunks of
 `equitableIncrement` recover, and the resulting block-energy increment with its loss made
-explicit. The construction half (`Graph/EquitableChunk.lean`) established the exact
-combinatorics first; nothing here revisits part counts or part sizes.
+explicit. The construction half (`RegularityLemmata/Graph/EquitableChunk.lean`) established the
+exact combinatorics first; nothing here revisits part counts or part sizes.
 
 **Two layers, named separately.** `witnessAtoms R ε P C` is the *certifying* layer: the
 atomisation of the parent cell `C` by its own witness cuts, in which every chosen witness
@@ -36,10 +36,11 @@ estimates only afterwards.
    `chunkWitnessRemainder_mul_pow_le_card_part`: the remainder is smaller than every
    parent cell by the whole equitabilisation factor `4^(n·2^(2n))` — the exact
    structural inequality that discharges the gain theorem's numerical hypotheses.
-3. `innerPartUnion Q W` (`Partition/Basic.lean`) is the recovered side: the union of the
+3. `innerPartUnion Q W` (`RegularityLemmata/Partition/Basic.lean`) is the recovered side: the union
+of the
    chunks contained in `W`. It is a part union of `Q` by construction, so it can be fed
    straight into the increment bridge.
-4. `abs_pairDensity_sub_mul_le` (`Finite/PairDensity.lean`) compares the recovered
+4. `abs_pairDensity_sub_mul_le` (`RegularityLemmata/Finite/PairDensity.lean`) compares the recovered
    density with the witness density in **multiplication form**, so no denominator
    positivity is needed.
 5. `blockEnergy_equitableIncrement_gain` — the approximate one-block increment, in direct

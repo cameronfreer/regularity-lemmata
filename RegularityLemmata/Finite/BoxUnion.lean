@@ -28,15 +28,15 @@ exactly `finsetMass` applied to `tupleWeight w`. That is what is used throughout
 
 The generic estimates it rests on — subadditivity, the union bound over a family, and the
 symmetric-difference bound on a mass difference — are properties of `finsetMass` and live in
-`Finite/Weight.lean` alongside it, not here.
+`RegularityLemmata/Finite/Weight.lean` alongside it, not here.
 
 ## Why this is a separate module
 
 `Finset.biUnion` and symmetric difference on tuple sets both need `DecidableEq (∀ i, V i)`, which
-in turn needs `[∀ i, DecidableEq (V i)]` fiberwise. `Finite/ProductBox.lean` deliberately carries
-no decidable equality on the carriers, so — exactly as with `Partition/BoxPartition.lean` — the
-heavier instances are confined here and `FiniteBox`, `boxMass`, `boxPredMass`, and `boxDensity`
-keep their lighter profile.
+in turn needs `[∀ i, DecidableEq (V i)]` fiberwise. `RegularityLemmata/Finite/ProductBox.lean`
+deliberately carries no decidable equality on the carriers, so — exactly as with
+`RegularityLemmata/Partition/BoxPartition.lean` — the heavier instances are confined here and
+`FiniteBox`, `boxMass`, `boxPredMass`, and `boxDensity` keep their lighter profile.
 
 ## Where nonnegativity enters, and where it does not
 

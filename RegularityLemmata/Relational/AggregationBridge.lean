@@ -36,14 +36,16 @@ does not claim one exists for every `FiniteRelModel L`; the arity-specific wrapp
 `hlocal` where the library has a local estimate (`bridgeTwo`, exact at arity `2` with the cell's
 own pair density, `δ = 0`; `bridgeThree`, `δ = 7·ε` at arity `3` from
 `abs_inducedEmbeddingCountOn_three_sub_le`). The **composite** (§9) chains the edit
-transfer (`Relational/Edit.lean`) with quotient counting (`Relational/DiagonalGate.lean`):
+transfer (`RegularityLemmata/Relational/Edit.lean`) with quotient counting
+(`RegularityLemmata/Relational/DiagonalGate.lean`):
 `abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_editMass`, its instantiation under a
 `CellwiseEditBound` via the exact cellwise-to-aggregate conversion
 (`CellwiseEditBound.editDistance_const_le`), the majority-rounding corollary — homogeneity in,
 counting out — the chain with the raw bridge, and the normalized composite over `(|s|)_k`. The
-composite introduces no coefficient of its own. The volume tiling and the generic profile
-substrate live upstream (`Relational/DiagonalGate.lean`, `Relational/BinaryPattern.lean`,
-`Relational/TransversalCounting.lean`).
+composite introduces no coefficient of its own. The volume tiling and the generic profile substrate
+live upstream (`RegularityLemmata/Relational/DiagonalGate.lean`,
+`RegularityLemmata/Relational/BinaryPattern.lean`,
+`RegularityLemmata/Relational/TransversalCounting.lean`).
 -/
 
 namespace RegularityLemmata

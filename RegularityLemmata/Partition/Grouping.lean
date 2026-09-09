@@ -25,8 +25,8 @@ arbitrary `Finpartition`:
   `3m ≤ |owner| ≤ 3m + 3`, and the intermediate values are ordinary mixed triples.
 * `exists_fibre_labelling` — the construction: any finset of cardinality `d·k` admits a
   labelling by `Fin k`-many labels whose every fibre has EXACTLY `d` elements. With
-  `d = 3` and `3 ∣ #Q.parts` — which `Graph/TripleSeed.lean` arranges — this produces the
-  owner labelling.
+  `d = 3` and `3 ∣ #Q.parts` — which `RegularityLemmata/Graph/TripleSeed.lean` arranges — this
+  produces the owner labelling.
 
 Everything is stated for a general fibre size `d`; the route fixes `d = 3`.
 -/
@@ -186,8 +186,9 @@ theorem card_groupUnion_triple_bounds {m : ℕ}
   card_groupUnion_bounds hm hfib
 
 /-- **The bridge from divisibility to the owner labelling.** `3 ∣ #Q.parts` — which
-`Graph/TripleSeed.lean`'s seeded summit delivers — directly produces the owner count `k` and
-a labelling whose every fibre is exactly a triple of cells. Downstream selection consumes
+`RegularityLemmata/Graph/TripleSeed.lean`'s seeded summit delivers — directly produces the owner
+count `k` and a labelling whose every fibre is exactly a triple of cells. Downstream selection
+consumes
 this, rather than recomposing the divisibility and the labelling itself. -/
 theorem exists_triple_grouping (h : 3 ∣ Q.parts.card) :
     ∃ k, ∃ g : Finset α → ℕ, Q.parts.card = 3 * k ∧

@@ -12,8 +12,8 @@ import Mathlib.Tactic.FinCases
 `S ⊆ A`, `T ⊆ B` — the cut norm in the library's raw-weight, denominator-free units (a
 normalized form divides by the total mass and is derived, never primitive). It measures a
 kernel against **nothing**: no partition, no stepped prediction. The partition-indexed
-`rectCutDiscrepancy` (`Partition/RectKernelCut.lean`) is the cut norm of the stepped residual,
-and the bridge between the two lives there.
+`rectCutDiscrepancy` (`RegularityLemmata/Partition/RectKernelCut.lean`) is the cut norm of the
+stepped residual, and the bridge between the two lives there.
 
 This is the quantity the cut-matrix decomposition (`docs/design/cut-matrix-decomposition.md`)
 bounds on its residual `f − ∑ cₖ 𝟙_{Sₖ} ⊗ 𝟙_{Tₖ}`.

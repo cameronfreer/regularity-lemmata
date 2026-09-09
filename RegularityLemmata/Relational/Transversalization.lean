@@ -22,7 +22,7 @@ set `s`** — `globalInducedCount` sums over cell triples of `Q`, so it sees onl
 whose images lie in `s`, not all of `V` — is realized on a transversal cell triple of `Q`.
 Phase 11 instantiates `s = univ`, where the two coincide. Stated on the existing exact
 decomposition `globalInducedCount = transversalInducedCount + nontransversal`
-(`Relational/DiagonalGate.lean`), it is
+(`RegularityLemmata/Relational/DiagonalGate.lean`), it is
 
     ∀ P, 0 < globalInducedCount P N Q → 0 < transversalInducedCount P N Q
 
@@ -58,8 +58,8 @@ transversal, nor the same triple, nor any statement about patterns absent from `
 1. *Monochromatic-triple rounding*: orient cell pairs by a linear order and recolor every
    cell interior to a palette orbit that also appears on a transversal triple of large
    cells — a multicolor Ramsey extraction over the cleaned palette assignment
-   (`Finite/MulticolorRamsey.lean` already supplies the extraction) makes such a triple
-   exist once the number of large cells beats the Ramsey bound. This targets the
+   (`RegularityLemmata/Finite/MulticolorRamsey.lean` already supplies the extraction) makes such a
+   triple exist once the number of large cells beats the Ramsey bound. This targets the
    all-three-in-one-cell stratum.
 2. *Clone/proxy cells*: split each large cell so that two-in-one-cell triples become
    transversal triples of the refined partition. This changes the representative event

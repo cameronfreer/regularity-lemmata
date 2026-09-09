@@ -8,11 +8,11 @@ import RegularityLemmata.Graph.RegularDegree
 /-!
 # Phase 11 unit 3: diagonal-inclusive bad mass and regularity
 
-The diagonal-inclusive strengthening of `Graph/BadMass.lean`, a **parallel additive
-layer** (Phase 11 design freeze in `ARCHITECTURE.md`): the frozen off-diagonal
+The diagonal-inclusive strengthening of `RegularityLemmata/Graph/BadMass.lean`, a **parallel
+additive layer** (Phase 11 design freeze in `ARCHITECTURE.md`): the frozen off-diagonal
 `IsBadPair`/`IsRegularPartition` surface is unchanged, because the mathlib uniformity
-bridge (`Graph/Bridge.lean`) cannot deliver diagonal control and the Phase 10 counting
-charges select `IsBadPair` by frozen design.
+bridge (`RegularityLemmata/Graph/Bridge.lean`) cannot deliver diagonal control and the Phase 10
+counting charges select `IsBadPair` by frozen design.
 
 An ordered pair of parts — **including a part paired with itself** — is `ε`-bad when it
 fails `ε`-uniformity (`IsBadPairDiag`, no distinctness conjunct). `badMassDiagNum` is
@@ -25,7 +25,7 @@ ordered reversal (`swapRel`).
 Removal-grade counting needs exactly this: copies with two or three vertices in one
 cell are counted on pairs `(C, C)`, about which off-diagonal regularity says nothing
 (see the tests, the dual of the frozen distinction test in
-`Relational/StrongCountingLifting.lean`).
+`RegularityLemmata/Relational/StrongCountingLifting.lean`).
 -/
 
 namespace RegularityLemmata
@@ -245,9 +245,10 @@ private theorem eqDiag_bad :
   linarith [hdev.1]
 
 -- **Off-diagonal regularity says nothing about a relation supported inside one cell**
--- (the dual of the frozen distinction test in `Relational/StrongCountingLifting.lean`).
--- On the single-cell partition the off-diagonal bad mass is vacuously `0`, so the
--- partition is off-diagonally regular at EVERY nonnegative tolerance…
+-- (the dual of the frozen distinction test in
+-- `RegularityLemmata/Relational/StrongCountingLifting.lean`). On the single-cell partition the
+-- off-diagonal bad mass is vacuously `0`, so the partition is off-diagonally regular at EVERY
+-- nonnegative tolerance…
 example {ε : ℝ} (hε : 0 ≤ ε) :
     IsRegularPartition (fun a b : Fin 2 => a = b) ε onePart := by
   classical

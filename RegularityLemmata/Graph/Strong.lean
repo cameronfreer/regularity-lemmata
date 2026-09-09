@@ -70,8 +70,8 @@ noncomputable def monoStepBound (E : ErrorSchedule) (m : ℕ) : ℕ :=
 schedule and `m` the current part count; the exponent `5` is the one-round Szemerédi-style
 exponent inherited from `regularityBound`. Coarse by design: the majorant is a `sup`, not
 a closed form. House lemma, no source. Consumed by `le_monoStepBound` and `strong_iterate`
-(and by the palette and diagonal analogues in `Relational/BinaryStrong.lean` and
-`Relational/BinaryDiagStrong.lean`). -/
+(and by the palette and diagonal analogues in `RegularityLemmata/Relational/BinaryStrong.lean` and
+`RegularityLemmata/Relational/BinaryDiagStrong.lean`). -/
 theorem stepBound_le_monoStepBound (E : ErrorSchedule) (m : ℕ) :
     regularityBound ⌈1 / (E m) ^ 5⌉₊ m ≤ monoStepBound E m := by
   unfold monoStepBound

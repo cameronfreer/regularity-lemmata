@@ -27,7 +27,7 @@ guard-free `x / 0 = 0` convention, and nothing sums to one.
 The proof is the potential argument on `Φ t = ∑ i, hedgeWeight η ℓ t i`. The update and
 potential identities (`hedgeWeight_succ`, `hedgePotential_succ`) are algebraic; the single
 analytic ingredient is `exp (−x) ≤ 1 − x + x²/2` (`exp_neg_le_one_sub_add_sq_half`,
-`Finite/Inequalities.lean`), which gives the per-round estimate
+`RegularityLemmata/Finite/Inequalities.lean`), which gives the per-round estimate
 `Φ (t+1) ≤ Φ t · (1 − η⟨p_t, ℓ_t⟩ + η²/2)`. **To keep `η` unconstrained**, the logarithm of that
 factor is relaxed to the increment `−η⟨p_t, ℓ_t⟩ + η²/2` via `log (1 + y) ≤ y` and *that*
 increment is telescoped; dividing a `(η − η²/2)`-form through instead would impose `η < 2` on

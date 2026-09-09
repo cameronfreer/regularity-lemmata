@@ -24,7 +24,7 @@ computable equivalences `finFunctionFinEquiv : (Fin n → Fin m) ≃ Fin (m ^ n)
 recurrence is thereby **proved by construction**, not stated informally. The
 computable projection `cutRefineProj` recovers the old color
 (`cutRefineProj_comp`), so `κ` is literally a merge of `cutRefine κ W` and the
-energy machinery of `Hypergraph/PolyadEnergy.lean` applies
+energy machinery of `RegularityLemmata/Hypergraph/PolyadEnergy.lean` applies
 (`polyadEnergyNum_le_cutRefine`); the bitmask is recovered by `cutRefineBit`
 (`cutRefineBit_cutRefine`).
 
@@ -34,7 +34,8 @@ The structural theorem consumed by the increment step:
 projected key depends only on its refined polyad key. The iteration itself follows
 the index-increment strategy of V. Rödl, M. Schacht, *Regular partitions of
 hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16 (2007), in the
-simultaneous-witness form the graph ladder already uses (`Graph/FriezeKannan.lean`).
+simultaneous-witness form the graph ladder already uses
+(`RegularityLemmata/Graph/FriezeKannan.lean`).
 -/
 
 namespace RegularityLemmata

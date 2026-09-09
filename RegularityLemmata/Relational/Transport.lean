@@ -88,7 +88,8 @@ theorem relabel_eq_pullback (M : FiniteRelModel L V) (e : V ≃ W) :
 
 /-- Unfolding lemma for relabeling: `(M.relabel e).Holds R x ↔ M.Holds R (fun i => e.symm (x i))`,
 the frozen pullback direction along `e.symm`. Definitional. Consumed by the relabeling
-invariance proofs in `Relational/Counts.lean` and `Relational/PatternCounts.lean`. -/
+invariance proofs in `RegularityLemmata/Relational/Counts.lean` and
+`RegularityLemmata/Relational/PatternCounts.lean`. -/
 theorem relabel_holds (M : FiniteRelModel L V) (e : V ≃ W) {n : ℕ}
     (R : L.Relations n) (x : Fin n → W) :
     (M.relabel e).Holds R x ↔ M.Holds R fun i => e.symm (x i) :=

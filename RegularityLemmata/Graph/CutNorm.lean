@@ -19,8 +19,8 @@ equitable bridge (for an equipartition with `k` parts it is `O(|s|²/k)`).
 (`exists_regular_partition_cut_deviation`): for `P = ⊤` it equals `|s|²` and the
 conclusion is vacuous. The genuine finite Frieze–Kannan theorem — uniform `ε·|s|²`
 cut approximation with a single-exponential part bound — is proved directly in
-`Graph/FriezeKannan.lean`; the estimate here records how ordinary partition regularity
-yields a cut bound once the diagonal mass `Σ|C|²` is separately controlled (e.g. by a
+`RegularityLemmata/Graph/FriezeKannan.lean`; the estimate here records how ordinary partition
+regularity yields a cut bound once the diagonal mass `Σ|C|²` is separately controlled (e.g. by a
 fine equipartition, where it is `O(|s|²/k)`).
 
 `cutDiscrepancy` packages the maximum rectangle deviation as a finite supremum, with
@@ -29,8 +29,8 @@ the quantifier form as an elimination API (`cutDiscrepancy_le_iff`).
 Everything here is finite: graphon (measure-theoretic) machinery is deliberately out of
 scope. The analytic analogues — cut norm, step-function approximation — are formalized
 in the author's graphon library (C. Freer, *Graphons in Lean 4*,
-<https://github.com/cameronfreer/graphon>: `Graphon/CutNorm.lean`,
-`Graphon/Approximation.lean`), whose development this file's finite statements
+<https://github.com/cameronfreer/graphon>: Graphon/CutNorm.lean,
+Graphon/Approximation.lean), whose development this file's finite statements
 parallel; adapters may connect the two in a later release. Literature: A. Frieze and
 R. Kannan, *Quick approximation to matrices and applications*, Combinatorica 19 (1999);
 L. Lovász, *Large Networks and Graph Limits*, Part 2.
@@ -221,7 +221,8 @@ theorem cut_deviation_le {P : Finpartition s} (hreg : IsRegularPartition R ε P)
   linarith
 
 /-- Cut deviation of a regular partition, **with an uncontrolled diagonal term**: this
-is NOT a Frieze–Kannan approximation (take `P = ⊤`); see `Graph/FriezeKannan.lean` for
+is NOT a Frieze–Kannan approximation (take `P = ⊤`); see `RegularityLemmata/Graph/FriezeKannan.lean`
+for
 the genuine theorem. -/
 theorem exists_regular_partition_cut_deviation (hε : 0 < ε) :
     ∃ P : Finpartition s, P.parts.card ≤ regularityBound ⌈1 / ε ^ 5⌉₊ 1 ∧

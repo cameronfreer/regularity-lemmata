@@ -8,8 +8,8 @@ import RegularityLemmata.Hypergraph.Polyad
 # Local polyad regularity
 
 The regularity predicates over the polyad/disc test surfaces of
-`Hypergraph/Polyad.lean`. The **primary predicates are local to one parent polyad**,
-matching the published shape (B. Nagle, V. Rödl, M. Schacht, *The counting lemma for
+`RegularityLemmata/Hypergraph/Polyad.lean`. The **primary predicates are local to one parent
+polyad**, matching the published shape (B. Nagle, V. Rödl, M. Schacht, *The counting lemma for
 regular k-uniform hypergraphs*, Random Structures Algorithms 28 (2006), Definition 9;
 V. Rödl, J. Skokan, *Regularity lemma for k-uniform hypergraphs*, Random Structures
 Algorithms 25 (2004)):

@@ -18,20 +18,26 @@ symmetric-difference error, and the coordinate-split adapter.
 
 ## What is here
 
-* `Finite/Weight.lean` — raw weights `w : X → ℝ` and `finsetMass`, with nonnegativity always a
+* `RegularityLemmata/Finite/Weight.lean` — raw weights `w : X → ℝ` and `finsetMass`, with
+nonnegativity always a
   hypothesis and never a field, plus the generic estimates the box layer rests on:
   subadditivity, the union bound over a finite family, and a mass difference bounded by a
   symmetric difference.
-* `Finite/CoordinateSplit.lean` — splitting tuple coordinates into two groups, with the tuple
+* `RegularityLemmata/Finite/CoordinateSplit.lean` — splitting tuple coordinates into two groups,
+with the tuple
   factorization `splitEquiv` and the index equivalences that keep every statement cast-free.
-* `Finite/ProductBox.lean` — `FiniteBox`, its tuples, `boxMass` as the weighted sum over them
+* `RegularityLemmata/Finite/ProductBox.lean` — `FiniteBox`, its tuples, `boxMass` as the weighted
+sum over them
   with the product factorization as a theorem, and `boxPredMass` / `boxDensity` as restrictions
   of that same sum.
-* `Finite/BoxUnion.lean` — semantic finite unions of boxes and `boxUnionError`, the weighted mass
+* `RegularityLemmata/Finite/BoxUnion.lean` — semantic finite unions of boxes and `boxUnionError`,
+the weighted mass
   of the tuples covered by exactly one of two families.
-* `Finite/BoxCoordinateSplit.lean` — boxes across a split: restriction, gluing, and the mass
+* `RegularityLemmata/Finite/BoxCoordinateSplit.lean` — boxes across a split: restriction, gluing,
+and the mass
   factorization.
-* `Partition/BoxPartition.lean` — independent coordinate partitions, their product cells, and the
+* `RegularityLemmata/Partition/BoxPartition.lean` — independent coordinate partitions, their product
+cells, and the
   exact decompositions of box mass and predicate mass over those cells.
 
 ## Why `Finite/CoordinateSplit` is imported explicitly
@@ -51,12 +57,13 @@ primitive anywhere in the stack.
 
 ## Where the instance profiles differ
 
-`Finite/ProductBox.lean` is deliberately instance-light — `[Fintype ι]` and `[DecidableEq ι]`
-only, with **no** decidable equality on the carriers. The two modules that genuinely need
-fiberwise `[∀ i, DecidableEq (V i)]` — `Partition/BoxPartition.lean`, where `Finpartition` needs
-the lattice on `Finset (V i)`, and `Finite/BoxUnion.lean`, where `biUnion` and symmetric
-difference need `DecidableEq (∀ i, V i)` — are separate modules for exactly that reason, so the
-cost does not leak backwards onto consumers that never partition or take unions.
+`RegularityLemmata/Finite/ProductBox.lean` is deliberately instance-light — `[Fintype ι]` and
+`[DecidableEq ι]` only, with **no** decidable equality on the carriers. The two modules that
+genuinely need fiberwise `[∀ i, DecidableEq (V i)]` —
+`RegularityLemmata/Partition/BoxPartition.lean`, where `Finpartition` needs the lattice on `Finset
+(V i)`, and `RegularityLemmata/Finite/BoxUnion.lean`, where `biUnion` and symmetric difference need
+`DecidableEq (∀ i, V i)` — are separate modules for exactly that reason, so the cost does not leak
+backwards onto consumers that never partition or take unions.
 
 ## Where nonnegativity enters
 

@@ -27,7 +27,7 @@ and the global level), avoiding square roots.
 
 This ports the architecture of the author's graphon development — C. Freer, *Graphons
 in Lean 4*, <https://github.com/cameronfreer/graphon>,
-`Graphon/Regularity.lean` (`energy_increment_quantitative`: witness rectangle, double
+Graphon/Regularity.lean (`energy_increment_quantitative`: witness rectangle, double
 split, conditional variance + Cauchy–Schwarz) — from measurable partitions of a
 probability space to finite partitions with counting measure. Literature: A. Frieze
 and R. Kannan, *Quick approximation to matrices and applications*, Combinatorica 19

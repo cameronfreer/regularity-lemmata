@@ -15,8 +15,8 @@ product cells, each counted once.
 
 ## Why this is a separate module
 
-`Finite/ProductBox.lean` is deliberately instance-light: it needs `[Fintype ι]` and
-`[DecidableEq ι]`, and **no** decidable equality on the carriers. `Finpartition (A i)` needs the
+`RegularityLemmata/Finite/ProductBox.lean` is deliberately instance-light: it needs `[Fintype ι]`
+and `[DecidableEq ι]`, and **no** decidable equality on the carriers. `Finpartition (A i)` needs the
 lattice structure on `Finset (V i)`, hence `[DecidableEq (V i)]` fiberwise. That requirement is
 legitimate here — the cells are manipulated as finite families of finsets — but it must not leak
 backwards, so it is confined to this module and `FiniteBox`, `boxMass`, and `boxDensity` keep
@@ -27,17 +27,18 @@ reader can see exactly what each result costs.
 
 ## Refinement direction
 
-`Partition/Basic.lean` fixes the convention: in the `Finpartition` order, `Q ≤ P` means `Q` is
+`RegularityLemmata/Partition/Basic.lean` fixes the convention: in the `Finpartition` order, `Q ≤ P`
+means `Q` is
 **finer** than `P`. Refinement of a box partition is that relation coordinatewise,
 `∀ i, Q i ≤ P i`.
 
 ## What the decompositions rest on
 
-The one-dimensional regrouping lemmas of `Partition/Basic.lean` are not what proves the box
-decompositions. Those follow from two facts about the product cells themselves — distinct cells
-have disjoint tuple sets, and the cells cover `A.tuples` — after which a single `Finset` biUnion
-sum splits the mass. Both decompositions are exact and **denominator-free**, so they hold for
-signed weights and for boxes of zero mass, with no positivity anywhere.
+The one-dimensional regrouping lemmas of `RegularityLemmata/Partition/Basic.lean` are not what
+proves the box decompositions. Those follow from two facts about the product cells themselves —
+distinct cells have disjoint tuple sets, and the cells cover `A.tuples` — after which a single
+`Finset` biUnion sum splits the mass. Both decompositions are exact and **denominator-free**, so
+they hold for signed weights and for boxes of zero mass, with no positivity anywhere.
 
 ## Not here
 
@@ -197,7 +198,8 @@ theorem card_boxCells_reindex [Fintype ι] [DecidableEq ι] {ι' : Type*} [Finty
 
 /-! ### Refinement
 
-`Q ≤ P` coordinatewise means `Q` is the finer partition, following `Partition/Basic.lean`. -/
+`Q ≤ P` coordinatewise means `Q` is the finer partition, following
+`RegularityLemmata/Partition/Basic.lean`. -/
 
 /-- **Every cell of a finer box partition sits inside exactly one cell of the coarser one.**
 Uniqueness needs no extra hypothesis: parts of a `Finpartition` are nonempty, so a containing

@@ -8,7 +8,7 @@ import RegularityLemmata.Graph.RegularityDiag
 /-!
 # Phase 11 unit 5a: diagonal-inclusive binary-palette regularity
 
-The diagonal-inclusive twin of `Relational/BinaryRegularity.lean` (Phase 11 design
+The diagonal-inclusive twin of `RegularityLemmata/Relational/BinaryRegularity.lean` (Phase 11 design
 freeze in `ARCHITECTURE.md`): simultaneous `ε`-regularity of every palette color over
 **all** ordered cell pairs, diagonal pairs included, as a parallel additive layer over
 the frozen off-diagonal surface.

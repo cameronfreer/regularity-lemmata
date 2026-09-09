@@ -25,7 +25,7 @@ block density of their symmetric difference (`abs_blockDensity_sub_le`) — the
 density/edit bridge consumed by the repair step.
 
 The bad-key layer at the end of the file is the triadic **specialization** of the
-arity-generic layer of `Hypergraph/PolyadIncrement.lean`, at `j = 2` and
+arity-generic layer of `RegularityLemmata/Hypergraph/PolyadIncrement.lean`, at `j = 2` and
 `obs = triadObs H`; the mass identities and the edit calculus above are the genuinely
 triadic content, and they are not consumed by the increment.
 -/
@@ -207,8 +207,8 @@ theorem sum_blockRealizedCount_symmDiff (H G : UniformHypergraph 3 α)
 /-! ### Bad keys and their mass
 
 The triadic instance of the arity-generic bad-key layer of
-`Hypergraph/PolyadIncrement.lean`, at `j = 2` and `obs = triadObs H`. Each `_def` lemma
-records the triadic normal form of a definition — `Fin 3`, `|V|³` — which is what the
+`RegularityLemmata/Hypergraph/PolyadIncrement.lean`, at `j = 2` and `obs = triadObs H`. Each `_def`
+lemma records the triadic normal form of a definition — `Fin 3`, `|V|³` — which is what the
 rewriting downstream consumes. -/
 
 /-- A **bad key**: `H` fails local disc regularity at the block's own density

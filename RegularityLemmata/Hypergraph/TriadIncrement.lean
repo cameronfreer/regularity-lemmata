@@ -14,13 +14,13 @@ cut round strictly gains more than `δ⁴` of normalized energy
 summit (`exists_goodColoring_refining`, `exists_goodColoring`).
 
 Every declaration here is the `j = 2`, `obs = triadObs H` instance of the arity-generic
-development in `Hypergraph/PolyadIncrement.lean`. Nothing in the increment is specific to
-triples: the witness family (`badWitnessFamily`), the strict local gain
+development in `RegularityLemmata/Hypergraph/PolyadIncrement.lean`. Nothing in the increment is
+specific to triples: the witness family (`badWitnessFamily`), the strict local gain
 (`local_variance_gain`), the exact refinement-variance identity
 (`polyadEnergyNum_comp_variance`), the cut budget `cutBound 2 K = K·2^(3K³)`, and the
 normalization by `|V|³` are all instances of arity-generic statements. What remains
-genuinely triadic lives in `Hypergraph/Triad.lean` — the realization identity, the mass
-identity, and the edit calculus — and none of it is consumed here.
+genuinely triadic lives in `RegularityLemmata/Hypergraph/Triad.lean` — the realization identity, the
+mass identity, and the edit calculus — and none of it is consumed here.
 
 The mathematics follows the index-increment strategy of V. Rödl, M. Schacht, *Regular
 partitions of hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16 (2007); this is

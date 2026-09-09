@@ -7,11 +7,11 @@ import RegularityLemmata.Relational.BinaryPattern
 /-!
 # Route (b) ladder step 2: the generic proxy move
 
-`ARCHITECTURE.md` route (b) ladder step 2 (2026-07-27). `Relational/CloneProxyProbe.lean`
-exhibited, on one configuration, that each of the five placement strata can be moved to a
-triple in three distinct proxy cells without changing the induced pattern. This file
-generalizes those five moves, and **names the hypothesis that makes them sound** so that a
-later rounding inherits it as an obligation rather than discovering it.
+`ARCHITECTURE.md` route (b) ladder step 2 (2026-07-27).
+`RegularityLemmata/Relational/CloneProxyProbe.lean` exhibited, on one configuration, that each of
+the five placement strata can be moved to a triple in three distinct proxy cells without changing
+the induced pattern. This file generalizes those five moves, and **names the hypothesis that makes
+them sound** so that a later rounding inherits it as an obligation rather than discovering it.
 
 **Combinatorial move only; no partition or rounding construction.** `exists_proxyDistinct_move`
 does construct the moved triple `g` — that is its content — but nothing here builds a

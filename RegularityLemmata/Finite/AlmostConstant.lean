@@ -42,8 +42,8 @@ one definition, not a parallel notion.
   level set `{x ∈ A : r·ν ≤ φ x}` keeps its density on `Q` within `β` of its density on `A`,
   the averages differ by at most `2ν + (1 + ν)β` — with the `2ν + 2β` reading under `ν ≤ 1`
   and a trivial regime at `1 < ν`. This is what reduces `[0,1]`-valued average control to the
-  finite-family *set*-density control of `Partition/BalancedSlicing.lean`, replacing any new
-  real-valued concentration.
+  finite-family *set*-density control of `RegularityLemmata/Partition/BalancedSlicing.lean`,
+  replacing any new real-valued concentration.
 -/
 
 namespace RegularityLemmata

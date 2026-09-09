@@ -23,8 +23,8 @@ are `1,0,0,0`, uniform mean `1/4`; refining to singletons gives nine densities
 That example uses the *diagonal-inclusive* uniform mean. Mathlib's `Finpartition.energy`
 is the uniform, `ℚ`-valued, **off-diagonal** variant used for equipartitions, so it needs
 its own witness — now proved, on a common instance, in
-`RegularityLemmata.MathlibEnergyCounterexample` (`Graph/Bridge.lean`, where both sides
-speak `SimpleGraph`): on six vertices split `2 + 4` with the complete bipartite graph
+`RegularityLemmata.MathlibEnergyCounterexample` (`RegularityLemmata/Graph/Bridge.lean`, where both
+sides speak `SimpleGraph`): on six vertices split `2 + 4` with the complete bipartite graph
 between the coarse cells, refining into `2 + 2 + 2` **decreases** mathlib's energy from
 `1/2` to `4/9` (`mathlibEnergy_fine_lt_coarse`) while the mass-weighted `energy` here is
 unchanged at `4/9` (`weightedEnergy_eq`), as `energy_mono` requires. Mathlib's

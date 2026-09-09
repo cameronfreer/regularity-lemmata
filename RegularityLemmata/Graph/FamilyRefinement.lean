@@ -14,18 +14,19 @@ host-independent part bound.
 
 This is the family analogue of `exists_regular_refinement`, and it is the prerequisite the
 generic finite-family *strong* witness needs. The equitable family summit
-(`exists_familyRegular_equipartition`, `Graph/EquitableFamilyRegularity.lean`) cannot serve that
-role: it constructs its own starting equipartition and so exposes no `Q ≤ P₀` for a user-supplied
-seed, and its increment machinery requires equitability of the seed, which an arbitrary partition
-does not have. Exact refinement and equitability do not compose for free — that tension is exactly
-what keeps equitable *strong* regularity deferred (`ARCHITECTURE.md`). This file takes the
-refinement side and drops equitability entirely.
+(`exists_familyRegular_equipartition`, `RegularityLemmata/Graph/EquitableFamilyRegularity.lean`)
+cannot serve that role: it constructs its own starting equipartition and so exposes no `Q ≤ P₀` for
+a user-supplied seed, and its increment machinery requires equitability of the seed, which an
+arbitrary partition does not have. Exact refinement and equitability do not compose for free — that
+tension is exactly what keeps equitable *strong* regularity deferred (`ARCHITECTURE.md`). This file
+takes the refinement side and drops equitability entirely.
 
 The argument is `regularity_iterate` with the ceiling raised from `1` to `#ι`: at a non-regular
-stage some relation `k` offends, its own weak step gains `ε⁵` (`exists_refinement_energy_increment`),
-and the gain lifts to the family energy because every other summand is refinement-monotone
-(`familyEnergy_add_le_of_component`). Since `familyEnergy ≤ K` (`familyEnergy_le_card`), at most
-`⌈K/ε⁵⌉` steps can fire — the fuel is linear in the family size, matching the ceiling.
+stage some relation `k` offends, its own weak step gains `ε⁵`
+(`exists_refinement_energy_increment`), and the gain lifts to the family energy because every other
+summand is refinement-monotone (`familyEnergy_add_le_of_component`). Since `familyEnergy ≤ K`
+(`familyEnergy_le_card`), at most `⌈K/ε⁵⌉` steps can fire — the fuel is linear in the family size,
+matching the ceiling.
 -/
 
 namespace RegularityLemmata

@@ -315,7 +315,8 @@ example : |(0.9 : ℝ) * 0.9 * 0.9 - 0.8 * 0.8 * 0.8|
 /-- **`exp (−x) ≤ 1 − x + x²/2` for `x ≥ 0`.** The reverse-direction companion of Mathlib's
 series bound `Real.quadratic_le_exp_of_nonneg` (`1 + x + x²/2 ≤ exp x`), from which it follows
 since `(1 − x + x²/2)·(1 + x + x²/2) = 1 + x⁴/4 ≥ 1`. This is the single analytic ingredient of
-the Hedge regret bound (`Finite/Hedge.lean`); Mathlib's pin has only the forward bound. Recorded
+the Hedge regret bound (`RegularityLemmata/Finite/Hedge.lean`); Mathlib's pin has only the forward
+bound. Recorded
 on the plausibly-Mathlib-shaped list (#54). -/
 theorem exp_neg_le_one_sub_add_sq_half {x : ℝ} (hx : 0 ≤ x) :
     Real.exp (-x) ≤ 1 - x + x ^ 2 / 2 := by

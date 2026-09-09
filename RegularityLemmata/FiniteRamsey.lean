@@ -15,15 +15,20 @@ The library's finite Ramsey results behind one import.
 
 ## What is here
 
-* `Finite/MulticolorRamsey.lean` — multicolour Ramsey for a colouring of **ordered pairs**, by
+* `RegularityLemmata/Finite/MulticolorRamsey.lean` — multicolour Ramsey for a colouring of **ordered
+pairs**, by
   greedy pigeonhole, with an explicit single-exponential bound. No symmetry is assumed.
-* `Finite/FullBinaryTree.lean` — the full binary tree of height `h` as the words of length at
+* `RegularityLemmata/Finite/FullBinaryTree.lean` — the full binary tree of height `h` as the words
+of length at
   most `h`, with ancestry and branch direction as relations on words.
-* `Finite/BinaryTreeEmbedding.lean` — subtree embeddings on internal nodes: arbitrary root,
+* `RegularityLemmata/Finite/BinaryTreeEmbedding.lean` — subtree embeddings on internal nodes:
+arbitrary root,
   branch direction preserved, depth unconstrained.
-* `Finite/BinaryTreeProperEmbedding.lean` — the same with the leaf level covered, and the
+* `RegularityLemmata/Finite/BinaryTreeProperEmbedding.lean` — the same with the leaf level covered,
+and the
   extension of an arbitrary internal embedding through it.
-* `Finite/BinaryTreeRamsey.lean` — the additive two-colour subtree theorem: a colouring of the
+* `RegularityLemmata/Finite/BinaryTreeRamsey.lean` — the additive two-colour subtree theorem: a
+colouring of the
   internal nodes of a height-`a + b + 1` tree admits a colour-`0` subtree of height `a + 1` or a
   colour-`1` subtree of height `b + 1`; and its multicolour form `binaryTreeRamsey` (companion
   Lemma 2.6 in colouring form): an `m`-colouring of a height-`(∑ i, t i) + 1` tree admits a

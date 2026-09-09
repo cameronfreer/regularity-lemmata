@@ -9,15 +9,15 @@ import RegularityLemmata.Finite.WeightedChoiceBudget
 # Route (b) ladder step 2: weighted choice on proxy cells, and the forbidden-event budgets
 
 `ARCHITECTURE.md` route (b) ladder step 2, final unit, **steps 1 and 2 of five**: the index
-and event types on which `Finite/WeightedChoice.lean` is instantiated, and the conversion of
-the aggregate nonuniform mass into that machine's forbidden-event hypothesis. The cost
+and event types on which `RegularityLemmata/Finite/WeightedChoice.lean` is instantiated, and the
+conversion of the aggregate nonuniform mass into that machine's forbidden-event hypothesis. The cost
 budget, the constants and the summit are steps 3–5 and are NOT here.
 
 The machine is already indexed by an abstract event type with two distinct coordinates,
 which is exactly what this file supplies. It is split across two generic modules:
-`Finite/WeightedChoice.lean` for the selection and expectation machinery, and
-`Finite/WeightedChoiceBudget.lean` for the adapters that convert aggregate mass estimates
-into its hypotheses. Neither mentions a partition, a relation or a palette.
+`RegularityLemmata/Finite/WeightedChoice.lean` for the selection and expectation machinery, and
+`RegularityLemmata/Finite/WeightedChoiceBudget.lean` for the adapters that convert aggregate mass
+estimates into its hypotheses. Neither mentions a partition, a relation or a palette.
 
 ## Step 1 — the instantiation
 
@@ -38,7 +38,8 @@ into its hypotheses. Neither mentions a partition, a relation or a palette.
 
 ## Step 2 — the forbidden-event budget
 
-* `sum_event_mass_le_of_weight_floor` (`Finite/WeightedChoiceBudget.lean`) — the generic
+* `sum_event_mass_le_of_weight_floor` (`RegularityLemmata/Finite/WeightedChoiceBudget.lean`) — the
+generic
   factorization: a uniform floor `w₀ ≤ W j` turns the whole `hbad` left-hand side into
   `(aggregate mass) / w₀ ^ 2 * ∏_j W j`. **The event count does not appear** — each event
   contributes its own mass, never a copy of the total.
@@ -52,7 +53,7 @@ into its hypotheses. Neither mentions a partition, a relation or a palette.
 * `sum_proxyEvent_paletteNonuniform_mass_le` — **the simultaneous budget**, which is what the
   selection actually needs. The forbidden set `paletteNonuniformFinePairs` is the union over
   palette colours of the per-palette nonuniform sets — charged with `sum_le_sum_of_exists_mem`,
-  the union bound in `Finite/WeightedChoiceBudget.lean` — and its budget is
+  the union bound in `RegularityLemmata/Finite/WeightedChoiceBudget.lean` — and its budget is
   `K * B / w₀ ^ 2` times the total weight, where `K = Fintype.card (BinaryPairPalette L)` and
   `B` bounds each palette's bad mass. `K` is the union-bound factor obtained from the
   per-palette estimates; it is not an event-count factor, and no `9n²` multiplier occurs

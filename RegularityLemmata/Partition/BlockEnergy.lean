@@ -13,7 +13,7 @@ The mass-weighted local energy of an ordered block `(A, B)` is
 `pairDensity R A B ² · |A| · |B|`. Its key property is superadditivity under disjoint
 covers (an Engel-form/Cauchy–Schwarz consequence), specialized to refinement fibers in
 `blockEnergy_le_sum_refined` — the engine behind energy monotonicity of the partition
-energy (`Partition/Energy.lean`).
+energy (`RegularityLemmata/Partition/Energy.lean`).
 -/
 
 namespace RegularityLemmata

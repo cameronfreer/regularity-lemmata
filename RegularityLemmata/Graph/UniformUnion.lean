@@ -25,13 +25,14 @@ estimate (costing `1/(s·ε)`, NOT `1/(s·ε²)`), which is what makes `α = (ε
 
 Equal cardinality is a genuine hypothesis: comparable-but-unequal pieces incur a
 comparability factor `Λ` in both within-piece terms (gate G-U2), and the frozen
-design trims comparable pieces to equal size FIRST via `Graph/UniformSlicing.lean`.
-The `α·m ≤ |X∩Aᵢ|` cutoff is inclusive (gate G-U4), matching `IsUniformPair`.
+design trims comparable pieces to equal size FIRST via
+`RegularityLemmata/Graph/UniformSlicing.lean`. The `α·m ≤ |X∩Aᵢ|` cutoff is inclusive (gate G-U4),
+matching `IsUniformPair`.
 
 **A single common center is a genuine hypothesis too, and it is what breaks the
 DIRECTED self-union composition** (gate G-U5, 2026-07-26): `hclose` demands one `d`
 for EVERY ordered pair, while the density-bucket extraction
-(`Finite/DensityBuckets.lean`) aligns a forward class and a reverse class which by
+(`RegularityLemmata/Finite/DensityBuckets.lean`) aligns a forward class and a reverse class which by
 gate G-U3 need not agree. For the strict order relation they are `1` and `0`, no
 center is within `α < 1/2` of both, and indeed no positive-linear-size self-uniform
 subset exists at tolerance `1/4`. The theorems in this file are unaffected and
@@ -43,7 +44,7 @@ D. Conlon and J. Fox, *Graph removal lemmas* (arXiv:1211.3487, §3.2) to directe
 finite binary palettes; the piece supplier follows the weaker
 regularity-plus-independent-set route the survey mentions, so no tower-type bound
 is claimed, and the full cylinder lemma and their quantitative bounds are NOT
-formalized (see `PROVENANCE.md`). The substrate lives in `Graph/UnionCenter.lean`.
+formalized (see `PROVENANCE.md`). The substrate lives in `RegularityLemmata/Graph/UnionCenter.lean`.
 -/
 
 namespace RegularityLemmata

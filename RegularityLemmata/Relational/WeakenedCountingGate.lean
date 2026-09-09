@@ -24,12 +24,12 @@ question this file answers is what that weakening costs the three-vertex count.
    quantity in different units, so a cost bound is a mass bound.
 3. The lifting is REUSED, not reproved: `selectedPairTripleMass_zero_one_le`,
    `selectedPairTripleMass_zero_two_le`, `selectedPairTripleMass_one_two_le`
-   (`Relational/TransversalCounting.lean`) each bound a one-coordinate-pair-restricted triple
-   mass by the pair mass times `#s`.
+   (`RegularityLemmata/Relational/TransversalCounting.lean`) each bound a
+   one-coordinate-pair-restricted triple mass by the pair mass times `#s`.
 4. The three-coordinate union is `selectedPairTripleMass_any_le`, which lives with the rest
-   of the counting infrastructure in `Relational/TransversalCounting.lean` and mentions no
-   palette, proxy or regularity: triples with ANY coordinate pair in `D` carry volume at most
-   `3 * (D-pair mass) * #s`. `badTripleVolume_le` is its short NORMALIZED corollary, giving
+   of the counting infrastructure in `RegularityLemmata/Relational/TransversalCounting.lean` and
+   mentions no palette, proxy or regularity: triples with ANY coordinate pair in `D` carry volume at
+   most `3 * (D-pair mass) * #s`. `badTripleVolume_le` is its short NORMALIZED corollary, giving
    `3 * β * #s ^ 3` from a pair mass at most `β * #s ^ 2`. The factor three is the number of
    coordinate pairs in a triple and nothing else.
 
@@ -43,8 +43,8 @@ single cost, and `expected_proxyCombinedCost_le` gives its budget as
 `4 * K * ε + 4 * K * δ / η ^ 2`
 
 **undoubled** — not the `2 ×` of the conditioned form. `exists_piFinset_cost_le`
-(`Finite/WeightedChoice.lean`) makes that formal without dummy event arguments: it consumes
-a positive total weight and an expected-cost bound and returns a selection at cost at most
+(`RegularityLemmata/Finite/WeightedChoice.lean`) makes that formal without dummy event arguments: it
+consumes a positive total weight and an expected-cost bound and returns a selection at cost at most
 `μ`, being the conditioned theorem at `E := Empty`, `σ := 0`. That is the constant branch B
 has to live with, and it is what this file pins.
 

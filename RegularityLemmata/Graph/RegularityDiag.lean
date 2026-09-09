@@ -9,8 +9,8 @@ import RegularityLemmata.Graph.Regularity
 # Phase 11 unit 4: diagonal-inclusive witness atomisation and regularity
 
 The diagonal-inclusive increment and iteration (Phase 11 design freeze in
-`ARCHITECTURE.md`): near-verbatim ports of `Graph/Atomise.lean` and
-`Graph/Regularity.lean` keyed to `IsBadPairDiag` — the witness atomisation, the
+`ARCHITECTURE.md`): near-verbatim ports of `RegularityLemmata/Graph/Atomise.lean` and
+`RegularityLemmata/Graph/Regularity.lean` keyed to `IsBadPairDiag` — the witness atomisation, the
 per-pair energy bridge, and the bounded-iteration architecture never use
 cell-distinctness, and the partition energy is diagonal-inclusive by the frozen
 mass-weighted convention, so the growth `k · 2^(2k)` per step, the fuel `⌈1/ε⁵⌉`, and
@@ -256,8 +256,8 @@ theorem exists_regularDiag_refinement (P : Finpartition s) (hε : 0 < ε) :
 /-! ### Tests and adversarial examples -/
 
 -- **Gate 10 (the freeze's ladder-sanity gate).** The single-cell equality-relation
--- partition is diagonal-inclusively BAD at 1/4 (`Graph/BadMassDiag.lean`), and the
--- diagonal-inclusive ladder genuinely fires and resolves it: the summit delivers a
+-- partition is diagonal-inclusively BAD at 1/4 (`RegularityLemmata/Graph/BadMassDiag.lean`), and
+-- the diagonal-inclusive ladder genuinely fires and resolves it: the summit delivers a
 -- refinement that is diagonal-inclusively 1/4-regular — necessarily a strict
 -- refinement here, which no off-diagonal machinery would have been forced to produce.
 example : ∃ Q : Finpartition (Finset.univ : Finset (Fin 2)),

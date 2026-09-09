@@ -420,7 +420,7 @@ empty or full cut costs nothing at all, and a cut respecting existing cell bound
 less than `2`.
 
 Named `cutRefinePartition` rather than `cutRefine` because the latter already denotes the
-unrelated polyad-witness colour refinement of `Hypergraph/PolyadWitness.lean`. -/
+unrelated polyad-witness colour refinement of `RegularityLemmata/Hypergraph/PolyadWitness.lean`. -/
 
 /-- Refine `P` by cutting every cell along the test set `S`. -/
 def cutRefinePartition (P : Finpartition s) (S : Finset α) : Finpartition s :=

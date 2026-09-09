@@ -7,7 +7,7 @@ import RegularityLemmata.Graph.UniformSlicing
 /-!
 # Route (b) step 1 substrate: indexed decompositions and center estimates
 
-The substrate of the equal-cardinality union theorem (`Graph/UniformUnion.lean`),
+The substrate of the equal-cardinality union theorem (`RegularityLemmata/Graph/UniformUnion.lean`),
 split out per the repository's file-size convention: the indexed exact
 decompositions over a disjoint family, and the two center estimates — test sets
 against the common off-diagonal density `d` (`pairDensity_union_close_center`,
@@ -51,7 +51,7 @@ theorem card_eq_sum_card_inter {s : ℕ} (A : Fin s → Finset V)
       (Finset.disjoint_of_subset_right Finset.inter_subset_right (hdisj i j hij))
 
 /-- **Exact pair-count decomposition** of test sets over an indexed disjoint family
-(the `Fin`-indexed sibling of `Graph/CutNorm.lean`'s Finpartition-indexed
+(the `Fin`-indexed sibling of `RegularityLemmata/Graph/CutNorm.lean`'s Finpartition-indexed
 `pairCount_eq_sum_inter`: an INDEXED family keeps coinciding intersection pieces
 apart, which a set-indexed cover cannot). -/
 theorem pairCount_eq_sum_inter_fin {s : ℕ} (R : V → V → Prop) [DecidableRel R]

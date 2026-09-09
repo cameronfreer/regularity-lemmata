@@ -29,8 +29,8 @@ Selections are elements of `Fintype.piFinset t` for a candidate family
   masses are strictly below the total weight, some selection avoids every bad event.
 
 The adapters that convert AGGREGATE mass estimates into these hypotheses live in the
-companion module `Finite/WeightedChoiceBudget.lean`: this file supplies the selection and
-expectation machinery, that one converts mass bounds into its inputs.
+companion module `RegularityLemmata/Finite/WeightedChoiceBudget.lean`: this file supplies the
+selection and expectation machinery, that one converts mass bounds into its inputs.
 
 The events carry two distinct coordinates each (`i₁ e ≠ i₂ e`); in the application
 the coordinates are (cell, role) pairs, so events over EQUAL cells with distinct roles

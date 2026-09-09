@@ -13,8 +13,9 @@ import Mathlib.Algebra.Order.Archimedean.Real.Basic
 The regularization iteration at its natural generality: a coloring `κ : RSet j α → Fin K`
 of `j`-sets, an arbitrary decidable observable `obs` on ordered `(j+1)`-tuples, and the
 `δ⁴` global energy increment that drives the iteration to a summit. The triadic
-development of `Hypergraph/Triad.lean` and `Hypergraph/TriadIncrement.lean` is the
-specialization at `j = 2`, `obs = triadObs H`.
+development of `RegularityLemmata/Hypergraph/Triad.lean` and
+`RegularityLemmata/Hypergraph/TriadIncrement.lean` is the specialization at `j = 2`, `obs = triadObs
+H`.
 
 Nothing here is dimension-specific. A **bad key** (`IsBadPolyad`) is one where local disc
 regularity fails at the block's own density; the bad keys carry the mass

@@ -37,8 +37,8 @@ nullary symbols pass through unchanged (`quotient_holds_zero`, `nullaryCompatibl
 on a transversal tuple of cells the induced-embedding count of `N` is all-or-nothing — the full
 box volume `Π_i |C i|` or `0` according to whether the quotient matches the pattern
 (`IsIndivisibleFor.inducedEmbeddingCountOn_cells`). `quotientInducedCount` sums those box
-volumes over the matching transversal cell tuples; `Relational/DiagonalGate.lean` compares it
-with the `s`-restricted count up to the diagonal charge.
+volumes over the matching transversal cell tuples; `RegularityLemmata/Relational/DiagonalGate.lean`
+compares it with the `s`-restricted count up to the diagonal charge.
 
 **Deliberately not claimed.** Nothing here is stability-theoretic: no stability, order
 property, or Littlestone hypothesis appears, and no *existence* of a nontrivial indivisible
@@ -50,13 +50,13 @@ defined here.
 **Nullary arity.** Arity zero is free: a relation on the unique empty tuple is indivisible
 for every partition (`isIndivisible_of_arity_zero`), so `IsIndivisibleFor` says nothing at
 arity `0` (`FiniteRelModel.isIndivisibleFor_iff_pos`). The arity-zero bookkeeping stays with
-the existing `NullaryCompatible` of `Relational/BinaryPattern.lean` — no competing predicate
-is introduced. `quotientRel_zero` identifies the arity-zero quotient with the nullary datum
-itself, and `nullaryCompatible_iff_quotientRel` states the resulting equivalence.
+the existing `NullaryCompatible` of `RegularityLemmata/Relational/BinaryPattern.lean` — no competing
+predicate is introduced. `quotientRel_zero` identifies the arity-zero quotient with the nullary
+datum itself, and `nullaryCompatible_iff_quotientRel` states the resulting equivalence.
 
 **Placement.** This file lives above `Partition/`, not in `Finite/`: as
-`Finite/HomogeneousPair.lean` records, importing `Finpartition` into the finite layer would
-invert the library's dependency direction.
+`RegularityLemmata/Finite/HomogeneousPair.lean` records, importing `Finpartition` into the finite
+layer would invert the library's dependency direction.
 -/
 
 namespace RegularityLemmata
@@ -254,9 +254,10 @@ theorem quotientRel_zero {L : FirstOrder.Language} [FiniteRelational L] (N : Fin
   rintro ⟨x, -, hR⟩
   rwa [show x = Fin.elim0 from funext fun i ↦ i.elim0] at hR
 
-/-- **The nullary layer is exactly `NullaryCompatible`** (`Relational/BinaryPattern.lean`):
-two models agree nullarily iff their arity-zero induced relations agree, over any partitions
-of any ground sets. Indivisibility never touches this layer, so no competing nullary
+/-- **The nullary layer is exactly `NullaryCompatible`**
+(`RegularityLemmata/Relational/BinaryPattern.lean`): two models agree nullarily iff their arity-zero
+induced relations agree, over any partitions of any ground sets. Indivisibility never touches this
+layer, so no competing nullary
 predicate is introduced here. -/
 theorem nullaryCompatible_iff_quotientRel {L : FirstOrder.Language} [FiniteRelational L]
     {W : Type*} [DecidableEq W] {t : Finset W} (M : FiniteRelModel L W)

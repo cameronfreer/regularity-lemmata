@@ -10,10 +10,10 @@ import RegularityLemmata.Partition.Equitable
 /-!
 # Phase 10 unit 8: the diagonal gate
 
-The strong-counting summit (`Relational/BinaryStrongCounting.lean`) compares the **transversal**
-induced count — copies whose three vertices land in three *distinct* coarse cells — against the
-coarse step estimate. This file closes the remaining gap to the **global** induced count, which
-also counts copies with two vertices in the same cell.
+The strong-counting summit (`RegularityLemmata/Relational/BinaryStrongCounting.lean`) compares the
+**transversal** induced count — copies whose three vertices land in three *distinct* coarse cells —
+against the coarse step estimate. This file closes the remaining gap to the **global** induced
+count, which also counts copies with two vertices in the same cell.
 
 The global count is the sum of the box counts over *all* ordered cell-triples; it decomposes
 exactly into the transversal part and a nontransversal part (`Function.Injective` vs not). For a
@@ -40,10 +40,11 @@ bound; the `k.choose 2` is the lift, not a union bound over per-pair hypotheses.
 
 The gate also settles the **quotient counting theorem** of the approximation-to-counting
 interface: for `N` indivisible for `Q`, the `s`-restricted induced count of a `k`-vertex pattern
-equals the quotient-weighted count `quotientInducedCount` (`Relational/Indivisible.lean`) on the
-transversal cell tuples exactly, and the repeated-cell tuples contribute at most the diagonal
-charge (`IsIndivisibleFor.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le`; full carrier
-at `s = univ`). The box decomposition behind it is index-generic
+equals the quotient-weighted count `quotientInducedCount`
+(`RegularityLemmata/Relational/Indivisible.lean`) on the transversal cell tuples exactly, and the
+repeated-cell tuples contribute at most the diagonal charge
+(`IsIndivisibleFor.abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le`; full carrier at `s =
+univ`). The box decomposition behind it is index-generic
 (`inducedEmbeddingCountOn_eq_sum_cellTuples`).
 
 Part-size bounds are inherited under refinement (a finer cell sits inside a coarse cell), so an
@@ -90,7 +91,8 @@ variable {W : Type*} [Fintype W] [DecidableEq W]
 
 /-- **The full box is the disjoint union of the cell boxes.** The constant-partition
 specialization of the `ProductSpaces` substrate `biUnion_boxCells_tuples`
-(`Partition/BoxPartition.lean`): the box `fun _ ↦ s` with the box partition `fun _ ↦ Q`. -/
+(`RegularityLemmata/Partition/BoxPartition.lean`): the box `fun _ ↦ s` with the box partition `fun _
+↦ Q`. -/
 theorem piFinset_const_eq_biUnion_cellTuples (Q : Finpartition s) :
     Fintype.piFinset (fun _ : W => s)
       = (Fintype.piFinset fun _ : W => Q.parts).biUnion Fintype.piFinset :=

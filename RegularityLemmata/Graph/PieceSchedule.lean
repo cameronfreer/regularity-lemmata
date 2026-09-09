@@ -31,7 +31,7 @@ shape, with `κ` and `N₀` produced before the family and the host are quantifi
 
 **`0 < t` is required and gate G-S2 stays permanent**: with `t = 0` a piece family exists
 vacuously while every positive mass floor fails, so the zero-target instance is FALSE
-(`Graph/PieceSupplier.lean`).
+(`RegularityLemmata/Graph/PieceSupplier.lean`).
 
 Provenance: step 1 of the Lemma 3.6 construction of D. Conlon and J. Fox, *Graph removal
 lemmas* (arXiv:1211.3487, §3.2), by the **weaker Szemerédi-plus-independent-set route**
@@ -261,7 +261,7 @@ example (t : ℕ) (ht : 0 < t) (τ : ℝ) (hτ : 0 < τ) (A : Finset (Fin 3))
 -- **Gate G-S2 stays live**: `0 < t` is not decoration. With `t = 0` the mass floor
 -- `κ·|A| ≤ t·m = 0` is unsatisfiable on a nonempty host for any positive `κ`, which is
 -- why the summit demands `0 < t` (the vacuous piece family at `t = 0` is exhibited in
--- `Graph/PieceSupplier.lean`).
+-- `RegularityLemmata/Graph/PieceSupplier.lean`).
 example (κ : ℝ) (hκ : 0 < κ) (m : ℕ) :
     ¬ (κ * (((Finset.univ : Finset (Fin 3)).card : ℕ) : ℝ) ≤ ((0 : ℕ) : ℝ) * (m : ℝ)) := by
   simp only [Finset.card_univ, Fintype.card_fin, Nat.cast_ofNat, Nat.cast_zero, zero_mul,
