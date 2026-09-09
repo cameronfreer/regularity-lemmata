@@ -33,6 +33,7 @@
 set -euo pipefail
 
 : "${DOCS_SRC:?}" "${DOCS_VERSION:?}" "${DEPS_KEY:?}" "${PAGES_DIR:?}"
+python3 "$(dirname "$0")/docs_layout.py" self-test
 SIZE_LIMIT_BYTES="${SIZE_LIMIT_BYTES:-900000000}"
 
 case "$DOCS_VERSION" in
@@ -116,5 +117,7 @@ if [ "$size" -gt "$SIZE_LIMIT_BYTES" ]; then
   exit 1
 fi
 
-# 6. Every relative link and search target of the version must resolve.
+# 6. Every relative link and search target of the version must resolve, and the shared tree
+#    must resolve too and contain no link into the library.
 python3 "$(dirname "$0")/docs_layout.py" check-links "$ver"
+python3 "$(dirname "$0")/docs_layout.py" check-links --shared "$deps"

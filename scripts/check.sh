@@ -41,6 +41,7 @@ lake exe axiom_audit
 
 echo "== Gate 5: the two roots partition the modules; the public root never reaches a gates-only module =="
 python3 scripts/check_roots.py --self-test
+python3 scripts/docs_layout.py self-test
 python3 scripts/check_roots.py
 
 echo "== check.sh: all gates passed =="

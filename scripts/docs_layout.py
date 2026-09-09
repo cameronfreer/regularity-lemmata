@@ -58,8 +58,32 @@ def rewrite_version(argv: list[str]) -> int:
     return 0
 
 
+def strip_navbar(text: str) -> tuple[str, int]:
+    """Remove the library's (nested) navigation sections and stray library links."""
+    removed = 0
+    while True:
+        m = re.search(r'<details[^>]*data-path="\./RegularityLemmata[^"]*"[^>]*>', text)
+        if not m:
+            break
+        depth, i = 1, m.end()
+        for tag in re.finditer(r"<details\b|</details>", text[m.end():]):
+            depth += 1 if tag.group().startswith("<details") else -1
+            if depth == 0:
+                i = m.end() + tag.end()
+                break
+        text = text[: m.start()] + text[i:]
+        removed += 1
+    text, n = re.subn(r'<div class="nav_link"><a href="\./RegularityLemmata[^"]*">[^<]*</a></div>', "", text)
+    return text, removed + n
+
+
 def strip_library(argv: list[str]) -> int:
     deps = pathlib.Path(argv[0])
+    nav = deps / "navbar.html"
+    if nav.exists():
+        text, n = strip_navbar(nav.read_text())
+        nav.write_text(text)
+        print(f"docs_layout: stripped {n} library navigation entries from the shared navbar")
     p = deps / "declarations" / "declaration-data.bmp"
     data = load(p)
     decls = data.get("declarations", {})
@@ -108,19 +132,30 @@ def resolve(base: pathlib.Path, link: str) -> pathlib.Path | None:
 
 
 def check_links(argv: list[str]) -> int:
-    ver = pathlib.Path(argv[0]).resolve()
+    shared = "--shared" in argv
+    ver = pathlib.Path([a for a in argv if not a.startswith("--")][0]).resolve()
     broken: list[str] = []
+    upstream: list[str] = []
     checked = 0
+    lib_link = re.compile(r'(href|src)="[^"]*(^|/)RegularityLemmata(/|\.html|Gates)[^"]*"')
     for page in sorted(ver.rglob("*.html")):
+        text = page.read_text(errors="replace")
+        toplevel = page.parent == ver
+        if shared:
+            for m in lib_link.finditer(text):
+                broken.append(f"{page.relative_to(ver)} -> {m.group(0)} (library link in the shared tree)")
         parser = LinkCollector()
-        parser.feed(page.read_text(errors="replace"))
+        parser.feed(text)
         for link in parser.links:
             target = resolve(page.parent, link)
             if target is None:
                 continue
             checked += 1
             if not target.exists():
-                broken.append(f"{page.relative_to(ver)} -> {link}")
+                if shared and not toplevel:
+                    upstream.append(f"{page.relative_to(ver)} -> {link}")
+                else:
+                    broken.append(f"{page.relative_to(ver)} -> {link}")
     data = load(ver / "declarations" / "declaration-data.bmp")
     for name, e in data.get("declarations", {}).items():
         target = resolve(ver, e.get("docLink", ""))
@@ -138,13 +173,96 @@ def check_links(argv: list[str]) -> int:
         print("docs_layout: broken", line)
     if len(broken) > 200:
         print(f"docs_layout: ... {len(broken) - 200} more")
+    if upstream:
+        print(f"docs_layout: {len(upstream)} broken links inside dependency page bodies (doc-gen4 output, not failing), e.g. {upstream[0]}")
     print(f"docs_layout: checked {checked} links and search targets, {len(broken)} broken")
     return 1 if broken else 0
 
 
+def self_test(argv: list[str]) -> int:
+    import contextlib
+    import io
+    import shutil
+    import tempfile
+    problems: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        root = pathlib.Path(tmp)
+        (root / "RegularityLemmata" / "Finite").mkdir(parents=True)
+        (root / "Mathlib").mkdir()
+        (root / "declarations").mkdir()
+        (root / "RegularityLemmata" / "Finite" / "A.html").write_text('<a href="../../Mathlib/B.html">B</a>')
+        (root / "Mathlib" / "B.html").write_text('<a href="../style.css">s</a><a href="../missing.html">x</a>')
+        (root / "style.css").write_text("")
+        (root / "RegularityLemmata.html").write_text("")
+        (root / "navbar.html").write_text(
+            '<nav><details class="nav_sect" data-path="./Mathlib.html"><summary>Mathlib</summary>'
+            '<div class="nav_link"><a href="./Mathlib/B.html">B</a></div></details>'
+            '<details class="nav_sect" data-path="./RegularityLemmata.html"><summary>RegularityLemmata</summary>'
+            '<details class="nav_sect" data-path="./RegularityLemmata/Finite.html"><summary>Finite</summary>'
+            '<div class="nav_link"><a href="./RegularityLemmata/Finite/A.html">A</a></div></details></details>'
+            '<div class="nav_link"><a href="./RegularityLemmata/Finite/A.html">stray</a></div></nav>')
+        dump(root / "declarations" / "declaration-data.bmp", {
+            "declarations": {"RegularityLemmata.a": {"docLink": "./RegularityLemmata/Finite/A.html#a"},
+                             "Mathlib.b": {"docLink": "./Mathlib/B.html#b"},
+                             "Mathlib.gone": {"docLink": "./Mathlib/Gone.html#gone"}},
+            "instances": {"Foo": ["RegularityLemmata.a", "Mathlib.b"]},
+            "instancesFor": {"RegularityLemmata.a": ["Mathlib.b"]},
+            "modules": {"RegularityLemmata.Finite.A": {"url": "./RegularityLemmata/Finite/A.html", "importedBy": []},
+                        "Mathlib.B": {"url": "./Mathlib/B.html", "importedBy": ["RegularityLemmata.Finite.A"]}}})
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = check_links([str(root)])
+        out = buf.getvalue()
+        if rc == 0 or "missing.html" not in out or "Mathlib.gone" not in out:
+            problems.append("check-links did not report the planted broken page link and search target")
+        (root / "Mathlib" / "B.html").write_text('<a href="../style.css">s</a>')
+        (root / "Mathlib" / "Gone.html").write_text("")
+        with contextlib.redirect_stdout(io.StringIO()):
+            strip_library([str(root)])
+        nav = (root / "navbar.html").read_text()
+        if "RegularityLemmata" in nav or "Mathlib/B.html" not in nav:
+            problems.append("strip-library left library navigation or removed dependency navigation")
+        data = load(root / "declarations" / "declaration-data.bmp")
+        if (any("RegularityLemmata" in k for k in data["declarations"])
+                or "RegularityLemmata.Finite.A" in data["modules"]
+                or data["modules"]["Mathlib.B"]["importedBy"]
+                or "RegularityLemmata.a" in data["instances"].get("Foo", [])
+                or "RegularityLemmata.a" in data["instancesFor"]):
+            problems.append("strip-library left library entries in the search index")
+        (root / "RegularityLemmata.html").unlink()
+        shutil.rmtree(root / "RegularityLemmata")
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = check_links([str(root), "--shared"])
+        if rc != 0:
+            problems.append("stripped shared tree does not pass check-links --shared")
+        (root / "Mathlib" / "B.html").write_text('<a href="../RegularityLemmata.html">lib</a>')
+        (root / "RegularityLemmata.html").write_text("")
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = check_links([str(root), "--shared"])
+        if rc == 0:
+            problems.append("check-links --shared accepted a library link in the shared tree")
+        (root / "RegularityLemmata.html").unlink()
+        (root / "Mathlib" / "B.html").write_text('<a href="../Mathlib/Absent.html">upstream</a>')
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = check_links([str(root), "--shared"])
+        if rc != 0:
+            problems.append("check-links --shared failed on a broken link inside a dependency page body")
+        nav = (root / "navbar.html").read_text()
+        (root / "navbar.html").write_text(nav + '<div class="nav_link"><a href="./Mathlib/Nowhere.html">n</a></div>')
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = check_links([str(root), "--shared"])
+        if rc == 0:
+            problems.append("check-links --shared accepted a broken navigation link")
+    for line in problems:
+        print("docs_layout: self-test:", line)
+    print(f"docs_layout: self-test {'FAILED' if problems else 'passed'}")
+    return 1 if problems else 0
+
+
 def main() -> int:
     cmd, rest = sys.argv[1], sys.argv[2:]
-    return {"rewrite-version": rewrite_version, "strip-library": strip_library, "check-links": check_links}[cmd](rest)
+    return {"rewrite-version": rewrite_version, "strip-library": strip_library,
+            "check-links": check_links, "self-test": self_test}[cmd](rest)
 
 
 if __name__ == "__main__":
