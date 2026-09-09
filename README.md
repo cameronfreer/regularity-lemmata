@@ -130,6 +130,7 @@ CI enforces the repository's proof and axiom policies on every commit.
 
 | File | Contents |
 | --- | --- |
+| [`docs/GUIDE.md`](docs/GUIDE.md) | The reader's guide: house vocabulary, what is reusable by release, and the mathematics in four parts, with the boundary of what is proved. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes, aggregated from the GitHub Releases, newest first. |
 | Generated API documentation | Built by doc-gen4 on each published release and served from GitHub Pages, versioned per tag (`docs/<tag>/`, with `docs/latest/`); the build recipe is `docbuild/`. |

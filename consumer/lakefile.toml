@@ -1,0 +1,14 @@
+# External consumer of RegularityLemmata: a separate Lake package depending on the library by
+# Git at a full commit SHA, importing only advertised entry points. Part of the release
+# checklist: it must build against the release candidate and again against the release commit.
+name = "RegularityLemmataConsumer"
+version = "0.1.0"
+defaultTargets = ["RegularityLemmataConsumer"]
+
+[[require]]
+name = "RegularityLemmata"
+git = "https://github.com/cameronfreer/regularity-lemmata"
+rev = "78dbd0c55e7d3cadb7b6f049dc8016e77d771624"
+
+[[lean_lib]]
+name = "RegularityLemmataConsumer"
