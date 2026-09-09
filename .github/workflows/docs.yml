@@ -47,16 +47,20 @@ jobs:
             | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Cache the documentation build
-        # actions/cache v6.1.0, pinned to an immutable revision
+      - name: Cache dependency compilation only
+        # actions/cache v6.1.0, pinned to an immutable revision. Only the dependency packages
+        # are cached; documentation outputs and their Lake metadata are regenerated on every
+        # run, because doc-gen4's final HTML step was observed to replay from its trace after
+        # the library's doc data had changed (stale pages with old links).
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
-          path: docbuild/.lake
-          key: docs-lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
+          path: docbuild/.lake/packages
+          key: docs-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
 
       - name: Build the documentation
         working-directory: docbuild
         run: |
+          rm -rf .lake/build
           lake update
           lake exe cache get
           lake build RegularityLemmata:docs
