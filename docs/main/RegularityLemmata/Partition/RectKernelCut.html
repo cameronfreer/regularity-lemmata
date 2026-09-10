@@ -1,0 +1,943 @@
+<html lang="en"><head><meta charset="UTF-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1"></meta><link rel="stylesheet" href="../.././style.css"></link><link rel="icon" href="../.././favicon.svg"></link><link rel="mask-icon" href="../.././favicon.svg" color="#000000"></link><link rel="prefetch" href="../.././/declarations/declaration-data.bmp" as="image"></link><title>RegularityLemmata.Partition.RectKernelCut</title><script defer="true" src="../.././mathjax-config.js"></script><script defer="true" src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="true" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>const SITE_ROOT="../.././";</script><script>const MODULE_NAME="RegularityLemmata.Partition.RectKernelCut";</script><script type="module" src="../.././jump-src.js"></script><script type="module" src="../.././search.js"></script><script type="module" src="../.././expand-nav.js"></script><script type="module" src="../.././how-about.js"></script><script type="module" src="../.././instances.js"></script><script type="module" src="../.././importedBy.js"></script></head><body><input id="nav_toggle" type="checkbox"></input><header><h1><label for="nav_toggle"></label><span>Documentation</span></h1><h2 class="header_filename break_within"><span class="name">RegularityLemmata</span>.<span class="name">Partition</span>.<span class="name">RectKernelCut</span></h2><form id="search_form"><input type="text" name="q" autocomplete="off"></input>&#32;<button id="search_button" onclick="javascript: form.action='../.././search.html';">Search</button></form></header><nav class="internal_nav"><p><a href="#top">return to top</a></p><p class="gh_nav_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean">source</a></p><div class="imports"><details><summary>Imports</summary><ul><li><a href="../.././Init.html">Init</a></li><li><a href="../.././RegularityLemmata/Finite/Inequalities.html">RegularityLemmata.Finite.Inequalities</a></li><li><a href="../.././RegularityLemmata/Finite/RectKernelCutNorm.html">RegularityLemmata.Finite.RectKernelCutNorm</a></li><li><a href="../.././RegularityLemmata/Partition/Basic.html">RegularityLemmata.Partition.Basic</a></li><li><a href="../.././RegularityLemmata/Partition/RectKernel.html">RegularityLemmata.Partition.RectKernel</a></li></ul></details><details><summary>Imported by</summary><ul id="imported-by-RegularityLemmata.Partition.RectKernelCut" class="imported-by-list"></ul></details></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectError"><span class="name">RegularityLemmata</span>.<span class="name">rectError</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectError_self"><span class="name">RegularityLemmata</span>.<span class="name">rectError_self</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_le_iff"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_le_iff</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_nonneg"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_nonneg</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.sum_part_mul_weight"><span class="name">RegularityLemmata</span>.<span class="name">sum_part_mul_weight</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectResidual_apply"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_apply</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectResidual_of_notMem_left"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_of_notMem_left</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectResidual_of_notMem_right"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_of_notMem_right</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectSum_rectResidual_eq_rectError"><span class="name">RegularityLemmata</span>.<span class="name">rectSum_rectResidual_eq_rectError</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_eq_rectCutNorm_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_eq_rectCutNorm_rectResidual</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectAverage_rectResidual_mul_trace_mass"><span class="name">RegularityLemmata</span>.<span class="name">rectAverage_rectResidual_mul_trace_mass</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.sq_rectAverage_rectResidual_mul_mass"><span class="name">RegularityLemmata</span>.<span class="name">sq_rectAverage_rectResidual_mul_mass</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.steppedRectSum_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">steppedRectSum_rectResidual</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.steppedRectSum_eq_relMass_bilinear"><span class="name">RegularityLemmata</span>.<span class="name">steppedRectSum_eq_relMass_bilinear</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.biUnion_parts_subset"><span class="name">RegularityLemmata</span>.<span class="name">biUnion_parts_subset</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.abs_steppedRectSum_le"><span class="name">RegularityLemmata</span>.<span class="name">abs_steppedRectSum_le</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.abs_rectError_le_two_mul"><span class="name">RegularityLemmata</span>.<span class="name">abs_rectError_le_two_mul</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectError_op"><span class="name">RegularityLemmata</span>.<span class="name">rectError_op</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_op"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_op</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectError_smul_weight_left"><span class="name">RegularityLemmata</span>.<span class="name">rectError_smul_weight_left</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_smul_weight_left"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_smul_weight_left</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectError_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectError_rectResidual</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_le_two_mul"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_le_two_mul</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_left"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_two_mul_left</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_right"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_two_mul_right</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_inf_le_of_le_half"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_of_le_half</span></a></div><div class="nav_link"><a class="break_within" href="#RegularityLemmata.rectCutDiscrepancy_inf_self_le_of_le_half"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_self_le_of_le_half</span></a></div></nav><main>
+<div class="mod_doc"><h1 id="Cut-discrepancy-for-rectangular-weighted-kernels" class="markdown-heading">Cut discrepancy for rectangular weighted kernels <a class="hover-link" href="#Cut-discrepancy-for-rectangular-weighted-kernels">#</a></h1><p>The rectangle error of a weighted kernel against its stepped prediction, the cut
+discrepancy as the supremum of that error over test rectangles, and the <strong>contraction</strong>
+of stepping: passing to a stepped prediction never increases the rectangle error.</p><p>The design freeze is <code>docs/design/rectangular-kernels.md</code>. No Frieze–Kannan iteration and
+no part-count recurrence appear here; those live in
+<code><a href="../.././RegularityLemmata/Partition/RectKernelFriezeKannan.html">RegularityLemmata/Partition/RectKernelFriezeKannan.lean</a></code>.</p><h2 id="The-contraction-constant-is-1" class="markdown-heading">The contraction constant is <code>1</code> <a class="hover-link" href="#The-contraction-constant-is-1">#</a></h2><p><code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.abs_steppedRectSum_le">abs_steppedRectSum_le</a></code> is the load-bearing estimate. Written in relative cell masses, a
+stepped rectangle sum is a <code>[0,1]</code>-weighted bilinear combination of the cell sums, and
+<code>abs_sum_bilinear_le</code> bounds any such combination by the supremum over genuine cell-union
+rectangles. So stepping costs a factor of <strong><code>1</code></strong>, not <code>2</code> — the only factor of two in the
+downstream common-refinement adapter comes from a triangle inequality.</p><p>Two facts make this work without side conditions, and both are deliberately upstream:
+<code>relMass_le_one</code> is guard-free, so no cell needs a positive-mass hypothesis; and
+<code>abs_sum_bilinear_le</code> needs no extreme-point machinery, because <code>cᵢ * yᵢ ≤ max yᵢ 0</code> holds
+pointwise.</p><h2 id="Provenance" class="markdown-heading">Provenance <a class="hover-link" href="#Provenance">#</a></h2><p>Cut norms and stepped (step-function) approximations are standard; see L. Lovász, <em>Large
+Networks and Graph Limits</em>, AMS 2012, for the background. The formulation here — raw
+carrier weights on two heterogeneous carriers, independent partitions, the guard-free
+<code>x / 0 = 0</code> conventions, and the constant-<code>1</code> contraction in the form proved below — is
+this repository's, and is not a restatement of a lemma from that source. The abstract
+inequality it rests on is <code>abs_sum_bilinear_le</code> in <code><a href="../.././RegularityLemmata/Finite/Inequalities.html">RegularityLemmata/Finite/Inequalities.lean</a></code>,
+proved independently there.</p></div><div class="mod_doc"><h3 id="Rectangle-error-and-cut-discrepancy" class="markdown-heading">Rectangle error and cut discrepancy <a class="hover-link" href="#Rectangle-error-and-cut-discrepancy">#</a></h3></div><div class="decl" id="RegularityLemmata.rectError"><div class="def"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L52-L56">source</a></div><div class="decl_header"><span class="decl_kind">noncomputable def</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError"><span class="name">RegularityLemmata</span>.<span class="name">rectError</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></div></div><p>The error of the <code>P ×ˢ Q</code>-stepped prediction on the test rectangle <code>S ×ˢ T</code>.</p><details><summary>Equations</summary><ul class="equations"><li class="equation"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">RegularityLemmata.rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a>   <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectSum">RegularityLemmata.rectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">RegularityLemmata.steppedRectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span></li></ul></details><details id="instances-for-list-RegularityLemmata.rectError" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="RegularityLemmata.rectError_self"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L58-L62">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError_self"><span class="name">RegularityLemmata</span>.<span class="name">rectError_self</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">A</span> <span class="fn">B</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn">0</span></div></div><p>On the full rectangle the prediction is exact, so the error vanishes.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy"><div class="def"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L64-L70">source</a></div><div class="decl_header"><span class="decl_kind">noncomputable def</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></div></div><p>The cut discrepancy: the largest rectangle error over test sets <code>S ⊆ A</code>, <code>T ⊆ B</code>.</p><details><summary>Equations</summary><ul class="equations"><li class="equation"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">RegularityLemmata.rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a>   <span class="fn"><span class="fn">(<span class="fn"><span class="fn">A</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Powerset.html#Finset.powerset">powerset</a></span> <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/SProd.html#SProd.sprod">×ˢ</a> <span class="fn"><span class="fn">B</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Powerset.html#Finset.powerset">powerset</a></span>).<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Lattice/Fold.html#Finset.sup'">sup'</a></span> <span class="fn">⋯</span> <span class="fn">fun (<span class="fn">p</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Prod">×</a> <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>) =&gt; <a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">RegularityLemmata.rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn"><span class="fn">p</span>.1</span> <span class="fn"><span class="fn">p</span>.2</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a></span></span></li></ul></details><details id="instances-for-list-RegularityLemmata.rectCutDiscrepancy" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_le_iff"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L72-L85">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_le_iff"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_le_iff</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">c</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">c</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Iff">↔</a> <span class="fn">∀ <span class="fn">S</span> ⊆ <span class="fn">A</span>, <span class="fn">∀ <span class="fn">T</span> ⊆ <span class="fn">B</span>, <a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">c</span></span></span></div></div><p>Elimination API: bounding the cut discrepancy is exactly the quantified rectangle
+bound.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_nonneg"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L87-L93">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_nonneg"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_nonneg</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span></div></div></div></div><div class="mod_doc"><h3 id="Reindexing-a-weighted-point-sum-by-cells" class="markdown-heading">Reindexing a weighted point sum by cells <a class="hover-link" href="#Reindexing-a-weighted-point-sum-by-cells">#</a></h3><p>The weighted corollary of <code>sum_over_parts</code>. It is <strong>purely algebraic</strong>: no nonnegativity of
+the weights and no positive-mass hypothesis. Those enter only where an average is cancelled
+or an inequality is proved, never here.</p></div><div class="decl" id="RegularityLemmata.sum_part_mul_weight"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L101-L107">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.sum_part_mul_weight"><span class="name">RegularityLemmata</span>.<span class="name">sum_part_mul_weight</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hS</span> : <span class="fn"><span class="fn">S</span> ⊆ <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">w</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">c</span> : <span class="fn"><span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">∑ <span class="fn">x</span> ∈ <span class="fn">S</span>, <span class="fn"><span class="fn">c</span> <span class="fn">(<span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">part</a></span> <span class="fn">x</span>)</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn">w</span> <span class="fn">x</span></span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn">∑ <span class="fn">C</span> ∈ <span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>, <span class="fn"><span class="fn">c</span> <span class="fn">C</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">w</span> (<span class="fn">S</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Inter.inter">∩</a> <span class="fn">C</span>)</span></span></div></div><p>A weighted sum whose coefficient depends on the containing cell reindexes to a sum over
+cells against the traces' masses.</p></div></div><div class="mod_doc"><h3 id="The-residual-kernel" class="markdown-heading">The residual kernel <a class="hover-link" href="#The-residual-kernel">#</a></h3><p>The kernel <code>f</code> minus its own stepped value: at <code>(x, y)</code> the prediction subtracted is the
+average over the cell pair containing <code>x</code> and <code>y</code>.</p><p><strong>Outside-support convention.</strong> <code><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">Finpartition.part</a></code> returns <code>∅</code> off the carrier, and an
+empty rectangle has average <code>0</code>, so the residual <strong>equals <code>f</code></strong> outside <code>A ×ˢ B</code>. That is a
+clean convention rather than a defect, but it splits the statements below in two.</p><p>Ordinary residual-sum and error identities are <strong>carrier-local</strong>: they quantify over test
+rectangles <code>S ⊆ A</code>, <code>T ⊆ B</code>, because an ordinary rectangle sum ranges over the test rectangle
+itself and so sees points outside the carrier, where the residual is <code>f</code>. Stepped-sum tower
+identities need no such hypothesis, because stepping ranges over partition cells and thereby
+ignores points outside the carriers entirely.</p><p><strong>Where hypotheses begin.</strong> The residual-to-error bridge is pure algebra — it needs neither
+nonnegative weights nor positive masses, only <code>S ⊆ A</code> and <code>T ⊆ B</code>. Conditional-expectation
+behaviour, in particular the tower identity, is where nonnegativity genuinely enters: with
+signed weights a cell can have zero total mass while a trace inside it has nonzero mass, and
+the zero-cell argument breaks.</p></div><div class="decl" id="RegularityLemmata.rectResidual"><div class="def"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L130-L133">source</a></div><div class="decl_header"><span class="decl_kind">noncomputable def</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span></div></div><p>The kernel minus its own stepped prediction, pointwise.</p><details><summary>Equations</summary><ul class="equations"><li class="equation"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">RegularityLemmata.rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">RegularityLemmata.rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">(<span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">part</a></span> <span class="fn">x</span>)</span> <span class="fn">(<span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">part</a></span> <span class="fn">y</span>)</span></span></li></ul></details><details id="instances-for-list-RegularityLemmata.rectResidual" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="RegularityLemmata.rectResidual_apply"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L135-L141">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual_apply"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">X</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">y</span> : <span class="fn">Y</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">(<span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">part</a></span> <span class="fn">x</span>)</span> <span class="fn">(<span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.part">part</a></span> <span class="fn">y</span>)</span></span></div></div><p>The defining equation. Deliberately <strong>not</strong> <code>@[simp]</code>: unconditional unfolding turns
+every rectangle sum into <code>part</code>-indexed averages, which is exactly what
+<code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectSum_rectResidual_eq_rectError">rectSum_rectResidual_eq_rectError</a></code> exists to avoid.</p></div></div><div class="decl" id="RegularityLemmata.rectResidual_of_notMem_left"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L143-L149">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual_of_notMem_left"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_of_notMem_left</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">x</span> : <span class="fn">X</span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hx</span> : <span class="fn"><span class="fn">x</span> ∉ <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">y</span> : <span class="fn">Y</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span> <span class="fn">y</span></span></div></div><p>Off the left carrier the residual is <code>f</code> itself: <code>P.part x = ∅</code>, and an empty rectangle
+has average <code>0</code>.</p></div></div><div class="decl" id="RegularityLemmata.rectResidual_of_notMem_right"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L151-L156">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual_of_notMem_right"><span class="name">RegularityLemmata</span>.<span class="name">rectResidual_of_notMem_right</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">X</span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">y</span> : <span class="fn">Y</span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hy</span> : <span class="fn"><span class="fn">y</span> ∉ <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">x</span> <span class="fn">y</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span> <span class="fn">y</span></span></div></div><p>…and off the right carrier likewise.</p></div></div><div class="decl" id="RegularityLemmata.rectSum_rectResidual_eq_rectError"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L158-L197">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectSum_rectResidual_eq_rectError"><span class="name">RegularityLemmata</span>.<span class="name">rectSum_rectResidual_eq_rectError</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hS</span> : <span class="fn"><span class="fn">S</span> ⊆ <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hT</span> : <span class="fn"><span class="fn">T</span> ⊆ <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectSum">rectSum</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span></div></div><p><strong>The carrier-local bridge.</strong> On a test rectangle inside the carriers, the residual's
+rectangle sum <em>is</em> the rectangle error.</p><p>Pure algebra: <code>S ⊆ A</code> and <code>T ⊆ B</code> are the only hypotheses. No nonnegativity, no positive
+mass, and no unfolding of <code>rectAverage</code> — each cell average is an opaque coefficient
+throughout, and <code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.sum_part_mul_weight">sum_part_mul_weight</a></code> is applied once per coordinate. If division appeared
+here, the proof would have crossed into tower mathematics prematurely.</p></div></div><div class="mod_doc"><h3 id="The-bridge-to-the-partition-free-cut-norm" class="markdown-heading">The bridge to the partition-free cut norm <a class="hover-link" href="#The-bridge-to-the-partition-free-cut-norm">#</a></h3><p>The cut discrepancy is the cut norm (<code><a href="../.././RegularityLemmata/Finite/RectKernelCutNorm.html">RegularityLemmata/Finite/RectKernelCutNorm.lean</a></code>) of the
+stepped residual: on every test rectangle inside the carriers the residual's rectangle sum is the
+stepped error (<code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectSum_rectResidual_eq_rectError">rectSum_rectResidual_eq_rectError</a></code> above, arbitrary signed weights), and both
+quantities are the same finite supremum. Hypothesis-free algebra, like the identity it repackages.
+The two summits — the step-partition theorem and the cut-matrix decomposition — therefore bound the
+same
+functional, one on the stepped residual and one on the rectangle-combination residual.</p></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_eq_rectCutNorm_rectResidual"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L208-L217">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_eq_rectCutNorm_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_eq_rectCutNorm_rectResidual</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernelCutNorm.html#RegularityLemmata.rectCutNorm">rectCutNorm</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">A</span> <span class="fn">B</span></span></div></div><p><strong>The two summits measure the same thing on the residual</strong>: the cut discrepancy equals the
+partition-free cut norm of the stepped residual. Pure repackaging, valid for arbitrary signed
+weights.</p></div></div><div class="mod_doc"><h3 id="The-tower-identity" class="markdown-heading">The tower identity <a class="hover-link" href="#The-tower-identity">#</a></h3><p><strong>The first genuinely conditional-expectation step in this file, and the first use of
+nonnegativity.</strong> Stepping the residual of a coarse pair against a finer pair gives exactly
+the difference of the two stepped predictions.</p><p>The internal unit is deliberately the <strong>trace-mass-multiplied</strong> fine-cell identity below,
+never an unmultiplied identity between fine-cell averages: on a zero-mass fine cell the
+guard-free average of the residual is <code>0 / 0 = 0</code> while the difference of averages need not
+be, so the unmultiplied statement is false as written. Multiplying by the trace masses
+repairs it, because nonnegativity forces the trace mass of a zero-mass cell to vanish too.
+That is precisely where signed weights would break the argument: a signed fine cell can have
+zero total mass with a nonzero-mass trace inside it.</p></div><div class="decl" id="RegularityLemmata.rectAverage_rectResidual_mul_trace_mass"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L249-L306">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectAverage_rectResidual_mul_trace_mass"><span class="name">RegularityLemmata</span>.<span class="name">rectAverage_rectResidual_mul_trace_mass</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">C </span><span class="fn">C'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">D </span><span class="fn">D'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hC</span> : <span class="fn">C</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Membership.mem">∈</a> <span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hD</span> : <span class="fn">D</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Membership.mem">∈</a> <span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hC'</span> : <span class="fn"><span class="fn">C'</span> ⊆ <span class="fn">C</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hD'</span> : <span class="fn"><span class="fn">D'</span> ⊆ <span class="fn">D</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C'</span> <span class="fn">D'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> (<span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wX</span> (<span class="fn">S</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Inter.inter">∩</a> <span class="fn">C'</span>)</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wY</span> (<span class="fn">T</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Inter.inter">∩</a> <span class="fn">D'</span>)</span>) <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a>   (<span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C'</span> <span class="fn">D'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C</span> <span class="fn">D</span></span>) <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> (<span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wX</span> (<span class="fn">S</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Inter.inter">∩</a> <span class="fn">C'</span>)</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wY</span> (<span class="fn">T</span> <a href="../../../deps/77cbcbc65f9e/Init/Core.html#Inter.inter">∩</a> <span class="fn">D'</span>)</span>)</div></div><p><strong>The fine-cell identity, multiplied by the trace masses.</strong> For a fine cell <code>C' ⊆ C</code> and
+<code>D' ⊆ D</code>, the residual's average is the difference of the fine and coarse averages — but only
+after multiplication by the trace masses, which is what makes the zero-mass branch true
+rather than merely convenient.</p><p><strong>Only the multiplied form is exposed, deliberately.</strong> The unweighted equality
+<code>rectAverage (rectResidual …) C' D' = rectAverage f C' D' - rectAverage f C D</code> is <strong>false</strong>
+on a zero-mass fine cell: the guard-free residual average is <code>0 / 0 = 0</code> there, while the
+difference of averages need not vanish. Consumers that want to cancel must first establish a
+nonzero mass product locally.</p></div></div><div class="decl" id="RegularityLemmata.sq_rectAverage_rectResidual_mul_mass"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L308-L330">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.sq_rectAverage_rectResidual_mul_mass"><span class="name">RegularityLemmata</span>.<span class="name">sq_rectAverage_rectResidual_mul_mass</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">C </span><span class="fn">C'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">D </span><span class="fn">D'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hC</span> : <span class="fn">C</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Membership.mem">∈</a> <span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hD</span> : <span class="fn">D</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Membership.mem">∈</a> <span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hC'</span> : <span class="fn"><span class="fn">C'</span> ⊆ <span class="fn">C</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hD'</span> : <span class="fn"><span class="fn">D'</span> ⊆ <span class="fn">D</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C'</span> <span class="fn">D'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HPow.hPow">^</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> (<span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wX</span> <span class="fn">C'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wY</span> <span class="fn">D'</span></span>) <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a>   (<span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C'</span> <span class="fn">D'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectAverage">rectAverage</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C</span> <span class="fn">D</span></span>) <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HPow.hPow">^</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> (<span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wX</span> <span class="fn">C'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.finsetMass">finsetMass</a> <span class="fn">wY</span> <span class="fn">D'</span></span>)</div></div><p><strong>The squared fine-cell identity, multiplied by the cell masses.</strong> The form the energy
+increment consumes.</p><p>Same contract as the linear version above: the identity is stated <strong>only</strong> after multiplying
+by the fine-cell mass product, because the unweighted equality of averages fails on a
+zero-mass fine cell. The cancellation happens inside this proof, under a locally established
+<code>mass ≠ 0</code>, and is never exposed.</p></div></div><div class="decl" id="RegularityLemmata.steppedRectSum_rectResidual"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L332-L400">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.steppedRectSum_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">steppedRectSum_rectResidual</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P </span><span class="fn">P'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q </span><span class="fn">Q'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hP</span> : <span class="fn">P'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hQ</span> : <span class="fn">Q'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">Q</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">steppedRectSum</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P'</span> <span class="fn">Q'</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a>   <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">steppedRectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P'</span> <span class="fn">Q'</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">steppedRectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span></div></div><p><strong>The tower identity.</strong> Stepping the <code>P ×ˢ Q</code>-residual against a finer pair <code>P' ×ˢ Q'</code>
+gives the difference of the two stepped predictions.</p><p>Nonnegative carrier weights are genuinely required. This is the <strong>first primitive identity</strong>
+in the file needing them rather than an inequality; the derived identities below — such as
+<code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError_rectResidual">rectError_rectResidual</a></code>, which is also an equality — inherit the hypotheses rather than
+introducing them. See the section note for why signed weights break the argument.</p><p><code>S ⊆ A</code> and <code>T ⊆ B</code> are <strong>not</strong> needed, unlike in <code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectSum_rectResidual_eq_rectError">rectSum_rectResidual_eq_rectError</a></code>. A
+stepped sum ranges over cells, so points of <code>S</code> outside the carrier are invisible to both
+sides; the ordinary rectangle sum, by contrast, sees them and there the residual equals <code>f</code>.
+Consumers below supply the carrier hypotheses anyway, since their other inputs need them.</p></div></div><div class="mod_doc"><h3 id="Relative-cell-mass-coefficients" class="markdown-heading">Relative cell-mass coefficients <a class="hover-link" href="#Relative-cell-mass-coefficients">#</a></h3><p>The bridge from the stepped prediction to a bilinear form: the coefficients are the
+relative masses of the test rectangle inside each cell, and they land in <code>[0,1]</code> with no
+positive-mass hypothesis.</p></div><div class="decl" id="RegularityLemmata.steppedRectSum_eq_relMass_bilinear"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L408-L450">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.steppedRectSum_eq_relMass_bilinear"><span class="name">RegularityLemmata</span>.<span class="name">steppedRectSum_eq_relMass_bilinear</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">steppedRectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn">∑ <span class="fn">C</span> ∈ <span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>, <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.relMass">relMass</a> <span class="fn">wX</span> <span class="fn">S</span> <span class="fn">C</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn">∑ <span class="fn">D</span> ∈ <span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>, <span class="fn"><a href="../.././RegularityLemmata/Finite/Weight.html#RegularityLemmata.relMass">relMass</a> <span class="fn">wY</span> <span class="fn">T</span> <span class="fn">D</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectSum">rectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">C</span> <span class="fn">D</span></span></span></span></div></div><p><strong>The stepped prediction as a bilinear form in the relative cell masses.</strong></p><p>Guard-free, and the zero-mass case is split rather than cancelled: when a cell has zero
+mass, its relative mass is <code>0 / 0 = 0</code> on one side, and the trace of the test set inside it
+has zero mass on the other, so both sides drop the cell.</p></div></div><div class="mod_doc"><h3 id="Contraction-of-stepping-at-constant-1" class="markdown-heading">Contraction of stepping, at constant <code>1</code> <a class="hover-link" href="#Contraction-of-stepping-at-constant-1">#</a></h3></div><div class="decl" id="RegularityLemmata.biUnion_parts_subset"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L454-L460">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.biUnion_parts_subset"><span class="name">RegularityLemmata</span>.<span class="name">biUnion_parts_subset</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">I</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">(<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span>)</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hI</span> : <span class="fn"><span class="fn">I</span> ⊆ <span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn"><span class="fn">I</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Union.html#Finset.biUnion">biUnion</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#id">id</a></span> ⊆ <span class="fn">A</span></span></div></div><p>Cell-union rectangles are test rectangles: a union of <code>P</code>-parts sits inside <code>A</code>.</p></div></div><div class="decl" id="RegularityLemmata.abs_steppedRectSum_le"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L462-L489">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.abs_steppedRectSum_le"><span class="name">RegularityLemmata</span>.<span class="name">abs_steppedRectSum_le</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">ε</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hrect</span> : <span class="fn">∀ <span class="fn">S'</span> ⊆ <span class="fn">A</span>, <span class="fn">∀ <span class="fn">T'</span> ⊆ <span class="fn">B</span>, <a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectSum">rectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">S'</span> <span class="fn">T'</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernel.html#RegularityLemmata.steppedRectSum">steppedRectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span></div></div><p><strong>Contraction, at constant <code>1</code>.</strong> If every rectangle sum of <code>f</code> is within <code>ε</code>, then so
+is every stepped prediction — for <strong>any</strong> test rectangle and any pair of partitions.</p><p>This is the estimate the common-refinement adapter rests on, and the reason its constant is
+<code>2</code> rather than <code>4</code>: stepping is free, and the factor of two is a triangle inequality.</p></div></div><div class="decl" id="RegularityLemmata.abs_rectError_le_two_mul"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L491-L506">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.abs_rectError_le_two_mul"><span class="name">RegularityLemmata</span>.<span class="name">abs_rectError_le_two_mul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hS</span> : <span class="fn"><span class="fn">S</span> ⊆ <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hT</span> : <span class="fn"><span class="fn">T</span> ⊆ <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">ε</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hrect</span> : <span class="fn">∀ <span class="fn">S'</span> ⊆ <span class="fn">A</span>, <span class="fn">∀ <span class="fn">T'</span> ⊆ <span class="fn">B</span>, <a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.rectSum">rectSum</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">S'</span> <span class="fn">T'</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span><a href="../../../deps/77cbcbc65f9e/Mathlib/Algebra/Order/Group/Unbundled/Abs.html#abs">|</a> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn">ε</span></div></div><p>The same bound in error form: a stepped prediction of a kernel whose rectangle sums are
+all small is itself small, so the rectangle error is at most twice the input bound. This is
+the triangle step, with its constant <code>2</code> made explicit.</p></div></div><div class="mod_doc"><h3 id="Transpose-transport" class="markdown-heading">Transpose transport <a class="hover-link" href="#Transpose-transport">#</a></h3><p>Design-freeze convention 7: <code>op</code> exchanges every left/right construction. The discrepancy
+statement goes through <code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_le_iff">rectCutDiscrepancy_le_iff</a></code> in both directions rather than through
+the two <code>sup'</code> index sets directly.</p></div><div class="decl" id="RegularityLemmata.rectError_op"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L514-L519">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError_op"><span class="name">RegularityLemmata</span>.<span class="name">rectError_op</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn"><span class="fn">f</span>.<a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel.op">op</a></span> <span class="fn">wY</span> <span class="fn">wX</span> <span class="fn">Q</span> <span class="fn">P</span> <span class="fn">T</span> <span class="fn">S</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span></div></div><p><code>op</code> exchanges the two sides of the rectangle error, together with the partitions and
+the test rectangle.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_op"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L521-L533">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_op"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_op</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn"><span class="fn">f</span>.<a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel.op">op</a></span> <span class="fn">wY</span> <span class="fn">wX</span> <span class="fn">Q</span> <span class="fn">P</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span></div></div><p>…and of the cut discrepancy.</p></div></div><div class="mod_doc"><h3 id="Positive-rescaling-of-a-carrier-weight" class="markdown-heading">Positive rescaling of a carrier weight <a class="hover-link" href="#Positive-rescaling-of-a-carrier-weight">#</a></h3><p>Design-freeze convention 6: rescaling a carrier weight by <code>c &gt; 0</code> scales the <strong>raw</strong>
+discrepancy by exactly <code>c</code>.</p><p>Positivity is what makes the proof uniform, in two places: <code>rectAverage_smul_weight_left</code>
+needs <code>c ≠ 0</code>, and <code>|c| = c</code> is what carries the factor through the absolute value. It is
+<strong>not</strong> that the identity fails at <code>c = 0</code> — there both sides vanish, since zero left
+weights force zero rectangle sums, zero cell masses, and hence <code>0 / 0 = 0</code> averages. That
+degenerate case simply wants a different argument, and no consumer has asked for it;
+<code>0 &lt; c</code> is the public contract until one does.</p></div><div class="decl" id="RegularityLemmata.rectError_smul_weight_left"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L547-L559">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError_smul_weight_left"><span class="name">RegularityLemmata</span>.<span class="name">rectError_smul_weight_left</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">c</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hc</span> : <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LT.lt">&lt;</a> <span class="fn">c</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">(fun (<span class="fn">x</span> : <span class="fn">X</span>) =&gt; <span class="fn">c</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span>)</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn">c</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span> <span class="fn">S</span> <span class="fn">T</span></span></div></div></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_smul_weight_left"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L561-L584">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_smul_weight_left"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_smul_weight_left</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">c</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hc</span> : <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LT.lt">&lt;</a> <span class="fn">c</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">(fun (<span class="fn">x</span> : <span class="fn">X</span>) =&gt; <span class="fn">c</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span>)</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn">c</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span></div></div><p><strong>The raw discrepancy scales with the carrier weight.</strong></p></div></div><div class="mod_doc"><h3 id="Transfer-to-a-refinement-and-the-common-refinement-adapter" class="markdown-heading">Transfer to a refinement, and the common-refinement adapter <a class="hover-link" href="#Transfer-to-a-refinement-and-the-common-refinement-adapter">#</a></h3><p>Derived surface: the tower identity supplies the residual's bookkeeping, the contraction
+supplies the estimate, and nothing below introduces new mathematics. The constant <code>2</code> is the
+triangle inequality of <code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.abs_rectError_le_two_mul">abs_rectError_le_two_mul</a></code>; stepping itself is free.</p></div><div class="decl" id="RegularityLemmata.rectError_rectResidual"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L592-L601">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError_rectResidual"><span class="name">RegularityLemmata</span>.<span class="name">rectError_rectResidual</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P </span><span class="fn">P'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q </span><span class="fn">Q'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hP</span> : <span class="fn">P'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hQ</span> : <span class="fn">Q'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">Q</span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">S</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">T</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hS</span> : <span class="fn"><span class="fn">S</span> ⊆ <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hT</span> : <span class="fn"><span class="fn">T</span> ⊆ <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">(<a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectResidual">rectResidual</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span>)</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P'</span> <span class="fn">Q'</span> <span class="fn">S</span> <span class="fn">T</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#Eq">=</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectError">rectError</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P'</span> <span class="fn">Q'</span> <span class="fn">S</span> <span class="fn">T</span></span></div></div><p>The rectangle error of the <strong>residual</strong> against a finer pair is the rectangle error of
+<code>f</code> itself against that pair: the coarse prediction cancels.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_le_two_mul"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L603-L622">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_le_two_mul"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_le_two_mul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P </span><span class="fn">P'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Q </span><span class="fn">Q'</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hP</span> : <span class="fn">P'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hQ</span> : <span class="fn">Q'</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">Q</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P'</span> <span class="fn">Q'</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P</span> <span class="fn">Q</span></span></div></div><p><strong>The transfer theorem.</strong> Refining <em>both</em> partitions costs at most a factor of <code>2</code> in the
+cut discrepancy.</p><p>The proof is the residual's: its rectangle sums are the coarse pair's rectangle errors, hence
+bounded by the coarse discrepancy; the contraction bounds the residual's stepped predictions
+by the same quantity; and the triangle inequality pays the factor <code>2</code>.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_left"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L624-L630">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_left"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_two_mul_left</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P₁ </span><span class="fn">P₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q₁ </span><span class="fn">Q₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">(<span class="fn">P₁</span> ⊓ <span class="fn">P₂</span>)</span> <span class="fn">(<span class="fn">Q₁</span> ⊓ <span class="fn">Q₂</span>)</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P₁</span> <span class="fn">Q₁</span></span></div></div><p>The common refinement inherits the <strong>left</strong> pair's bound, up to the factor <code>2</code>.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_right"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L632-L638">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_inf_le_two_mul_right"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_two_mul_right</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P₁ </span><span class="fn">P₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q₁ </span><span class="fn">Q₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">(<span class="fn">P₁</span> ⊓ <span class="fn">P₂</span>)</span> <span class="fn">(<span class="fn">Q₁</span> ⊓ <span class="fn">Q₂</span>)</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">2</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P₂</span> <span class="fn">Q₂</span></span></div></div><p>…and symmetrically the <strong>right</strong> pair's.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_inf_le_of_le_half"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L640-L662">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_inf_le_of_le_half"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_le_of_le_half</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">Y</span> : <a href="../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">B</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">Y</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">Y</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">Y</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wX</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">wY</span> : <span class="fn"><span class="fn">Y</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P₁ </span><span class="fn">P₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">Q₁ </span><span class="fn">Q₂</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">B</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwX</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wX</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hwY</span> : <span class="fn">∀ <span class="fn">y</span> ∈ <span class="fn">B</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">wY</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">ε</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hε</span> : <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">P₁</span> <span class="fn">Q₁</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">2</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">wX</span> <span class="fn">wY</span> <span class="fn">(<span class="fn">P₁</span> ⊓ <span class="fn">P₂</span>)</span> <span class="fn">(<span class="fn">Q₁</span> ⊓ <span class="fn">Q₂</span>)</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#And">∧</a>   <span class="fn"><span class="fn"><span class="fn">(<span class="fn">P₁</span> ⊓ <span class="fn">P₂</span>)</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn"><span class="fn">P₁</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">P₂</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#And">∧</a> <span class="fn"><span class="fn"><span class="fn">(<span class="fn">Q₁</span> ⊓ <span class="fn">Q₂</span>)</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn"><span class="fn">Q₁</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">Q₂</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span></div></div><p><strong>The <code>ε/2</code> common-refinement adapter.</strong> A pair achieving <code>ε/2</code> yields a <em>common
+refinement with any second pair</em> achieving <code>ε</code>, with the two complexity inputs kept separate:
+the left part count multiplies left inputs, the right multiplies right inputs, and they are
+never merged into a single bound.</p><p><strong>Quantitative disclaimer.</strong> This recovers the <strong>discrepancy conclusion</strong> of the existing
+Boolean same-carrier summit, not that theorem's sharper complexity bound: the part counts here
+are the generic product bounds of <code>card_parts_inf_le</code>, and the <code>4^t</code>-type control of the
+Boolean development is <em>not</em> reproduced. Single-exponential dependence is preserved; see
+<code>docs/design/rectangular-kernels.md</code>.</p></div></div><div class="decl" id="RegularityLemmata.rectCutDiscrepancy_inf_self_le_of_le_half"><div class="theorem"><div class="gh_link"><a href="https://github.com/cameronfreer/regularity-lemmata/blob/2493ce34d109a9dcadd3578b08c119e2ee62f520/RegularityLemmata/Partition/RectKernelCut.lean#L664-L685">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_inf_self_le_of_le_half"><span class="name">RegularityLemmata</span>.<span class="name">rectCutDiscrepancy_inf_self_le_of_le_half</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">X</span> : <a href="../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">A</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Defs.html#Finset">Finset</a> <span class="fn">X</span></span>}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#DecidableEq">DecidableEq</a> <span class="fn">X</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><a href="../.././RegularityLemmata/Finite/RectKernel.html#RegularityLemmata.RectKernel">RectKernel</a> <span class="fn">X</span> <span class="fn">X</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">w₁ </span><span class="fn">w₂</span> : <span class="fn"><span class="fn">X</span> → <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">P </span><span class="fn">Q</span> : <span class="fn"><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition">Finpartition</a> <span class="fn">A</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hw₁</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">w₁</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hw₂</span> : <span class="fn">∀ <span class="fn">x</span> ∈ <span class="fn">A</span>, <span class="fn">0</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn">w₂</span> <span class="fn">x</span></span></span>)</span></span>
+<span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">ε</span> : <a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Real/Basic.html#Real">ℝ</a>}</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">hε</span> : <span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">w₁</span> <span class="fn">w₂</span> <span class="fn">P</span> <span class="fn">Q</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">2</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy">rectCutDiscrepancy</a> <span class="fn">f</span> <span class="fn">w₁</span> <span class="fn">w₂</span> <span class="fn">(<span class="fn">P</span> ⊓ <span class="fn">Q</span>)</span> <span class="fn">(<span class="fn">P</span> ⊓ <span class="fn">Q</span>)</span></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn">ε</span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#And">∧</a> <span class="fn"><span class="fn"><span class="fn">(<span class="fn">P</span> ⊓ <span class="fn">Q</span>)</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#LE.le">≤</a> <span class="fn"><span class="fn"><span class="fn">P</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span> <a href="../../../deps/77cbcbc65f9e/Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">Q</span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Partition/Finpartition.html#Finpartition.parts">parts</a></span>.<a href="../../../deps/77cbcbc65f9e/Mathlib/Data/Finset/Card.html#Finset.card">card</a></span></div></div><p><strong>The same-carrier adapter.</strong> The statement the design freeze actually promises (§2.2 of
+<code>docs/design/rectangular-kernels.md</code>): one partition <code>P ⊓ Q</code> used on <strong>both</strong> coordinates, so
+this is a genuine same-carrier conclusion rather than two independently refined sides.</p><p>Both halves of the common refinement do work here — <code><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Lattice.html#inf_le_left">inf_le_left</a></code> on the left coordinate and
+<code><a href="../../../deps/77cbcbc65f9e/Mathlib/Order/Lattice.html#inf_le_right">inf_le_right</a></code> on the right — which is exactly what lets a single partition serve both.</p><p>The same-carrier product bound is <strong>derived</strong>, from the two separate part counts, never
+primitive. The quantitative disclaimer of <code><a href="../.././RegularityLemmata/Partition/RectKernelCut.html#RegularityLemmata.rectCutDiscrepancy_inf_le_of_le_half">rectCutDiscrepancy_inf_le_of_le_half</a></code> applies
+verbatim: this recovers the Boolean summit's discrepancy conclusion, not its sharper
+complexity bound.</p></div></div><div class="mod_doc"><h3 id="Tests-and-adversarial-examples" class="markdown-heading">Tests and adversarial examples <a class="hover-link" href="#Tests-and-adversarial-examples">#</a></h3></div><div class="mod_doc"><h4 id="The-zero-mass-fine-cell" class="markdown-heading">The zero-mass fine cell <a class="hover-link" href="#The-zero-mass-fine-cell">#</a></h4><p>The adversarial case for the tower identity: a <strong>zero-weight point sitting inside a
+positive-mass coarse cell</strong>, so that the fine partition has a genuine zero-mass cell.</p><p>The weights are <code>[1, 0, 1]</code> rather than <code>[1, 0]</code> for a reason. On two points with weights
+<code>[1, 0]</code> all the mass sits at a single point, so <em>every</em> partition has the same stepped sum
+and the identity degenerates to <code>0 = 0 - 0</code>. Adding a third weighted point keeps the
+zero-mass fine cell <code>{1}</code> while making the coarse and fine stepped predictions genuinely
+different — so the test pins the refinement bookkeeping and the zero-trace argument, not just
+an arithmetic endpoint.</p></div><div class="mod_doc"><h4 id="The-bridge-to-the-cut-norm" class="markdown-heading">The bridge to the cut norm <a class="hover-link" href="#The-bridge-to-the-cut-norm">#</a></h4></div></main>
+<nav class="nav"><iframe src="../.././navbar.html" class="navframe" frameBorder="0"></iframe></nav></body></html>
