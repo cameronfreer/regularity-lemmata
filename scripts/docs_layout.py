@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Helpers for scripts/deploy_docs.sh: search-data rewriting and link checking.
+"""Helpers for scripts/deploy_docs.sh: search-data rewriting, navbar stripping, link checking.
 
   docs_layout.py rewrite-version <version-dir> <deps-rel> <dep-dirs...>
       In the version's `declarations/declaration-data.bmp`, route every docLink and module
@@ -10,14 +10,33 @@
   docs_layout.py strip-library <deps-dir>
       In the shared tree's `declarations/declaration-data.bmp`, remove every entry that
       belongs to the library (declarations under `./RegularityLemmata/`, modules named
-      `RegularityLemmata.*`, and their occurrences in instance and importedBy lists), so the
-      shared index never dangles into a version directory.
+      `RegularityLemmata.*`, and their occurrences in instance and importedBy lists), and in
+      the shared tree's `navbar.html` remove the library's navigation sections (the nested
+      `<details data-path="./RegularityLemmata*.html">` blocks and any stray library link),
+      so the shared tree never dangles into a version directory.
 
-  docs_layout.py check-links <version-dir>
-      Resolve every relative href/src of every HTML page under the version directory, and
-      every docLink and module url of its search data, against the file system; report and
-      fail on any target that does not exist. External (`http`, `mailto`, `data:`) and
-      fragment-only links are skipped; fragments are stripped before resolving.
+  docs_layout.py check-links <dir> [--shared [--source <doc-gen output dir>]]
+      Resolve every relative href/src of every HTML page under the directory, and every
+      docLink and module url of its search data, against the file system; report and fail
+      on any target that does not exist. External (`http`, `mailto`, `data:`) and
+      fragment-only links are skipped; fragments are stripped before resolving. With
+      `--shared` (the dependency tree) the failing conditions are: any link into
+      `RegularityLemmata` anywhere, any broken link in the navigation (`navbar.html`) or in
+      the top-level pages, any broken search target, and any broken link inside a dependency
+      page body that is NOT already broken in the untouched doc-gen4 output given by
+      `--source`: the exact (page, target) pairs are compared, so doc-gen4's own defects are
+      tolerated while a defect introduced by the layout fails. Without `--source`, every
+      broken body link fails.
+
+  docs_layout.py self-test
+      Build a small synthetic tree (a library page, a dependency page, a navbar with a nested
+      library section, a search index with both) and require that: check-links reports a
+      planted broken page link and a planted broken search target; strip-library removes
+      every library entry from the navbar and the index while keeping the dependency ones;
+      the stripped tree passes check-links --shared; check-links --shared rejects a library
+      link and a broken navigation link; a dependency-body defect that is also broken in the
+      `--source` output is tolerated while a newly introduced one fails, and without
+      `--source` every such defect fails. Exit status 1 on any failure.
 """
 import html.parser
 import json
@@ -131,9 +150,30 @@ def resolve(base: pathlib.Path, link: str) -> pathlib.Path | None:
     return (base / path).resolve()
 
 
+def body_broken_pairs(source: pathlib.Path) -> set[tuple[str, str]]:
+    """The (page, link) pairs of broken relative links inside the bodies of the dependency pages
+    of an untouched doc-gen4 output directory (pages outside `RegularityLemmata/` and below the
+    top level)."""
+    pairs: set[tuple[str, str]] = set()
+    for page in sorted(source.rglob("*.html")):
+        rel = page.relative_to(source)
+        if page.parent == source or rel.parts[0] == LIB:
+            continue
+        parser = LinkCollector()
+        parser.feed(page.read_text(errors="replace"))
+        for link in parser.links:
+            target = resolve(page.parent, link)
+            if target is not None and not target.exists():
+                pairs.add((str(rel), link))
+    return pairs
+
+
 def check_links(argv: list[str]) -> int:
     shared = "--shared" in argv
-    ver = pathlib.Path([a for a in argv if not a.startswith("--")][0]).resolve()
+    positional = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] != "--source")]
+    ver = pathlib.Path(positional[0]).resolve()
+    source = pathlib.Path(argv[argv.index("--source") + 1]).resolve() if "--source" in argv else None
+    baseline = body_broken_pairs(source) if (shared and source is not None) else None
     broken: list[str] = []
     upstream: list[str] = []
     checked = 0
@@ -153,7 +193,13 @@ def check_links(argv: list[str]) -> int:
             checked += 1
             if not target.exists():
                 if shared and not toplevel:
-                    upstream.append(f"{page.relative_to(ver)} -> {link}")
+                    pair = (str(page.relative_to(ver)), link)
+                    if baseline is not None and pair not in baseline:
+                        broken.append(f"{pair[0]} -> {link} (broken dependency-body link not present in the doc-gen4 output)")
+                    elif baseline is None:
+                        broken.append(f"{pair[0]} -> {link} (broken dependency-body link; no --source baseline given)")
+                    else:
+                        upstream.append(f"{pair[0]} -> {link}")
                 else:
                     broken.append(f"{page.relative_to(ver)} -> {link}")
     data = load(ver / "declarations" / "declaration-data.bmp")
@@ -174,7 +220,7 @@ def check_links(argv: list[str]) -> int:
     if len(broken) > 200:
         print(f"docs_layout: ... {len(broken) - 200} more")
     if upstream:
-        print(f"docs_layout: {len(upstream)} broken links inside dependency page bodies (doc-gen4 output, not failing), e.g. {upstream[0]}")
+        print(f"docs_layout: {len(upstream)} broken links inside dependency page bodies, each also broken in the doc-gen4 output (tolerated), e.g. {upstream[0]}")
     print(f"docs_layout: checked {checked} links and search targets, {len(broken)} broken")
     return 1 if broken else 0
 
@@ -242,11 +288,28 @@ def self_test(argv: list[str]) -> int:
         if rc == 0:
             problems.append("check-links --shared accepted a library link in the shared tree")
         (root / "RegularityLemmata.html").unlink()
+        src = pathlib.Path(tempfile.mkdtemp())  # outside the checked tree
+        (src / "Mathlib").mkdir(parents=True)
+        (src / "RegularityLemmata").mkdir()
+        (src / "Mathlib" / "B.html").write_text('<a href="../Mathlib/Absent.html">upstream</a>')
+        (src / "RegularityLemmata" / "X.html").write_text('<a href="../Nope.html">library defect, not a baseline entry</a>')
+        (root / "Mathlib" / "B.html").write_text('<a href="../Mathlib/Absent.html">upstream</a>')
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = check_links([str(root), "--shared", "--source", str(src)])
+        if rc != 0:
+            problems.append("check-links --shared failed on a baseline dependency-body defect")
+        (root / "Mathlib" / "B.html").write_text('<a href="../Mathlib/Absent.html">upstream</a><a href="../Mathlib/New.html">new</a>')
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = check_links([str(root), "--shared", "--source", str(src)])
+        if rc == 0 or "New.html" not in buf.getvalue():
+            problems.append("check-links --shared accepted a newly introduced broken dependency-body link")
         (root / "Mathlib" / "B.html").write_text('<a href="../Mathlib/Absent.html">upstream</a>')
         with contextlib.redirect_stdout(io.StringIO()):
             rc = check_links([str(root), "--shared"])
-        if rc != 0:
-            problems.append("check-links --shared failed on a broken link inside a dependency page body")
+        if rc == 0:
+            problems.append("check-links --shared without --source accepted a broken dependency-body link")
+        shutil.rmtree(src)
         nav = (root / "navbar.html").read_text()
         (root / "navbar.html").write_text(nav + '<div class="nav_link"><a href="./Mathlib/Nowhere.html">n</a></div>')
         with contextlib.redirect_stdout(io.StringIO()):
