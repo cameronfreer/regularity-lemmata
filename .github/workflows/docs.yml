@@ -1,0 +1,97 @@
+# Copyright (c) 2026 Cameron Freer. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generated API documentation (doc-gen4) on GitHub Pages, versioned per release. The layout
+# and the size budget are handled by scripts/deploy_docs.sh: one shared dependency tree per
+# Mathlib pin, a small directory per version, `latest` as a redirect.
+name: Docs
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit to document (also the version directory name)"
+        required: true
+        default: "main"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      DOCS_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.ref }}
+    steps:
+      # actions/checkout v7.0.0, pinned to an immutable revision
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.DOCS_VERSION }}
+          persist-credentials: false
+
+      - name: Validate the version name
+        run: |
+          [[ "$DOCS_VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid version name" >&2; exit 1; }
+
+      - name: Install elan
+        # elan v4.2.3 installer, pinned to an immutable revision
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/b6cec7e10fe4965a605aaf60d1cb4a5837f0462b/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Cache dependency compilation only
+        # actions/cache v6.1.0, pinned to an immutable revision. Only the dependency packages
+        # are cached; documentation outputs and their Lake metadata are regenerated on every
+        # run, because doc-gen4's final HTML step was observed to replay from its trace after
+        # the library's doc data had changed (stale pages with old links).
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: docbuild/.lake/packages
+          key: docs-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
+
+      - name: Build the documentation
+        working-directory: docbuild
+        run: |
+          rm -rf .lake/build
+          lake update
+          lake exe cache get
+          lake build RegularityLemmata:docs
+
+      - name: Check out gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          url="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$url" gh-pages >/dev/null; then
+            git clone --quiet --depth 1 --branch gh-pages "$url" pages
+          else
+            git init --quiet pages && git -C pages switch --quiet --orphan gh-pages
+            git -C pages remote add origin "$url"
+          fi
+
+      - name: Lay out the version
+        env:
+          DOCS_SRC: docbuild/.lake/build/doc
+          PAGES_DIR: pages
+          DOCS_UPDATE_LATEST: ${{ github.event_name == 'release' && '1' || '0' }}
+        run: |
+          DEPS_KEY=$(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0][:12])")
+          export DEPS_KEY
+          bash scripts/deploy_docs.sh
+
+      - name: Publish
+        working-directory: pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "docs: $DOCS_VERSION" || { echo "nothing to publish"; exit 0; }
+          git push --quiet origin gh-pages

@@ -32,7 +32,11 @@ jobs:
         run: python3 scripts/check_public_api_impact.py
 
       - name: Install ripgrep
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
+        # The runner image carries a third-party Chrome apt source whose index intermittently
+        # fails with a hash mismatch; it is not needed, so drop it before updating.
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+          sudo apt-get update && sudo apt-get install -y ripgrep
 
       - name: Install elan
         # elan v4.2.3 installer, pinned to an immutable revision
