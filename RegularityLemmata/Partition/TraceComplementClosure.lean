@@ -28,7 +28,7 @@ def traceComplementClosure (A : Finset α) (F : Finset (Finset α)) : Finset (Fi
 cell `A` both belong to `traceComplementClosure A F`. The parent `A` is the first argument;
 no relation between `T` and `A` is assumed (`A \ T` is the relative complement whatever `T`
 is). House lemma, no source; consumed by `SliceCert.abs_block_density_sub_le` in
-`Partition/BalancedSlicing.lean`. -/
+`RegularityLemmata/Partition/BalancedSlicing.lean`. -/
 theorem mem_traceComplementClosure (A : Finset α) (F : Finset (Finset α))
     {T : Finset α} (hT : T ∈ F) :
     T ∈ traceComplementClosure A F ∧ A \ T ∈ traceComplementClosure A F := by
@@ -41,7 +41,7 @@ theorem mem_traceComplementClosure (A : Finset α) (F : Finset (Finset α))
 `F ∪ image (A \ ·) F`, with no credit for families already closed under complements or for
 traces whose complements coincide. House lemma, no source; consumed by
 `card_biUnion_traceClosure_le` below and by `exists_balanced_slicing` in
-`Partition/BalancedSlicing.lean`. -/
+`RegularityLemmata/Partition/BalancedSlicing.lean`. -/
 theorem card_traceComplementClosure_le (A : Finset α) (F : Finset (Finset α)) :
     (traceComplementClosure A F).card ≤ 2 * F.card := by
   calc

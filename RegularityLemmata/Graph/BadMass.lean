@@ -15,8 +15,8 @@ bridge, matching the energy convention of including them in `energy`).
 `badMassNum` is the raw mass `Σ |C||D|` over bad ordered pairs; `badMass` its
 normalization by `|s|²` under the library's zero-denominator convention. A partition is
 **`ε`-regular** (`IsRegularPartition`, Szemerédi-style partition regularity — "weak
-regularity" is reserved for the Frieze–Kannan cut-norm notion in `Graph/CutNorm.lean`)
-when its normalized bad mass is at most `ε`.
+regularity" is reserved for the Frieze–Kannan cut-norm notion in
+`RegularityLemmata/Graph/CutNorm.lean`) when its normalized bad mass is at most `ε`.
 
 Ordered off-diagonal pairs follow mathlib's `Finpartition.nonUniforms`
 (`Mathlib.Combinatorics.SimpleGraph.Regularity.Uniform`). Mathlib *counts* bad pairs

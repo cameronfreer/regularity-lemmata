@@ -9,9 +9,9 @@ import RegularityLemmata.Graph.Regularity
 # Equitable-supplier ladder, step 4: the one-step theorem
 
 `ARCHITECTURE.md` supplier route decision (2026-07-22), implementation sequence step 4.
-Step 3 delivered the equitabilised refinement (`Graph/EquitableChunk.lean`) and its loss
-calculus (`Graph/EquitableChunkApprox.lean`) with every constant left open. This file
-closes the numerics, in the order the constants actually depend on each other:
+Step 3 delivered the equitabilised refinement (`RegularityLemmata/Graph/EquitableChunk.lean`) and
+its loss calculus (`RegularityLemmata/Graph/EquitableChunkApprox.lean`) with every constant left
+open. This file closes the numerics, in the order the constants actually depend on each other:
 
 1. **The threshold is fixed**: `familyChunkThreshold = 100`. Combining the
    remainder-to-cell inequality `r · 4^(n·2^(2n)) ≤ |C|` with the transported numerical
@@ -29,7 +29,7 @@ closes the numerics, in the order the constants actually depend on each other:
    partition whose bad mass exceeds `ε`, the equitabilised refinement of the offending
    relation raises that relation's normalized energy by `(1/5)·ε⁵`. This is step 3's
    `c·ε⁴` per bad pair pushed through the `ε`-free global increment
-   `energy_increment_of_pairwise_gain` (`Graph/Regularity.lean`), which the exact
+   `energy_increment_of_pairwise_gain` (`RegularityLemmata/Graph/Regularity.lean`), which the exact
    refinement now shares.
 4. **The component gain is lifted** to the family sum by
    `familyEnergy_add_le_of_component`: resolving ONE relation cannot decrease the other

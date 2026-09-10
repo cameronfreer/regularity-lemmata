@@ -161,7 +161,8 @@ theorem exists_pos_of_finsetMass_pos (hw : ∀ x ∈ A, 0 ≤ w x) (h : 0 < fins
 /-! ### Relative mass
 
 The fraction of a cell's mass carried by a test set. These are exactly the `[0,1]`
-coefficients that the bilinear domination lemma of `Finite/Inequalities.lean` consumes, so
+coefficients that the bilinear domination lemma of `RegularityLemmata/Finite/Inequalities.lean`
+consumes, so
 the `≤ 1` bound must hold with **no** positive-mass hypothesis. -/
 
 /-- The relative mass of `S` inside the cell `C`, guard-free: `0` on a zero-mass cell. -/

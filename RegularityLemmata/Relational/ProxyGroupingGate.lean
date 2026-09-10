@@ -26,9 +26,9 @@ regular while a split of one of its cells produces a sibling pair that is not
 
 Nor can the gap be filled by diagonal-inclusive regularity in general: for the strict order
 on any linearly ordered set, `(W, W)` fails `1/4`-uniformity whenever `|W| ≥ 2` (gate
-G-U5, `Graph/UniformUnion.lean`), so a diagonal-inclusive regular partition at tolerance
-below `1/4` must be almost all singletons — no bounded part count survives. That is exactly
-the "unavailable self-regularity" the checkpoint's hard stop names.
+G-U5, `RegularityLemmata/Graph/UniformUnion.lean`), so a diagonal-inclusive regular partition at
+tolerance below `1/4` must be almost all singletons — no bounded part count survives. That is
+exactly the "unavailable self-regularity" the checkpoint's hard stop names.
 
 ## The resolution: group instead of split
 

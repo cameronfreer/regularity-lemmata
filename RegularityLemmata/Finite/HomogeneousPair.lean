@@ -9,7 +9,7 @@ import RegularityLemmata.Finite.PairDensity
 
 A rectangle is `ε`-**homogeneous** for `R` when its density is within `ε` of one of the two
 extremes: almost no related pairs, or almost all of them. Carriers are heterogeneous
-(`R : α → β → Prop`), matching `Finite/PairDensity.lean`.
+(`R : α → β → Prop`), matching `RegularityLemmata/Finite/PairDensity.lean`.
 
 The argument order is `R A B ε`, matching `IsUniformPair` rather than putting the tolerance
 first — homogeneity is a property *of a rectangle*, parametrized by a tolerance.

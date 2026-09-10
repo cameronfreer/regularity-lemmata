@@ -67,8 +67,8 @@ each listed module remains directly importable.
   residuals, and the cut-norm contraction of stepping with constant `1`.
 * `Partition.RectKernelFriezeKannan` — the weak-regularity summit: the paired energy-increment
   iteration, with **separate** left and right part-count bounds (`2^t` per coordinate), and
-  the same-carrier adapter that multiplies them. The Boolean summit in `Graph/FriezeKannan.lean`
-  remains the sharper direct result for one carrier.
+  the same-carrier adapter that multiplies them. The Boolean summit in
+  `RegularityLemmata/Graph/FriezeKannan.lean` remains the sharper direct result for one carrier.
 
 The design freeze for this stack is `docs/design/rectangular-kernels.md`.
 -/

@@ -248,7 +248,7 @@ theorem tupleDensity_eq_zero_of_side_empty {i : ι} (hi : A i = ∅) : tupleDens
 
 A `Fin 1` box is a single coordinate set under the encoding `a ↦ ![a]`, so its tuple density is
 an ordinary `densityOn`. The two cardinality lemmas this rests on carry no density notion and
-live beside their `Fin 2` analogues in `Finite/Tuple.lean`. -/
+live beside their `Fin 2` analogues in `RegularityLemmata/Finite/Tuple.lean`. -/
 
 /-- Arity-one tuple density is the density of the curried relation on the single coordinate
 set. Holds for all boxes: with an empty side both sides are `0` by the division convention. -/

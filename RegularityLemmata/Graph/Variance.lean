@@ -14,10 +14,10 @@ parallel-axis theorem for block energy: over a disjoint rectangle cover of `(C, 
 `Σ |C'||D'| · (d(C',D') − d(C,D))² = Σ blockEnergy(C',D') − blockEnergy(C,D)`.
 
 Superadditivity of block energy is the nonnegativity of the left side; the one-block
-energy increment (`Graph/Increment.lean`) is a quantitative lower bound on it.
+energy increment (`RegularityLemmata/Graph/Increment.lean`) is a quantitative lower bound on it.
 
 The file's test section also formalizes the design fact recorded in
-`Partition/Energy.lean`: the **uniform** (count-weighted) block-mean of `d²` can
+`RegularityLemmata/Partition/Energy.lean`: the **uniform** (count-weighted) block-mean of `d²` can
 strictly decrease under refinement — which is why the library's energy is
 mass-weighted.
 
@@ -122,7 +122,8 @@ theorem variance_eq_sum_blockEnergy_sub [DecidableEq α] (R : α → α → Prop
   ring
 
 /-- Superadditivity re-derived: the variance is nonnegative. (The Engel-form proof in
-`Partition/BlockEnergy.lean` remains the library's primary route; this corollary checks
+`RegularityLemmata/Partition/BlockEnergy.lean` remains the library's primary route; this corollary
+checks
 the identity against it.) -/
 theorem blockEnergy_le_sum_of_cover_via_variance [DecidableEq α] (R : α → α → Prop)
     [DecidableRel R] {C D : Finset α} (sC sD : Finset (Finset α))

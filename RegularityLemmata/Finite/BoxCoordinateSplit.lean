@@ -15,10 +15,10 @@ glue back to the original, and — because a box's mass is a product over coordi
 
 ## The adapter lives here, not in either parent
 
-`Finite/ProductBox.lean` never mentions `CoordinateSplit`, and `Finite/CoordinateSplit.lean`
-never mentions weights or boxes. Neither is a natural home for statements about both, and making
-either import the other would tax every consumer that needs only one. This module imports both
-and is imported by neither.
+`RegularityLemmata/Finite/ProductBox.lean` never mentions `CoordinateSplit`, and
+`RegularityLemmata/Finite/CoordinateSplit.lean` never mentions weights or boxes. Neither is a
+natural home for statements about both, and making either import the other would tax every consumer
+that needs only one. This module imports both and is imported by neither.
 
 ## No casts
 

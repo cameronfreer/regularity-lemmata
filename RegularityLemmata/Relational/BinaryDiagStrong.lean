@@ -8,8 +8,8 @@ import RegularityLemmata.Relational.BinaryStrong
 /-!
 # Phase 11 unit 5b: the strong diagonal-inclusive palette witness
 
-The diagonal-inclusive twin of `Relational/BinaryStrong.lean` (Phase 11 design freeze
-in `ARCHITECTURE.md`): the same seven data/proof fields, with `fine_regular`
+The diagonal-inclusive twin of `RegularityLemmata/Relational/BinaryStrong.lean` (Phase 11 design
+freeze in `ARCHITECTURE.md`): the same seven data/proof fields, with `fine_regular`
 strengthened to `fine_diagRegular : IsBinaryPaletteDiagRegular`.
 
 Three reviewer-gated guarantees of this file:

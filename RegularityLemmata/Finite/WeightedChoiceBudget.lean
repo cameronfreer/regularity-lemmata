@@ -9,8 +9,8 @@ import Mathlib.Algebra.Order.Field.Basic
 /-!
 # Phase 11 unit 7 substrate: aggregate mass into selection hypotheses
 
-`Finite/WeightedChoice.lean` supplies the selection and expectation machinery, whose
-hypotheses `hbad` and `hexp` are stated as PER-EVENT masses against the total weight. This
+`RegularityLemmata/Finite/WeightedChoice.lean` supplies the selection and expectation machinery,
+whose hypotheses `hbad` and `hexp` are stated as PER-EVENT masses against the total weight. This
 file is the seam on the other side: it converts AGGREGATE mass estimates — the form actual
 combinatorial bounds come in — into those hypotheses.
 

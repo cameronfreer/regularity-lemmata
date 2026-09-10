@@ -25,7 +25,7 @@ The order is the one gate **G-S1** forces:
    G-S1 shows is FALSE without equal sizes.
 2. **Summed symmetrized bad degree** (`sum_card_badNbhd_le`): both orientations and all
    `K` relations, so `∑_C |badNbhd C| ≤ 8Kρn²` — the `2K` factor
-   `Finite/IndependentSet.lean` documents.
+   `RegularityLemmata/Finite/IndependentSet.lean` documents.
 3. **Independent-set corollary** (`exists_clean_cells`): with `ρ ≤ 1/(64(K+1)t)` and
    `4t ≤ n`, the degree budget `D + 1 = n/(2t)` satisfies the Markov hypothesis and
    `2(D+1)t ≤ n`, so the extraction returns at least `t` pairwise-clean cells. The

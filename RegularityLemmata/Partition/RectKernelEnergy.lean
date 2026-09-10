@@ -41,7 +41,8 @@ transported from the left-only one through `op`, and all three monotonicity stat
 corollaries of nonnegativity. Downstream files must consume these rather than construct a
 private substitute.
 
-Following `refinementVarianceNum` in `Graph/Strong.lean`, the variance definition is
+Following `refinementVarianceNum` in `RegularityLemmata/Graph/Strong.lean`, the variance definition
+is
 **proof-free**: refinement hypotheses enter the identity theorems, never the data.
 
 No Frieze–Kannan iteration and no part-count recurrence appear here.
@@ -55,7 +56,7 @@ variable {A : Finset X} {B : Finset Y}
 /-! ### Block energy
 
 `rectBlockEnergy` — the mass-weighted square of one rectangle's average — mentions no
-partition and lives in `Finite/RectKernel.lean` (with `rectBlockEnergy_nonneg`,
+partition and lives in `RegularityLemmata/Finite/RectKernel.lean` (with `rectBlockEnergy_nonneg`,
 `rectBlockEnergy_le_mass`, and `rectBlockEnergy_op`); this file sums it over a partition pair. -/
 
 /-! ### Energy over a pair of partitions -/
@@ -138,7 +139,8 @@ theorem rectVarianceNum_nonneg [DecidableEq X] [DecidableEq Y] (P : Finpartition
 `P ×ˢ Q` gains exactly the mass-weighted variance of the cell averages.
 
 Both cancellations it needs — the first moment and the total mass — come from the
-denominator-free decompositions of `Partition/RectKernel.lean`, so no mass is divided out
+denominator-free decompositions of `RegularityLemmata/Partition/RectKernel.lean`, so no mass is
+divided out
 and the zero-mass case is handled uniformly. -/
 theorem rectEnergyNum_sub_rectBlockEnergy [DecidableEq X] [DecidableEq Y]
     (P : Finpartition A) (Q : Finpartition B) (hwX : ∀ x ∈ A, 0 ≤ wX x)
@@ -182,7 +184,7 @@ theorem rectBlockEnergy_le_rectEnergyNum [DecidableEq X] [DecidableEq Y]
 /-! ### Transpose transport -/
 
 /-- `op` exchanges the two sides of the total energy (the block-energy law is
-`rectBlockEnergy_op` in `Finite/RectKernel.lean`). -/
+`rectBlockEnergy_op` in `RegularityLemmata/Finite/RectKernel.lean`). -/
 theorem rectEnergyNum_op [DecidableEq X] [DecidableEq Y] (f : RectKernel X Y)
     (wX : X → ℝ) (wY : Y → ℝ) (P : Finpartition A) (Q : Finpartition B) :
     rectEnergyNum f.op wY wX Q P = rectEnergyNum f wX wY P Q := by
@@ -197,8 +199,9 @@ refines. The identity the Frieze–Kannan iteration actually consumes compares t
 **pairs**, `P' ≤ P` and `Q' ≤ Q`. That joint statement is the primitive here; the one-sided
 identities are specializations of it, at `Q' = Q` and at `P' = P`.
 
-Following `refinementVarianceNum` in `Graph/Strong.lean`, the variance is **proof-free**: it
-is defined for arbitrary partition pairs by filtering the fine parts inside each coarse part,
+Following `refinementVarianceNum` in `RegularityLemmata/Graph/Strong.lean`, the variance is
+**proof-free**: it is defined for arbitrary partition pairs by filtering the fine parts inside each
+coarse part,
 and the refinement hypotheses enter the identity theorem rather than the definition. -/
 
 /-- The mass-weighted variance of the cells of `P' ×ˢ Q'` around the cells of `P ×ˢ Q` that

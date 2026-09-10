@@ -8,10 +8,10 @@ import RegularityLemmata.Finite.PairDensity
 /-!
 # Relation indicators as rectangular kernels
 
-The bridge between the two independent cores. `Finite/RectKernel.lean` knows nothing about
-relations and `Finite/PairDensity.lean` knows nothing about kernels; this file imports both
-and identifies the indicator kernel's uniform-counting sum and average with `pairCount` and
-`pairDensity`.
+The bridge between the two independent cores. `RegularityLemmata/Finite/RectKernel.lean` knows
+nothing about relations and `RegularityLemmata/Finite/PairDensity.lean` knows nothing about kernels;
+this file imports both and identifies the indicator kernel's uniform-counting sum and average with
+`pairCount` and `pairDensity`.
 
 ```
 PairDensity ────┐
@@ -203,7 +203,8 @@ The algebra of one round of the cut-matrix decomposition: subtracting a multiple
 rectangle indicator from a kernel changes the pointwise square by a quadratic in the
 coefficient, and at the rectangle's own average the change is exactly minus the block energy.
 Both identities are **hypothesis-free apart from rectangle containment** and hold for arbitrary
-signed weights; positivity enters only the estimates (`Finite/RectKernel.lean`). -/
+signed weights; positivity enters only the estimates (`RegularityLemmata/Finite/RectKernel.lean`).
+-/
 
 section Decrement
 

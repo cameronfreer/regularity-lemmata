@@ -10,7 +10,7 @@ import RegularityLemmata.Finite.Edit
 # Per-symbol and aggregate edit calculus
 
 Phase 8 unit 5 (design freeze in `ARCHITECTURE.md`): **per-symbol edits are
-primitive**, reusing the finite edit substrate (`Finite/Edit.lean`, house
+primitive**, reusing the finite edit substrate (`RegularityLemmata/Finite/Edit.lean`, house
 `¬(P ↔ Q)` disagreement form). The full per-symbol count includes diagonals and is
 normalized by `|V|^n`; the injective version by the falling factorial — with the
 exact ordered = injective + noninjective split and the collision bound.

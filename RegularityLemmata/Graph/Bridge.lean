@@ -23,7 +23,7 @@ mathlib's effective Szemerédi regularity lemma (re-exported as
 `exists_equipartition_isUniform`), this makes the wrapper an actual bridge into the
 library's calculus. See Y. Dillies and B. Mehta, *Formalising Szemerédi's Regularity
 Lemma in Lean*, ITP 2022, for the underlying development. Triangle counting/removal
-bridges live in `Graph/RemovalBridge.lean`.
+bridges live in `RegularityLemmata/Graph/RemovalBridge.lean`.
 
 `MathlibEnergyCounterexample` settles why the library forks the energy notion:
 mathlib's uniform **off-diagonal** `Finpartition.energy` is *not* refinement-monotone,

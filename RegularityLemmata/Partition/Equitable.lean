@@ -162,7 +162,7 @@ theorem mem_refineBySplit_of_ne {P : Finpartition s} {C : Finset α} (hC : C ∈
 
 /-! ### Equitabilise re-exports
 
-The consumers below are `Partition/AlmostRefines.lean` and the graph ladder. -/
+The consumers below are `RegularityLemmata/Partition/AlmostRefines.lean` and the graph ladder. -/
 
 variable {a b m : ℕ} {P : Finpartition s}
 

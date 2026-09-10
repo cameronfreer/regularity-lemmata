@@ -14,7 +14,8 @@ and derives its size, and nothing else.
 
 ## What changes
 
-The role-indexed selection of `Relational/RepresentativeSelection.lean` indexes events by
+The role-indexed selection of `RegularityLemmata/Relational/RepresentativeSelection.lean` indexes
+events by
 
     (large coarse cell × large coarse cell) × (ordered distinct role pair × palette)
 
@@ -55,8 +56,8 @@ constant.
 
 The selection summit itself is not rebuilt. `BinaryPaletteStrongDiagWitness.exists_representatives`
 and its deviant-mass input remain role-indexed, and the generic weighted-choice machinery
-(`Finite/WeightedChoice.lean`) is untouched by design — it is already indexed by an abstract
-event type with two distinct coordinates, which is exactly what the new index supplies.
+(`RegularityLemmata/Finite/WeightedChoice.lean`) is untouched by design — it is already indexed by
+an abstract event type with two distinct coordinates, which is exactly what the new index supplies.
 Rounding, cleaning, and `Recolor.lean` stay closed; profile homogenization remains the later
 rounding obligation.
 -/

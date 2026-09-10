@@ -17,8 +17,8 @@ chunks recover) is a separate unit.
 The construction follows mathlib's `SzemerediRegularity.chunk` architecture
 (`Mathlib.Combinatorics.SimpleGraph.Regularity.Chunk`), adapted in three ways: the host
 is an arbitrary `s : Finset α` rather than `univ`; the relation is an arbitrary DIRECTED
-`R` (via `witnessCuts` from `Graph/Atomise.lean`), so no symmetry is used; and the number
-of chunks per parent is the ladder's own `familyChunksPerPart #P.parts` rather than
+`R` (via `witnessCuts` from `RegularityLemmata/Graph/Atomise.lean`), so no symmetry is used; and the
+number of chunks per parent is the ladder's own `familyChunksPerPart #P.parts` rather than
 mathlib's `4 ^ #P.parts`.
 
 * `chunkSize P` (mathlib's `m`) and `chunkRem P` (mathlib's `a`) are the numerical data of

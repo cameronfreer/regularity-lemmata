@@ -18,7 +18,8 @@ question, asked here and nowhere else:
 **This file answers that question on concrete configurations only.** It builds no rounding,
 no Ramsey extraction, no representative selection, and no cleaning; it does not prove the
 transversalization certificate for any partition. `IsTransversalizable`
-(`Relational/Transversalization.lean`) remains unachieved and `11B` remains closed.
+(`RegularityLemmata/Relational/Transversalization.lean`) remains unachieved and `11B` remains
+closed.
 
 ## The configuration
 

@@ -22,9 +22,9 @@ with a doubling of the `δ`-constant parameter:
 
 ## Frozen conventions
 
-All predicates follow `Finite/AlmostConstant.lean`: **subset form**, **no decidability
-instances**, **strict `<`** in the closeness and mass clauses, **totalized on the empty set**,
-and **no range or sign constraint inside the predicates**. In particular:
+All predicates follow `RegularityLemmata/Finite/AlmostConstant.lean`: **subset form**, **no
+decidability instances**, **strict `<`** in the closeness and mass clauses, **totalized on the empty
+set**, and **no range or sign constraint inside the predicates**. In particular:
 
 * `IsAlmostNearOn φ r δ ε V` reads "for `ε`-almost all `v ∈ V`, `φ v ≈_δ r`"; here
   `x ≈_δ r` is `|x - r| < δ` (strict, the paper's footnote 8 convention).
@@ -43,8 +43,8 @@ no hypothesis at all — for `ε > 1` the conclusion is the trivial regime), loc
 assumption (to the rectangle, in (a) only, where it places the common value in `[0,1]`), and
 totalize empty rectangles. The paper's "main observation" (a `δ`-constant function is within
 `δ / 2` of a common center) is `isDeltaConstantOn_iff_exists_center` in
-`Finite/AlmostConstant.lean`; (a) is then a row-wise Markov count and (b) a union-of-fibers
-count.
+`RegularityLemmata/Finite/AlmostConstant.lean`; (a) is then a row-wise Markov count and (b) a
+union-of-fibers count.
 -/
 
 namespace RegularityLemmata

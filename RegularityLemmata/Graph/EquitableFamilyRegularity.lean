@@ -47,8 +47,8 @@ claimed. The Conlon–Fox scope statement in `PROVENANCE.md` stands: this route 
 weaker regularity-plus-independent-set argument, so no quantitative optimality is asserted.
 
 The budget-form iteration is this library's own `regularity_iterate`
-(`Graph/Regularity.lean`) transposed from one relation with ceiling `1` to a family with
-ceiling `K`; the bounded-iteration architecture it follows is mathlib's proof of
+(`RegularityLemmata/Graph/Regularity.lean`) transposed from one relation with ceiling `1` to a
+family with ceiling `K`; the bounded-iteration architecture it follows is mathlib's proof of
 Szemerédi's regularity lemma, credited there and in `PROVENANCE.md`.
 -/
 

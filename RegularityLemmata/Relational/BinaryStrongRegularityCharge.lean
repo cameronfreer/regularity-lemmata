@@ -17,10 +17,10 @@ The charge decomposes as `7·τ` (the exact three-vertex count on uniform fine t
 `abs_inducedEmbeddingCountOn_three_sub_le`) plus `3·τ` (the `IsBadPair` lifting on nonuniform
 triples, via `selectedRefinementPairTripleMass_*_le`, `sum_refinement_isBadPair_mass_eq`, and
 `badMassNum_le_of_isRegularPartition`), built on the nested selected-pair lifting in
-`Relational/StrongCountingLifting.lean`.
+`RegularityLemmata/Relational/StrongCountingLifting.lean`.
 
 The density-shift charge (`3·η + 3·δ/η²`) and the assembled summit live in
-`Relational/BinaryStrongCounting.lean`, which imports this file.
+`RegularityLemmata/Relational/BinaryStrongCounting.lean`, which imports this file.
 -/
 
 namespace RegularityLemmata

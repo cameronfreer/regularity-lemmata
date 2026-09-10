@@ -33,7 +33,8 @@ disjoint union of `piFinset`s, not bespoke bijections — and `sum_refinement_vo
 that refining preserves total volume. Together with the coarse-estimate bounds
 (`coarseInducedEstimate_nonneg`, `coarseInducedEstimate_le_cube`) and the flat pair-to-triple
 lifting (`selectedPairTripleMass_*_le`), these are the exact-rewriting substrate that the
-strong-counting theorem (in `Relational/BinaryStrongCounting.lean`) assembles over.
+strong-counting theorem (in `RegularityLemmata/Relational/BinaryStrongCounting.lean`) assembles
+over.
 -/
 
 namespace RegularityLemmata

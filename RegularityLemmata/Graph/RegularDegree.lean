@@ -97,7 +97,8 @@ theorem lt_pairDensity_of_forall_lt (hT : T.Nonempty) {c : ℝ}
 /-! ### Transpose transport -/
 
 /-- Uniformity transports to the transpose. `swapRel` and its count/density transport now
-live in `Finite/PairDensity.lean`, stated for genuinely heterogeneous carriers; only the
+live in `RegularityLemmata/Finite/PairDensity.lean`, stated for genuinely heterogeneous carriers;
+only the
 uniformity statement belongs at this layer. -/
 theorem isUniformPair_swapRel (hunif : IsUniformPair R A B ε) :
     IsUniformPair (swapRel R) B A ε := by

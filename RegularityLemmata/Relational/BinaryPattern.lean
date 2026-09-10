@@ -177,7 +177,8 @@ theorem preservesAndReflects_transport_three [AtMostBinary L]
 /-! ### Profile matching on a box -/
 
 /-- Every vertex of the cell `T i` carries the pattern's required vertex profile at `i`.
-`MatchesThreeProfiles` (`Relational/TransversalCounting.lean`) is the `Fin 3` instance. -/
+`MatchesThreeProfiles` (`RegularityLemmata/Relational/TransversalCounting.lean`) is the `Fin 3`
+instance. -/
 def MatchesProfiles (P : FiniteRelModel L W) (M : FiniteRelModel L V) (T : W → Finset V) :
     Prop :=
   ∀ i, ∀ v ∈ T i, binaryVertexProfile M v = binaryVertexProfile P i
@@ -313,8 +314,8 @@ example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
   preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)
 
 -- …and to a NON-SYMMETRIC one, where it reproduces the orientation probe's positive result
--- (`Relational/OrientationProbe.lean`) for EVERY pattern at once, rather than one pattern
--- at a time by `decide`.
+-- (`RegularityLemmata/Relational/OrientationProbe.lean`) for EVERY pattern at once, rather than one
+-- pattern at a time by `decide`.
 example (P : FiniteRelModel (singleRelLang 2) (Fin 3)) :
     PreservesAndReflects P ordModel ![0, 1, 2] ↔ PreservesAndReflects P ordModel ![3, 4, 5] :=
   preservesAndReflects_transport_three (by decide) (by decide) (by decide) (by decide)

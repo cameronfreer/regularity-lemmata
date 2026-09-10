@@ -17,8 +17,8 @@ every ordered coarse-cell pair `(C, D)` **including `C = D`**, every ordered rol
 `(i, j)` with `i ≠ j`, and every palette color.
 
 Proof order (frozen): candidate definition and the half-mass theorem; the abstract
-weighted-selection lemma (`Finite/WeightedChoice.lean`) exposing all constants; the
-simultaneous construction; the uniformity and density-closeness projections; the size
+weighted-selection lemma (`RegularityLemmata/Finite/WeightedChoice.lean`) exposing all constants;
+the simultaneous construction; the uniformity and density-closeness projections; the size
 guarantee `2·q·|rep C i| ≥ |C|`; and only then the strong-witness instantiation.
 
 **Circularity discipline (the unit's stop condition).** The fine-part bound `q` is

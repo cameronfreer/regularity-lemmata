@@ -9,16 +9,16 @@ import RegularityLemmata.Relational.TransversalCounting
 
 Phase 10 unit 7 (design freeze in `ARCHITECTURE.md`), lifting layer: charging fine
 coordinate-pairs selected by a coarse/fine predicate through partition refinements, so the
-strong-counting theorem (`Relational/BinaryStrongCounting.lean`) can bound its nonuniform and
-density-deviant contributions.
+strong-counting theorem (`RegularityLemmata/Relational/BinaryStrongCounting.lean`) can bound its
+nonuniform and density-deviant contributions.
 
 `selectedFinePairs Q Pc sel` flattens, over each coarse pair, the fine pairs its selection
 `sel` keeps; `sum_selectedFinePairs_mass` reindexes their mass to match the nesting of
 `BinaryPaletteStrongWitness.deviant_mass_le`. The nested wrappers
 `selectedRefinementPairTripleMass_*_le` lift the flat pair-to-triple bounds of
-`Relational/TransversalCounting.lean` to sums over coarse-transversal triples and their fine
-refinements (embedding into fine transversal triples, whose refinement families are pairwise
-disjoint), reusing the flat lemmas rather than three independent coordinate arguments.
+`RegularityLemmata/Relational/TransversalCounting.lean` to sums over coarse-transversal triples and
+their fine refinements (embedding into fine transversal triples, whose refinement families are
+pairwise disjoint), reusing the flat lemmas rather than three independent coordinate arguments.
 -/
 
 namespace RegularityLemmata

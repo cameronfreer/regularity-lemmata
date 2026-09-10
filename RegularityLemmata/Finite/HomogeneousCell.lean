@@ -56,8 +56,8 @@ zero-instance test at the end of the file pins this contract.
 ## Placement of the `n`-box perturbation bound
 
 `abs_tupleDensity_sub_le_of_grow` and its telescoping ingredient live in this file rather than
-in `Finite/Density.lean` or `Finite/HomogeneousPair.lean`. Imports stay honest either way — the
-bound needs nothing beyond `Density` — but its only consumer is
+in `RegularityLemmata/Finite/Density.lean` or `RegularityLemmata/Finite/HomogeneousPair.lean`.
+Imports stay honest either way — the bound needs nothing beyond `Density` — but its only consumer is
 `IsHomogeneousCell.of_abs_tupleDensity_sub_le` directly below it, and `HomogeneousPair.lean` is
 about `pairDensity`, a different (heterogeneous, two-carrier) object that the `n`-ary bound
 does not specialize to on the nose.

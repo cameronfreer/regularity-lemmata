@@ -15,24 +15,24 @@ of absolute value at most `1/ε`, plus a residual of cut norm at most `ε` times
 One statement, `kernel_frieze_kannan_cutDecomposition`, carries all four guarantees.
 
 **Why it is a separate summit.** The step-partition theorem
-(`Partition/RectKernelFriezeKannan.lean`) predicts by a stepped kernel, whose stepped prediction
-is a rectangle combination with the *product* term count `#P · #Q`. The decomposition is produced
-by a **greedy residual iteration** that records one rectangle per round and forms no partition,
-so its term count is `O(ε⁻²)`; its residual is measured by the partition-free cut norm
-(`Finite/RectKernelCutNorm.lean`), and the two summits meet on the residual through
-`rectCutDiscrepancy_eq_rectCutNorm_rectResidual`. Design freeze:
+(`RegularityLemmata/Partition/RectKernelFriezeKannan.lean`) predicts by a stepped kernel, whose
+stepped prediction is a rectangle combination with the *product* term count `#P · #Q`. The
+decomposition is produced by a **greedy residual iteration** that records one rectangle per round
+and forms no partition, so its term count is `O(ε⁻²)`; its residual is measured by the
+partition-free cut norm (`RegularityLemmata/Finite/RectKernelCutNorm.lean`), and the two summits
+meet on the residual through `rectCutDiscrepancy_eq_rectCutNorm_rectResidual`. Design freeze:
 `docs/design/cut-matrix-decomposition.md`.
 
-**The iteration (private; only the summit and its corollaries are API).** The potential is the pointwise mass-weighted square `rectSqMass` of the
-residual. The invariant after `t` rounds (`CutIterInv`) records `t` rectangles inside the
-carriers with coefficients bounded by `1/ε` whose residual `Rₜ` satisfies
-`Φ(Rₜ) + t·ε²·M ≤ Φ(f)`, **strictly** once `t ≥ 1`. A failing round — a witness rectangle with
-`ε·M < |rectSum Rₜ S T|` — subtracts the rectangle at the residual's own average: the decrement
-identity (`rectSqMass_sub_rectAverage_smul_rectIndicator`) drops the potential by the block
-energy, which exceeds `ε²·M` *strictly* by the strict witness inequality, and the new coefficient
-is bounded by `abs_rectAverage_le_inv_of_lt_abs_rectSum`, using only `Φ(Rₜ) ≤ M` (never any
-boundedness of the residual, which is not unit-bounded after the first round). With `M > 0`,
-`N = ⌈1/ε²⌉₊` consecutive failures would give `Φ(R_N) < 0`, so some round `t ≤ N` stops; with
+**The iteration (private; only the summit and its corollaries are API).** The potential is the
+pointwise mass-weighted square `rectSqMass` of the residual. The invariant after `t` rounds
+(`CutIterInv`) records `t` rectangles inside the carriers with coefficients bounded by `1/ε` whose
+residual `Rₜ` satisfies `Φ(Rₜ) + t·ε²·M ≤ Φ(f)`, **strictly** once `t ≥ 1`. A failing round — a
+witness rectangle with `ε·M < |rectSum Rₜ S T|` — subtracts the rectangle at the residual's own
+average: the decrement identity (`rectSqMass_sub_rectAverage_smul_rectIndicator`) drops the
+potential by the block energy, which exceeds `ε²·M` *strictly* by the strict witness inequality, and
+the new coefficient is bounded by `abs_rectAverage_le_inv_of_lt_abs_rectSum`, using only `Φ(Rₜ) ≤ M`
+(never any boundedness of the residual, which is not unit-bounded after the first round). With `M >
+0`, `N = ⌈1/ε²⌉₊` consecutive failures would give `Φ(R_N) < 0`, so some round `t ≤ N` stops; with
 `M = 0` the empty decomposition already works. This is what supplies the budget with no `+ 1`.
 
 Nonnegative carrier weights and `0 < ε` are the only hypotheses beyond `|f| ≤ 1` on `A ×ˢ B`:
@@ -278,9 +278,9 @@ example : ⌈1 / (1 / 2 : ℝ) ^ 2⌉₊ = 4 := by norm_num
 example : ⌈1 / (1 / 5 : ℝ) ^ 2⌉₊ = 25 := by norm_num
 
 -- **A forced update.** At unit weights the chequerboard has `M = 4` and cut norm `1`
--- (`Finite/RectKernelCutNorm.lean`), so at `ε = 1/5` the **empty** decomposition fails the
--- target `ε·M = 4/5 < 1`: the summit must record at least one rectangle. (At `ε = 1/2` the
--- target is `2`, and the empty decomposition already succeeds.)
+-- (`RegularityLemmata/Finite/RectKernelCutNorm.lean`), so at `ε = 1/5` the **empty** decomposition
+-- fails the target `ε·M = 4/5 < 1`: the summit must record at least one rectangle. (At `ε = 1/2`
+-- the target is `2`, and the empty decomposition already succeeds.)
 private theorem cheqD_empty_fails : ¬ (rectCutNorm cheqD (fun _ => 1) (fun _ => 1)
     Finset.univ Finset.univ
     ≤ (1 / 5 : ℝ) * (finsetMass (fun _ : Fin 2 => (1 : ℝ)) Finset.univ

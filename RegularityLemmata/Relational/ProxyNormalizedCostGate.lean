@@ -8,9 +8,9 @@ import RegularityLemmata.Relational.ProxyHierarchyBridge
 # Route (b) ladder step 2: the normalized-cost gate
 
 `ARCHITECTURE.md` route (b) ladder step 2. Gate G-H1 left two ways to break the `P`/`δ`
-hierarchy, and `Relational/ProxyHierarchyBridge.lean` closed the first (gates G-H2a, G-H2b):
-no a priori count bound is available for `w.coarse`. This file tests the second — **a `P`-free
-deviation requirement** — by changing what the cost channel charges.
+hierarchy, and `RegularityLemmata/Relational/ProxyHierarchyBridge.lean` closed the first (gates
+G-H2a, G-H2b): no a priori count bound is available for `w.coarse`. This file tests the second — **a
+`P`-free deviation requirement** — by changing what the cost channel charges.
 
 **This is a gate, not step 5.** Nothing is assembled here.
 

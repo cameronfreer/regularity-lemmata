@@ -18,8 +18,8 @@ composition is two existing pieces:
   `[0,1]`-average control to density control of the `⌈1/ν⌉` level sets per function.
 
 The trace family therefore has at most `q · ⌈1/ν⌉` sets for `q` functions; this factor
-enters only the geometric ratio hypothesis (see `Partition/SlicingThreshold.lean` for the
-named thresholds discharging it). The control is **two-sided** (`|·| ≤`).
+enters only the geometric ratio hypothesis (see `RegularityLemmata/Partition/SlicingThreshold.lean`
+for the named thresholds discharging it). The control is **two-sided** (`|·| ≤`).
 -/
 
 namespace RegularityLemmata

@@ -380,8 +380,9 @@ theorem finsetMass_mul_pos_of_lt_abs_rectSum (hwX : ∀ x ∈ A, 0 ≤ wX x)
 Two partition-free quantities: the **pointwise mass-weighted square** `rectSqMass`, defined
 through `rectSum` applied to the pointwise square so that its algebra is `rectSum`'s, and the
 **block energy** `rectBlockEnergy`, the mass-weighted square of a rectangle's average.
-`Partition/RectKernelEnergy.lean` sums the block energy over a partition pair; the cut-matrix
-decomposition (`docs/design/cut-matrix-decomposition.md`) uses the square as its potential and
+`RegularityLemmata/Partition/RectKernelEnergy.lean` sums the block energy over a partition pair; the
+cut-matrix decomposition (`docs/design/cut-matrix-decomposition.md`) uses the square as its
+potential and
 the block energy as its per-round gain. -/
 
 /-- The raw rectangle sum of the pointwise square, `∑ x ∈ A, ∑ y ∈ B, wX x * wY y * f x y ^ 2`. -/

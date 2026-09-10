@@ -27,10 +27,11 @@ distinct proxy pair AND per palette colour:
 
 ## The budget
 
-`sum_piFinset_weight_mul_eventCost_le_of_weight_floor` (`Finite/WeightedChoiceBudget.lean`) takes
-an aggregate event-mass bound straight to `hexp`: it composes the expected-cost identity with
-the weight-floor factorization used by the forbidden channel. `sum_proxyDevEvent_mass_le`
-supplies that aggregate by applying `sum_proxyPair_deviant_le` once per colour. The result is
+`sum_piFinset_weight_mul_eventCost_le_of_weight_floor`
+(`RegularityLemmata/Finite/WeightedChoiceBudget.lean`) takes an aggregate event-mass bound straight
+to `hexp`: it composes the expected-cost identity with the weight-floor factorization used by the
+forbidden channel. `sum_proxyDevEvent_mass_le` supplies that aggregate by applying
+`sum_proxyPair_deviant_le` once per colour. The result is
 
 `expected_proxyDeviationCost_le` :  `μ = K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2`
 
@@ -186,8 +187,8 @@ open Classical in
 /-- **Step 3: the `hexp` input.** The weighted expected deviation cost is at most
 `K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2` times the total selection weight. The route is the same
 as in the forbidden channel: `sum_piFinset_weight_mul_eventCost_le_of_weight_floor`
-(`Finite/WeightedChoiceBudget.lean`) composes the expected-cost identity with the same
-weight-floor factorization, and `sum_proxyDevEvent_mass_le` supplies the aggregate by
+(`RegularityLemmata/Finite/WeightedChoiceBudget.lean`) composes the expected-cost identity with the
+same weight-floor factorization, and `sum_proxyDevEvent_mass_le` supplies the aggregate by
 applying `sum_proxyPair_deviant_le` ONCE PER PALETTE. Only
 the palette multiplicity `K` is paid — never the event-cardinality envelope, and no `9n²`
 multiplier appears. -/

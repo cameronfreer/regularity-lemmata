@@ -23,7 +23,7 @@ partitions (`inf_fiberPartition_constant`), and a single partition suffices when
 relation is symmetric (`fiberPartition_pair_constant_of_symm`). Constancy transfers
 down any refinement (`pair_constant_of_le`, `pred_constant_of_le`); cell counts under
 repeated common refinement are controlled by `card_parts_inf'_le`
-(`Partition/Basic.lean`).
+(`RegularityLemmata/Partition/Basic.lean`).
 
 Constancy statements use the house disjunction form (`(∀ …, R a d) ∨ (∀ …, ¬R a d)`),
 not a `Bool` encoding; parts of a `Finpartition` are nonempty, so no `Nonempty`

@@ -15,7 +15,8 @@ discrepancy as the supremum of that error over test rectangles, and the **contra
 of stepping: passing to a stepped prediction never increases the rectangle error.
 
 The design freeze is `docs/design/rectangular-kernels.md`. No Frieze–Kannan iteration and
-no part-count recurrence appear here; those live in `Partition/RectKernelFriezeKannan.lean`.
+no part-count recurrence appear here; those live in
+`RegularityLemmata/Partition/RectKernelFriezeKannan.lean`.
 
 ## The contraction constant is `1`
 
@@ -37,8 +38,8 @@ Networks and Graph Limits*, AMS 2012, for the background. The formulation here �
 carrier weights on two heterogeneous carriers, independent partitions, the guard-free
 `x / 0 = 0` conventions, and the constant-`1` contraction in the form proved below — is
 this repository's, and is not a restatement of a lemma from that source. The abstract
-inequality it rests on is `abs_sum_bilinear_le` in `Finite/Inequalities.lean`, proved
-independently there.
+inequality it rests on is `abs_sum_bilinear_le` in `RegularityLemmata/Finite/Inequalities.lean`,
+proved independently there.
 -/
 
 namespace RegularityLemmata
@@ -197,11 +198,12 @@ theorem rectSum_rectResidual_eq_rectError [DecidableEq X] [DecidableEq Y]
 
 /-! ### The bridge to the partition-free cut norm
 
-The cut discrepancy is the cut norm (`Finite/RectKernelCutNorm.lean`) of the stepped residual:
-on every test rectangle inside the carriers the residual's rectangle sum is the stepped error
-(`rectSum_rectResidual_eq_rectError` above, arbitrary signed weights), and both quantities are
-the same finite supremum. Hypothesis-free algebra, like the identity it repackages. The two
-summits — the step-partition theorem and the cut-matrix decomposition — therefore bound the same
+The cut discrepancy is the cut norm (`RegularityLemmata/Finite/RectKernelCutNorm.lean`) of the
+stepped residual: on every test rectangle inside the carriers the residual's rectangle sum is the
+stepped error (`rectSum_rectResidual_eq_rectError` above, arbitrary signed weights), and both
+quantities are the same finite supremum. Hypothesis-free algebra, like the identity it repackages.
+The two summits — the step-partition theorem and the cut-matrix decomposition — therefore bound the
+same
 functional, one on the stepped residual and one on the rectangle-combination residual. -/
 /-- **The two summits measure the same thing on the residual**: the cut discrepancy equals the
 partition-free cut norm of the stepped residual. Pure repackaging, valid for arbitrary signed

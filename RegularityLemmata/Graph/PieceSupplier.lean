@@ -12,8 +12,8 @@ import RegularityLemmata.Graph.Uniformity
 piece-family PREDICATE and the checkpoint's permanent gates.
 
 **The supplier summit is proved** (2026-07-25): `pieceSupplier` and
-`exists_pieceFamily` in `Graph/PieceSchedule.lean`, from the extraction of
-`Graph/PieceExtraction.lean`. Until then it was recorded in prose only, per the
+`exists_pieceFamily` in `RegularityLemmata/Graph/PieceSchedule.lean`, from the extraction of
+`RegularityLemmata/Graph/PieceExtraction.lean`. Until then it was recorded in prose only, per the
 repository policy that unproved summits are never Lean `Prop` placeholders; the gates
 below stay permanent. Its signature demands `0 < t`: gate G-S2 below shows the
 zero-target instance is FALSE.
@@ -26,7 +26,7 @@ zero-target instance is FALSE.
   the weighted mass passes the `τ = 3/49` regularity-style test, yet every
   pairwise-clean subfamily is a singleton — while an unweighted conversion at this
   `τ` would promise three clean pieces. Equal (or fixed-`Λ`-comparable) sizes must
-  come BEFORE the independent-set extraction of `Finite/IndependentSet.lean`, and
+  come BEFORE the independent-set extraction of `RegularityLemmata/Finite/IndependentSet.lean`, and
   the readily available candidate cells retain only a `1/(2q)` fraction with `q`
   the output fine-part bound — a supplier tolerance `≤ target/(2q)` would recreate
   the circularity route (b) exists to avoid.

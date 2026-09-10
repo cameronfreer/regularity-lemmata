@@ -13,7 +13,8 @@ cell assignment `κ : RSet j α → Fin K` against an observable —
 
 `polyadEnergyNum κ obs = Σ_key density(block key)² · |block key|`
 
-— the polyad-level analogue of the pair energy in `Partition/Energy.lean` and of the
+— the polyad-level analogue of the pair energy in `RegularityLemmata/Partition/Energy.lean` and of
+the
 *index* of a partition family in V. Rödl, M. Schacht, *Regular partitions of
 hypergraphs: Regularity lemmas*, Combin. Probab. Comput. 16 (2007) (the mean-square
 density driving their iteration); the mass-weighted normalization follows the
@@ -25,7 +26,7 @@ The load-bearing fact is **refinement monotonicity** (`polyadEnergyNum_comp_le`)
 merging cells through any map `f : Fin K' → Fin K` can only lower the energy,
 because a merged block is the disjoint union of its fibers' blocks
 (`polyadBlock_comp`) and the Engel-form Cauchy–Schwarz (`titu_finset`,
-`Finite/Inequalities.lean`) is exactly `(Σ r)²/(Σ b) ≤ Σ r²/b`. This is the
+`RegularityLemmata/Finite/Inequalities.lean`) is exactly `(Σ r)²/(Σ b) ≤ Σ r²/b`. This is the
 square-root-free energy bookkeeping the one-step repair (unit 4) will consume.
 -/
 
@@ -177,7 +178,7 @@ theorem polyadEnergy_comp_le (f : Fin K' → Fin K) (κ' : RSet j α → Fin K')
 /-- **The exact refinement-variance identity**: the energy gap under merging is the
 mass-weighted variance of the fine block densities around their merged blocks'
 densities (the polyad analogue of the parallel-axis identity in
-`Graph/Variance.lean`). Refinement monotonicity is its nonnegativity. -/
+`RegularityLemmata/Graph/Variance.lean`). Refinement monotonicity is its nonnegativity. -/
 theorem polyadEnergyNum_comp_variance (f : Fin K' → Fin K) (κ' : RSet j α → Fin K')
     (obs : (Fin (j + 1) → α) → Prop) [DecidablePred obs] :
     polyadEnergyNum κ' obs - polyadEnergyNum (fun e => f (κ' e)) obs
