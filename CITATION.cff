@@ -7,8 +7,8 @@ authors:
     given-names: Cameron
 license: Apache-2.0
 repository-code: https://github.com/cameronfreer/regularity-lemmata
-version: 0.10.0
-date-released: 2026-09-06
+version: 0.11.0
+date-released: 2026-09-11
 keywords:
   - Lean 4
   - mathlib
