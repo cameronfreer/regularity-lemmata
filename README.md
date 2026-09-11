@@ -133,7 +133,7 @@ CI enforces the repository's proof and axiom policies on every commit.
 | [`docs/GUIDE.md`](docs/GUIDE.md) | The reader's guide: house vocabulary, what is reusable by release, and the mathematics in four parts, with the boundary of what is proved. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes, aggregated from the GitHub Releases, newest first. |
-| Generated API documentation | Built by doc-gen4 on each published release and served from GitHub Pages, versioned per tag (`docs/<tag>/`, with `docs/latest/`); the build recipe is `docbuild/`. |
+| [Generated API documentation](https://cameronfreer.github.io/regularity-lemmata/docs/) | doc-gen4 pages on GitHub Pages, one directory per version: `docs/latest/` follows the newest release, `docs/main/` is the most recently published documentation snapshot of `main` (the workflow runs on releases and on manual dispatch), and every module has a page at `docs/<version>/RegularityLemmata/<Dir>/<File>.html`; the build recipe is `docbuild/`. |
 | [`docs/design/`](docs/design/) | Design documents for work that is not yet a theorem, including its permanent obstruction gates. |
 | [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
