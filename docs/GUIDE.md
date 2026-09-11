@@ -65,7 +65,7 @@ named, because importing it is the advertised way in.
 | v0.8.0 | The Hedge forecaster and its regret bound `hedge_regret`. |
 | v0.9.0 | Multicolour tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
 | v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
-| next | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`. |
+| v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
 
 The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
 tag, because `main` moves between tags.

@@ -3,6 +3,52 @@
 Release notes aggregated from the GitHub Releases, newest first. Each tag is annotated and the
 GitHub Release names the full commit SHA it was cut from; pin a tag when depending on the library.
 
+## v0.11.0 (2026-09-11)
+
+Release commit: recorded in full on the GitHub Release.
+
+Lean `v4.34.0-rc1` and Mathlib `77cbcbc65f9e26f6ede0a01b24c2cb909e11cc0d` are unchanged from v0.10.0.
+
+Axiom audit: standard axioms only, over `4069` audited declarations (an audit count including private and compiler-generated declarations; not a public-API measure). The public surface change in this release is **38 declarations added, 4 relocated with unchanged names and statements, and one public version marker changed**.
+
+### Highlights
+
+**The cut-matrix decomposition (#71, #162, #167–#169, #171).** Frieze–Kannan's second statement in the library's weighted rectangular formulation, `kernel_frieze_kannan_cutDecomposition` in `Finite/RectKernelCutDecomposition.lean` (via the `Kernel` facade): an absolutely unit-bounded kernel on `A ×ˢ B` with nonnegative carrier weights is a sum of at most `⌈1/ε²⌉₊` weighted rectangle indicators inside the carriers, with coefficients of absolute value at most `1/ε`, plus a residual whose partition-free cut norm is at most `ε · mass wX A · mass wY B`, for every `0 < ε`; no nonemptiness, positive-mass, or `ε ≤ 1` hypothesis. Produced by a private greedy residual iteration with a strict potential invariant (one rectangle per round, no partition, budget without `+1`); normalized and transposed forms are corollaries. The residual is measured by the new partition-free cut norm `rectCutNorm` (`Finite/RectKernelCutNorm.lean`), and the two Frieze–Kannan summits meet on the stepped residual: `rectCutDiscrepancy_eq_rectCutNorm_rectResidual`. Substrate added on the way: `rectSqMass`, `rectIndicator`, `rectCombination` (with `_snoc`, `_op`), the decrement identities, the mass-weighted Cauchy–Schwarz bound `rectBlockEnergy_le_rectSqMass`, and the coefficient estimate `abs_rectAverage_le_inv_of_lt_abs_rectSum`. Design record: `docs/design/cut-matrix-decomposition.md`, now marked implemented.
+
+**Worked examples (#171).** A new default build target `RegularityLemmataExamples` under `examples/`, three compiled specializations importing only the `Kernel` facade: an ordinary `[-1, 1]` matrix at unit weights, a weighted bipartite graph, and a signed centred residual.
+
+**The reader's release (#172, #173–#178).** `docs/GUIDE.md`, a mathematics-first guide with the house vocabulary, a release-indexed table of reusable outputs, four parts (counts and edits; partitions and sampling; weighted kernels, step partition versus decomposition; which counting and removal theorems exist, with the boundary stated plainly). Docstrings on ten named modules (81 added; the convention: statement in words, normalization and error metric, parameter conventions, boundary behaviour, sharpness, source, nearby usage). Generated API documentation on GitHub Pages at <https://cameronfreer.github.io/regularity-lemmata/docs/>, one directory per version with a shared dependency tree, `latest/` following the newest release, every module at `docs/<version>/RegularityLemmata/<Dir>/<File>.html`, and link and search-target checks on every deployment. An external consumer fixture under `consumer/`, a separate Lake package depending on this repository by Git at a full commit. `CHANGELOG.md`. A fifth gate in `scripts/check.sh`: the two library roots partition the modules against a recorded gates-only list, with a self-test.
+
+### Release card: the weighted-kernel package
+
+- **Mathematical output.** The cut-matrix decomposition in weighted rectangular form, companion to the step-partition summit `rect_frieze_kannan_cutDiscrepancy` (v0.3.0); the two meet on the residual.
+- **Exact hypotheses.** `∀ x ∈ A, 0 ≤ wX x`; `∀ y ∈ B, 0 ≤ wY y`; `IsAbsUnitBoundedOnRectangle f A B`; `0 < ε`. Nothing else.
+- **Public imports.** `RegularityLemmata.Kernel`, or `RegularityLemmata.Finite.RectKernelCutNorm` and `RegularityLemmata.Finite.RectKernelCutDecomposition` directly.
+- **Quantitative bounds.** `n ≤ ⌈1/ε²⌉₊`; `|cₖ| ≤ 1/ε`; `rectCutNorm (residual) ≤ ε · M` in raw mass units; normalized form `≤ ε` guard-free; transposed form on `B ×ˢ A`.
+- **Compiled consumers.** The three in-repository examples, built by the gate; the external fixture, rebuilt against the release commit before publication.
+- **Documentation entry.** `docs/GUIDE.md` Part III; the `Kernel` facade docstring; README; the design record.
+- **Explicitly deferred.** Bounded-union polyads; regular-complex and counting machinery on top of the decomposition; any use of the decomposition for removal. Separate campaigns with their own design freezes.
+
+### Public API added in v0.11.0
+
+- `Finite/RectKernel`: `rectSum_finset_sum`, `rectSum_eq_zero_of_finsetMass_mul_eq_zero`, `finsetMass_mul_pos_of_lt_abs_rectSum`, `rectSqMass`, `rectSqMass_def`, `rectSqMass_nonneg`, `rectSqMass_le`, `rectSqMass_op`, `rectSqMass_mono`, `sq_rectSum_le_mul_rectSqMass`, `rectBlockEnergy_le_rectSqMass`, `abs_rectAverage_le_inv_of_lt_abs_rectSum`.
+- `Finite/RelationKernel`: `rectIndicator`, `rectIndicator_apply`, `isUnitIntervalOnRectangle_rectIndicator`, `rectSum_rectIndicator`, `rectIndicator_op`, `rectCombination`, `rectCombination_apply`, `rectCombination_zero`, `rectSum_rectCombination`, `rectSum_mul_rectIndicator`, `rectSqMass_sub_smul_rectIndicator`, `rectSqMass_sub_rectAverage_smul_rectIndicator`, `rectCombination_snoc`, `rectCombination_op`.
+- `Finite/RectKernelCutNorm` (new): `rectCutNorm`, `rectCutNorm_le_iff`, `abs_rectSum_le_rectCutNorm`, `rectCutNorm_nonneg`, `rectCutNorm_op`, `rectCutNorm_smul_weight_left`, `rectCutNorm_le_mul_mass`, `rectCutNorm_eq_zero_of_finsetMass_mul_eq_zero`.
+- `Partition/RectKernelCut`: `rectCutDiscrepancy_eq_rectCutNorm_rectResidual`.
+- `Finite/RectKernelCutDecomposition` (new): `kernel_frieze_kannan_cutDecomposition`, `kernel_frieze_kannan_cutDecomposition_normalized`, `kernel_frieze_kannan_cutDecomposition_op`.
+
+### Changed
+
+- `rectBlockEnergy`, `rectBlockEnergy_nonneg`, `rectBlockEnergy_le_mass`, `rectBlockEnergy_op` relocated from `Partition/RectKernelEnergy` to `Finite/RectKernel`, same names and statements.
+- The `Kernel` facade imports `Finite/RectKernelCutNorm` and `Finite/RectKernelCutDecomposition`; `Finite/RectKernel` imports `Finite/Inequalities`; `Partition/RectKernelCut` imports the cut norm.
+- Default build targets include `RegularityLemmataExamples`; `scripts/check.sh` scans `examples/` and gains Gate 5 (roots) with two self-tests; `ci.yml` drops the runner image's Chrome apt source before installing ripgrep.
+- Docstrings cite modules as `RegularityLemmata/Dir/File.lean` (184 references), so doc-gen4 links resolve.
+- `RegularityLemmata.version` is `"0.11.0"`; package, citation, and installation markers identify v0.11.0.
+
+### Not in this release
+
+Bounded-union polyads, regular-complex and counting machinery over the decomposition, relational induced removal, and the API audits of the release-readiness plan. The Zenodo DOI per tag is outstanding until the integration is verified.
+
 ## v0.10.0 (2026-09-06)
 
 Release commit: `f4377e2d30db1906b9cf2e11f2ca858b755a601f`
