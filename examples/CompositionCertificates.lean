@@ -24,9 +24,11 @@ things and are kept apart:
    `η`, `δ`, `p` from the target `ε₀` in a visible, non-circular order; under the explicit host-size
    condition `24/ε₀ ≤ |s|` the induced count of any three-vertex pattern is within `ε₀·|s|³` of the
    coarse estimate. Nothing in the library composes these two theorems; the choices below are the
-   consumer's.
+   consumer's. **The conclusion does not retain the witness's part-count bound**: this is a
+   prescribed-error composition, not an exposed bounded-complexity endpoint.
 
-Direct module imports are advertised entry points; the facades do not bundle this stack.
+The two modules are imported directly (advertised entry points); they are also reachable through
+the `RelationalApproximation` facade.
 -/
 
 namespace RegularityLemmataExamples
@@ -60,7 +62,7 @@ theorem compatibility (M : FiniteRelModel L V) (P : FiniteRelModel L (Fin 3))
 /-- **Endpoint with a prescribed error.** Parameter order: the target `ε₀` is given; the schedule
 is the constant `ε₀/40`, `η = ε₀/12`, `δ = η²·ε₀/12`, and the seed is an equipartition with
 `p = ⌈24/ε₀⌉₊` parts, which exists because `24/ε₀ ≤ |s|`; the four error terms are each at most
-`ε₀/4·|s|³`. -/
+`ε₀/4·|s|³`. The witness's part-count bound is not carried into the conclusion. -/
 theorem prescribed_error (M : FiniteRelModel L V) (P : FiniteRelModel L (Fin 3))
     (hnull : NullaryCompatible P M) {ε₀ : ℝ} (hε₀ : 0 < ε₀) (hε₁ : ε₀ ≤ 1)
     (hs : 24 / ε₀ ≤ (s.card : ℝ)) :
