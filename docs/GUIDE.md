@@ -7,7 +7,12 @@ the release named in each section; it designs nothing. Conventions are in
 the theorem statements themselves are the authority whenever this text is coarser than they are.
 
 Every declaration named below is reachable from `import RegularityLemmata` (the public root)
-unless it is marked *gates umbrella*. Where a curated facade bundles a stack, the facade is
+unless it is marked *gates umbrella*. Generated pages for every module live at
+<https://cameronfreer.github.io/regularity-lemmata/docs/>: `latest/` follows the newest
+release and `main/` the development head, and a module `Dir/File` is at
+`docs/<version>/RegularityLemmata/Dir/File.html` (for example
+[`Finite/RectKernelCutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/main/RegularityLemmata/Finite/RectKernelCutDecomposition.html)),
+with declaration search on each version's `search.html`. Where a curated facade bundles a stack, the facade is
 named, because importing it is the advertised way in.
 
 ## House vocabulary
