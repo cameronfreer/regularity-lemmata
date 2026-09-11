@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import RegularityLemmata.Finite.BinaryTreeEmbedding
 
 /-!
-# Proper embeddings: covering the leaf level
+# Proper embeddings: source leaves to host leaves
 
 An `InternalEmbedding` places the internal nodes of one tree inside another. A **proper
 embedding** additionally sends every source **leaf** to a host leaf — a word of length exactly

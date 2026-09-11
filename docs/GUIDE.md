@@ -302,6 +302,31 @@ graphs, re-exported with the conversions between this library's counts and Mathl
    approximation exists at every arity and for every fixed pattern (above). Deferred
    statements are recorded as prose, never as `Prop` placeholders.
 
+**Non-implications, stated once.** Each pair below names two things that sound alike and are
+different theorems here; the contracts keep them apart, and no result of the first kind
+should be read as the second.
+
+- An equitable almost-refinement is not automatically regular: `AlmostRefines` controls
+  uncovered mass, regularity controls densities on pairs of parts.
+- A global exceptional-mass bound (a sum over bad pairs at most `β|s|²`) is not a bound inside
+  every parent cell; the aggregation bridge consumes the global form only.
+- Quotient counting over transversal placements is not an all-placement count formula: a
+  placement putting two pattern vertices in one cell is charged, not evaluated; and repeated
+  arguments inside one relation atom are a third, separate matter.
+- A count-transfer theorem (counts within an explicit error of a quotient count) is not a
+  removal theorem; the library has exactly one removal theorem, Mathlib's, re-exported.
+- Completing a partition by enlarging existing blocks (the absorption theorems) is not the
+  same as retaining prescribed exact-size blocks and partitioning the remainder; only the
+  first exists.
+- The step-partition theorem (a stepped prediction with product term count) and the cut-matrix
+  decomposition (a bounded sum of rectangle indicators) are different outputs; both exist.
+- Counting from a cellwise approximation is not producing that approximation: the library
+  rounds a homogeneous partition to an indivisible model, but produces no homogeneous
+  partition for general models.
+- An embedding example that fails a stronger constraint (a tree embedding with the root moved
+  or depth changed) shows what the structure allows; it is not a proof that no monochromatic
+  embedding satisfies the stronger constraint, which would need a colouring counterexample.
+
 ## Independent tools
 
 - **Finite Ramsey** (`FiniteRamsey` facade): multicolour Ramsey for ordered pairs by greedy
