@@ -530,7 +530,14 @@ disjoint blocks of exact size `sliceBlockSize μ n` inside `A`, on each of which
 `F` has density within `ν` of its density on `A`. The leftover is `A.card % sliceBlockSize μ n`
 (`SliceCert.card_leftover_eq_mod`). Hypotheses: `0 < μ`, `0 < ν ≤ 1/2`, the threshold,
 `A.card ≤ n`, `A.Nonempty` (for the parent density), `F.card ≤ q`. Nothing is chosen here:
-`s`, `t`, and the ratio are computed from `(μ, ν, n)` in that order. -/
+`s`, `t`, and the ratio are computed from `(μ, ν, n)` in that order.
+
+**The zero-block case is part of the contract.** `A.card ≤ n` does not make the block size fit
+inside `A`: `sliceBlockSize μ n = ⌊μ·n⌋₊` can exceed `A.card` (for a small carrier inside a large
+host, or for `μ > 1`), and then `A.card / sliceBlockSize μ n = 0`, the certificate has no blocks,
+its leftover is all of `A`, and the density conclusion is vacuous. The specialization
+`exists_balanced_slicing_of_threshold_self` at `n = A.card` and `μ ≤ 1` returns at least one
+block. -/
 theorem exists_balanced_slicing_of_threshold [DecidableEq α] (A : Finset α)
     (F : Finset (Finset α)) {q n : ℕ} {μ ν : ℝ} (hμ : 0 < μ) (hν : 0 < ν) (hν2 : ν ≤ 1 / 2)
     (hn : sliceThreshold q μ ν ≤ n) (hAn : A.card ≤ n) (hA : A.Nonempty) (hF : F.card ≤ q) :
@@ -556,6 +563,42 @@ theorem exists_balanced_slicing_of_threshold [DecidableEq α] (A : Finset α)
     lt_of_le_of_lt (Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ hfam)) hrace
   exact exists_balanced_slicing A F hA hs ht htβ hratio
 
+/-- **The intended sampling use, nonvacuous.** At `n = A.card` and `μ ≤ 1` the block size
+`⌊μ·|A|⌋₊` fits inside `A`, so at least one block is returned: the block count
+`A.card / sliceBlockSize μ A.card` is positive. Same conclusion as
+`exists_balanced_slicing_of_threshold` otherwise; the threshold is now a condition on `A.card`. -/
+theorem exists_balanced_slicing_of_threshold_self [DecidableEq α] (A : Finset α)
+    (F : Finset (Finset α)) {q : ℕ} {μ ν : ℝ} (hμ : 0 < μ) (hμ1 : μ ≤ 1) (hν : 0 < ν)
+    (hν2 : ν ≤ 1 / 2) (hn : sliceThreshold q μ ν ≤ A.card) (hF : F.card ≤ q) :
+    ∃ cert : SliceCert A (traceComplementClosure A F) (A.card / sliceBlockSize μ A.card)
+        (sliceBlockSize μ A.card) (sliceSlack μ ν A.card),
+      0 < A.card / sliceBlockSize μ A.card ∧
+      ∀ T ∈ F, ∀ j, |((T ∩ cert.block j).card : ℝ) / sliceBlockSize μ A.card
+          - ((A ∩ T).card : ℝ) / A.card| ≤ ν := by
+  have hs : 0 < sliceBlockSize μ A.card := by
+    have := sixteen_le_sliceBlockSize (q := q) hμ hν hν2 hn
+    omega
+  have hA : A.Nonempty := by
+    rw [← Finset.card_pos]
+    have hs' := sixteen_le_sliceBlockSize (q := q) hμ hν hν2 hn
+    have : (sliceBlockSize μ A.card : ℝ) ≤ μ * A.card := sliceBlockSize_le hμ.le
+    have h0 : (0 : ℝ) < A.card := by
+      by_contra h
+      push Not at h
+      have : (sliceBlockSize μ A.card : ℝ) ≤ 0 := this.trans (by nlinarith)
+      have : (16 : ℝ) ≤ sliceBlockSize μ A.card := by exact_mod_cast hs'
+      linarith
+    exact_mod_cast h0
+  obtain ⟨cert, h⟩ :=
+    exists_balanced_slicing_of_threshold A F hμ hν hν2 hn le_rfl hA hF
+  refine ⟨cert, ?_, h⟩
+  apply Nat.div_pos _ hs
+  have h1 : (sliceBlockSize μ A.card : ℝ) ≤ A.card :=
+    calc (sliceBlockSize μ A.card : ℝ) ≤ μ * A.card := sliceBlockSize_le hμ.le
+      _ ≤ 1 * A.card := by gcongr
+      _ = A.card := one_mul _
+  exact_mod_cast h1
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
@@ -574,6 +617,40 @@ example [DecidableEq α] (A : Finset α) (F : Finset (Finset α)) {q n : ℕ} {�
           - ((A ∩ T).card : ℝ) / A.card| ≤ ν := by
   obtain ⟨cert, h⟩ := exists_balanced_slicing_of_threshold A F hμ hν hν2 hn hAn hA hF
   exact ⟨cert, cert.card_leftover_eq_mod, h⟩
+
+-- **The zero-block endpoint of the wrapper**: when the block size exceeds the carrier, the block
+-- count is `0`, the certificate returned by `exists_balanced_slicing_of_threshold` has no blocks,
+-- its leftover is all of `A`, and the density conclusion is vacuous. Pinned at the level of the
+-- block count and the leftover, since the wrapper's hypotheses cannot be met on a small concrete
+-- host (the thresholds are large).
+example [DecidableEq α] (A : Finset α) {n : ℕ} {μ : ℝ} (hlt : A.card < sliceBlockSize μ n) :
+    A.card / sliceBlockSize μ n = 0 :=
+  Nat.div_eq_of_lt hlt
+example [DecidableEq α] (A : Finset α) (F : Finset (Finset α)) {n t : ℕ} {μ : ℝ}
+    (cert : SliceCert A F (A.card / sliceBlockSize μ n) (sliceBlockSize μ n) t)
+    (hlt : A.card < sliceBlockSize μ n) : cert.leftover = A := by
+  have h0 : A.card / sliceBlockSize μ n = 0 := Nat.div_eq_of_lt hlt
+  simp only [SliceCert.leftover, SliceCert.covered]
+  have : (Finset.univ : Finset (Fin (A.card / sliceBlockSize μ n))) = ∅ := by
+    rw [Finset.univ_eq_empty_iff]; rw [h0]; exact Fin.isEmpty'
+  rw [this, Finset.biUnion_empty, Finset.sdiff_empty]
+-- The block size can exceed the carrier even with `A.card ≤ n`: `μ` has no upper bound.
+example : (2 : ℕ) < sliceBlockSize (3 : ℝ) 2 := by
+  rw [sliceBlockSize]
+  have : (⌊(3 : ℝ) * (2 : ℕ)⌋₊) = 6 := by norm_num
+  omega
+
+-- **The nonvacuous specialization**: at `n = A.card` and `μ ≤ 1` at least one block is
+-- returned (statement-level; the threshold hypothesis is on `A.card`).
+example [DecidableEq α] (A : Finset α) (F : Finset (Finset α)) {q : ℕ} {μ ν : ℝ}
+    (hμ : 0 < μ) (hμ1 : μ ≤ 1) (hν : 0 < ν) (hν2 : ν ≤ 1 / 2)
+    (hn : sliceThreshold q μ ν ≤ A.card) (hF : F.card ≤ q) :
+    ∃ cert : SliceCert A (traceComplementClosure A F) (A.card / sliceBlockSize μ A.card)
+        (sliceBlockSize μ A.card) (sliceSlack μ ν A.card),
+      0 < A.card / sliceBlockSize μ A.card ∧
+      ∀ T ∈ F, ∀ j, |((T ∩ cert.block j).card : ℝ) / sliceBlockSize μ A.card
+          - ((A ∩ T).card : ℝ) / A.card| ≤ ν :=
+  exists_balanced_slicing_of_threshold_self A F hμ hμ1 hν hν2 hn hF
 
 -- Block sizes floor to zero below one block's worth of mass.
 example : sliceBlockSize (1/4 : ℝ) 2 = 0 := by
