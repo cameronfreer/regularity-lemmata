@@ -9,7 +9,9 @@ the theorem statements themselves are the authority whenever this text is coarse
 Every declaration named below is reachable from `import RegularityLemmata` (the public root)
 unless it is marked *gates umbrella*. Generated pages for every module live at
 <https://cameronfreer.github.io/regularity-lemmata/docs/>: `latest/` follows the newest
-release and `main/` the development head, and a module `Dir/File` is at
+release, `main/` is the most recently published documentation snapshot of `main` (the
+workflow runs on releases and on manual dispatch, not on every push), and a module `Dir/File`
+is at
 `docs/<version>/RegularityLemmata/Dir/File.html` (for example
 [`Finite/RectKernelCutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/main/RegularityLemmata/Finite/RectKernelCutDecomposition.html)),
 with declaration search on each version's `search.html`. Where a curated facade bundles a stack, the facade is
