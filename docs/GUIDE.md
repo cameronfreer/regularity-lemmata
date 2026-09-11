@@ -321,8 +321,9 @@ should be read as the second.
 - The step-partition theorem (a stepped prediction with product term count) and the cut-matrix
   decomposition (a bounded sum of rectangle indicators) are different outputs; both exist.
 - Counting from a cellwise approximation is not producing that approximation: the library
-  rounds a homogeneous partition to an indivisible model, but produces no homogeneous
-  partition for general models.
+  rounds a homogeneous partition to an indivisible model, but for general models it does not
+  construct a homogeneous partition with host-independent size and tolerance guarantees (the
+  discrete partition is trivially indivisible, and says nothing).
 - An embedding example that fails a stronger constraint (a tree embedding with the root moved
   or depth changed) shows what the structure allows; it is not a proof that no monochromatic
   embedding satisfies the stronger constraint, which would need a colouring counterexample.

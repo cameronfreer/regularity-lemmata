@@ -25,7 +25,7 @@ of length at
 arbitrary root,
   branch direction preserved, depth unconstrained.
 * `RegularityLemmata/Finite/BinaryTreeProperEmbedding.lean` — the same with source leaves mapped
-  to host leaves (no host leaf need be hit), and the extension of an arbitrary internal
+  to host leaves (the leaf map need not be surjective), and the extension of an arbitrary internal
   embedding through the leaf level.
 * `RegularityLemmata/Finite/BinaryTreeRamsey.lean` — the additive two-colour subtree theorem: a
 colouring of the
