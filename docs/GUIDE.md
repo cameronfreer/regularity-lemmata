@@ -157,7 +157,9 @@ that every test set of a finite family keeps its density within `β` on every bl
 quantitative hypothesis is a ratio inequality that the consumer discharges; the named
 parameters `sliceBlockSize`, `sliceSlack`, `sliceThreshold` and the two races
 (`slice_sampling_race`, `slice_sampling_race_linear`) discharge it beyond explicit host sizes
-(`Partition/SlicingThreshold`). Averages of a `[0,1]`-valued family are controlled within
+(`Partition/SlicingThreshold`); `exists_balanced_slicing_of_threshold` packages the whole
+thing, so a consumer supplies the carrier, the family, `μ`, `ν`, a family-size ceiling, and a
+host size beyond the threshold, and receives the blocks with every side condition discharged. Averages of a `[0,1]`-valued family are controlled within
 `2ν + (1+ν)β` (`exists_average_slicing`), and every piece of a partition can be sliced into
 blocks of one common exact size (`exists_common_blocks`).
 

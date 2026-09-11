@@ -513,9 +513,67 @@ theorem sliceThresholdLinear_le_sliceThresholdLinear {μ μ' ν ν' : ℝ}
 
 
 
+/-! ### Balanced slicing at the named parameters
+
+The sampling corollary: a consumer supplies the carrier, a finite family of test sets, the
+block fraction `μ`, the tolerance `ν`, a family-size ceiling `q`, and a host size beyond
+`sliceThreshold q μ ν`; every side condition of `exists_balanced_slicing` is discharged here
+from those inputs (block size and slack from `sliceBlockSize` and `sliceSlack`, positivity and
+`t < s` from `sixteen_le_sliceBlockSize` and `sliceSlack_lt_sliceBlockSize`, `t ≤ ν·s` from
+`sliceSlack_le`, and the ratio from the constant-count race with the family term `2 · |F|`
+bounded by the race's `2 · q · ⌈1/ν⌉₊`). The normalization is the parent-density one of
+`exists_balanced_slicing` and is not changed. -/
+
+/-- **Balanced slicing beyond the named threshold.** For `n ≥ sliceThreshold q μ ν`, a carrier
+`A` of size at most `n` and a family `F` of at most `q` test sets: `A.card / sliceBlockSize μ n`
+disjoint blocks of exact size `sliceBlockSize μ n` inside `A`, on each of which every member of
+`F` has density within `ν` of its density on `A`. The leftover is `A.card % sliceBlockSize μ n`
+(`SliceCert.card_leftover_eq_mod`). Hypotheses: `0 < μ`, `0 < ν ≤ 1/2`, the threshold,
+`A.card ≤ n`, `A.Nonempty` (for the parent density), `F.card ≤ q`. Nothing is chosen here:
+`s`, `t`, and the ratio are computed from `(μ, ν, n)` in that order. -/
+theorem exists_balanced_slicing_of_threshold [DecidableEq α] (A : Finset α)
+    (F : Finset (Finset α)) {q n : ℕ} {μ ν : ℝ} (hμ : 0 < μ) (hν : 0 < ν) (hν2 : ν ≤ 1 / 2)
+    (hn : sliceThreshold q μ ν ≤ n) (hAn : A.card ≤ n) (hA : A.Nonempty) (hF : F.card ≤ q) :
+    ∃ cert : SliceCert A (traceComplementClosure A F) (A.card / sliceBlockSize μ n)
+        (sliceBlockSize μ n) (sliceSlack μ ν n),
+      ∀ T ∈ F, ∀ j, |((T ∩ cert.block j).card : ℝ) / sliceBlockSize μ n
+          - ((A ∩ T).card : ℝ) / A.card| ≤ ν := by
+  have hs : 0 < sliceBlockSize μ n := by
+    have := sixteen_le_sliceBlockSize (q := q) hμ hν hν2 hn
+    omega
+  have ht : sliceSlack μ ν n < sliceBlockSize μ n :=
+    sliceSlack_lt_sliceBlockSize (q := q) hμ hν hν2 hn
+  have htβ : (sliceSlack μ ν n : ℝ) ≤ ν * sliceBlockSize μ n := sliceSlack_le hν.le
+  have hrace := slice_sampling_race (q := q) (c := A.card) hμ hν hν2 hn hAn
+  have hfam : 2 * F.card ≤ 2 * (q * ⌈1 / ν⌉₊) := by
+    have hc : 1 ≤ ⌈1 / ν⌉₊ := Nat.one_le_ceil_iff.mpr (by positivity)
+    calc 2 * F.card ≤ 2 * q := Nat.mul_le_mul_left 2 hF
+      _ = 2 * (q * 1) := by rw [mul_one]
+      _ ≤ 2 * (q * ⌈1 / ν⌉₊) := Nat.mul_le_mul_left 2 (Nat.mul_le_mul_left q hc)
+  have hratio : (A.card / sliceBlockSize μ n) * (2 * F.card)
+      * (2 * sliceBlockSize μ n - sliceSlack μ ν n) ^ (sliceSlack μ ν n / 8)
+      < (2 * sliceBlockSize μ n) ^ (sliceSlack μ ν n / 8) :=
+    lt_of_le_of_lt (Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ hfam)) hrace
+  exact exists_balanced_slicing A F hA hs ht htβ hratio
+
 /-! ### Tests and adversarial examples -/
 
 section Tests
+
+-- **The named-parameter wrapper is a compiled consumer of the race**: a consumer supplies
+-- `(A, F, μ, ν, q, n)` and receives exact-size blocks with parent-density control at tolerance
+-- `ν`, together with the leftover `A.card % sliceBlockSize μ n`; no side condition of
+-- `exists_balanced_slicing` is left to the consumer.
+example [DecidableEq α] (A : Finset α) (F : Finset (Finset α)) {q n : ℕ} {μ ν : ℝ}
+    (hμ : 0 < μ) (hν : 0 < ν) (hν2 : ν ≤ 1 / 2) (hn : sliceThreshold q μ ν ≤ n)
+    (hAn : A.card ≤ n) (hA : A.Nonempty) (hF : F.card ≤ q) :
+    ∃ cert : SliceCert A (traceComplementClosure A F) (A.card / sliceBlockSize μ n)
+        (sliceBlockSize μ n) (sliceSlack μ ν n),
+      cert.leftover.card = A.card % sliceBlockSize μ n ∧
+      ∀ T ∈ F, ∀ j, |((T ∩ cert.block j).card : ℝ) / sliceBlockSize μ n
+          - ((A ∩ T).card : ℝ) / A.card| ≤ ν := by
+  obtain ⟨cert, h⟩ := exists_balanced_slicing_of_threshold A F hμ hν hν2 hn hAn hA hF
+  exact ⟨cert, cert.card_leftover_eq_mod, h⟩
 
 -- Block sizes floor to zero below one block's worth of mass.
 example : sliceBlockSize (1/4 : ℝ) 2 = 0 := by
