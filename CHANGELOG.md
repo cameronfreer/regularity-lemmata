@@ -23,7 +23,7 @@ Axiom audit: standard axioms only, over `4069` audited declarations (an audit co
 
 - **Mathematical output.** The cut-matrix decomposition in weighted rectangular form, companion to the step-partition summit `rect_frieze_kannan_cutDiscrepancy` (v0.3.0); the two meet on the residual.
 - **Exact hypotheses.** `∀ x ∈ A, 0 ≤ wX x`; `∀ y ∈ B, 0 ≤ wY y`; `IsAbsUnitBoundedOnRectangle f A B`; `0 < ε`. Nothing else.
-- **Public imports.** `RegularityLemmata.Kernel`, or `Finite.RectKernelCutNorm` and `Finite.RectKernelCutDecomposition` directly.
+- **Public imports.** `RegularityLemmata.Kernel`, or `RegularityLemmata.Finite.RectKernelCutNorm` and `RegularityLemmata.Finite.RectKernelCutDecomposition` directly.
 - **Quantitative bounds.** `n ≤ ⌈1/ε²⌉₊`; `|cₖ| ≤ 1/ε`; `rectCutNorm (residual) ≤ ε · M` in raw mass units; normalized form `≤ ε` guard-free; transposed form on `B ×ˢ A`.
 - **Compiled consumers.** The three in-repository examples, built by the gate; the external fixture, rebuilt against the release commit before publication.
 - **Documentation entry.** `docs/GUIDE.md` Part III; the `Kernel` facade docstring; README; the design record.
