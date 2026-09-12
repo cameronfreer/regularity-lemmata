@@ -58,7 +58,9 @@ Elementary laws to be proved with it:
   `placementCount Q C = ∏ i, |C i| = cellTupleVolume (fun i ↦ C i)`.
 - **Insufficient capacity.** If some `m_A(C) > |A|` then `(|A|)_{m_A(C)} = 0` and
   `placementCount Q C = 0`; no injective placement exists.
-- **Empty pattern.** For `W` empty the product is empty and `placementCount Q C = 1`.
+- **Empty pattern.** For `W` empty every multiplicity `m_A(C)` is `0`, so every factor
+  `(|A|)_0` is `1` and `placementCount Q C = 1` (the product over cells is not empty; each of its
+  factors is).
 - **Sum over all assignments.** `∑_{C : W → Q.parts} placementCount Q C = (|s|)_{|W|}`, the
   number of injective tuples in `s` (`card_injectiveTuplesOn`); this is the all-placement
   counterpart of `sum_cellTupleVolume_eq : ∑_T cellTupleVolume T = |s|^k`.
@@ -156,9 +158,12 @@ separate facts explain this, and neither is touched by repeated-cell counting:
 1. The extension lemma `card_filter_comp_mem_le` charges every edited tuple `e` of arity `r`
    with `|s|^{k−1}` embeddings: it fixes one coordinate of `f` through `f ∘ x = e` and lets
    the other `k−1` range freely. For an argument tuple `x` with `j` distinct arguments, the
-   equation `f ∘ x = e` fixes `j` coordinates, so the sharp count is `|s|^{k−j}`; the lemma
-   uses the worst case `j = 1`, which is attained only when `x` is constant, that is, when
-   `e` is a **diagonal** tuple `(v, …, v)`.
+   equation `f ∘ x = e` pins `j` distinct images when `e` is compatible with `x` (equal
+   arguments must receive equal values and distinct arguments distinct values; an incompatible
+   pinned tuple contributes `0`), and the number of injective completions of a compatible
+   pinned tuple is `(|s| − j)_{k−j}`, of which `|s|^{k−j}` is only an upper bound. The lemma
+   uses the worst case `j = 1`, attained only when `x` is constant, that is, when `e` is a
+   **diagonal** tuple `(v, …, v)`.
 2. The cellwise edit bound controls the **density** of edits on each cell box, `≤ ε · ∏ |C i|`.
    It says nothing about how the edits distribute over the diagonal strata of the box. The
    review's obstruction shows the two facts combining: one binary symbol interpreted as
@@ -172,23 +177,29 @@ separate facts explain this, and neither is touched by repeated-cell counting:
 So eliminating the repeated-cell collision charge does not improve the edit-transfer
 coefficient. A host-independent transfer for arbitrary patterns needs an **additional
 hypothesis on the diagonal strata of the edit sets**, which this repository does not have; it
-is identified here as the missing input, not specified:
+is identified here as the missing input and is **outside this implementation** by ruling.
+For the record, the two shapes such an input could take:
 
 - **Option A (stratified cellwise edit bound).** For every symbol of arity `r`, every cell box,
   and every equivalence relation `π` on `Fin r` (the repetition pattern), the edits among the
   tuples of repetition pattern exactly `π` number at most `ε` times the number of such tuples
-  in the box. With this, the transfer lemma can be restated stratum by stratum
-  (`|s|^{k−|π|}` embeddings per edit of pattern `π`, at most `ε · ∏ |C i|`-type many edits per
-  stratum), giving a normalized error of the form `ε · ∑_R c(k, r)` with `c` depending on `k`
-  and `r` only. The equality example violates Option A on the diagonal stratum (density `1`).
-- **Option B (diagonal-free patterns).** Restrict the transfer to patterns whose symbols are
-  never applied with repeated arguments, or to models where all symbols are diagonal-free
-  (as the graph adapter is by looplessness); then only the stratum `j = r` occurs and the
-  existing lemma sharpened to `|s|^{k−r}` gives a host-independent coefficient. This is a
-  restriction of scope, not a new hypothesis on the edits.
+  in the box. The transfer lemma could then be restated stratum by stratum (at most
+  `(|s| − |π|)_{k−|π|}` injective completions per compatible edit of pattern `π`), giving a
+  normalized error `ε · ∑_R c(k, r)` with `c` depending on `k` and `r` only. The equality
+  example violates Option A on the diagonal stratum (density `1`).
+- **Option B (agreement on non-injective argument tuples).** `PreservesAndReflects` tests
+  **every** argument tuple, repeated arguments and false atoms included, so restricting the
+  *pattern* to "diagonal-free" symbols does not remove the diagonal strata from the comparison:
+  the host's value on a repeated-argument tuple still enters through the false atoms of the
+  pattern. What removes them is a hypothesis on the two compared **models**: `M` and `N` agree
+  on all non-injective argument tuples of every symbol (for instance both relations vanish
+  there, as the graph adapter's do by looplessness). Under that agreement only the stratum
+  `j = r` carries edits, and the extension count `(|s| − r)_{k−r}` gives a host-independent
+  coefficient. Without it, a different counting predicate (one that ignores non-injective
+  argument tuples) would be needed, which is not `inducedEmbeddingCountOn`.
 
-Which of A or B (or both, as separate theorems) is wanted is the open choice; it is not
-decided here, and nothing in this specification depends on it.
+**Ruling:** neither option is part of this tranche; this document specifies the counting
+extension only, and the transfer hypotheses remain an identified missing input.
 
 ## 5. Proposed compiled consumer (an `example` that a transversal example cannot satisfy)
 
@@ -207,9 +218,13 @@ true on all four argument tuples `(0,0), (0,1), (1,0), (1,1)`.
   into a one-part partition, so the existing API can only bound the discrepancy by the charge
   `(2 choose 2)·4·4 = 16`, while the new count is exact.
 
-A second, negative instance pins the agreement condition on a repeated argument: the same
-setting with `N` the **empty** relation and `P` requiring the symbol on `(0,1)` gives
-`placementCount = 12` but agreement fails, so the count is `0`, matching `decide`.
+A second, negative instance pins the agreement condition **at a repeated argument**: the
+same setting with `N` the **empty** relation and `P` requiring the symbol exactly on the
+repeated-argument tuple `(0,0)` (false on `(0,1)`, `(1,0)`, `(1,1)`): every off-diagonal atom
+agrees with the empty host, and the only disagreement is at `(0,0)`, where the quotient's
+diagonal value of the cell is false. `placementCount = 12`, agreement fails, the count is
+`0`, matching `decide`. (A requirement at `(0,1)` would test an ordinary injective argument
+tuple, not the boundary this extension is about.)
 
 Both instances have two distinct pattern vertices in one cell, so no transversal example
 satisfies them; this is the acceptance test for the extension.
@@ -236,16 +251,21 @@ theorem abs_inducedEmbeddingCountOn_sub_quotientInducedCountAll_le_of_cellwiseEd
       ≤ (∑_{R : arity r > 0} k^r · ε · |s|^r) · |s|^{k−1}      -- no collision term
 ```
 
-Placement: `placementCount` and its laws beside `injectiveTuplesOn` in `Finite/Injective.lean`
-(it is partition combinatorics) or beside `quotientInducedCount` in `Relational/Indivisible.lean`
-(it is stated on `Q.parts`); the choice is open and affects only imports. The general cell law
-and `quotientInducedCountAll` go in `Relational/Indivisible.lean` next to their transversal
-versions; the composite goes in `Relational/AggregationBridge.lean`.
+Placement, **by ruling**: `placementCount` (partition-specific, stated on `Q.parts`) and its
+laws live beside the quotient machinery in `Relational/Indivisible.lean` initially; the
+genuinely partition-independent counting lemma behind it (injective maps of a finite type
+into pairwise disjoint finsets with prescribed fibre sizes are counted by the product of
+falling factorials) goes upstream beside `injectiveTuplesOn` in `Finite/Injective.lean`
+**without** adding a partition dependency there. The general cell law and
+`quotientInducedCountAll` go in `Relational/Indivisible.lean` next to their transversal
+versions; the composite (collision term removed, edit term unchanged) goes in
+`Relational/AggregationBridge.lean`.
 
-## 7. Open choices presented, not resolved
+## 7. Choices, as ruled
 
-1. Home of `placementCount` (§6).
-2. Whether `quotientInducedCountAll` should carry the transversal count as a named summand
-   (`quotientInducedCount + nontransversal part`) or be defined directly over all `C`.
-3. The remaining input for a host-independent edit transfer: Option A or Option B of §4, or
-   neither in this repository.
+1. `quotientInducedCountAll` is **defined directly over all assignments** `C : W → Q.parts`; the
+   split `quotientInducedCountAll = quotientInducedCount + (sum over non-injective C)` is a
+   **theorem** (the transversal/non-transversal decomposition), not the definition.
+2. `placementCount` beside the quotient machinery; partition-independent counting upstream
+   (§6).
+3. Neither edit-transfer option of §4 belongs in this tranche.
