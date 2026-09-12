@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Finite.Injective
+import RegularityLemmata.Finite.PatternExtensions
 import RegularityLemmata.Finite.Density
 import RegularityLemmata.Finite.Average
 import RegularityLemmata.Finite.RectangleCounting
