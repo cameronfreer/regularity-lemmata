@@ -49,20 +49,23 @@ enlarged. This is the distinction from `AbsorbLeftover`, where the conclusion is
   retained. When there is at least one block (`m > 0`), the blocks have size `s`, so every
   part must have size in `{s−1, s}` or in `{s, s+1}`, and the remainder must split into parts
   of those sizes. When `m = 0` there is no size-`s` part and the condition is simply that the
-  remainder partition is itself an equipartition. **No numerical threshold characterizes
-  feasibility**: `|R| ≥ s − 1` or `|R| ≥ s` is not sufficient. Counterexample: one block of
-  size `5` and a remainder of size `7`; `7` is not a sum of parts in `{4, 5}` nor in `{5, 6}`,
+  remainder partition is itself an equipartition. **The proposed lower-bound conditions are
+  insufficient**: `|R| ≥ s − 1` or `|R| ≥ s` does not give feasibility. Counterexample: one block
+  of size `5` and a remainder of size `7`; `7` is not a sum of parts in `{4, 5}` nor in `{5, 6}`,
   so no retaining completion of this input is an equipartition, although `7 ≥ 5`. Also
   infeasible: one block of size `3` in a four-element carrier, whose remainder is a singleton
-  (`{3, 1}` is not equitable). At the maximal count `|R| = |A| % s < s`, reading (II) is
-  feasible only for `|R| = 0` (`s ∣ |A|`) or `|R| = s − 1` (a single remainder part); in
-  general the numerical existence question (which `|R|` are sums of parts from `{s−1, s}` or
-  `{s, s+1}`) is **deferred** and not stated as a theorem here.
+  (`{3, 1}` is not equitable). At the maximal count with `m > 0`, `|R| = |A| % s < s`, so
+  reading (II) is feasible only for `|R| = 0` (`s ∣ |A|`) or `|R| = s − 1` (a single remainder
+  part); with `m = 0` (for instance `|A| = 1`, `s = 3`) the remainder is the whole carrier and
+  its own equipartition is a retaining completion, whatever `|R|`. The numerical feasibility
+  question (which `|R|` are sums of parts from `{s−1, s}` or `{s, s+1}`) is **deferred** and not
+  stated as a theorem here.
 
-**Scope, by ruling:** the theorem is reading (I) with a free feasible remainder-part count; the
-balanced-whole reading is kept only as a characterization lemma with its correct hypotheses
-(the `m > 0` and `m = 0` clauses), and its numerical existence characterization is deferred
-rather than replaced by a threshold shortcut.
+**Scope, by ruling:** the theorem is reading (I) with a free feasible remainder-part count
+(`1 ≤ p' ≤ |R|`, or `p' = 0` with `R = ∅`); the balanced-whole reading is kept only as a
+characterization lemma with its correct hypotheses (the `m > 0` and `m = 0` clauses), and its
+numerical feasibility characterization is deferred rather than replaced by a lower-bound
+shortcut.
 
 ## 2. Proposed statements
 
@@ -112,9 +115,11 @@ remainder's parts carry **no** density guarantee, and the specification does not
   readings (I) and (II) coincide.
 - `m = 0` (no blocks): the retained partition is `P_R` itself; reading (I) is Mathlib's
   equipartition existence; reading (II) is vacuous about `s`.
-- `0 < |R| < s−1` at the maximal count: reading (I) gives one part of size `|R|` (or `p'`
-  parts); reading (II) is infeasible, and the enlarging completion `exists_equipartition_absorb_leftover`
-  is the alternative when an equipartition is required (at the cost of growing the blocks).
+- `0 < |R| < s−1` at the maximal count **with `m > 0`**: reading (I) gives one part of size
+  `|R|` (or `p'` parts); reading (II) is infeasible, and the enlarging completion
+  `exists_equipartition_absorb_leftover` is the alternative when an equipartition is required
+  (at the cost of growing the blocks). With `m = 0` the same inequality is harmless (the
+  remainder is the carrier; see the zero-block endpoint).
 - `AbsorbLeftover`, `SliceCert`, and every slicing theorem are preserved unchanged.
 
 ## 4. Proposed compiled consumers and tests
@@ -126,8 +131,8 @@ remainder's parts carry **no** density guarantee, and the specification does not
    remainder of size `7`): for **every** partition `P_R` of the remainder, the retained
    partition is not an equipartition. Proof route: by the characterization the remainder parts
    would all have sizes in `{4, 5}` or all in `{5, 6}`, and their sizes sum to `7`, which is
-   impossible in either set (a small arithmetic lemma, `omega` after summing). This pins that no
-   threshold on `|R|` can replace the deferred existence question.
+   impossible in either set (a small arithmetic lemma, `omega` after summing). This pins that
+   the proposed lower-bound conditions are insufficient; numerical feasibility is deferred.
 1c. **The zero-block case** (`m = 0`, `A = R`): `retain B P_R = P_R` up to `parts`, and the
    retained partition is an equipartition iff `P_R` is; with `P_R` from Mathlib's
    `exists_equipartition_card_eq`, it is.
@@ -148,12 +153,14 @@ remainder's parts carry **no** density guarantee, and the specification does not
    its numerical existence characterization is deferred.
 2. The input is an abstract indexed block family `B : Fin m → Finset α`; the `SliceCert`
    adapter is derived.
-3. Still open for the next specification review: the exact form of the characterization's
-   statement (two disjuncts on sizes, or the single condition "all remainder parts within one
-   of `s`" phrased with `Nat` subtraction), and whether the construction should also be offered
-   for a `Finset (Finset α)` family to match `AbsorbLeftover`'s interface.
+3. The characterization is stated with the **two global size-band disjuncts** as written in §2
+   (all remainder parts in `{s−1, s}`, or all in `{s, s+1}`); the single condition "every
+   remainder part within one of `s`" is insufficient, since sizes `s−1` and `s+1` are each within
+   one of `s` but differ by two. A `Finset (Finset α)` variant of the input is deferred until
+   needed.
 
-This document needs another specification review before any signature is frozen.
+**Status after review: specification approved; no Lean implementation authorized by this
+approval.**
 
 The per-type supply completion of #183 (item i) is not touched by any of this; its condition
 remains unwritten and it stays open.
