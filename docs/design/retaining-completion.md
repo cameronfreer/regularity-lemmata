@@ -46,21 +46,31 @@ enlarged. This is the distinction from `AbsorbLeftover`, where the conclusion is
   for every `1 ≤ p' ≤ |R|`, and for `R = ∅` with `p' = 0`. The whole partition is in general
   **not** an equipartition.
 - **(II) Balanced whole.** The whole partition is an equipartition of `A` with the blocks
-  retained. Since the blocks have size `s`, every part must have size in `{s−1, s}` or in
-  `{s, s+1}`, so the remainder must split into parts of those sizes. **Feasibility:** `|R| = 0`,
-  or `|R|` is a sum of parts each in `{s−1, s}` (that is, `|R| ≥ s−1` when `s ≥ 2`, with the
-  parts chosen by division), or a sum of parts in `{s, s+1}` (that is, `|R| ≥ s`). In particular
-  a remainder with `0 < |R| < s−1` is **infeasible** for reading (II): retaining one block of
-  size `3` in a four-element carrier leaves a singleton, and `{3, 1}` is not equitable (the
-  review's example). At the maximal count, `|R| = |A| % s < s`, so reading (II) is feasible only
-  for `|R| = 0` (that is, `s ∣ |A|`) or `|R| = s−1` (a single remainder part).
+  retained. When there is at least one block (`m > 0`), the blocks have size `s`, so every
+  part must have size in `{s−1, s}` or in `{s, s+1}`, and the remainder must split into parts
+  of those sizes. When `m = 0` there is no size-`s` part and the condition is simply that the
+  remainder partition is itself an equipartition. **No numerical threshold characterizes
+  feasibility**: `|R| ≥ s − 1` or `|R| ≥ s` is not sufficient. Counterexample: one block of
+  size `5` and a remainder of size `7`; `7` is not a sum of parts in `{4, 5}` nor in `{5, 6}`,
+  so no retaining completion of this input is an equipartition, although `7 ≥ 5`. Also
+  infeasible: one block of size `3` in a four-element carrier, whose remainder is a singleton
+  (`{3, 1}` is not equitable). At the maximal count `|R| = |A| % s < s`, reading (II) is
+  feasible only for `|R| = 0` (`s ∣ |A|`) or `|R| = s − 1` (a single remainder part); in
+  general the numerical existence question (which `|R|` are sums of parts from `{s−1, s}` or
+  `{s, s+1}`) is **deferred** and not stated as a theorem here.
 
-Reading (I) is always feasible and is what "retaining exact-size pieces while distributing the
-remaining elements" can promise unconditionally; reading (II) needs the feasibility condition as
-a hypothesis. **This document proposes (I) as the theorem and (II) as a separate
-characterization lemma**, and records that choice as open (§5).
+**Scope, by ruling:** the theorem is reading (I) with a free feasible remainder-part count; the
+balanced-whole reading is kept only as a characterization lemma with its correct hypotheses
+(the `m > 0` and `m = 0` clauses), and its numerical existence characterization is deferred
+rather than replaced by a threshold shortcut.
 
 ## 2. Proposed statements
+
+**Input shape, by ruling.** The construction takes an **abstract indexed block family**
+`B : Fin m → Finset α` with `∀ j, B j ⊆ A`, `∀ j, |B j| = s`, pairwise disjointness for `i ≠ j`,
+and `0 < s`; the `SliceCert` adapter (feeding `cert.block` with `cert.block_subset`,
+`cert.block_card`, `cert.block_disjoint`) is derived from it, so the slicing theorems compose
+without a second construction.
 
 **Construction.** Given the blocks and any partition `P_R : Finpartition R`, the retained
 partition `retain B P_R : Finpartition A` has `parts = (univ.image B) ∪ P_R.parts` (disjoint
@@ -81,10 +91,14 @@ block with `m + p'` parts, remainder part sizes in `{|R| / p', |R| / p' + 1}`, a
 the remainder larger than `|R| / p' + 1`. Corollary at the maximal count with `p' = 1` (when
 `R ≠ ∅`): one remainder part of size `|A| % s < s`.
 
-**Reading (II), characterization.** For the retained partition with remainder parts `P_R`:
-`(retain B P_R).IsEquipartition ↔ ∀ p ∈ P_R.parts, |p| ∈ {s−1, s} ∨ ∀ p ∈ P_R.parts, |p| ∈ {s, s+1}`
-(with the empty remainder trivially satisfying it). A feasibility lemma: such a `P_R` exists iff
-`|R| = 0 ∨ (s ≥ 2 ∧ s−1 ≤ |R|) ∨ s ≤ |R|`, with the parts produced by division with remainder.
+**Reading (II), characterization (with its correct hypotheses).** For the retained partition
+with remainder parts `P_R`:
+- if `m > 0`: `(retain B P_R).IsEquipartition ↔ (∀ p ∈ P_R.parts, |p| ∈ {s−1, s}) ∨ (∀ p ∈ P_R.parts, |p| ∈ {s, s+1})`
+  (the empty remainder satisfies both sides);
+- if `m = 0`: `(retain B P_R).IsEquipartition ↔ P_R.IsEquipartition` (there is no size-`s` part).
+
+No existence lemma for such a `P_R` is proposed; the numerical characterization of the
+representable remainder sizes is deferred (§1).
 
 **Density transport.** Composing with `exists_balanced_slicing` (or the threshold wrapper): the
 retained blocks are the certificate's blocks as sets, so every density guarantee
@@ -105,9 +119,18 @@ remainder's parts carry **no** density guarantee, and the specification does not
 
 ## 4. Proposed compiled consumers and tests
 
-1. **The review's example** (`α = Fin 4`, one block `{0,1,2}`, `s = 3`): reading (I) with
-   `p' = 1` gives the partition `{{0,1,2}, {3}}`, the block retained, `2` parts; the
+1. **The review's first example** (`α = Fin 4`, one block `{0,1,2}`, `s = 3`): reading (I)
+   with `p' = 1` gives the partition `{{0,1,2}, {3}}`, the block retained, `2` parts; the
    characterization shows it is **not** an equipartition (`|{3}| = 1 ∉ {2, 3}`), by `decide`.
+1b. **The size-5, remainder-7 counterexample** (`α = Fin 12`, one block `{0,…,4}`, `s = 5`,
+   remainder of size `7`): for **every** partition `P_R` of the remainder, the retained
+   partition is not an equipartition. Proof route: by the characterization the remainder parts
+   would all have sizes in `{4, 5}` or all in `{5, 6}`, and their sizes sum to `7`, which is
+   impossible in either set (a small arithmetic lemma, `omega` after summing). This pins that no
+   threshold on `|R|` can replace the deferred existence question.
+1c. **The zero-block case** (`m = 0`, `A = R`): `retain B P_R = P_R` up to `parts`, and the
+   retained partition is an equipartition iff `P_R` is; with `P_R` from Mathlib's
+   `exists_equipartition_card_eq`, it is.
 2. **A feasible balanced whole** (`α = Fin 6`, blocks `{0,1}, {2,3}`, `s = 2`, remainder
    `{4,5}` as one part): the retained partition `{{0,1},{2,3},{4,5}}` is an equipartition, by
    `decide`.
@@ -118,15 +141,19 @@ remainder's parts carry **no** density guarantee, and the specification does not
 4. **`R = ∅`**: `α = Fin 4`, blocks `{0,1}, {2,3}`: the retained partition equals the block
    family and is an equipartition.
 
-## 5. Open choices presented, not resolved
+## 5. Choices, as ruled, and what stays open
 
-1. Whether the theorem is reading (I) with reading (II) as a characterization (proposed), or
-   reading (II) alone under its feasibility hypothesis.
-2. Whether the input is a `SliceCert` (blocks as `Fin m → Finset α` with the certificate's
-   fields) or an abstract block family `Finset (Finset α)` as in `AbsorbLeftover`; the former
-   composes directly with slicing, the latter matches the enlarging theorems' interface. Both
-   could be offered, one derived from the other.
-3. Whether `p'` is a free parameter (proposed) or fixed to `1` at the maximal count.
+1. The theorem is reading (I), balanced remainder, with a free feasible remainder-part count
+   `p'`; reading (II) is a characterization lemma only, with the `m > 0` / `m = 0` clauses, and
+   its numerical existence characterization is deferred.
+2. The input is an abstract indexed block family `B : Fin m → Finset α`; the `SliceCert`
+   adapter is derived.
+3. Still open for the next specification review: the exact form of the characterization's
+   statement (two disjuncts on sizes, or the single condition "all remainder parts within one
+   of `s`" phrased with `Nat` subtraction), and whether the construction should also be offered
+   for a `Finset (Finset α)` family to match `AbsorbLeftover`'s interface.
+
+This document needs another specification review before any signature is frozen.
 
 The per-type supply completion of #183 (item i) is not touched by any of this; its condition
 remains unwritten and it stays open.
