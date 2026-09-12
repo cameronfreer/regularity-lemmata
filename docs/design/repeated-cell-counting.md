@@ -59,8 +59,7 @@ Elementary laws to be proved with it:
 - **Insufficient capacity.** If some `m_A(C) > |A|` then `(|A|)_{m_A(C)} = 0` and
   `placementCount Q C = 0`; no injective placement exists.
 - **Empty pattern.** For `W` empty every multiplicity `m_A(C)` is `0`, so every factor
-  `(|A|)_0` is `1` and `placementCount Q C = 1` (the product over cells is not empty; each of its
-  factors is).
+  `(|A|)_0` is `1` and `placementCount Q C = 1`.
 - **Sum over all assignments.** `∑_{C : W → Q.parts} placementCount Q C = (|s|)_{|W|}`, the
   number of injective tuples in `s` (`card_injectiveTuplesOn`); this is the all-placement
   counterpart of `sum_cellTupleVolume_eq : ∑_T cellTupleVolume T = |s|^k`.
