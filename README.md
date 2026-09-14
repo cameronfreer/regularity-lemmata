@@ -46,14 +46,14 @@ prevents closed questions from being reopened silently. These modules live under
 separate umbrella `RegularityLemmataGates` — built and audited by the same CI, directly
 importable by module name, but not pulled in by `import RegularityLemmata`.
 
-## Proved summits and major entry points
+## Main theorems and entry points
 
-The declarations to reach for, and the module each lives in. A summit's constants are visible
-in its statement. The final two rows are entry points rather than regularity summits —
-balanced slicing is a sampling theorem, and the indivisible-approximation theorem takes its
-partition as an input.
+The declarations to reach for, and the module each lives in. Every bound is visible in the
+statement. The final two rows are entry points rather than regularity theorems: balanced
+slicing is a sampling theorem, and the indivisible-approximation theorem takes its partition as
+an input.
 
-| Summit | Declaration | Module |
+| Theorem | Declaration | Module |
 | --- | --- | --- |
 | Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
 | Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
@@ -64,6 +64,8 @@ partition as an input.
 | Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
 | Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
 | Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
+| Rectangular Frieze–Kannan step partition: separate left and right part bounds, uniform cut discrepancy | `rect_frieze_kannan_cutDiscrepancy` | `Partition.RectKernelFriezeKannan` |
+| Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | `kernel_frieze_kannan_cutDecomposition` | `Finite.RectKernelCutDecomposition` |
 | Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
 | Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
 
@@ -89,8 +91,9 @@ Five curated **facades** import a stack whole:
   with count transfer, and the approximation-to-counting aggregation bridge.
 - `RegularityLemmata.FiniteRamsey` — the independent finite Ramsey APIs: multicolour Ramsey for
   ordered-pair colourings, finite full binary trees as words, arbitrary-root subtree embeddings
-  and their proper extensions through the leaf level, and the additive two-colour subtree
-  theorem.
+  and their proper extensions through the leaf level, and the additive subtree theorems: two
+  colours at host height `a + b + 1`, `m` colours at `(∑ tᵢ) + 1`, and the equal-height form
+  at `m·t + 1`.
 - `RegularityLemmata.ProductSpaces` — the heterogeneous weighted-box stack: raw weights and
   masses, boxes and their tuples, predicate mass and guard-free density, independent coordinate
   partitions with exact cell decompositions, finite unions with a weighted symmetric-difference
@@ -134,7 +137,7 @@ CI enforces the repository's proof and axiom policies on every commit.
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes, aggregated from the GitHub Releases, newest first. |
 | [Generated API documentation](https://cameronfreer.github.io/regularity-lemmata/docs/) | doc-gen4 pages on GitHub Pages, one directory per version: `docs/latest/` follows the newest release, `docs/main/` is the most recently published documentation snapshot of `main` (the workflow runs on releases and on manual dispatch), and every module has a page at `docs/<version>/RegularityLemmata/<Dir>/<File>.html`; the build recipe is `docbuild/`. |
-| [`docs/design/`](docs/design/) | Design documents for work that is not yet a theorem, including its permanent obstruction gates. |
+| [`docs/design/`](docs/design/) | Design records, each with a status banner: implemented (with links to the declarations), approved but not implemented, or deferred (with its permanent obstruction gates). |
 | [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
 | [`SECURITY.md`](SECURITY.md) | Reporting policy. |

@@ -1,9 +1,14 @@
 # Design: generic approximation-to-counting and edit transfer
 
-Work in progress. Nothing here is a theorem; theorems live in the library and their conventions
-in [`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document is the audit-and-freeze deliverable
-for issue #84. It records what already exists, what each version actually proves, and the
-interface decisions — **no implementation**.
+**Status: implemented** (v0.7.0). The three interfaces frozen here are `FiniteRelModel.quotient`
+with `quotientInducedCount` (`RegularityLemmata/Relational/Indivisible.lean`), the count transfer
+`abs_inducedEmbeddingCountOn_sub_le_editMass` (`RegularityLemmata/Relational/Edit.lean`), and the
+composite `abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound` with the
+aggregation bridge `abs_inducedEmbeddingCountOn_sub_sum_est_le`
+(`RegularityLemmata/Relational/AggregationBridge.lean`); merged as PRs #149–#153 and #155 under
+tracker #148 for issue #84. Kept as the record of the audit and the interface decisions; the
+sections below are as frozen, with no retroactive edits. Conventions are in
+[`ARCHITECTURE.md`](../../ARCHITECTURE.md).
 
 The issue promises three user-facing interfaces, and this document freezes all three — the
 **boxwise-constant quotient** with its exact counting relationship (§7), the **edit transfer**

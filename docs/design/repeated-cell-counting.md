@@ -1,7 +1,8 @@
 # Repeated-cell counting: specification of the extension to induced counting over a partition
 
-**Status: specification for review. No theorem signature is frozen until this document is
-approved; no Lean implementation accompanies it.** Companion to issue #181 (audit 5d) and to
+**Status: approved specification (PR #190, 2026-09-12); not implemented.** The approval fixes the
+counting contract below; it authorizes no Lean implementation by itself, and the edit-transfer
+options of §4 stay outside any implementation. Companion to issue #181 (audit 5d) and to
 `docs/design/approximation-to-counting.md`. Everything below is stated in this repository's
 existing definitions and audit findings; where a choice remains open it is presented as a
 choice, not resolved by an outside requirement.
