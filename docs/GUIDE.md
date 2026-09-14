@@ -7,22 +7,57 @@ the release named in each section; it designs nothing. Conventions are in
 the theorem statements themselves are the authority whenever this text is coarser than they are.
 
 Every declaration named below is reachable from `import RegularityLemmata` (the public root)
-unless it is marked *gates umbrella*. Generated pages for every module live at
-<https://cameronfreer.github.io/regularity-lemmata/docs/>: `latest/` follows the newest
-release, `main/` is the most recently published documentation snapshot of `main` (the
-workflow runs on releases and on manual dispatch, not on every push), and a module `Dir/File`
-is at
-`docs/<version>/RegularityLemmata/Dir/File.html` (for example
-[`Finite/RectKernelCutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/main/RegularityLemmata/Finite/RectKernelCutDecomposition.html)),
-with declaration search on each version's `search.html`. Where a curated facade bundles a stack, the facade is
-named, because importing it is the advertised way in.
+unless it is marked as living under the gates umbrella (§ Open campaigns). Generated pages for
+every module live at <https://cameronfreer.github.io/regularity-lemmata/docs/>: `latest/` follows the newest release, `main/` is the most recently
+published documentation snapshot of `main` (the workflow runs on releases and on manual
+dispatch, not on every push), and a module `Dir/File` is at
+`docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
+`search.html`. Links in this guide point at the **v0.11.0** pages for released material; the
+section "On `main`, not yet released" is the only one that points at `main/`. Where a curated
+facade bundles a stack, the facade is named, because importing it is the advertised way in.
+
+## Contents
+
+- [Start here, by task](#start-here-by-task)
+- [House vocabulary](#house-vocabulary)
+- [What can I reuse, by release?](#what-can-i-reuse-by-release)
+- [On `main`, not yet released](#on-main-not-yet-released)
+- [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
+- [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
+- [Part III. Weighted kernels: two different outputs](#part-iii-weighted-kernels-two-different-outputs)
+- [Part IV. Which counting and removal theorems exist](#part-iv-which-counting-and-removal-theorems-exist)
+- [The five facades](#the-five-facades)
+- [Independent tools](#independent-tools)
+- [Open campaigns (not reusable yet)](#open-campaigns-not-reusable-yet)
+
+## Start here, by task
+
+- **I have a directed relation or a finite family of them and want a regular partition.**
+  [`exists_regular_refinement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/Regularity.html#RegularityLemmata.exists_regular_refinement)
+  for one relation; [`exists_familyRegular_equipartition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/EquitableFamilyRegularity.html#RegularityLemmata.exists_familyRegular_equipartition)
+  for a family with an equitable output; [`exists_familyStrongWitness`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/FamilyStrong.html#RegularityLemmata.exists_familyStrongWitness)
+  for a strong (energy-gap) witness. Part IV.
+- **I have a weighted matrix or kernel and want a low-complexity approximation.**
+  [`rect_frieze_kannan_cutDiscrepancy`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Partition/RectKernelFriezeKannan.html#RegularityLemmata.rect_frieze_kannan_cutDiscrepancy)
+  for a step partition, [`kernel_frieze_kannan_cutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Finite/RectKernelCutDecomposition.html#RegularityLemmata.kernel_frieze_kannan_cutDecomposition)
+  for a sum of few rectangles; import `RegularityLemmata.Kernel`. Part III.
+- **I want to count induced copies of a small pattern in a finite relational model.**
+  Exact characterizations on two and three vertices, the three-vertex estimate against a strong
+  witness, and counting from a cellwise approximation at any arity. Part IV.
+- **I want equal-size blocks on which given sets keep their density.**
+  [`exists_balanced_slicing`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Partition/BalancedSlicing.html#RegularityLemmata.exists_balanced_slicing)
+  and its named-parameter wrapper (on `main`). Part II.
+- **I want to move between an ordinary graph or hypergraph and this library's objects.**
+  The adapters `Relational/GraphAdapter`, `Relational/HypergraphAdapters`, `Relational/GraphCounting`,
+  and `Graph/RemovalBridge` (the one removal theorem, mathlib's). Part IV.
+- **I only need a finite Ramsey theorem, a forecaster, or density buckets.** Independent tools.
 
 ## House vocabulary
 
 - **Summit.** A major theorem whose constants are visible in its statement, so it can be
-  instantiated and its bounds inspected. The README's summit table lists them; two of its rows
-  (balanced slicing, indivisible approximation) are *entry points* rather than regularity
-  summits, because the first is a sampling theorem and the second takes its partition as input.
+  instantiated and its bounds inspected. The README's main-theorem table lists them; two of its
+  rows (balanced slicing, indivisible approximation) are *entry points* rather than regularity
+  theorems, because the first is a sampling theorem and the second takes its partition as input.
 - **Gate.** A module that keeps counterexamples, impossibility results, and feasibility probes
   machine-checked, so that a rejected interface cannot be reopened silently. Gates carry
   identifiers (`G1`, `G-S1`, `G-H2a`, …). The word is also used for the review process: a
@@ -69,6 +104,23 @@ named, because importing it is the advertised way in.
 
 The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
 tag, because `main` moves between tags.
+
+## On `main`, not yet released
+
+Merged after v0.11.0 and documented here so that nobody pins v0.11.0 and looks for them there;
+they will appear in the next release's row above. Links point at the `main/` documentation
+snapshot, which may lag `main` itself.
+
+- [`exists_balanced_slicing_of_threshold`](https://cameronfreer.github.io/regularity-lemmata/docs/main/RegularityLemmata/Partition/SlicingThreshold.html#RegularityLemmata.exists_balanced_slicing_of_threshold)
+  and `exists_balanced_slicing_of_threshold_self` (`Partition/SlicingThreshold`): balanced slicing
+  at the named parameters with every side condition discharged; the zero-block case documented,
+  the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
+- `examples/CompositionCertificates.lean`: the compatibility check and the prescribed-error
+  endpoint chaining strong-witness existence with three-vertex counting.
+- Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
+  `docs/design/retaining-completion.md`; no declaration exists for either yet.
+- The non-implications list (Part IV) and the wording corrections of the proper-embedding
+  documentation.
 
 ## Part I. Counts, densities, edits, diagonals
 
@@ -329,6 +381,46 @@ should be read as the second.
 - An embedding example that fails a stronger constraint (a tree embedding with the root moved
   or depth changed) shows what the structure allows; it is not a proof that no monochromatic
   embedding satisfies the stronger constraint, which would need a colouring counterexample.
+
+## The five facades
+
+Each facade imports a curated stack and defines nothing; every listed module remains directly
+importable, and direct imports of a module are as advertised as the facade.
+
+- `RegularityLemmata.Kernel`: the rectangular weighted-kernel layer (raw weights, kernels,
+  relation and rectangle indicators, the partition-free cut norm, one-variable averages and
+  almost-constancy, stepping, energy and the refinement-variance identity, cut discrepancy, the
+  Frieze–Kannan step-partition theorem, and the cut-matrix decomposition). Three of the
+  examples compile against this facade alone.
+- `RegularityLemmata.FiniteSetSystems`: heterogeneous relation fibers, finite trace families,
+  mathlib's VC dimension under restriction, support-sensitive Sauer–Shelah bounds, and
+  polynomial bounded-subset estimates.
+- `RegularityLemmata.RelationalApproximation`: homogeneous cells, finite relational models,
+  indivisibility, cellwise edit bounds with the majority-rounding theorems, the edit calculus
+  with count transfer, and the approximation-to-counting aggregation bridge.
+- `RegularityLemmata.FiniteRamsey`: multicolour Ramsey for ordered-pair colourings, finite full
+  binary trees as words, arbitrary-root subtree embeddings and their proper extensions, and the
+  additive subtree theorems (two colours at host height `a + b + 1`, `m` colours at
+  `(∑ tᵢ) + 1`, the equal-height form at `m·t + 1`).
+- `RegularityLemmata.ProductSpaces`: raw weights and masses, boxes and their tuples, predicate
+  mass and guard-free density, independent coordinate partitions with exact cell decompositions,
+  finite unions with a weighted symmetric-difference error, and the coordinate-split adapter.
+
+For the substrate rather than the theorems: `Finite.Tuple`, `Finite.Injective`, `Finite.Density`
+for counting, densities, and edits; `Partition.Basic` and `Partition.BlockEnergy` for partitions
+and weighted energy; `Relational.Language` for the finite relational layer.
+
+## Areas at a glance
+
+| Area | Public capability |
+| --- | --- |
+| **Finite foundations** | Tuple boxes, injective counts, densities, edits, homogeneous rectangles and `n`-index cell boxes, dependent coordinate splits, relation fibers and trace families with support-sensitive VC and Sauer–Shelah estimates, abstract weighted selection. |
+| **Partitions and sampling** | Equitable refinements, weighted block energy, hypergeometric tails by exact binomial moments, balanced slicing, average-preserving slicing and common blocks with named thresholds and geometric races, leftover and chunk absorption into equipartitions. |
+| **Weighted kernels** | Heterogeneous rectangular kernels with raw carrier weights: sums and averages, restriction, transpose, relation indicators, stepping over independent partitions, energy with the exact refinement-variance identity, residuals, cut discrepancy, the cut-norm contraction of stepping with constant 1, the partition-free cut norm, and the cut-matrix decomposition. |
+| **Graphs** | Directed pair regularity, weak and strong regularity, equitable finite-family regularity, path and triangle counting, graph-removal bridges. |
+| **Hypergraphs** | Uniform and colored vocabulary, copy counts, polyads and disc regularity, weak and edited triadic approximations. |
+| **Relational structures** | Computable finite relational models, transports, counts, edits, binary-palette regularity, three-vertex induced counting, indivisibility with the quotient reading and exact nullary compatibility, cellwise edit bounds with a computable majority rounding whose box-level edit count is computed exactly. |
+| **Adapters** | Bridges to mathlib's `SimpleGraph` and to this library's uniform and colored hypergraphs. |
 
 ## Independent tools
 
