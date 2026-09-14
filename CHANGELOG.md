@@ -47,7 +47,7 @@ Axiom audit: standard axioms only, over `4069` audited declarations (an audit co
 
 ### Not in this release
 
-Bounded-union polyads, regular-complex and counting machinery over the decomposition, relational induced removal, and the API audits of the release-readiness plan. The Zenodo DOI per tag is outstanding until the integration is verified.
+Bounded-union polyads, regular-complex and counting machinery over the decomposition, relational induced removal, and the API audits of the release-readiness plan.
 
 ## v0.10.0 (2026-09-06)
 

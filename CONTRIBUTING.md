@@ -16,7 +16,7 @@ that license. Add the standard SPDX header to new files.
 1. Fork the repository and create a topic branch from `main`.
 2. Make your changes following the per-unit cadence below.
 3. Open a pull request. CI runs `bash scripts/check.sh`; it must pass.
-4. Maintainers review; once approved, the PR is merged without history rewriting.
+4. Maintainers review; once approved, the PR is squash-merged onto `main`. Published history on `main` is never rewritten; the squash is the one commit the branch becomes.
 
 ## Public API impact
 
@@ -76,9 +76,12 @@ Four surfaces, four triggers. Keeping them separate is what stops any of them fr
 - **`PROVENANCE.md`** — update when an **intellectual dependency or adaptation claim**
   changes: a new antecedent, or a change in what is borrowed versus what is not.
 
-- **`docs/design/*.md`** — one document per target that is not yet a theorem: goal, fixed
-  normalizations, proved inputs, current construction, permanent obstruction gates, open
-  certificates, non-goals. A rejected route is recorded there once, by its mathematical
+- **`docs/design/*.md`** — one document per design target, each opening with a status banner
+  (implemented, with links to the declarations; approved but not implemented; or deferred): goal,
+  fixed normalizations, proved inputs, current construction, permanent obstruction gates, open
+  certificates, non-goals. An implemented record keeps the historical design as frozen; factual
+  corrections and status updates (the banner, links to what merged) are made in place, and a
+  changed contract gets a new record rather than a rewritten one. A rejected route is recorded there once, by its mathematical
   obstruction. Do not transfer chronology into it; Git history and issues already preserve
   the order of discovery.
 

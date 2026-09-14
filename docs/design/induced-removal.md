@@ -1,7 +1,11 @@
 # Design: relational induced removal (three vertices)
 
-Work in progress. Nothing here is a theorem; theorems live in the library and their
-conventions in [`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document records the target,
+**Status: deferred; not implemented.** No relational induced-removal theorem exists in the
+library, and none is scheduled. What is machine-checked is the set of obstruction gates under the
+gates umbrella ([`Relational/InducedRemovalGates.lean`](../../RegularityLemmata/Relational/InducedRemovalGates.lean) and the proxy and
+transversalization modules listed in [`RegularityLemmataGates.lean`](../../RegularityLemmataGates.lean)); the guide's boundary section
+states the consequence for consumers. Conventions are in
+[`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document records the target,
 what is fixed, what is proved, what is currently being built, what has been ruled out, and
 what is still owed.
 

@@ -1,14 +1,16 @@
 # Cut-matrix decomposition: audit and interface proposal (#71, tranche 9)
 
-**Status: implemented.** The frozen interface of §3 is `kernel_frieze_kannan_cutDecomposition`
-in `RegularityLemmata/Finite/RectKernelCutDecomposition.lean` (with the `CutIterInv` invariant,
-`cutIterInv_step`, and the normalized and `op` corollaries); the substrate landed as
-`rectSqMass`, `rectIndicator`, `rectCombination`, the decrement identities, and the coefficient
-bound in `Finite/RectKernel.lean` and `Finite/RelationKernel.lean`, and the partition-free cut
-norm as `Finite/RectKernelCutNorm.lean`, bridged to the step-partition summit by
-`rectCutDiscrepancy_eq_rectCutNorm_rectResidual` in `Partition/RectKernelCut.lean`. Three
-worked specializations are compiled under `examples/`. Kept as the record of the audit and
-the decisions; the sections below are as frozen, with no retroactive edits.
+**Status: implemented** (v0.11.0). The frozen interface of §3 is `kernel_frieze_kannan_cutDecomposition`
+in [`Finite/RectKernelCutDecomposition.lean`](../../RegularityLemmata/Finite/RectKernelCutDecomposition.lean) (with the
+private iteration invariant and step, and the normalized and `op` corollaries); the substrate landed
+as `rectSqMass`, `rectIndicator`, `rectCombination`, the decrement identities, and the coefficient
+bound in [`Finite/RectKernel.lean`](../../RegularityLemmata/Finite/RectKernel.lean) and
+[`Finite/RelationKernel.lean`](../../RegularityLemmata/Finite/RelationKernel.lean), and the partition-free cut norm as
+[`Finite/RectKernelCutNorm.lean`](../../RegularityLemmata/Finite/RectKernelCutNorm.lean), bridged to the step-partition
+summit by `rectCutDiscrepancy_eq_rectCutNorm_rectResidual` in
+[`Partition/RectKernelCut.lean`](../../RegularityLemmata/Partition/RectKernelCut.lean). Three worked specializations are
+compiled under [`examples/`](../../examples/). Kept as the record of the audit and the decisions;
+the sections below are the design as frozen.
 
 The last open item of #71. `Partition/RectKernelFriezeKannan.lean` delivered the
 **step-partition summit** (`rect_frieze_kannan_cutDiscrepancy`, design freeze

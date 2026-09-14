@@ -1,7 +1,14 @@
 # Design: rectangular weighted finite kernels and cut discrepancy
 
-Work in progress. Nothing here is a theorem; theorems live in the library and their
-conventions in [`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document records the target,
+**Status: implemented** (v0.2.0–v0.3.0 for items 1–2, v0.11.0 for item 3). The rectangular
+weighted-kernel substrate and the parallel-axis identities are [`Finite/RectKernel.lean`](../../RegularityLemmata/Finite/RectKernel.lean),
+[`Partition/RectKernel.lean`](../../RegularityLemmata/Partition/RectKernel.lean), [`Partition/RectKernelEnergy.lean`](../../RegularityLemmata/Partition/RectKernelEnergy.lean);
+the step-partition summit `rect_frieze_kannan_cutDiscrepancy` is [`Partition/RectKernelFriezeKannan.lean`](../../RegularityLemmata/Partition/RectKernelFriezeKannan.lean)
+with the cut file [`Partition/RectKernelCut.lean`](../../RegularityLemmata/Partition/RectKernelCut.lean); the cut-matrix
+decomposition (item 3 of §6) is recorded in [`cut-matrix-decomposition.md`](cut-matrix-decomposition.md)
+and implemented in [`Finite/RectKernelCutDecomposition.lean`](../../RegularityLemmata/Finite/RectKernelCutDecomposition.lean).
+Issue #71 is closed. Kept as the record of the design; the sections below are the design as frozen. Conventions are in
+[`ARCHITECTURE.md`](../../ARCHITECTURE.md). This document records the target,
 what is fixed, what has been checked, and where the quantitative seams are.
 
 This is the design freeze for issue #71. Its purpose is to fix the definitions **before**

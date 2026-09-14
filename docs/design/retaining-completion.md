@@ -1,7 +1,9 @@
 # Retaining completion: specification of completing a family of exact-size blocks to a partition
 
-**Status: specification for review. No theorem signature is frozen until this document is
-approved; no Lean implementation accompanies it.** Companion to issue #183 (audit 5c, item ii).
+**Status: approved specification (PR #191, 2026-09-12); not implemented.** The approval fixes the
+contract below (reading (I) with a free feasible remainder-part count; the balanced-whole
+characterization with its correct hypotheses; numerical feasibility deferred); it authorizes no
+Lean implementation by itself. Companion to issue #183 (audit 5c, item ii).
 The supply-constrained completion (audit 5c, item i) is **not** specified here and stays open.
 Everything below uses this repository's definitions and the audit findings; open choices are
 presented as choices.
@@ -159,8 +161,6 @@ remainder's parts carry **no** density guarantee, and the specification does not
    one of `s` but differ by two. A `Finset (Finset α)` variant of the input is deferred until
    needed.
 
-**Status after review: specification approved; no Lean implementation authorized by this
-approval.**
 
 The per-type supply completion of #183 (item i) is not touched by any of this; its condition
 remains unwritten and it stays open.
