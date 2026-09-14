@@ -1,13 +1,13 @@
 # Design: generic approximation-to-counting and edit transfer
 
 **Status: implemented** (v0.7.0). The three interfaces frozen here are `FiniteRelModel.quotient`
-with `quotientInducedCount` (`RegularityLemmata/Relational/Indivisible.lean`), the count transfer
-`abs_inducedEmbeddingCountOn_sub_le_editMass` (`RegularityLemmata/Relational/Edit.lean`), and the
+with `quotientInducedCount` ([`Relational/Indivisible.lean`](../../RegularityLemmata/Relational/Indivisible.lean)), the count transfer
+`abs_inducedEmbeddingCountOn_sub_le_editMass` ([`Relational/Edit.lean`](../../RegularityLemmata/Relational/Edit.lean)), and the
 composite `abs_inducedEmbeddingCountOn_sub_quotientInducedCount_le_of_cellwiseEditBound` with the
 aggregation bridge `abs_inducedEmbeddingCountOn_sub_sum_est_le`
-(`RegularityLemmata/Relational/AggregationBridge.lean`); merged as PRs #149–#153 and #155 under
+([`Relational/AggregationBridge.lean`](../../RegularityLemmata/Relational/AggregationBridge.lean)); merged as PRs #149–#153 and #155 under
 tracker #148 for issue #84. Kept as the record of the audit and the interface decisions; the
-sections below are as frozen, with no retroactive edits. Conventions are in
+sections below are the design as frozen. Conventions are in
 [`ARCHITECTURE.md`](../../ARCHITECTURE.md).
 
 The issue promises three user-facing interfaces, and this document freezes all three — the

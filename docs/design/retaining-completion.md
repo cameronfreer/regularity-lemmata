@@ -161,7 +161,6 @@ remainder's parts carry **no** density guarantee, and the specification does not
    one of `s` but differ by two. A `Finset (Finset α)` variant of the input is deferred until
    needed.
 
-(Status is stated once, at the top of this document.)
 
 The per-type supply completion of #183 (item i) is not touched by any of this; its condition
 remains unwritten and it stays open.

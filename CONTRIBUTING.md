@@ -79,7 +79,9 @@ Four surfaces, four triggers. Keeping them separate is what stops any of them fr
 - **`docs/design/*.md`** — one document per design target, each opening with a status banner
   (implemented, with links to the declarations; approved but not implemented; or deferred): goal,
   fixed normalizations, proved inputs, current construction, permanent obstruction gates, open
-  certificates, non-goals. An implemented record stays as frozen, with no retroactive edits. A rejected route is recorded there once, by its mathematical
+  certificates, non-goals. An implemented record keeps the historical design as frozen; factual
+  corrections and status updates (the banner, links to what merged) are made in place, and a
+  changed contract gets a new record rather than a rewritten one. A rejected route is recorded there once, by its mathematical
   obstruction. Do not transfer chronology into it; Git history and issues already preserve
   the order of discovery.
 
