@@ -11,12 +11,17 @@ full SHA. The release checklist rebuilds the fixture against the actual release 
 copy outside the repository:
 
 ```
-dir=$(mktemp -d -p /home/freer/scratch/tmp consumer-check-XXXX) && cp -r consumer/. "$dir" && cd "$dir"
+# SCRATCH_DIR must be a disk-backed directory; the build downloads the mathlib cache (several GB)
+: "${SCRATCH_DIR:?Set SCRATCH_DIR to a disk-backed directory}"
+dir=$(mktemp -d -p "$SCRATCH_DIR" consumer-check-XXXX) && cp -r consumer/. "$dir" && cd "$dir"
 sed -i 's/^rev = .*/rev = "<release commit, full SHA>"/' lakefile.toml
 rm -f lake-manifest.json && lake update && lake exe cache get && lake build
 python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='RegularityLemmata'])"
 ```
 
+`SCRATCH_DIR` is required: point it at a directory on a disk with room for the dependency
+cache. A RAM-backed temporary directory is not suitable for a build of this size.
+
 The printed revision must be the release commit's full SHA. Builds are large (the library's
-imported modules are compiled from source; Mathlib comes from the cache), so keep them outside
+imported modules are compiled from source; mathlib comes from the cache), so keep them outside
 the repository.
