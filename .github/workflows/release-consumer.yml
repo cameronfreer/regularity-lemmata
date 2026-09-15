@@ -1,0 +1,53 @@
+name: Release consumer
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Full release-candidate commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - name: Record exact candidate
+        env:
+          CANDIDATE: ${{ inputs.ref }}
+        run: |
+          [[ "$CANDIDATE" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          echo "candidate=$CANDIDATE"
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/b6cec7e10fe4965a605aaf60d1cb4a5837f0462b/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build separate Git-pinned consumer
+        env:
+          CANDIDATE: ${{ inputs.ref }}
+        run: |
+          fixture=$(mktemp -d "$RUNNER_TEMP/release-consumer.XXXXXX")
+          cp -r consumer/. "$fixture/"
+          cd "$fixture"
+          sed -i "s/^rev = .*/rev = \"$CANDIDATE\"/" lakefile.toml
+          rm -f lake-manifest.json
+          lake update
+          python3 - <<'PY'
+          import json, os
+          packages = json.load(open('lake-manifest.json'))['packages']
+          actual = next(p['rev'] for p in packages if p['name'] == 'RegularityLemmata')
+          assert actual == os.environ['CANDIDATE'], (actual, os.environ['CANDIDATE'])
+          print('resolved_library=' + actual, flush=True)
+          PY
+          lake exe cache get
+          lake build
+          echo 'consumer_exit=0'

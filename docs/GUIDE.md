@@ -13,7 +13,7 @@ published documentation snapshot of `main` (the workflow runs on releases and on
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.11.0** pages for released material; the
-section "On `main`, not yet released" is the only one that points at `main/`. Where a curated
+section "Additions released in v0.12.0" uses source links for newer material. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
@@ -21,7 +21,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 - [Start here, by task](#start-here-by-task)
 - [House vocabulary](#house-vocabulary)
 - [What can I reuse, by release?](#what-can-i-reuse-by-release)
-- [On `main`, not yet released](#on-main-not-yet-released)
+- [Additions released in v0.12.0](#additions-released-in-v0120)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
 - [Part III. Weighted kernels: two different outputs](#part-iii-weighted-kernels-two-different-outputs)
@@ -101,15 +101,16 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 | v0.9.0 | Multicolour tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
 | v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
 | v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
+| v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
 
 The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
 tag, because `main` moves between tags.
 
-## On `main`, not yet released
+## Additions released in v0.12.0
 
-Merged after v0.11.0 and documented here so that nobody pins v0.11.0 and looks for them there;
-they will appear in the next release's row above. Links point at the `main/` documentation
-snapshot, which may lag `main` itself.
+These additions were merged after v0.11.0 and are included in v0.12.0.
+Source links below use `main`; pin v0.12.0 for reproducibility. Older generated
+documentation links above still identify their published documentation version.
 
 - [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/SlicingThreshold.lean)
   and `exists_balanced_slicing_of_threshold_self` (source link; the published `main/`
@@ -124,6 +125,8 @@ snapshot, which may lag `main` itself.
   `docs/design/retaining-completion.md`; no declaration exists for either yet.
 - The non-implications list (Part IV) and the wording corrections of the proper-embedding
   documentation.
+- Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
+- Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).
 
 ## Part I. Counts, densities, edits, diagonals
 
@@ -212,8 +215,8 @@ that every test set of a finite family keeps its density within `β` on every bl
 quantitative hypothesis is a ratio inequality that the consumer discharges; the named
 parameters `sliceBlockSize`, `sliceSlack`, `sliceThreshold` and the two races
 (`slice_sampling_race`, `slice_sampling_race_linear`) discharge it beyond explicit host sizes
-(`Partition/SlicingThreshold`). On `main` and not in v0.11.0 (see
-[On `main`, not yet released](#on-main-not-yet-released)), `exists_balanced_slicing_of_threshold`
+(`Partition/SlicingThreshold`). Since v0.12.0 (see
+[Additions released in v0.12.0](#additions-released-in-v0120)), `exists_balanced_slicing_of_threshold`
 packages the whole thing, so a consumer supplies the carrier, the family, `μ`, `ν`, a family-size
 ceiling, and a host size beyond the threshold, and receives the blocks with every side condition
 discharged. Averages of a `[0,1]`-valued family are controlled within
