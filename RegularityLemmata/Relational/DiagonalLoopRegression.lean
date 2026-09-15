@@ -3,6 +3,7 @@ Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RegularityLemmata.Relational.PatternCounts
+import RegularityLemmata.Relational.UniformPatternCounts
 
 /-!
 # Named diagonal-loop regression
@@ -59,8 +60,36 @@ theorem hom_count_collision_difference :
     homCount (complete 2 false) (complete 3 false) = 6 ∧
       homCount (complete 2 false) (complete 3 true) = 9 := by decide
 
+/-- The positive edge pattern meets the new simplicity hypothesis. -/
+theorem edge_isSimplePattern : SimplePattern (complete 2 false) := by
+  unfold SimplePattern
+  decide
+
+/-- The two hosts in the regression do not meet diagonal agreement. This is
+the explicit missing premise of the induced-count corollary. -/
+theorem hosts_not_diagonalAgreement :
+    ¬ DiagonalAgreementOn (complete 3 false) (complete 3 true) Finset.univ := by
+  intro h
+  have hi : ¬ Function.Injective (fun _ : Fin 2 ↦ (0 : Fin 3)) := by
+    intro hinj
+    exact (by decide : (0 : Fin 2) ≠ 1) (hinj (a₁ := 0) (a₂ := 1) rfl)
+  have hh := h (RelSymbol.mk' (n := 2) (() : language.Relations 2)) (fun _ ↦ 0)
+    (fun _ ↦ Finset.mem_univ _) hi
+  change (false = true ↔ true = true) at hh
+  exact Bool.false_ne_true (hh.mpr rfl)
+
+/-- The set-restricted homomorphism API agrees with the original count used
+by this regression, including its three colliding maps. -/
+theorem restricted_hom_regression :
+    homCountOn (complete 2 false) (complete 3 true) Finset.univ = 9 := by
+  rw [homCountOn_univ]
+  exact hom_count_collision_difference.2
+
 end RegularityLemmata.DiagonalLoopRegression
 
 #print axioms RegularityLemmata.DiagonalLoopRegression.induced_count_changes_on_loops
 #print axioms RegularityLemmata.DiagonalLoopRegression.injective_hom_count_ignores_added_loops
 #print axioms RegularityLemmata.DiagonalLoopRegression.hom_count_collision_difference
+#print axioms RegularityLemmata.DiagonalLoopRegression.edge_isSimplePattern
+#print axioms RegularityLemmata.DiagonalLoopRegression.hosts_not_diagonalAgreement
+#print axioms RegularityLemmata.DiagonalLoopRegression.restricted_hom_regression
