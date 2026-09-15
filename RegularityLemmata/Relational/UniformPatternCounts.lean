@@ -125,8 +125,8 @@ private theorem nullary_agreement {M N : FiniteRelModel L V} (hnull : NullaryCom
   simpa [he] using hnull S
 
 /-- Uniform induced-count transfer under diagonal and nullary agreement.
-The coefficient is independent of the host size. In fact the pattern need not
-be simple once all repeated-entry atoms agree. -/
+The coefficient is independent of the host size. The pattern may be arbitrary:
+both diagonal agreement and nullary agreement are explicit hypotheses. -/
 theorem abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement
     (P : FiniteRelModel L (Fin k)) (M N : FiniteRelModel L V) (s : Finset V)
     {ε : ℝ} (hε : 0 ≤ ε) (hnull : NullaryCompatible M N)
