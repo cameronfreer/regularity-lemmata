@@ -391,4 +391,51 @@ example {s t : ℕ} (e : ProperEmbedding s t) (x y : TreeNode s) (h : e.vertex x
 
 end Tests
 
+/-! ### Immediate-child convention -/
+
+/-- An immediate-child branch-preserving map, sending internal nodes to internal nodes,
+induces a proper embedding with exactly the same internal-node map. In particular this
+accepts a regular embedding with synchronized levels, without using that extra condition.
+Source height is `s`, host height is `t`, with no shift. Leaves are extended to host depth
+`t`; their original images need not be preserved. This is a one-way convention bridge:
+proper embeddings do not require synchronized levels. It transfers monochromaticity on
+internal nodes, but does not identify Ramsey bounds or supply the converse convention. -/
+theorem exists_properEmbedding_of_child_branches {s t : ℕ}
+    (f : (x : List Bool) → x.length ≤ s → List Bool)
+    (hint : ∀ x (hx : x.length < s), (f x (by omega)).length < t)
+    (hstep : ∀ x (hx : x.length < s) b,
+      ∃ w, f (x ++ [b]) (by simp; omega) = f x (by omega) ++ [b] ++ w) :
+    ∃ e : ProperEmbedding s t, ∀ x : InternalNode s,
+      (e.internal x).1 = f x.1 (by have := x.2; omega) := by
+  have hprefix : ∀ w x (h : (x ++ w).length ≤ s),
+      f x (by simp only [List.length_append] at h; omega) <+: f (x ++ w) h := by
+    intro w
+    induction w with
+    | nil => intro x h; simp
+    | cons b w ih =>
+      intro x h
+      have hx : x.length < s := by simp only [List.length_append, List.length_cons] at h; omega
+      obtain ⟨v, hv⟩ := hstep x hx b
+      have h₁ : f x (by omega) <+: f (x ++ [b]) (by simp; omega) := by
+        rw [hv]
+        exact List.prefix_append _ _ |>.trans (List.prefix_append _ _)
+      have h₂ := ih (x ++ [b]) (by simpa [List.append_assoc] using h)
+      simpa [List.append_assoc] using h₁.trans h₂
+  let e : InternalEmbedding s t := {
+    toFun := fun x ↦ ⟨f x.1 (by have := x.2; omega), hint x.1 x.2⟩
+    branch := by
+      intro b x y hxy
+      obtain ⟨w, hw⟩ := hxy
+      obtain ⟨v, hv⟩ := hstep x.1 x.2 b
+      have hp := hprefix w (x.1 ++ [b]) (by rw [hw]; exact Nat.le_of_lt y.2)
+      have hb : f x.1 (by have := x.2; omega) ++ [b] <+:
+          f (x.1 ++ [b]) (by simp; have := x.2; omega) := by
+        rw [hv]
+        exact List.prefix_append _ _
+      change f x.1 _ ++ [b] <+: f y.1 _
+      simpa [hw] using hb.trans hp }
+  exact ⟨e.extendProper, fun _ ↦ rfl⟩
+
+#print axioms exists_properEmbedding_of_child_branches
+
 end RegularityLemmata
