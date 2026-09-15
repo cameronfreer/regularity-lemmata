@@ -19,3 +19,4 @@ RegularityLemmata.Relational.ProxySelectionSetup
 RegularityLemmata.Relational.RepresentativeSelection
 RegularityLemmata.Relational.Transversalization
 RegularityLemmata.Relational.WeakenedCountingGate
+RegularityLemmata.Relational.DiagonalLoopRegression
