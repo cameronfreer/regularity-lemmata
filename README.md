@@ -23,7 +23,7 @@ Add the library to your `lakefile.toml`, pinned to a tag:
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "v0.11.0"
+rev = "v0.12.0"
 ```
 
 Your project's toolchain must match the library's: see [`lean-toolchain`](lean-toolchain) and

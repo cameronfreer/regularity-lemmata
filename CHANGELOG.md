@@ -3,6 +3,35 @@
 Release notes aggregated from the GitHub Releases, newest first. Each tag is annotated and the
 GitHub Release names the full commit SHA it was cut from; pin a tag when depending on the library.
 
+## v0.12.0 (2026-09-15)
+
+Release commit and validation runs are recorded on the GitHub Release.
+Lean `v4.34.0-rc1` and Mathlib `77cbcbc65f9e26f6ede0a01b24c2cb909e11cc0d`
+are unchanged. This minor release adds public counting and embedding APIs;
+it does not change existing theorem statements or freeze new quantitative formulas.
+
+- Sharp finite assignment extension counts use every touched coordinate, with
+  exponent `k - d`, in `Finite/PatternExtensions` (#192).
+- Host-uniform induced-count transfer for arbitrary patterns explicitly assumes
+  diagonal and nullary agreement. Simple-pattern injective homomorphism transfer
+  needs nullary agreement but no diagonal agreement. All-homomorphism transfer
+  retains the collision term `(k.choose 2) * |s|^(k-1)`. Cellwise wrappers are
+  included in `Relational/UniformPatternCounts` (#198).
+- The named diagonal-loop regression certifies induced counts `6 -> 0`,
+  injective homomorphisms `6 -> 6`, and all homomorphisms `6 -> 9`.
+- `exists_properEmbedding_of_child_branches` converts immediate-child branch maps
+  to proper embeddings with the same internal-node map. Synchronized regular
+  embeddings supply its hypotheses, not conversely; leaves are extended to host
+  height. No new Ramsey theorem or equality of Ramsey bounds is asserted (#199).
+- Named-parameter balanced slicing and the compiled three-vertex
+  stability-to-counting composition (#188, #189), plus guide and design-status
+  corrections, are now included in a release tag.
+
+See `docs/uniform-pattern-counts.md` and `docs/tree-embedding-conventions.md`
+for exact names, conventions, and non-implications. Generated documentation links
+may still point to the previous published documentation version until the existing
+release-triggered documentation workflow finishes.
+
 ## v0.11.0 (2026-09-11)
 
 Release commit: recorded in full on the GitHub Release.
@@ -848,4 +877,3 @@ First public release.
 **Stability:** pre-1.0 — statements pass a review-and-falsification gate before freezing, but names and signatures may change between releases.
 
 **Explicit non-goals of this release:** no relational removal theorem of any kind is included (fixed-pattern and finite-family induced removal are deferred to a later phase with their own statement freeze), and the relational layers assert nothing about relation symbols of arity greater than two.
-
