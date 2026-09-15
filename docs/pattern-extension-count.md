@@ -19,6 +19,13 @@ assignment. CI remains the integration gate.
 
 ## Boundary of a uniform counting corollary
 
+The named, compiled small-host regression is
+`DiagonalLoopRegression.induced_count_changes_on_loops`. Its companion declarations
+`injective_hom_count_ignores_added_loops` and `hom_count_collision_difference`
+distinguish the preservation-only conventions using the library's actual count
+definitions. They are imported by the gates root and have standard axioms only.
+The larger quantitative example below remains a written calculation.
+
 The extension improvement alone does not absorb diagonal atomic edits into
 the existing quotient collision charge. Induced counting tests negative atoms
 too: a pattern having no loops does not mean that loop tests are omitted.
