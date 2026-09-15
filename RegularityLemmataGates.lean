@@ -21,6 +21,7 @@ import RegularityLemmata.Relational.ForbiddenForkGate
 import RegularityLemmata.Relational.WeakenedCountingGate
 import RegularityLemmata.Relational.GenericTripleEstimate
 import RegularityLemmata.Relational.PositivityGate
+import RegularityLemmata.Relational.DiagonalLoopRegression
 
 /-!
 # RegularityLemmataGates
