@@ -22,7 +22,6 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 - [House vocabulary](#house-vocabulary)
 - [What can I reuse, by release?](#what-can-i-reuse-by-release)
 - [Additions released in v0.12.0](#additions-released-in-v0120)
-- [On `main`, not yet released](#on-main-not-yet-released)
 - [Main theorems and entry points](#main-theorems-and-entry-points)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
