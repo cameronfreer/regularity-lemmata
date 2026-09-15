@@ -13,9 +13,48 @@ in the theorem statement.
 axioms; CI enforces that on every commit. Names and signatures may change between tags, so pin a
 tag.
 
-**[Reader's guide](docs/GUIDE.md)** · **[API documentation](https://cameronfreer.github.io/regularity-lemmata/docs/)** · **[Examples](examples/README.md)** · **[Latest release](https://github.com/cameronfreer/regularity-lemmata/releases/latest)** · **[Changelog](CHANGELOG.md)**
+**[Reader's guide](docs/GUIDE.md)** · **[API reference](https://cameronfreer.github.io/regularity-lemmata/docs/)** · **[Examples](examples/README.md)** · **[Latest release](https://github.com/cameronfreer/regularity-lemmata/releases/latest)** · **[Changelog](CHANGELOG.md)**
 
-## Installation
+## What you can use, and current limits
+
+- **Regularity for directed relations and finite families**: Szemerédi-style regular
+  refinements, equitable finite-family regularity with host-independent bounds, and strong
+  (energy-gap) witnesses, all with explicit fuel and part-count bounds.
+  [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
+- **Weighted rectangular kernels**: the Frieze–Kannan step partition with separate left and
+  right part bounds, and the cut-matrix decomposition (at most `⌈1/ε²⌉₊` weighted rectangles,
+  coefficients at most `1/ε`, residual cut norm at most `ε · mass`), two different reusable
+  outputs. [Guide, Part III](docs/GUIDE.md#part-iii-weighted-kernels-two-different-outputs).
+- **Counting**: exact two- and three-vertex characterizations of induced patterns in finite
+  relational models, the three-vertex counting theorem against a strong witness with every
+  error term explicit, and counting from a cellwise approximation at any arity with the
+  collision term computed.
+  [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
+- **Sampling and completion**: exact equal-size blocks on which every member of a supplied
+  family keeps its density (balanced slicing), average-preserving slicing, and completion of
+  block families into equipartitions.
+  [Guide, Part II](docs/GUIDE.md#part-ii-partitions-sampling-completion).
+- **Hypergraph precursors**: polyad regularity with an arity-generic energy increment and the
+  deletion-only triadic approximation.
+  [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
+- **Independent tools**: finite multicolour Ramsey and binary-tree subtree Ramsey theorems, the
+  Hedge forecaster's regret bound, density buckets, weighted selection.
+  [Guide, Independent tools](docs/GUIDE.md#independent-tools).
+
+The limits, stated plainly: the relational substrate supports arbitrary finite relational
+languages and exact finite-model counts, but the regularity and regularity-based counting
+layers assume **arity at most two**, and the quantitative induced-counting theorem treats
+patterns on **`Fin 3`**. There is exactly **one removal theorem**, mathlib's triangle removal for
+simple graphs, re-exported; there is **no general relational induced-removal theorem**. The
+triadic approximation is a **precursor**, not the full Rödl–Schacht theorem. Regularity-based
+counting for general fixed patterns, higher arities, and general hypergraph removal are
+**outside the current API**. The guide's
+[boundary section](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist) has the
+longer explanation, and its table of
+[main theorems and entry points](docs/GUIDE.md#main-theorems-and-entry-points) names the
+declarations to reach for.
+
+## Quick start
 
 Add the library to your `lakefile.toml`, pinned to a tag:
 
@@ -26,18 +65,27 @@ git = "https://github.com/cameronfreer/regularity-lemmata"
 rev = "v0.12.0"
 ```
 
-Your project's toolchain must match the library's: see [`lean-toolchain`](lean-toolchain) and
-the mathlib revision in [`lake-manifest.json`](lake-manifest.json). Then import the public root,
-a facade, or a module:
+Your project's toolchain must match the pinned release's: see its
+[`lean-toolchain`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/lean-toolchain)
+and the mathlib revision in its
+[`lake-manifest.json`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/lake-manifest.json).
+Then import the public root, a facade, or a module:
 
 ```lean
 import RegularityLemmata.Kernel
 ```
 
-A complete, compiled use. The file below is [`examples/ReadmeSnippet.lean`](examples/ReadmeSnippet.lean)
-verbatim (built by the gate on every commit, and checked against the v0.11.0 release): a matrix
-with entries in `[-1, 1]` is a sum of at most `⌈1/ε²⌉₊` weighted submatrix indicators with
-coefficients at most `1/ε`, up to a residual of cut norm at most `ε·m·n`.
+Five curated facades bundle a stack behind one import (`RegularityLemmata.Kernel`,
+`.FiniteSetSystems`, `.RelationalApproximation`, `.FiniteRamsey`, `.ProductSpaces`); the guide
+describes each, and every module remains directly importable.
+
+<details>
+<summary><b>Example: approximating a matrix</b> (a complete, compiled file)</summary>
+
+The file below is [`examples/ReadmeSnippet.lean`](examples/ReadmeSnippet.lean) verbatim, built
+by the gate on every commit (the v0.12.0 release included) and checked against v0.11.0 as well: a matrix with entries in `[-1, 1]` is
+a sum of at most `⌈1/ε²⌉₊` weighted submatrix indicators with coefficients at most `1/ε`, up to a
+residual of cut norm at most `ε·m·n`.
 
 ```lean
 import RegularityLemmata.Kernel
@@ -59,101 +107,22 @@ example {m n : ℕ} (M : Fin m → Fin n → ℝ) (hM : ∀ i j, |M i j| ≤ 1) 
     (fun i _ j _ => hM i j) hε
 ```
 
-To build the library itself:
+</details>
 
-```bash
-lake exe cache get
-lake build
-bash scripts/check.sh   # build, sorry scan, axiom audit, roots gate
-```
+## Documentation and contributing
 
-The external consumer fixture under [`consumer/`](consumer/README.md) is a separate Lake package
-that depends on this repository by Git at a full commit; it is rebuilt against every release
-commit.
+- **Learn and use**: the [reader's guide](docs/GUIDE.md) (start here by task, what is reusable
+  by release, the mathematics in four parts, the boundary), the
+  [API reference](https://cameronfreer.github.io/regularity-lemmata/docs/) (generated by
+  doc-gen4, one directory per version), and the [examples](examples/README.md) (theorem
+  specializations and composition certificates, compiled on every commit).
+- **Develop**: [`CONTRIBUTING.md`](CONTRIBUTING.md) (building and checking the repository, the
+  per-unit cadence, gates, release verification), [`ARCHITECTURE.md`](ARCHITECTURE.md) (frozen
+  conventions and invariants), and the [design records](docs/design/) (each with a status
+  banner: implemented, approved but not implemented, or deferred with its obstruction gates).
+- **Reference**: the [changelog](CHANGELOG.md), [`PROVENANCE.md`](PROVENANCE.md) (mathematical
+  and formal antecedents, and the scope of each adaptation), [`SECURITY.md`](SECURITY.md).
 
-## What you can reuse
+## Citation and license
 
-- **Regularity for directed relations and finite families**: Szemerédi-style regular
-  refinements, equitable finite-family regularity with host-independent bounds, and strong
-  (energy-gap) witnesses, all with explicit fuel and part-count bounds.
-- **Weighted rectangular kernels**: the Frieze–Kannan step partition with separate left and
-  right part bounds, and the cut-matrix decomposition (at most `⌈1/ε²⌉₊` weighted rectangles,
-  coefficients at most `1/ε`, residual cut norm at most `ε · mass`), two different reusable
-  outputs.
-- **Counting**: exact two- and three-vertex characterizations of induced patterns in finite
-  relational models, the three-vertex counting theorem against a strong witness with every
-  error term explicit, and counting from a cellwise approximation at any arity with the
-  collision term computed.
-- **Sampling and completion**: exact equal-size blocks on which every member of a supplied
-  family keeps its density (balanced slicing), average-preserving slicing, and completion of
-  block families into equipartitions.
-- **Hypergraph precursors**: polyad regularity with an arity-generic energy increment and the
-  deletion-only triadic approximation.
-- **Independent tools**: finite multicolour Ramsey and binary-tree subtree Ramsey theorems, the
-  Hedge forecaster's regret bound, density buckets, weighted selection.
-
-The [reader's guide](docs/GUIDE.md) inventories all of this, mathematics first, with the
-declarations to reach for and a release-indexed table of what is reusable at each tag.
-
-## Main theorems and entry points
-
-The declarations to reach for, and the module each lives in. Every bound is visible in the
-statement. The final two rows are entry points rather than regularity theorems: balanced
-slicing is a sampling theorem, and the indivisible-approximation theorem takes its partition as
-an input.
-
-| Theorem | Declaration | Module |
-| --- | --- | --- |
-| Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
-| Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
-| Large equal-size regular pieces | `exists_pieceFamily` | `Graph.PieceSchedule` |
-| Strong (energy-gap) regularity for a finite family, simultaneously in every relation | `exists_familyStrongWitness` | `Graph.FamilyStrong` |
-| Boundedly-colored coloring of `j`-sets with small bad mass, any observable | `exists_goodPolyadColoring` | `Hypergraph.PolyadIncrement` |
-| Boundedly-colored pair coloring with small bad mass | `exists_goodColoring` | `Hypergraph.TriadIncrement` |
-| Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
-| Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
-| Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
-| Rectangular Frieze–Kannan step partition: separate left and right part bounds, uniform cut discrepancy | `rect_frieze_kannan_cutDiscrepancy` | `Partition.RectKernelFriezeKannan` |
-| Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | `kernel_frieze_kannan_cutDecomposition` | `Finite.RectKernelCutDecomposition` |
-| Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
-| Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
-
-Five curated **facades** bundle a stack behind one import (`RegularityLemmata.Kernel`,
-`.FiniteSetSystems`, `.RelationalApproximation`, `.FiniteRamsey`, `.ProductSpaces`); each is
-described in the guide, and every module remains directly importable.
-
-## What is proved, and what is not
-
-- The relational substrate supports **arbitrary finite relational languages** and exact
-  finite-model counts. The **regularity** and regularity-based **counting** layers assume
-  **arity at most two**, and the quantitative induced-counting theorem treats patterns on
-  **`Fin 3`**.
-- There is exactly **one removal theorem**, mathlib's triangle removal for simple graphs,
-  re-exported; there is **no general relational induced-removal theorem**.
-- The triadic approximation is a **precursor**, not a formalization of the full Rödl–Schacht
-  theorem.
-- Regularity-based counting for **general fixed patterns**, higher relational arities, and
-  general hypergraph removal are **outside the current API**.
-
-Counterexamples, impossibility results, and feasibility probes that constrain the API are
-retained as machine-checked modules under the separate umbrella `RegularityLemmataGates`,
-built and audited by the same CI but not pulled in by `import RegularityLemmata`.
-
-## Project documentation
-
-| File | Contents |
-| --- | --- |
-| [`docs/GUIDE.md`](docs/GUIDE.md) | The reader's guide: start here by task, what is reusable by release, the mathematics in four parts, and the boundary of what is proved. |
-| [Generated API documentation](https://cameronfreer.github.io/regularity-lemmata/docs/) | doc-gen4 pages on GitHub Pages, one directory per version: `docs/latest/` follows the newest release, `docs/main/` is the most recently published documentation snapshot of `main` (the workflow runs on releases and on manual dispatch), and every module has a page at `docs/<version>/RegularityLemmata/<Dir>/<File>.html`; the build recipe is `docbuild/`. |
-| [`examples/README.md`](examples/README.md) | The compiled examples: theorem specializations, concrete computations, and composition certificates. |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Frozen design conventions and invariants. |
-| [`CHANGELOG.md`](CHANGELOG.md) | Release notes, aggregated from the GitHub Releases, newest first. |
-| [`docs/design/`](docs/design/) | Design records, each with a status banner: implemented (with links to the declarations), approved but not implemented, or deferred (with its permanent obstruction gates). |
-| [`PROVENANCE.md`](PROVENANCE.md) | Mathematical and formal antecedents, and the scope of each adaptation. |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Per-unit cadence, gates, and documentation rules. |
-| [`SECURITY.md`](SECURITY.md) | Reporting policy. |
-| [`CITATION.cff`](CITATION.cff) | How to cite this library. |
-
-## License
-
-Apache License 2.0; see [`LICENSE`](LICENSE).
+Cite with [`CITATION.cff`](CITATION.cff). Apache License 2.0; see [`LICENSE`](LICENSE).

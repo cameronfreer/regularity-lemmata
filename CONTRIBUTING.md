@@ -18,6 +18,26 @@ that license. Add the standard SPDX header to new files.
 3. Open a pull request. CI runs `bash scripts/check.sh`; it must pass.
 4. Maintainers review; once approved, the PR is squash-merged onto `main`. Published history on `main` is never rewritten; the squash is the one commit the branch becomes.
 
+## Building and checking the repository
+
+This is the workflow for working on the library itself; to *use* the library in a project, see
+the quick start in the README.
+
+```bash
+lake exe cache get      # mathlib's compiled cache, once per pin
+lake build              # the library, the gates umbrella, and the examples
+bash scripts/check.sh   # build, sorry scan, axiom audit, roots gate; what CI runs
+```
+
+The toolchain is pinned in [`lean-toolchain`](lean-toolchain) and the mathlib revision in
+[`lake-manifest.json`](lake-manifest.json); both change only in dedicated PRs.
+
+**Release verification.** Every release is checked from outside: the external consumer fixture
+under [`consumer/`](consumer/README.md), a separate Lake package depending on this repository by
+Git at a full commit, is rebuilt against the release candidate and again against the merge
+commit before the tag is created, and its resolved manifest must name that commit. The recipe
+is in its README.
+
 ## Public API impact
 
 Every pull request must contain a nonempty `## Public API impact` section. Use one or more

@@ -22,6 +22,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 - [House vocabulary](#house-vocabulary)
 - [What can I reuse, by release?](#what-can-i-reuse-by-release)
 - [Additions released in v0.12.0](#additions-released-in-v0120)
+- [Main theorems and entry points](#main-theorems-and-entry-points)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
 - [Part III. Weighted kernels: two different outputs](#part-iii-weighted-kernels-two-different-outputs)
@@ -55,7 +56,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 ## House vocabulary
 
 - **Summit.** A major theorem whose constants are visible in its statement, so it can be
-  instantiated and its bounds inspected. The README's main-theorem table lists them; two of its
+  instantiated and its bounds inspected. The main-theorem table below lists them; two of its
   rows (balanced slicing, indivisible approximation) are *entry points* rather than regularity
   theorems, because the first is a sampling theorem and the second takes its partition as input.
 - **Gate.** A module that keeps counterexamples, impossibility results, and feasibility probes
@@ -127,6 +128,29 @@ documentation links above still identify their published documentation version.
   documentation.
 - Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
 - Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).
+
+## Main theorems and entry points
+
+The declarations to reach for, and the module each lives in. Every bound is visible in the
+statement. The final two rows are entry points rather than regularity theorems: balanced
+slicing is a sampling theorem, and the indivisible-approximation theorem takes its partition as
+an input.
+
+| Theorem | Declaration | Module |
+| --- | --- | --- |
+| Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
+| Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
+| Large equal-size regular pieces | `exists_pieceFamily` | `Graph.PieceSchedule` |
+| Strong (energy-gap) regularity for a finite family, simultaneously in every relation | `exists_familyStrongWitness` | `Graph.FamilyStrong` |
+| Boundedly-colored coloring of `j`-sets with small bad mass, any observable | `exists_goodPolyadColoring` | `Hypergraph.PolyadIncrement` |
+| Boundedly-colored pair coloring with small bad mass | `exists_goodColoring` | `Hypergraph.TriadIncrement` |
+| Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
+| Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
+| Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
+| Rectangular Frieze–Kannan step partition: separate left and right part bounds, uniform cut discrepancy | `rect_frieze_kannan_cutDiscrepancy` | `Partition.RectKernelFriezeKannan` |
+| Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | `kernel_frieze_kannan_cutDecomposition` | `Finite.RectKernelCutDecomposition` |
+| Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
+| Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
 
 ## Part I. Counts, densities, edits, diagonals
 
