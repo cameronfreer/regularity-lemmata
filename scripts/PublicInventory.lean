@@ -40,6 +40,13 @@ def main : IO UInt32 := do
   try
     initSearchPath (← findSysroot)
     let env ← importModules #[{ module := inventoryRoot }] {} (trustLevel := 1024)
+    -- Instances, read from the persisted per-module entries of the instance extension (the
+    -- extension's live state is not populated by a bare `importModules`).
+    let mut instNames : Std.HashSet Name := {}
+    for idx in [0:env.header.moduleNames.size] do
+      for e in Meta.instanceExtension.ext.getModuleEntries env idx do
+        if let .global ie := e then
+          if let some n := ie.globalName? then instNames := instNames.insert n
     let mut lines : Array String := #[]
     let mut modules : Std.HashSet Name := {}
     for (n, ci) in env.constants.map₁.toList do
@@ -48,7 +55,7 @@ def main : IO UInt32 := do
       let mod := env.header.moduleNames[idx.toNat]!
       unless inventoryRoot.isPrefixOf mod do continue
       modules := modules.insert mod
-      let inst := if Meta.isInstanceCore env n then " [instance]" else ""
+      let inst := if instNames.contains n then " [instance]" else ""
       lines := lines.push s!"{mod}: {kindOf ci} {n}{inst}"
     let sorted := lines.qsort (· < ·)
     for l in sorted do IO.println l
