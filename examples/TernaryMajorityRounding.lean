@@ -11,7 +11,10 @@ The majority-rounding cost theorem `editDistance_majorityRound_le` instantiated 
 symbol, with the arity-generic constant `(n + 1) · |s|^(n+1)` read off as `3 · |s|³`, together
 with the pieces a consumer touches on the way: the ternary decency hypothesis spelled out on the
 ambient off-pairs `s²`, the box-level identity (edit distance to the majority equals the minority
-count on every cell box), the no-exceptional-part specialization, and the nullary copy.
+count on every cell box), the no-exceptional-part specialization, the nullary copy, and the
+**rounded model itself**: `majorityRound` is cellwise constant (`majorityRound_isIndivisibleFor`),
+so the consumer obtains one model that is indivisible for `P` *and* within the edit bound
+(`ternary_exists_isIndivisibleFor_and_editDistance_le`).
 
 Everything below is a statement-level instantiation of proved results; no choice of language,
 model, or partition is made here.
@@ -55,6 +58,19 @@ theorem ternary_editDistance_majorityRound_le_of_decent (M : FiniteRelModel L V)
   have h := ternary_editDistance_majorityRound_le M P S hθ hγ ∅ (Finset.empty_subset _)
     (lam := 0) (by simp) hdec
   simpa using h
+
+/-- **The rounded model, packaged.** One model that is indivisible for `P` (product-constant on
+every cell box, from the existing `majorityRound_isIndivisibleFor`), copies every nullary symbol
+exactly, and is within `3 · |s|³ · (2θ + γ/2 + λ/2)` of `M` on the ternary symbol. -/
+theorem ternary_exists_isIndivisibleFor_and_editDistance_le (M : FiniteRelModel L V)
+    (P : Finpartition s) (S : L.Relations 3) {θ γ lam : ℝ} (hθ : 0 ≤ θ) (hγ : 0 ≤ γ)
+    (E : Finset (Finset V)) (hE : E ⊆ P.parts) (hlam : (∑ l ∈ E, (l.card : ℝ)) ≤ lam * s.card)
+    (hdec : TernaryDecent M P S E θ γ) :
+    ∃ N : FiniteRelModel L V, N.IsIndivisibleFor P ∧ NullaryCompatible M N ∧
+      (editDistance (M.Holds S) (N.Holds S) (fun _ : Fin 3 ↦ s) : ℝ)
+        ≤ 3 * (s.card : ℝ) ^ 3 * (2 * θ + γ / 2 + lam / 2) :=
+  ⟨M.majorityRound P, majorityRound_isIndivisibleFor M P, nullaryCompatible_majorityRound M P,
+    ternary_editDistance_majorityRound_le M P S hθ hγ E hE hlam hdec⟩
 
 /-- **Box level, ternary.** On every cell box the edit distance to the majority rounding is the
 minority count of the box, an exact `ℕ` identity. -/

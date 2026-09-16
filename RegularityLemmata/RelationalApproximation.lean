@@ -45,6 +45,14 @@ curated stack and defines nothing; each listed module remains directly importabl
   `editDistance_majorityRound_eq_min`, the rounding theorem
   `exists_isIndivisibleFor_of_isHomogeneousCell`, its exact converse, and the exact
   cellwise-to-aggregate conversion `CellwiseEditBound.editDistance_const_le`.
+* `Relational.MajorityAssembly` (with its substrate `Finite.SectionDefect` and
+  `Finite.ProductHybrid`) — the **majority-rounding cost from summed coordinate defects**: the
+  box-level identity `editDistance_majorityRound_eq_minorityCount`, the ambient
+  part-resampling defect `partResampleDefect` and its reassembly across cell boxes, the global
+  bound `editDistance_majorityRound_le_sum_partResampleDefect`, the inclusive-decency form
+  `editDistance_majorityRound_le` at `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)`, the labelled-fibre
+  adapter `labelPartition` (unused labels allowed) with its reassembly over label tuples, and
+  the exact nullary copy.
 
 * `Relational.AggregationBridge` — the **approximation-to-counting bridge**: the raw,
   denominator-free aggregation `abs_inducedEmbeddingCountOn_sub_sum_est_le` (a supplied

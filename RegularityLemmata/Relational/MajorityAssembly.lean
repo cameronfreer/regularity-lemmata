@@ -2,8 +2,8 @@
 Copyright (c) 2026 Cameron Freer. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 -/
-import Mathlib.Data.Fin.Tuple.Finset
 import RegularityLemmata.Finite.ProductHybrid
+import RegularityLemmata.Finite.Tuple
 import RegularityLemmata.Relational.CellwiseEdit
 import RegularityLemmata.Relational.Edit
 
@@ -16,7 +16,8 @@ cell boxes by the tuple-to-part map.
 
 * Box level (`editDistance_majorityRound_eq_minorityCount`): on any cell box `∏ Cᵢ` with
   `Cᵢ ∈ P.parts`, the edit distance to the majority value is exactly the minority count of the
-  box (a division-free `ℕ` identity).
+  box, a division-free `ℕ` identity derived from the existing real-valued form
+  `editDistance_majorityRound_eq_min` (which is kept as stated).
 * Reassembly (`partResampleDefect`, `sum_coordDisagreement_div_eq_sum_partResampleDefect`): the
   coordinate defect of a box, normalized by the size of its `j`-th factor, is the sum over the
   box's tuples of the *part-resampling defect* at coordinate `j`: the fraction of replacements of
@@ -25,6 +26,13 @@ cell boxes by the tuple-to-part map.
   claim about any individual box.
 * Global majority bound (`editDistance_majorityRound_le_sum_partResampleDefect`): the edit
   distance of the rounding on `s^(n+1)` is at most `∑ⱼ ∑_{w ∈ s^(n+1)} partResampleDefect j w`.
+* Labelled fibres (`labelPartition`, `labelFibre`): a labelling `lab : V → Λ` of the host
+  induces the finpartition of `s` into its nonempty fibres (mathlib's
+  `Finpartition.ofSetSetoid` on the kernel setoid, so no parallel partition structure). Labels
+  with an empty fibre are simply unused; the reassembly over **label tuples**
+  (`sum_piFinset_const_eq_sum_labelBoxes`) and the labelled form of the global bound
+  (`editDistance_majorityRound_labelPartition_le`) range over all label tuples, boxes with an
+  unused label being empty.
 * Decency (`sum_partResampleDefect_le`, `editDistance_majorityRound_le`): if a set `E` of
   exceptional parts has total size at most `λ·|s|`, and for every ordinary part `l` and coordinate
   `j` at most a `γ`-fraction of the ambient off-tuples `rest ∈ s^n` have an inclusively `θ`-mixed
@@ -33,8 +41,13 @@ cell boxes by the tuple-to-part map.
   (`editDistance_majorityRound_nullary`).
 
 The decency hypothesis is stated on the ambient off-tuples `s^n`, so it needs no cell-box
-bookkeeping from the consumer; the composition with a displacement of the partition itself is
-not part of this file.
+bookkeeping from the consumer. Requiring the same mixedness fraction inside every off-coordinate
+cell box would imply the ambient hypothesis by summation, not conversely. The composition with a
+displacement of the partition itself is not part of this file.
+
+The product substrate (`prefixHybrid`, `coordDisagreement`, `minorityCount`, the normalized
+resampling bound) is `Finite/ProductHybrid.lean`, used here with the constant coordinate family;
+the split of a box sum at one coordinate is `sum_piFinset_succAbove` in `Finite/Tuple.lean`.
 -/
 
 namespace RegularityLemmata
@@ -102,37 +115,6 @@ theorem sum_coordDisagreement_div_eq_sum_partResampleDefect :
   unfold partResampleDefect
   rw [P.part_eq_of_mem (hC' j) (Fintype.mem_piFinset.mp hw j)]
 
-/-- The minority count of a box with nonempty factors is at most the sum over coordinates of
-the coordinate defect normalized by the size of that factor (`minorityCount_mul_card_le`
-divided by the box size). -/
-theorem minorityCount_le_sum_coordDisagreement_div (A : Fin (n + 1) → Finset V)
-    (hA : ∀ i, (A i).Nonempty) :
-    (minorityCount R A : ℝ) ≤ ∑ j : Fin (n + 1), (coordDisagreement R A j : ℝ) / (A j).card := by
-  classical
-  have hpos : ∀ i, (0 : ℝ) < (A i).card := fun i ↦ by exact_mod_cast (hA i).card_pos
-  have hbox : (0 : ℝ) < (Fintype.piFinset A).card := by
-    rw [Fintype.card_piFinset]; push_cast
-    exact Finset.prod_pos fun i _ ↦ hpos i
-  have hprod : ∀ j : Fin (n + 1), ((Fintype.piFinset A).card : ℝ)
-      = (A j).card * ∏ i ∈ Finset.univ.erase j, ((A i).card : ℝ) := by
-    intro j
-    rw [Fintype.card_piFinset]; push_cast
-    exact (Finset.mul_prod_erase Finset.univ (fun i ↦ ((A i).card : ℝ)) (Finset.mem_univ j)).symm
-  have hterm : ∀ j : Fin (n + 1), (coordDisagreement R A j : ℝ) / (A j).card
-      = ((coordDisagreement R A j : ℝ) * ∏ i ∈ Finset.univ.erase j, ((A i).card : ℝ))
-          / (Fintype.piFinset A).card := by
-    intro j
-    have h2 : (0 : ℝ) < ∏ i ∈ Finset.univ.erase j, ((A i).card : ℝ) :=
-      Finset.prod_pos fun i _ ↦ hpos i
-    rw [hprod j, mul_div_mul_right _ _ h2.ne']
-  have hsum : ∑ j : Fin (n + 1), (coordDisagreement R A j : ℝ) / (A j).card
-      = (∑ j : Fin (n + 1), (coordDisagreement R A j : ℝ)
-          * ∏ i ∈ Finset.univ.erase j, ((A i).card : ℝ)) / (Fintype.piFinset A).card := by
-    rw [Finset.sum_div]
-    exact Finset.sum_congr rfl fun j _ ↦ hterm j
-  rw [hsum, le_div_iff₀ hbox]
-  exact_mod_cast minorityCount_mul_card_le R A
-
 end Resample
 
 section Majority
@@ -140,33 +122,28 @@ section Majority
 variable {L : FirstOrder.Language} [FiniteRelational L]
 
 /-- **Box level.** On a cell box of `P`, the edit distance from `M` to its majority rounding is
-exactly the minority count of the box. -/
+exactly the minority count of the box: the `ℕ` form of `editDistance_majorityRound_eq_min`. -/
 theorem editDistance_majorityRound_eq_minorityCount (M : FiniteRelModel L V) (P : Finpartition s)
     {m : ℕ} (S : L.Relations m) (C : Fin m → Finset V) (hC : ∀ i, C i ∈ P.parts) :
     editDistance (M.Holds S) ((M.majorityRound P).Holds S) C = minorityCount (M.Holds S) C := by
   classical
-  have hmaj : ∀ x ∈ Fintype.piFinset C, ((M.majorityRound P).Holds S x
-      ↔ (Fintype.piFinset C).card ≤ 2 * tupleCount (M.Holds S) C) := by
-    intro x hx
-    rw [majorityRound_holds_iff]
-    have : (fun i ↦ P.part (x i)) = C :=
-      funext fun i ↦ P.part_eq_of_mem (hC i) (Fintype.mem_piFinset.mp hx i)
-    rw [this]
-  have hsplit := Finset.card_filter_add_card_filter_not (s := Fintype.piFinset C) (p := M.Holds S)
-  unfold editDistance editSet minorityCount tupleCount at *
-  by_cases h : (Fintype.piFinset C).card ≤ 2 * ((Fintype.piFinset C).filter (M.Holds S)).card
-  · have hfilt : (Fintype.piFinset C).filter
-        (fun x ↦ ¬ (M.Holds S x ↔ (M.majorityRound P).Holds S x))
-        = (Fintype.piFinset C).filter fun x ↦ ¬ M.Holds S x := by
-      refine Finset.filter_congr fun x hx ↦ ?_
-      rw [hmaj x hx]; simp only [h, iff_true]
-    rw [hfilt]; omega
-  · have hfilt : (Fintype.piFinset C).filter
-        (fun x ↦ ¬ (M.Holds S x ↔ (M.majorityRound P).Holds S x))
-        = (Fintype.piFinset C).filter (M.Holds S) := by
-      refine Finset.filter_congr fun x hx ↦ ?_
-      rw [hmaj x hx]; simp only [h, iff_false, not_not]
-    rw [hfilt]; omega
+  have hreal : (editDistance (M.Holds S) ((M.majorityRound P).Holds S) C : ℝ)
+      = min (tupleDensity (M.Holds S) C) (1 - tupleDensity (M.Holds S) C)
+          * ∏ i, ((C i).card : ℝ) :=
+    editDistance_majorityRound_eq_min M P S fun i ↦ ⟨C i, hC i⟩
+  have hbox : (0 : ℝ) < ∏ i, ((C i).card : ℝ) :=
+    Finset.prod_pos fun i _ ↦ by exact_mod_cast (P.nonempty_of_mem_parts (hC i)).card_pos
+  have hn : ((Fintype.piFinset C).card : ℝ) = ∏ i, ((C i).card : ℝ) := by
+    rw [Fintype.card_piFinset]; push_cast; rfl
+  have hc : tupleCount (M.Holds S) C ≤ (Fintype.piFinset C).card :=
+    tupleCount_le_card (R := M.Holds S) (A := C)
+  have key : (editDistance (M.Holds S) ((M.majorityRound P).Holds S) C : ℝ)
+      = (minorityCount (M.Holds S) C : ℝ) := by
+    rw [hreal, minorityCount_eq_min_tupleCount, Nat.cast_min, Nat.cast_sub hc]
+    unfold tupleDensity densityOn tupleCount
+    rw [hn, min_mul_of_nonneg _ _ hbox.le, div_mul_cancel₀ _ hbox.ne', sub_mul, one_mul,
+      div_mul_cancel₀ _ hbox.ne']
+  exact_mod_cast key
 
 /-- **Global majority bound.** The edit distance of the majority rounding on `s^(n+1)` is at
 most the sum, over coordinates `j` and ambient tuples `w`, of the part-resampling defects. -/
@@ -182,7 +159,6 @@ theorem editDistance_majorityRound_le_sum_partResampleDefect (M : FiniteRelModel
   have hC' : ∀ i, C i ∈ P.parts := Fintype.mem_piFinset.mp hC
   rw [editDistance_majorityRound_eq_minorityCount M P S C hC']
   exact minorityCount_le_sum_coordDisagreement_div (M.Holds S) C
-    fun i ↦ P.nonempty_of_mem_parts (hC' i)
 
 /-- Nullary symbols are copied exactly by the majority rounding. -/
 theorem editDistance_majorityRound_nullary (M : FiniteRelModel L V) (P : Finpartition s)
@@ -195,41 +171,6 @@ end Majority
 section Decency
 
 variable {n : ℕ} (R : (Fin (n + 1) → V) → Prop) [DecidablePred R] (P : Finpartition s)
-
-omit [DecidableEq V] in
-/-- Replacing the pivot of an inserted tuple. -/
-theorem update_insertNth_same (j : Fin (n + 1)) (b a : V) (rest : Fin n → V) :
-    Function.update (Fin.insertNth j b rest : Fin (n + 1) → V) j a = Fin.insertNth j a rest := by
-  ext i
-  obtain rfl | ⟨i', rfl⟩ := Fin.eq_self_or_eq_succAbove j i
-  · simp
-  · rw [Function.update_of_ne (Fin.succAbove_ne j i')]
-    simp
-
-omit [DecidableEq V] in
-/-- A sum over `s^(n+1)` split as a sum over the ambient off-tuples `s^n` and the pivot value. -/
-theorem sum_piFinset_const_eq_sum_insertNth (j : Fin (n + 1)) (f : (Fin (n + 1) → V) → ℝ) :
-    ∑ w ∈ Fintype.piFinset (fun _ : Fin (n + 1) ↦ s), f w
-      = ∑ rest ∈ Fintype.piFinset (fun _ : Fin n ↦ s), ∑ b ∈ s, f (Fin.insertNth j b rest) := by
-  rw [← Finset.sum_product' (s := Fintype.piFinset (fun _ : Fin n ↦ s)) (t := s)
-    (f := fun rest b ↦ f (Fin.insertNth j b rest))]
-  symm
-  refine Finset.sum_nbij' (fun q ↦ Fin.insertNth j q.2 q.1)
-    (fun w ↦ (Fin.removeNth j w, w j)) ?_ ?_ ?_ ?_ ?_
-  · rintro ⟨rest, b⟩ hq
-    rw [Finset.mem_product] at hq
-    rw [Fin.mem_piFinset_iff_pivot_removeNth j]
-    simpa [Fin.removeNth, Fintype.mem_piFinset] using ⟨hq.2, Fintype.mem_piFinset.mp hq.1⟩
-  · intro w hw
-    rw [Fin.mem_piFinset_iff_pivot_removeNth j] at hw
-    rw [Finset.mem_product]
-    exact ⟨hw.2, hw.1⟩
-  · rintro ⟨rest, b⟩ _
-    simp
-  · intro w _
-    simp
-  · rintro ⟨rest, b⟩ _
-    rfl
 
 /-- The part-resampling defects of a whole row `b ↦ insertNth j b rest`, `b` ranging over a part
 `l`, sum to the section disagreement of `a ↦ R (insertNth j a rest)` on `l`, divided by `|l|`. -/
@@ -245,7 +186,7 @@ theorem sum_partResampleDefect_row (j : Fin (n + 1)) (rest : Fin n → V) {l : F
   rw [Fin.insertNth_apply_same, P.part_eq_of_mem hl hb]
   congr 3
   ext a
-  simp only [Finset.mem_filter, update_insertNth_same]
+  simp only [Finset.mem_filter, Fin.update_insertNth]
 
 /-- **Decency ⇒ summed resampling defect.** With exceptional parts `E ⊆ P.parts` of total size at
 most `λ·|s|`, and at most a `γ`-fraction of the ambient off-tuples inclusively `θ`-mixed on each
@@ -271,7 +212,7 @@ theorem sum_partResampleDefect_le (j : Fin (n + 1)) {θ γ lam : ℝ} (hθ : 0 �
   have hsum : ∑ w ∈ Fintype.piFinset (fun _ : Fin (n + 1) ↦ s), partResampleDefect R P j w
       = ∑ l ∈ P.parts, (l.card : ℝ) * ∑ rest ∈ Y,
           (sectionDisagreement l fun a ↦ R (Fin.insertNth j a rest) : ℝ) / (l.card : ℝ) ^ 2 := by
-    rw [sum_piFinset_const_eq_sum_insertNth j]
+    rw [sum_piFinset_succAbove (fun _ ↦ s) j]
     simp_rw [hparts]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l hl ↦ ?_
@@ -327,6 +268,82 @@ theorem sum_partResampleDefect_le (j : Fin (n + 1)) {θ γ lam : ℝ} (hθ : 0 �
 
 end Decency
 
+/-! ### Labelled fibres: unused labels allowed -/
+
+section Labels
+
+variable {Λ : Type*} [DecidableEq Λ] (lab : V → Λ) (s : Finset V)
+
+instance instDecidableRelKer : DecidableRel (Setoid.ker lab).r :=
+  fun a b ↦ inferInstanceAs (Decidable (lab a = lab b))
+
+/-- The fibre of a label: the elements of `s` carrying it (empty for an unused label). -/
+def labelFibre (a : Λ) : Finset V := s.filter fun v ↦ lab v = a
+
+/-- The partition of `s` into the nonempty fibres of a labelling: mathlib's
+`Finpartition.ofSetSetoid` on the kernel setoid of `lab`. Unused labels contribute no part. -/
+def labelPartition : Finpartition s := Finpartition.ofSetSetoid (Setoid.ker lab) s
+
+omit [DecidableEq V] in
+theorem labelFibre_eq_empty_iff (a : Λ) : labelFibre lab s a = ∅ ↔ ∀ v ∈ s, lab v ≠ a := by
+  simp [labelFibre, Finset.filter_eq_empty_iff]
+
+/-- The part of an element of `s` is the fibre of its label. -/
+theorem labelPartition_part_eq {b : V} (hb : b ∈ s) :
+    (labelPartition lab s).part b = labelFibre lab s (lab b) := by
+  ext v
+  rw [labelPartition, Finpartition.mem_part_ofSetSetoid_iff_rel]
+  simp only [labelFibre, Finset.mem_filter, hb, true_and]
+  exact ⟨fun h ↦ ⟨h.1, h.2.symm⟩, fun h ↦ ⟨h.1, h.2.symm⟩⟩
+
+omit [DecidableEq V] in
+/-- **Reassembly over label tuples.** A sum over `s^m` is the sum over all label tuples `c` of
+the sum over the box `∏ᵢ labelFibre (c i)`; boxes with an unused label are empty. -/
+theorem sum_piFinset_const_eq_sum_labelBoxes [Fintype Λ] {m : ℕ} {M : Type*} [AddCommMonoid M]
+    (f : (Fin m → V) → M) :
+    ∑ w ∈ Fintype.piFinset (fun _ : Fin m ↦ s), f w
+      = ∑ c : Fin m → Λ, ∑ w ∈ Fintype.piFinset (fun i ↦ labelFibre lab s (c i)), f w := by
+  classical
+  rw [← Finset.sum_fiberwise_of_maps_to (g := fun w ↦ lab ∘ w) (t := Finset.univ)
+    (fun w _ ↦ Finset.mem_univ _)]
+  refine Finset.sum_congr rfl fun c _ ↦ Finset.sum_congr ?_ fun _ _ ↦ rfl
+  ext w
+  simp only [Finset.mem_filter, Fintype.mem_piFinset, labelFibre, funext_iff, Function.comp]
+  exact ⟨fun ⟨h1, h2⟩ i ↦ ⟨h1 i, h2 i⟩, fun h ↦ ⟨fun i ↦ (h i).1, fun i ↦ (h i).2⟩⟩
+
+/-- For the label partition, the part-resampling defect resamples inside the fibre of the
+label of `w j`. -/
+theorem partResampleDefect_labelPartition {n : ℕ} (R : (Fin (n + 1) → V) → Prop)
+    [DecidablePred R] (j : Fin (n + 1)) {w : Fin (n + 1) → V} (hw : w j ∈ s) :
+    partResampleDefect R (labelPartition lab s) j w
+      = (((labelFibre lab s (lab (w j))).filter
+            fun a ↦ ¬ (R w ↔ R (Function.update w j a))).card : ℝ)
+          / (labelFibre lab s (lab (w j))).card := by
+  unfold partResampleDefect
+  rw [labelPartition_part_eq lab s hw]
+
+/-- **The labelled global bound.** For the label partition, the edit distance of the majority
+rounding is at most the sum over coordinates, label tuples `c`, and tuples of the label box of
+the resampling defect inside the fibre of `c j`; boxes with an unused label are empty. -/
+theorem editDistance_majorityRound_labelPartition_le [Fintype Λ] {L : FirstOrder.Language}
+    [FiniteRelational L] (M : FiniteRelModel L V) {n : ℕ} (S : L.Relations (n + 1)) :
+    (editDistance (M.Holds S) ((M.majorityRound (labelPartition lab s)).Holds S)
+        (fun _ : Fin (n + 1) ↦ s) : ℝ)
+      ≤ ∑ j : Fin (n + 1), ∑ c : Fin (n + 1) → Λ,
+          ∑ w ∈ Fintype.piFinset (fun i ↦ labelFibre lab s (c i)),
+            (((labelFibre lab s (c j)).filter
+                fun a ↦ ¬ (M.Holds S w ↔ M.Holds S (Function.update w j a))).card : ℝ)
+              / (labelFibre lab s (c j)).card := by
+  refine (editDistance_majorityRound_le_sum_partResampleDefect M (labelPartition lab s) S).trans
+    (le_of_eq (Finset.sum_congr rfl fun j _ ↦ ?_))
+  rw [sum_piFinset_const_eq_sum_labelBoxes lab s]
+  refine Finset.sum_congr rfl fun c _ ↦ Finset.sum_congr rfl fun w hw ↦ ?_
+  have hw' := Fintype.mem_piFinset.mp hw j
+  rw [labelFibre, Finset.mem_filter] at hw'
+  rw [partResampleDefect_labelPartition lab s _ j hw'.1, hw'.2]
+
+end Labels
+
 section Assembly
 
 variable {L : FirstOrder.Language} [FiniteRelational L]
@@ -374,6 +391,24 @@ example (R : (Fin 3 → V) → Prop) [DecidablePred R] (P : Finpartition (∅ : 
     (j : Fin 3) :
     ∑ w ∈ Fintype.piFinset (fun _ : Fin 3 ↦ (∅ : Finset V)), partResampleDefect R P j w = 0 := by
   rw [Fintype.piFinset_empty, Finset.sum_empty]
+
+-- **An unused label.** `lab₃ = ![0, 0, 2]` on `Fin 3` never uses label `1`: its fibre is empty,
+-- the partition has the two parts `{0, 1}` and `{2}`, and the reassembly over the nine label
+-- pairs still recovers `|s|² = 9` (every box with a `1` is empty).
+private def lab₃ : Fin 3 → Fin 3 := ![0, 0, 2]
+example : labelFibre lab₃ Finset.univ 1 = ∅ := by decide
+example : (labelPartition lab₃ Finset.univ).parts = {{0, 1}, {2}} := by decide
+example : ∑ c : Fin 2 → Fin 3,
+    (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card = 9 := by decide
+example : ∑ c : Fin 2 → Fin 3,
+      (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card
+    = (Fintype.piFinset fun _ : Fin 2 ↦ (Finset.univ : Finset (Fin 3))).card := by
+  have h := sum_piFinset_const_eq_sum_labelBoxes lab₃ Finset.univ (m := 2) (fun _ ↦ (1 : ℕ))
+  calc ∑ c : Fin 2 → Fin 3, (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card
+      = ∑ c : Fin 2 → Fin 3, ∑ _w ∈ Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i),
+          (1 : ℕ) := Finset.sum_congr rfl fun c _ ↦ Finset.card_eq_sum_ones _
+    _ = ∑ _w ∈ Fintype.piFinset fun _ : Fin 2 ↦ (Finset.univ : Finset (Fin 3)), (1 : ℕ) := h.symm
+    _ = _ := (Finset.card_eq_sum_ones _).symm
 
 end Tests
 
