@@ -12,6 +12,8 @@ import RegularityLemmata.Finite.RectangleCounting
 import RegularityLemmata.Finite.AlmostConstant
 import RegularityLemmata.Finite.AnalyticHomogeneous
 import RegularityLemmata.Finite.Edit
+import RegularityLemmata.Finite.SectionDefect
+import RegularityLemmata.Finite.ProductHybrid
 import RegularityLemmata.Finite.WeightedChoice
 import RegularityLemmata.Finite.WeightedChoiceBudget
 import RegularityLemmata.Finite.DensityBuckets
@@ -116,6 +118,7 @@ import RegularityLemmata.Relational.BinaryBridges
 import RegularityLemmata.Relational.BinaryPattern
 import RegularityLemmata.Relational.Indivisible
 import RegularityLemmata.Relational.CellwiseEdit
+import RegularityLemmata.Relational.MajorityAssembly
 import RegularityLemmata.Relational.TwoVertexCounting
 import RegularityLemmata.Relational.ThreeVertexCounting
 import RegularityLemmata.Relational.TransversalCounting

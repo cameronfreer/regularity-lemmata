@@ -11,6 +11,7 @@ import RegularityLemmata.Relational.Transport
 import RegularityLemmata.Relational.Indivisible
 import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.CellwiseEdit
+import RegularityLemmata.Relational.MajorityAssembly
 import RegularityLemmata.Relational.AggregationBridge
 
 /-!
