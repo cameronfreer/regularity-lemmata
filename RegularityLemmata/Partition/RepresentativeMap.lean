@@ -15,7 +15,7 @@ the new part of `x` is the old part `P.part (rep x)`; outside `D`, old label = o
 (`part_eq_owner`).
 
 **This charge is not the almost-refinement charge.** `exceptionalMass Q P`
-(`Partition/AlmostRefines.lean`) counts every point of a new part not wholly contained in an old
+(`RegularityLemmata/Partition/AlmostRefines.lean`) counts every point of a new part not wholly contained in an old
 part. A representative map may keep a *core* of such a crossing part (the points in its owner's
 old part) and displace only the rest, so `|D|` can be strictly smaller: the regression below has
 `exceptionalMass = 3` and `|D| = 1`. The two are related by one-way bridges, each under the exact
@@ -23,13 +23,18 @@ hypothesis that makes it valid:
 
 * `ofExceptional` (mass → map): displacing every point of every crossing part, with the
   crossing parts owned by a designated old part `t₀`, gives a representative map with
-  `|D| = exceptionalMass Q P` (`card_displaced_ofExceptional`). Composed with mathlib's
-  equitabilisation this is the **equitable construction**
+  `|D| = exceptionalMass Q P` (`card_displaced_ofExceptional`).
+* `ofExceptionalFree` (the **one free old part**): the same representatives, but the crossing
+  points *inside* `t₀` already have the right owner and are not displaced,
+  `D = crossingSet P Q \ t₀`. Its displaced set is the sum of the uncovered remainders of the
+  *other* old parts (`card_displaced_ofExceptionalFree`), hence at most `(K − 1) · m` under a
+  per-parent remainder `m` (`card_displaced_ofExceptionalFree_le`), and `0` for a single old
+  part. Composed with mathlib's equitabilisation this is the **equitable construction**
   `exists_equitable_representativeMap`: for every requested part count `0 < t ≤ |s|`, an
   equipartition `Q` with exactly `t` parts and a representative map into `P` whose displaced
-  set has size at most `#P.parts · ⌊|s|/t⌋`. The bound is the per-old-part remainder `⌊|s|/t⌋`
-  of `Finpartition.equitabilise` summed over all `K = #P.parts` old parts; it is stated with the
-  floor visible, and no divisibility is assumed.
+  set has size at most `(#P.parts − 1) · ⌊|s|/t⌋`, the per-old-part remainder `⌊|s|/t⌋` of
+  `Finpartition.equitabilise` summed over the `K − 1` old parts other than `t₀`; stated with the
+  floor visible, no divisibility assumed.
 * `exceptionalMass_le_mul_card_displaced` (map → mass): if every part of `Q` has at most `b`
   elements, `exceptionalMass Q P ≤ b · |D|` (each crossing part contains a displaced point).
 
@@ -190,6 +195,67 @@ theorem RepresentativeMap.card_displaced_ofExceptional (ht₀ : t₀ ∈ P.parts
     (RepresentativeMap.ofExceptional P Q ht₀).displaced.card = exceptionalMass Q P :=
   card_crossingSet P Q
 
+/-- **One free old part.** The representatives of `ofExceptional`, but only the crossing points
+outside `t₀` are displaced: a crossing point of `t₀` is represented in `t₀`, its own old part. -/
+noncomputable def RepresentativeMap.ofExceptionalFree (ht₀ : t₀ ∈ P.parts) :
+    RepresentativeMap P Q where
+  rep := (RepresentativeMap.ofExceptional P Q ht₀).rep
+  displaced := crossingSet P Q \ t₀
+  displaced_subset := (Finset.sdiff_subset).trans (Finset.filter_subset _ _)
+  rep_mem := (RepresentativeMap.ofExceptional P Q ht₀).rep_mem
+  rep_const := (RepresentativeMap.ofExceptional P Q ht₀).rep_const
+  part_rep := fun x hx hxD ↦ by
+    rw [Finset.mem_sdiff, not_and, not_not] at hxD
+    by_cases hcross : x ∈ crossingSet P Q
+    · -- a crossing point of `t₀`: its representative is the chosen element of `t₀`.
+      have hxt₀ : x ∈ t₀ := hxD hcross
+      have hnot : ¬ ((Q.part x).Nonempty ∧ ∃ t ∈ P.parts, Q.part x ⊆ t) := fun h ↦
+        (Finset.mem_filter.mp hcross).2 h.2
+      show P.part (repOfPart P ht₀ (Q.part x)) = P.part x
+      unfold repOfPart
+      rw [dite_eq_right_of_eq_false (eq_false hnot),
+        P.part_eq_of_mem ht₀ (P.nonempty_of_mem_parts ht₀).choose_spec, P.part_eq_of_mem ht₀ hxt₀]
+    · exact (RepresentativeMap.ofExceptional P Q ht₀).part_rep x hx hcross
+
+/-- The displaced set of `ofExceptionalFree` is the union of the uncovered remainders of the old
+parts other than `t₀`. -/
+theorem RepresentativeMap.card_displaced_ofExceptionalFree (ht₀ : t₀ ∈ P.parts) :
+    (RepresentativeMap.ofExceptionalFree P Q ht₀).displaced.card
+      = ∑ t ∈ P.parts.erase t₀, (uncoveredWithin Q t).card := by
+  classical
+  show (crossingSet P Q \ t₀).card = _
+  have hmaps : ∀ x ∈ crossingSet P Q \ t₀, P.part x ∈ P.parts.erase t₀ := by
+    intro x hx
+    rw [Finset.mem_sdiff] at hx
+    have hxs : x ∈ s := (Finset.mem_filter.mp hx.1).1
+    rw [Finset.mem_erase]
+    refine ⟨fun h ↦ hx.2 (h ▸ P.mem_part_self.mpr hxs), P.part_mem.mpr hxs⟩
+  rw [Finset.card_eq_sum_card_fiberwise hmaps]
+  refine Finset.sum_congr rfl fun t ht ↦ ?_
+  rw [Finset.mem_erase] at ht
+  rw [uncoveredWithin_eq_filter_crossing P Q ht.2]
+  congr 1
+  ext x
+  simp only [Finset.mem_filter, Finset.mem_sdiff]
+  constructor
+  · rintro ⟨⟨hc, _⟩, hpt⟩
+    exact ⟨hc, (P.part_eq_iff_mem ht.2).mp hpt⟩
+  · rintro ⟨hc, hxt⟩
+    refine ⟨⟨hc, fun hxt₀ ↦ ht.1 (P.eq_of_mem_parts ht.2 ht₀ hxt hxt₀)⟩,
+      (P.part_eq_iff_mem ht.2).mpr hxt⟩
+
+/-- Under a per-parent remainder `m`, the free-part construction displaces at most
+`(K − 1) · m` points, `K = #P.parts`; in particular `0` when `P` has a single part. -/
+theorem RepresentativeMap.card_displaced_ofExceptionalFree_le (ht₀ : t₀ ∈ P.parts) {m : ℕ}
+    (h : AlmostRefinesAt Q P m) :
+    (RepresentativeMap.ofExceptionalFree P Q ht₀).displaced.card ≤ (P.parts.card - 1) * m := by
+  rw [RepresentativeMap.card_displaced_ofExceptionalFree]
+  calc ∑ t ∈ P.parts.erase t₀, (uncoveredWithin Q t).card
+      ≤ ∑ _t ∈ P.parts.erase t₀, m :=
+        Finset.sum_le_sum fun t ht ↦ h t (Finset.mem_of_mem_erase ht)
+    _ = (P.parts.card - 1) * m := by
+        rw [Finset.sum_const, smul_eq_mul, Finset.card_erase_of_mem ht₀]
+
 end OfExceptional
 
 /-! ### Bridge: map → mass -/
@@ -247,29 +313,28 @@ theorem RepresentativeMap.exceptionalMass_le_mul_card_displaced {P Q : Finpartit
 /-! ### The equitable construction -/
 
 /-- **Equitable representative map.** For a requested part count `0 < t ≤ |s|` and a designated
-old part `t₀`, an equipartition `Q` with exactly `t` parts and a representative map into `P`
-whose displaced set has at most `#P.parts · ⌊|s|/t⌋` elements (the per-old-part remainder of
-mathlib's equitabilisation, summed over the `K = #P.parts` old parts). -/
+(free) old part `t₀`, an equipartition `Q` with exactly `t` parts and a representative map into
+`P` whose displaced set has at most `(#P.parts − 1) · ⌊|s|/t⌋` elements: the per-old-part
+remainder of mathlib's equitabilisation, summed over the old parts other than `t₀`. -/
 theorem exists_equitable_representativeMap (P : Finpartition s) {t₀ : Finset α}
     (ht₀ : t₀ ∈ P.parts) {t : ℕ} (ht : 0 < t) (hts : t ≤ s.card) :
     ∃ (Q : Finpartition s) (r : RepresentativeMap P Q), Q.IsEquipartition ∧ Q.parts.card = t ∧
-      r.displaced.card ≤ P.parts.card * (s.card / t) := by
+      r.displaced.card ≤ (P.parts.card - 1) * (s.card / t) := by
   obtain ⟨Q, hQ, hcard, hat⟩ := exists_equipartition_almostRefinesAt P ht hts
-  refine ⟨Q, RepresentativeMap.ofExceptional P Q ht₀, hQ, hcard, ?_⟩
-  rw [RepresentativeMap.card_displaced_ofExceptional]
-  calc exceptionalMass Q P ≤ s.card / t * P.parts.card := exceptionalMass_le_of_almostRefinesAt hat
-    _ = P.parts.card * (s.card / t) := Nat.mul_comm _ _
+  exact ⟨Q, RepresentativeMap.ofExceptionalFree P Q ht₀, hQ, hcard,
+    RepresentativeMap.card_displaced_ofExceptionalFree_le P Q ht₀ hat⟩
 
-/-- The `ε`-form: displaced mass at most `ε · |s|` once `⌊|s|/t⌋ · #P.parts ≤ ε · |s|`. -/
+/-- The `ε`-form: displaced mass at most `ε · |s|` once `⌊|s|/t⌋ · (#P.parts − 1) ≤ ε · |s|`. -/
 theorem exists_equitable_representativeMap_of_le (P : Finpartition s) {t₀ : Finset α}
     (ht₀ : t₀ ∈ P.parts) {t : ℕ} (ht : 0 < t) (hts : t ≤ s.card) {ε : ℝ}
-    (hbound : ((s.card / t : ℕ) : ℝ) * P.parts.card ≤ ε * s.card) :
+    (hbound : ((s.card / t : ℕ) : ℝ) * ((P.parts.card - 1 : ℕ) : ℝ) ≤ ε * s.card) :
     ∃ (Q : Finpartition s) (r : RepresentativeMap P Q), Q.IsEquipartition ∧ Q.parts.card = t ∧
       (r.displaced.card : ℝ) ≤ ε * s.card := by
   obtain ⟨Q, r, hQ, hcard, hD⟩ := exists_equitable_representativeMap P ht₀ ht hts
   refine ⟨Q, r, hQ, hcard, le_trans ?_ hbound⟩
-  calc (r.displaced.card : ℝ) ≤ ((P.parts.card * (s.card / t) : ℕ) : ℝ) := by exact_mod_cast hD
-    _ = ((s.card / t : ℕ) : ℝ) * P.parts.card := by push_cast; ring
+  calc (r.displaced.card : ℝ) ≤ (((P.parts.card - 1) * (s.card / t) : ℕ) : ℝ) := by
+        exact_mod_cast hD
+    _ = ((s.card / t : ℕ) : ℝ) * ((P.parts.card - 1 : ℕ) : ℝ) := by push_cast; ring
 
 /-! ### Tests and the crossing regression -/
 
@@ -311,6 +376,20 @@ example : exceptionalMass (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) P₀
 example : (RepresentativeMap.ofExceptional P₀ (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3)))
     (t₀ := {0, 1}) (by decide)).displaced.card = 3 := by
   rw [RepresentativeMap.card_displaced_ofExceptional]; decide
+-- **The free-part construction** with `t₀ = {0, 1}` displaces exactly `{2}`, not all three points.
+example : (RepresentativeMap.ofExceptionalFree P₀ (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3)))
+    (t₀ := {0, 1}) (by decide)).displaced = {2} := by
+  show crossingSet P₀ ⊤ \ {0, 1} = {2}
+  decide
+-- **One old part**: with `P = ⊤` the improved bound is `(1 − 1) · m = 0`, so nothing is displaced.
+example (Q : Finpartition ({0, 1, 2} : Finset (Fin 3))) (m : ℕ)
+    (h : AlmostRefinesAt Q (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) m) :
+    (RepresentativeMap.ofExceptionalFree (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))) Q
+      (t₀ := {0, 1, 2}) (by decide)).displaced.card = 0 := by
+  have := RepresentativeMap.card_displaced_ofExceptionalFree_le _ Q (t₀ := {0, 1, 2}) (by decide) h
+  have hcard : (⊤ : Finpartition ({0, 1, 2} : Finset (Fin 3))).parts.card = 1 := by decide
+  rw [hcard] at this
+  simpa using this
 
 -- **Singleton fallback**: `⊥` has `|s|` parts and nothing displaced.
 example : (RepresentativeMap.bot P₀).displaced = ∅ := rfl

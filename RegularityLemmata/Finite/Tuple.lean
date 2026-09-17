@@ -23,7 +23,8 @@ Mathlib provides the box itself (`Fintype.piFinset`), its cardinality
 (`Fintype.card_piFinset`), and the pair equivalence (`finTwoArrowEquiv`); this file only
 adds the glue used by the density and counting layers, including the split of a sum over a
 box at one coordinate into the pivot value and the lower-box tuple (`sum_piFinset_succAbove`,
-via mathlib's `Fin.insertNth`).
+via mathlib's `Fin.insertNth`) and the count of tuples meeting a set (`card_filter_apply_mem`,
+`card_filter_exists_apply_mem_le`).
 -/
 
 namespace RegularityLemmata
@@ -66,6 +67,39 @@ theorem sum_piFinset_succAbove {M : Type*} [AddCommMonoid M] {n : ℕ}
     simp
   · rintro ⟨rest, b⟩ _
     rfl
+
+/-- The tuples of `s^(n+1)` whose `j`-th coordinate lies in `D ⊆ s`: exactly `|D| · |s|^n`. -/
+theorem card_filter_apply_mem [DecidableEq α] {s D : Finset α} (hD : D ⊆ s) {n : ℕ}
+    (j : Fin (n + 1)) :
+    ((Fintype.piFinset fun _ : Fin (n + 1) ↦ s).filter fun x ↦ x j ∈ D).card
+      = D.card * s.card ^ n := by
+  classical
+  rw [Finset.card_filter, sum_piFinset_succAbove (fun _ ↦ s) j]
+  simp only [Fin.insertNth_apply_same]
+  rw [Finset.sum_const, Fintype.card_piFinset_const, smul_eq_mul, ← Finset.card_filter,
+    Finset.filter_mem_eq_inter, Finset.inter_eq_right.mpr hD]
+  exact Nat.mul_comm _ _
+
+/-- Union bound: at most `(n+1) · |D| · |s|^n` tuples of `s^(n+1)` meet `D ⊆ s`. -/
+theorem card_filter_exists_apply_mem_le [DecidableEq α] {s D : Finset α} (hD : D ⊆ s) (n : ℕ) :
+    ((Fintype.piFinset fun _ : Fin (n + 1) ↦ s).filter fun x ↦ ∃ i, x i ∈ D).card
+      ≤ (n + 1) * D.card * s.card ^ n := by
+  classical
+  calc ((Fintype.piFinset fun _ : Fin (n + 1) ↦ s).filter fun x ↦ ∃ i, x i ∈ D).card
+      ≤ (Finset.univ.biUnion fun j : Fin (n + 1) ↦
+          (Fintype.piFinset fun _ : Fin (n + 1) ↦ s).filter fun x ↦ x j ∈ D).card := by
+        refine Finset.card_le_card fun x hx ↦ ?_
+        rw [Finset.mem_filter] at hx
+        obtain ⟨hxs, j, hj⟩ := hx
+        rw [Finset.mem_biUnion]
+        exact ⟨j, Finset.mem_univ _, Finset.mem_filter.mpr ⟨hxs, hj⟩⟩
+    _ ≤ ∑ j : Fin (n + 1),
+          ((Fintype.piFinset fun _ : Fin (n + 1) ↦ s).filter fun x ↦ x j ∈ D).card :=
+        Finset.card_biUnion_le
+    _ = (n + 1) * D.card * s.card ^ n := by
+        rw [Finset.sum_congr rfl fun j _ ↦ card_filter_apply_mem hD j, Finset.sum_const,
+          Finset.card_univ, Fintype.card_fin, smul_eq_mul]
+        exact (Nat.mul_assoc _ _ _).symm
 
 /-- Lower faces of injective tuples are injective. -/
 theorem lowerFace_injective {j : ℕ} {v : Fin (j + 1) → α} (hv : Function.Injective v)
