@@ -24,7 +24,7 @@ counting hypothesis stronger). Stated with the sum rather
 than the average, so it is guard-free for `Y = ∅`.
 
 Nothing here refers to a partition or to a relation of higher arity; the coordinate-wise
-hybrid argument that consumes these sections is `Finite/ProductHybrid.lean`.
+hybrid argument that consumes these sections is `RegularityLemmata/Finite/ProductHybrid.lean`.
 -/
 
 namespace RegularityLemmata

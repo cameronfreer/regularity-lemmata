@@ -46,8 +46,8 @@ cell box would imply the ambient hypothesis by summation, not conversely. The co
 displacement of the partition itself is not part of this file.
 
 The product substrate (`prefixHybrid`, `coordDisagreement`, `minorityCount`, the normalized
-resampling bound) is `Finite/ProductHybrid.lean`, used here with the constant coordinate family;
-the split of a box sum at one coordinate is `sum_piFinset_succAbove` in `Finite/Tuple.lean`.
+resampling bound) is `RegularityLemmata/Finite/ProductHybrid.lean`, used here with the constant coordinate family;
+the split of a box sum at one coordinate is `sum_piFinset_succAbove` in `RegularityLemmata/Finite/Tuple.lean`.
 -/
 
 namespace RegularityLemmata

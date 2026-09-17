@@ -26,6 +26,7 @@ roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual", "Composit
 [[lean_exe]]
 name = "axiom_audit"
 root = "scripts.AxiomAudit"
+supportInterpreter = true
 
 [[lean_exe]]
 name = "public_inventory"
