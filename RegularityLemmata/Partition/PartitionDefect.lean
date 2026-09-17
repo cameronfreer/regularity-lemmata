@@ -209,6 +209,36 @@ example : partitionDefect P₂ (fun a ↦ a = 0) = 1 := by
 example : partitionDefect (⊥ : Finpartition (Finset.univ : Finset (Fin 4))) (fun a ↦ a = 0) = 0 :=
   partitionDefect_bot _
 
+-- **The variance term, numerically**: inside the single part `{0,1,2,3}` (density `1/4`) the fine
+-- parts `{0,1}` (density `1/2`) and `{2,3}` (density `0`) contribute `2·(1/4)² + 2·(1/4)² = 1/4`.
+example : sectionRefinementVariance P₂ (⊤ : Finpartition (Finset.univ : Finset (Fin 4)))
+    (fun a ↦ a = 0) = 1 / 4 := by
+  have htop : (⊤ : Finpartition (Finset.univ : Finset (Fin 4))).parts = {Finset.univ} := by
+    decide
+  have hfilt : P₂.parts.filter (· ⊆ (Finset.univ : Finset (Fin 4))) = {{0, 1}, {2, 3}} := by
+    decide
+  have d₀ : densityOn ({0, 1} : Finset (Fin 4)) (fun a ↦ a = 0) = 1 / 2 := by
+    unfold densityOn
+    rw [show (({0, 1} : Finset (Fin 4)).filter fun a ↦ a = 0).card = 1 by decide]; norm_num
+  have d₁ : densityOn ({2, 3} : Finset (Fin 4)) (fun a ↦ a = 0) = 0 := by
+    unfold densityOn
+    rw [show (({2, 3} : Finset (Fin 4)).filter fun a ↦ a = 0).card = 0 by decide]; norm_num
+  have dt : densityOn (Finset.univ : Finset (Fin 4)) (fun a ↦ a = 0) = 1 / 4 := by
+    unfold densityOn
+    rw [show ((Finset.univ : Finset (Fin 4)).filter fun a ↦ a = 0).card = 1 by decide]; norm_num
+  unfold sectionRefinementVariance
+  rw [htop, Finset.sum_singleton, hfilt, Finset.sum_pair (by decide), d₀, d₁, dt,
+    Finset.card_pair (show (0 : Fin 4) ≠ 1 by decide), Finset.card_pair (show (2 : Fin 4) ≠ 3 by decide)]
+  norm_num
+
+-- **The exact identity on the instance**: `3/2 = 1 + 2 · (1/4)`, pinning the weighting and the
+-- factor `2`.
+example : partitionDefect (⊤ : Finpartition (Finset.univ : Finset (Fin 4))) (fun a ↦ a = 0)
+    = partitionDefect P₂ (fun a ↦ a = 0)
+      + 2 * sectionRefinementVariance P₂ (⊤ : Finpartition (Finset.univ : Finset (Fin 4)))
+          (fun a ↦ a = 0) :=
+  partitionDefect_eq_add_refinementVariance _ le_top
+
 -- **Monotonicity on the instance**: `P₂ ≤ ⊤`, and `1 ≤ 3/2`.
 example : partitionDefect P₂ (fun a ↦ a = 0)
     ≤ partitionDefect (⊤ : Finpartition (Finset.univ : Finset (Fin 4))) (fun a ↦ a = 0) :=

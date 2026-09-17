@@ -6,6 +6,8 @@ import Mathlib.Order.Partition.Finpartition
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Basic
+import Mathlib.Data.Fin.VecNotation
+import Mathlib.Tactic.FinCases
 
 /-!
 # Part-union and counting lemmas over `Finpartition`
@@ -74,6 +76,35 @@ theorem card_parts_inf'_le {ι : Type*} {t : Finset ι} (ht : t.Nonempty)
     · rw [Finset.not_nonempty_iff_eq_empty] at ht'
       subst ht'
       simp
+
+/-! ### The join of coordinate partitions -/
+
+/-- The common refinement of the coordinate partitions: the lattice meet over all coordinates. -/
+noncomputable def coordinateJoin {n : ℕ} (P : Fin (n + 1) → Finpartition s) : Finpartition s :=
+  Finset.univ.inf' Finset.univ_nonempty P
+
+theorem coordinateJoin_le {n : ℕ} (P : Fin (n + 1) → Finpartition s) (j : Fin (n + 1)) :
+    coordinateJoin P ≤ P j :=
+  Finset.inf'_le _ (Finset.mem_univ j)
+
+/-- **Join cardinality**: at most the product of the coordinate part counts. -/
+theorem card_parts_coordinateJoin_le {n : ℕ} (P : Fin (n + 1) → Finpartition s) :
+    (coordinateJoin P).parts.card ≤ ∏ j, (P j).parts.card :=
+  card_parts_inf'_le _ P
+
+/-- A constant family joins to itself. -/
+@[simp] theorem coordinateJoin_const {n : ℕ} (P : Finpartition s) :
+    coordinateJoin (fun _ : Fin (n + 1) ↦ P) = P :=
+  Finset.inf'_const _ _
+
+/-- For two coordinates the join is the lattice meet. -/
+theorem coordinateJoin_two (P₁ P₂ : Finpartition s) :
+    coordinateJoin ![P₁, P₂] = P₁ ⊓ P₂ := by
+  refine le_antisymm (le_inf (coordinateJoin_le _ 0) (coordinateJoin_le _ 1)) ?_
+  refine Finset.le_inf' _ _ fun j _ ↦ ?_
+  fin_cases j
+  · exact inf_le_left
+  · exact inf_le_right
 
 /-! ### Part unions -/
 

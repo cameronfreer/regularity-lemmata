@@ -15,10 +15,9 @@ import RegularityLemmata.Relational.MajorityAssembly
 * **Labelled partitions.** For `labelPartition lab s` the defect is the sum over *all* labels of
   the fibre defects, an unused (empty) fibre contributing `0`
   (`partitionDefect_labelPartition`).
-* **The join.** For coordinate partitions `P : Fin (n+1) → Finpartition s`, `coordinateJoin P`
-  is their common refinement (the lattice meet `Finset.univ.inf' _ P`), below every `P j`
-  (`coordinateJoin_le`), with at most `∏ⱼ #(P j).parts` parts (`card_parts_coordinateJoin_le`,
-  from `card_parts_inf'_le`).
+* **The join.** `coordinateJoin P` (`RegularityLemmata/Partition/Basic.lean`) is the common
+  refinement of the coordinate partitions `P : Fin (n+1) → Finpartition s`, below every `P j`,
+  with at most `∏ⱼ #(P j).parts` parts.
 * **Majority rounding for arbitrary coordinate partitions**
   (`editDistance_majorityRound_coordinateJoin_le`): rounding `M` at the join has edit distance
   on `s^(n+1)` at most `∑ⱼ familyDefect (P j)` of the coordinate-`j` sections, i.e. the sum of
@@ -27,8 +26,11 @@ import RegularityLemmata.Relational.MajorityAssembly
   above. Proof: the one-partition bound at the join, the bridge, and refinement monotonicity
   `partitionDefect_mono` along `coordinateJoin_le`.
 
-Compiled consumers: `examples/DirectedJoinRounding.lean` (a directed binary relation, two
-partitions) and `examples/SymmetricRounding.lean` (a symmetric relation, one partition).
+Compiled consumers (source, not published API modules): a directed binary relation with two
+partitions,
+<https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/DirectedJoinRounding.lean>,
+and a symmetric relation with one partition,
+<https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/SymmetricRounding.lean>.
 -/
 
 namespace RegularityLemmata
@@ -62,14 +64,6 @@ section Labels
 
 variable {Λ : Type*} [DecidableEq Λ] (lab : V → Λ) (s : Finset V)
 
-/-- The parts of the label partition are the fibres of the labels used. -/
-theorem labelPartition_parts :
-    (labelPartition lab s).parts = (s.image lab).image (labelFibre lab s) := by
-  rw [labelPartition, Finpartition.ofSetSetoid_parts, Finset.image_image]
-  refine Finset.image_congr fun v _ ↦ ?_
-  simp only [Function.comp, labelFibre]
-  exact Finset.filter_congr fun b _ ↦ ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
-
 /-- The defect of a labelled partition is the sum over all labels of the fibre defects; an
 unused label has an empty fibre and contributes `0`. -/
 theorem partitionDefect_labelPartition [Fintype Λ] (p : V → Prop) [DecidablePred p] :
@@ -91,35 +85,6 @@ theorem partitionDefect_labelPartition [Fintype Λ] (p : V → Prop) [DecidableP
     exact hva.2
 
 end Labels
-
-/-! ### The join of coordinate partitions -/
-
-/-- The common refinement of the coordinate partitions: the lattice meet over all coordinates. -/
-noncomputable def coordinateJoin {n : ℕ} (P : Fin (n + 1) → Finpartition s) : Finpartition s :=
-  Finset.univ.inf' Finset.univ_nonempty P
-
-theorem coordinateJoin_le {n : ℕ} (P : Fin (n + 1) → Finpartition s) (j : Fin (n + 1)) :
-    coordinateJoin P ≤ P j :=
-  Finset.inf'_le _ (Finset.mem_univ j)
-
-/-- **Join cardinality**: at most the product of the coordinate part counts. -/
-theorem card_parts_coordinateJoin_le {n : ℕ} (P : Fin (n + 1) → Finpartition s) :
-    (coordinateJoin P).parts.card ≤ ∏ j, (P j).parts.card :=
-  card_parts_inf'_le _ P
-
-/-- A constant family joins to itself. -/
-@[simp] theorem coordinateJoin_const {n : ℕ} (P : Finpartition s) :
-    coordinateJoin (fun _ : Fin (n + 1) ↦ P) = P :=
-  Finset.inf'_const _ _
-
-/-- For two coordinates the join is the lattice meet. -/
-theorem coordinateJoin_two (P₁ P₂ : Finpartition s) :
-    coordinateJoin ![P₁, P₂] = P₁ ⊓ P₂ := by
-  refine le_antisymm (le_inf (coordinateJoin_le _ 0) (coordinateJoin_le _ 1)) ?_
-  refine Finset.le_inf' _ _ fun j _ ↦ ?_
-  fin_cases j
-  · exact inf_le_left
-  · exact inf_le_right
 
 /-! ### Majority rounding for arbitrary coordinate partitions -/
 
