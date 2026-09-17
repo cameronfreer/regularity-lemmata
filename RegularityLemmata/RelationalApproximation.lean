@@ -12,6 +12,7 @@ import RegularityLemmata.Relational.Indivisible
 import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.CellwiseEdit
 import RegularityLemmata.Relational.MajorityAssembly
+import RegularityLemmata.Relational.DisplacedTransport
 import RegularityLemmata.Relational.AggregationBridge
 
 /-!
@@ -53,6 +54,17 @@ curated stack and defines nothing; each listed module remains directly importabl
   `editDistance_majorityRound_le` at `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)`, the labelled-fibre
   adapter `labelPartition` (unused labels allowed) with its reassembly over label tuples, and
   the exact nullary copy.
+* `Partition.RepresentativeMap`, `Relational.DisplacedTransport` — the **owner/displacement
+  contract** `RepresentativeMap P Q` (a representative map constant on the new parts, a
+  displaced set `D`, old label = owner (new label) outside `D`), kept distinct from the
+  almost-refinement charge with one-way bridges in each direction (`ofExceptional`,
+  `exceptionalMass_le_mul_card_displaced`) and the crossing regression; the equitable
+  construction `exists_equitable_representativeMap` (`t` parts, `|D| ≤ #P.parts·⌊|s|/t⌋`,
+  crossing parts owned by a designated old part); transport `FiniteRelModel.transportAlong`
+  (the pullback along the representative map, indivisible for the new partition, exact on
+  nullary symbols) with the displaced-coordinate edit bound `(n+1)·|D|·|s|^n`; and the
+  composition `exists_equitable_isIndivisibleFor` giving one shared equitable partition and one
+  model for all symbols.
 
 * `Relational.AggregationBridge` — the **approximation-to-counting bridge**: the raw,
   denominator-free aggregation `abs_inducedEmbeddingCountOn_sub_sum_est_le` (a supplied
