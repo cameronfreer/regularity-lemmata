@@ -13,6 +13,7 @@ import RegularityLemmata.Relational.Edit
 import RegularityLemmata.Relational.CellwiseEdit
 import RegularityLemmata.Relational.MajorityAssembly
 import RegularityLemmata.Relational.DisplacedTransport
+import RegularityLemmata.Relational.CoordinatePartitionRounding
 import RegularityLemmata.Relational.AggregationBridge
 
 /-!
@@ -67,6 +68,15 @@ curated stack and defines nothing; each listed module remains directly importabl
   nullary symbols) with the displaced-coordinate edit bound `(n+1)·|D|·|s|^n`; and the
   composition `exists_equitable_isIndivisibleFor` giving one shared equitable partition and one
   model for all symbols.
+* `Partition.PartitionDefect`, `Relational.CoordinatePartitionRounding` — the **partition
+  defect** `partitionDefect P p = ∑_l sectionDisagreement l p / |l|` of a section and of a
+  finite section family (`familyDefect`), the exact **refinement variance identity**
+  `partitionDefect P p = partitionDefect Q p + 2 · sectionRefinementVariance Q P p` for `Q ≤ P`
+  with its monotonicity corollary, the labelled form over all labels
+  (`partitionDefect_labelPartition`, unused labels contribute `0`), the join of coordinate
+  partitions `coordinateJoin` with its cardinality bound, and the **majority bound for
+  arbitrary coordinate partitions** `editDistance_majorityRound_coordinateJoin_le`: rounding at
+  the join costs at most the sum of the coordinate defects, each measured in its own partition.
 
 * `Relational.AggregationBridge` — the **approximation-to-counting bridge**: the raw,
   denominator-free aggregation `abs_inducedEmbeddingCountOn_sub_sum_est_le` (a supplied
