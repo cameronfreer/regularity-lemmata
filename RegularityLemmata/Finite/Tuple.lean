@@ -7,6 +7,7 @@ import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Data.Finset.Prod
+import Mathlib.Data.Fin.Tuple.Finset
 import Mathlib.Data.Fin.SuccPred
 import Mathlib.Tactic.FinCases
 
@@ -20,7 +21,9 @@ products via mathlib's `finTwoArrowEquiv`.
 
 Mathlib provides the box itself (`Fintype.piFinset`), its cardinality
 (`Fintype.card_piFinset`), and the pair equivalence (`finTwoArrowEquiv`); this file only
-adds the glue used by the density and counting layers.
+adds the glue used by the density and counting layers, including the split of a sum over a
+box at one coordinate into the pivot value and the lower-box tuple (`sum_piFinset_succAbove`,
+via mathlib's `Fin.insertNth`).
 -/
 
 namespace RegularityLemmata
@@ -36,6 +39,33 @@ def lowerFace {j : ℕ} (v : Fin (j + 1) → α) (i : Fin (j + 1)) : Fin j → �
 
 @[simp] theorem lowerFace_apply {j : ℕ} (v : Fin (j + 1) → α) (i : Fin (j + 1)) (k : Fin j) :
     lowerFace v i k = v (i.succAbove k) := rfl
+
+/-- A sum over the box `∏ᵢ A i` split at coordinate `j`: the pivot value `b ∈ A j` and the
+off-coordinate tuple in the lower box `∏_{i ≠ j} A i` (indexed via `Fin.succAbove`). -/
+theorem sum_piFinset_succAbove {M : Type*} [AddCommMonoid M] {n : ℕ}
+    (A : Fin (n + 1) → Finset α) (j : Fin (n + 1)) (f : (Fin (n + 1) → α) → M) :
+    ∑ w ∈ Fintype.piFinset A, f w
+      = ∑ rest ∈ Fintype.piFinset (fun i ↦ A (j.succAbove i)), ∑ b ∈ A j,
+          f (Fin.insertNth j b rest) := by
+  rw [← Finset.sum_product' (s := Fintype.piFinset (fun i ↦ A (j.succAbove i))) (t := A j)
+    (f := fun rest b ↦ f (Fin.insertNth j b rest))]
+  symm
+  refine Finset.sum_nbij' (fun q ↦ Fin.insertNth j q.2 q.1)
+    (fun w ↦ (Fin.removeNth j w, w j)) ?_ ?_ ?_ ?_ ?_
+  · rintro ⟨rest, b⟩ hq
+    rw [Finset.mem_product] at hq
+    rw [Fin.mem_piFinset_iff_pivot_removeNth j]
+    simpa [Fin.removeNth, Fintype.mem_piFinset] using ⟨hq.2, Fintype.mem_piFinset.mp hq.1⟩
+  · intro w hw
+    rw [Fin.mem_piFinset_iff_pivot_removeNth j] at hw
+    rw [Finset.mem_product]
+    exact ⟨hw.2, hw.1⟩
+  · rintro ⟨rest, b⟩ _
+    simp
+  · intro w _
+    simp
+  · rintro ⟨rest, b⟩ _
+    rfl
 
 /-- Lower faces of injective tuples are injective. -/
 theorem lowerFace_injective {j : ℕ} {v : Fin (j + 1) → α} (hv : Function.Injective v)

@@ -21,9 +21,14 @@ name = "RegularityLemmataGates"
 [[lean_lib]]
 name = "RegularityLemmataExamples"
 srcDir = "examples"
-roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual", "CompositionCertificates", "ReadmeSnippet"]
+roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual", "CompositionCertificates", "ReadmeSnippet", "TernaryMajorityRounding"]
 
 [[lean_exe]]
 name = "axiom_audit"
 root = "scripts.AxiomAudit"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "public_inventory"
+root = "scripts.PublicInventory"
 supportInterpreter = true
