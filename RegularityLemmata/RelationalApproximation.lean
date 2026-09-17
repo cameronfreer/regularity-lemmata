@@ -58,9 +58,11 @@ curated stack and defines nothing; each listed module remains directly importabl
   contract** `RepresentativeMap P Q` (a representative map constant on the new parts, a
   displaced set `D`, old label = owner (new label) outside `D`), kept distinct from the
   almost-refinement charge with one-way bridges in each direction (`ofExceptional`,
-  `exceptionalMass_le_mul_card_displaced`) and the crossing regression; the equitable
-  construction `exists_equitable_representativeMap` (`t` parts, `|D| ≤ #P.parts·⌊|s|/t⌋`,
-  crossing parts owned by a designated old part); transport `FiniteRelModel.transportAlong`
+  `exceptionalMass_le_mul_card_displaced`) and the crossing regression; the free-part
+  construction `ofExceptionalFree` (crossing parts owned by a designated old part `t₀`, whose
+  own crossing points stay in place) and the equitable construction
+  `exists_equitable_representativeMap` (`t` parts, `|D| ≤ (#P.parts − 1)·⌊|s|/t⌋`); transport
+  `FiniteRelModel.transportAlong`
   (the pullback along the representative map, indivisible for the new partition, exact on
   nullary symbols) with the displaced-coordinate edit bound `(n+1)·|D|·|s|^n`; and the
   composition `exists_equitable_isIndivisibleFor` giving one shared equitable partition and one
