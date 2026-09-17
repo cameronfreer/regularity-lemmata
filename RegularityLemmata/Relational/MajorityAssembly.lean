@@ -284,6 +284,14 @@ def labelFibre (a : Λ) : Finset V := s.filter fun v ↦ lab v = a
 `Finpartition.ofSetSetoid` on the kernel setoid of `lab`. Unused labels contribute no part. -/
 def labelPartition : Finpartition s := Finpartition.ofSetSetoid (Setoid.ker lab) s
 
+/-- The parts of the label partition are the fibres of the labels used. -/
+theorem labelPartition_parts :
+    (labelPartition lab s).parts = (s.image lab).image (labelFibre lab s) := by
+  rw [labelPartition, Finpartition.ofSetSetoid_parts, Finset.image_image]
+  refine Finset.image_congr fun v _ ↦ ?_
+  simp only [Function.comp, labelFibre]
+  exact Finset.filter_congr fun b _ ↦ ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
+
 omit [DecidableEq V] in
 theorem labelFibre_eq_empty_iff (a : Λ) : labelFibre lab s a = ∅ ↔ ∀ v ∈ s, lab v ≠ a := by
   simp [labelFibre, Finset.filter_eq_empty_iff]
