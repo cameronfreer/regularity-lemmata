@@ -26,6 +26,7 @@
 # Environment:
 #   DOCS_SRC          doc-gen4 output directory (docbuild/.lake/build/doc)
 #   DOCS_VERSION      version name, e.g. v0.11.0 (validated: [A-Za-z0-9._-], not latest/deps)
+#                     (an existing deps tree is topped up with newly reachable dependency pages)
 #   DEPS_KEY          dependency-pin key, e.g. the Mathlib revision's first 12 characters
 #   PAGES_DIR         checkout of the gh-pages branch
 #   SIZE_LIMIT_BYTES  optional, default 900000000
@@ -67,7 +68,31 @@ if [ ! -d "$deps" ]; then
   python3 "$(dirname "$0")/docs_layout.py" strip-library "$deps"
   echo "deploy_docs: published dependency pages under deps/$DEPS_KEY"
 else
-  echo "deploy_docs: dependency pages deps/$DEPS_KEY already published; reused"
+  # Top up. The tree is keyed by the dependency pin, but its contents follow the library's import
+  # closure, which can grow between versions (a newly imported Mathlib module has no page yet).
+  # Pages are only ever added: an existing page is what older versions link to, so it is never
+  # overwritten. The shared index, navbar, and top-level files are refreshed from this build (a
+  # superset of what was published) and the library is stripped from them again.
+  added=0
+  for n in "${dep_names[@]}"; do
+    while IFS= read -r -d '' f; do
+      rel=${f#"$DOCS_SRC/"}
+      if [ ! -e "$deps/$rel" ]; then
+        mkdir -p "$(dirname "$deps/$rel")"
+        cp "$f" "$deps/$rel"
+        added=$((added + 1))
+      fi
+    done < <(find "$DOCS_SRC/$n" -type f -print0)
+  done
+  find "$DOCS_SRC" -maxdepth 1 -type f ! -name 'RegularityLemmata*.html' -exec cp {} "$deps/" \;
+  if [ -d "$DOCS_SRC/declarations" ]; then
+    rm -rf "$deps/declarations"; cp -r "$DOCS_SRC/declarations" "$deps/declarations"
+  fi
+  if [ -d "$DOCS_SRC/find" ]; then
+    mkdir -p "$deps/find"; cp -rn "$DOCS_SRC/find/." "$deps/find/"
+  fi
+  python3 "$(dirname "$0")/docs_layout.py" strip-library "$deps"
+  echo "deploy_docs: dependency pages deps/$DEPS_KEY already published; reused, $added new dependency page(s) added"
 fi
 
 # 2. The version directory, replaced whole.

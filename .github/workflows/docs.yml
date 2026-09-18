@@ -15,6 +15,11 @@ on:
         description: "Tag or commit to document (also the version directory name)"
         required: true
         default: "main"
+      update_latest:
+        description: "Also point latest/ at this version (use when re-publishing a release)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -81,7 +86,7 @@ jobs:
         env:
           DOCS_SRC: docbuild/.lake/build/doc
           PAGES_DIR: pages
-          DOCS_UPDATE_LATEST: ${{ github.event_name == 'release' && '1' || '0' }}
+          DOCS_UPDATE_LATEST: ${{ (github.event_name == 'release' || inputs.update_latest == true) && '1' || '0' }}
         run: |
           DEPS_KEY=$(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0][:12])")
           export DEPS_KEY
