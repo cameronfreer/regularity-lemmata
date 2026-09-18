@@ -40,7 +40,12 @@ all homomorphisms `6` vs `9`, the edge is simple, the hosts lack diagonal agreem
 counterexample, not a failed tactic: on six vertices, the loopless complete relation and the one
 with loops added are nullary-compatible, the edge pattern is simple, and the edit bound holds at
 `ε = 1/6` (exactly `6` edited tuples out of `36`), yet the induced counts differ by `30`, above
-the would-be bound `4 · (1/6) · 36 = 24`.
+the would-be bound `4 · (1/6) · 36 = 24`. This uses the **actual** edit rate `1/6`; it says
+nothing about an induced estimate at the potentially larger `globalRate`. Finally the boundary is
+pinned to the rounding operation itself (`majorityRound_top_six_agrees_loops`,
+`majorityRound_top_six_not_diagonalAgreement`): majority rounding of the loopless host at the
+indiscrete partition **is** the loop-added host, relation by relation, so the rounding fails
+diagonal agreement with its input.
 -/
 
 namespace RegularityLemmataExamples
@@ -137,7 +142,8 @@ theorem exists_hom_transfer (M : FiniteRelModel L V) (P : Finpartition s)
 
 /-- **The induced corollary, only with its explicit premise.** For the produced `N`, *if*
 `DiagonalAgreementOn M N s` holds (a premise the approximation does not supply), the induced
-count of a simple pattern moves by at most `coefficient · ε · N^k`. -/
+count of **any** pattern on `k` vertices (no simplicity is needed here) moves by at most
+`coefficient · ε · N^k`. -/
 theorem exists_induced_transfer_of_diagonalAgreement (M : FiniteRelModel L V) (P : Finpartition s)
     {t₀ : Finset V} (ht₀ : t₀ ∈ P.parts) {t : ℕ} (ht : 0 < t) (hts : t ≤ s.card)
     (hs : 0 < s.card) {θ γ lam : ℝ} (hθ : 0 ≤ θ) (hγ : 0 ≤ γ) (hlam0 : 0 ≤ lam)
@@ -288,6 +294,38 @@ theorem induced_six :
       inducedEmbeddingCountOn (complete 2 false) (complete 6 true) (fun _ ↦ Finset.univ) = 0 := by
   decide
 
+/-- The six-vertex hosts do not meet diagonal agreement (the loops disagree). -/
+theorem six_not_diagonalAgreement :
+    ¬ DiagonalAgreementOn (complete 6 false) (complete 6 true) Finset.univ := by
+  intro h
+  have hi : ¬ Function.Injective (fun _ : Fin 2 ↦ (0 : Fin 6)) := by
+    intro hinj
+    exact (by decide : (0 : Fin 2) ≠ 1) (hinj (a₁ := 0) (a₂ := 1) rfl)
+  have hh := h (RelSymbol.mk' (n := 2) (() : language.Relations 2)) (fun _ ↦ 0)
+    (fun _ ↦ Finset.mem_univ _) hi
+  change (false = true ↔ true = true) at hh
+  exact Bool.false_ne_true (hh.mpr rfl)
+
+/-- **The rounding pin.** Majority rounding of the loopless six-vertex host at the indiscrete
+partition agrees, relation by relation, with the loop-added host: the single cell `V × V` has
+`30` of `36` tuples true, so every tuple, loops included, rounds to true. -/
+theorem majorityRound_top_six_agrees_loops :
+    ∀ (S : RelSymbol language) (x : Fin (S.1 : ℕ) → Fin 6),
+      ((complete 6 false).majorityRound (⊤ : Finpartition (Finset.univ : Finset (Fin 6)))).Holds
+          S.2 x
+        ↔ (complete 6 true).Holds S.2 x := by
+  decide
+
+/-- Hence the rounding operation itself fails diagonal agreement with its input. -/
+theorem majorityRound_top_six_not_diagonalAgreement :
+    ¬ DiagonalAgreementOn (complete 6 false)
+      ((complete 6 false).majorityRound (⊤ : Finpartition (Finset.univ : Finset (Fin 6))))
+      Finset.univ := by
+  intro h
+  apply six_not_diagonalAgreement
+  intro S y hy hinj
+  exact (h S y hy hinj).trans (majorityRound_top_six_agrees_loops S y)
+
 /-- **The induced transfer fails without diagonal agreement: a counterexample.** Two hosts that
 are nullary-compatible, a simple pattern, and an edit bound at rate `ε = 1/6` (the exact edited
 fraction), yet the induced counts differ by `30 > 24 = 4 · (1/6) · 6²`. The only hypothesis of
@@ -304,7 +342,7 @@ theorem induced_transfer_fails_without_diagonalAgreement :
         < |(inducedEmbeddingCountOn (complete 2 false) M (fun _ ↦ Finset.univ) : ℝ)
             - inducedEmbeddingCountOn (complete 2 false) N (fun _ ↦ Finset.univ)| := by
   refine ⟨complete 6 false, complete 6 true, 1 / 6, by norm_num, nullaryCompatible_language _ _,
-    edge_isSimplePattern, ?_, ?_, ?_⟩
+    edge_isSimplePattern, ?_, six_not_diagonalAgreement, ?_⟩
   · intro S hS
     have h := edit_six_le S hS
     rw [Finset.card_univ, Fintype.card_fin]
@@ -312,14 +350,6 @@ theorem induced_transfer_fails_without_diagonalAgreement :
         (fun _ ↦ (Finset.univ : Finset (Fin 6))) : ℝ) * 6 ≤ (6 : ℝ) ^ (S.1 : ℕ) := by
       exact_mod_cast h
     linarith
-  · intro h
-    have hi : ¬ Function.Injective (fun _ : Fin 2 ↦ (0 : Fin 6)) := by
-      intro hinj
-      exact (by decide : (0 : Fin 2) ≠ 1) (hinj (a₁ := 0) (a₂ := 1) rfl)
-    have hh := h (RelSymbol.mk' (n := 2) (() : language.Relations 2)) (fun _ ↦ 0)
-      (fun _ ↦ Finset.mem_univ _) hi
-    change (false = true ↔ true = true) at hh
-    exact Bool.false_ne_true (hh.mpr rfl)
   · rw [induced_six.1, induced_six.2, patternAtomCoefficient_language_two, Finset.card_univ,
       Fintype.card_fin]
     norm_num
