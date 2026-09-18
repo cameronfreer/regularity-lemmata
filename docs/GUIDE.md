@@ -13,7 +13,7 @@ published documentation snapshot of `main` (the workflow runs on releases and on
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.11.0** pages for released material; the
-section "Additions released in v0.13.0" uses source links for newer material. Where a curated
+sections "Additions released in v0.13.0" and "Additions released in v0.12.0" use source links for newer material. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
@@ -22,6 +22,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 - [House vocabulary](#house-vocabulary)
 - [What can I reuse, by release?](#what-can-i-reuse-by-release)
 - [Additions released in v0.13.0](#additions-released-in-v0130)
+- [Additions released in v0.12.0](#additions-released-in-v0120)
 - [Main theorems and entry points](#main-theorems-and-entry-points)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
@@ -134,6 +135,28 @@ documentation links above still identify their published documentation version.
   homomorphism-count transfer from the global approximation with constants displayed, and the
   induced-count boundary (diagonal agreement is required and rounding does not supply it).
 - The environment-based public inventory (`lake exe public_inventory`).
+
+## Additions released in v0.12.0
+
+These additions were merged after v0.11.0 and are included in v0.12.0.
+Source links below use `main`; pin v0.12.0 for reproducibility. Older generated
+documentation links above still identify their published documentation version.
+
+- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/SlicingThreshold.lean)
+  and `exists_balanced_slicing_of_threshold_self` (source link; the published `main/`
+  documentation snapshot predates them, so their generated anchors are not yet verified):
+  balanced slicing
+  at the named parameters with every side condition discharged; the zero-block case documented,
+  the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
+- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/CompositionCertificates.lean):
+  the compatibility check and the prescribed-error endpoint chaining strong-witness existence
+  with three-vertex counting.
+- Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
+  `docs/design/retaining-completion.md`; no declaration exists for either yet.
+- The non-implications list (Part IV) and the wording corrections of the proper-embedding
+  documentation.
+- Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
+- Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).
 
 ## Main theorems and entry points
 
