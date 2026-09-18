@@ -13,7 +13,7 @@ published documentation snapshot of `main` (the workflow runs on releases and on
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.11.0** pages for released material; the
-section "Additions released in v0.12.0" uses source links for newer material. Where a curated
+section "Additions released in v0.13.0" uses source links for newer material. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
@@ -21,7 +21,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 - [Start here, by task](#start-here-by-task)
 - [House vocabulary](#house-vocabulary)
 - [What can I reuse, by release?](#what-can-i-reuse-by-release)
-- [Additions released in v0.12.0](#additions-released-in-v0120)
+- [Additions released in v0.13.0](#additions-released-in-v0130)
 - [Main theorems and entry points](#main-theorems-and-entry-points)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
@@ -103,31 +103,37 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 | v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
 | v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
 | v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
+| v0.13.0 | The global-approximation stack: majority-rounding cost from summed coordinate defects (`editDistance_majorityRound_le`), the partition defect with the exact refinement variance identity and the join bound for arbitrary coordinate partitions, representative maps with displaced-coordinate transport and the equitable composition `exists_equitable_isIndivisibleFor`, five compiled consumers including the counting recipe with its diagonal boundary, and the environment-based public inventory. |
 
 The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
 tag, because `main` moves between tags.
 
-## Additions released in v0.12.0
+## Additions released in v0.13.0
 
-These additions were merged after v0.11.0 and are included in v0.12.0.
-Source links below use `main`; pin v0.12.0 for reproducibility. Older generated
+These additions were merged after v0.12.0 and are included in v0.13.0.
+Source links below use `main`; pin v0.13.0 for reproducibility. Older generated
 documentation links above still identify their published documentation version.
 
-- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/SlicingThreshold.lean)
-  and `exists_balanced_slicing_of_threshold_self` (source link; the published `main/`
-  documentation snapshot predates them, so their generated anchors are not yet verified):
-  balanced slicing
-  at the named parameters with every side condition discharged; the zero-block case documented,
-  the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
-- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/CompositionCertificates.lean):
-  the compatibility check and the prescribed-error endpoint chaining strong-witness existence
-  with three-vertex counting.
-- Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
-  `docs/design/retaining-completion.md`; no declaration exists for either yet.
-- The non-implications list (Part IV) and the wording corrections of the proper-embedding
-  documentation.
-- Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
-- Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).
+- Majority rounding at any partition, costed by summed coordinate defects:
+  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/MajorityAssembly.lean)
+  (`editDistance_majorityRound_le`, the labelled-fibre adapter `labelPartition`), on the
+  substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
+  prefix-swap identity and the minority bound over heterogeneous coordinate types).
+- The partition defect and the exact refinement variance identity
+  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/PartitionDefect.lean)),
+  the join of coordinate partitions (`coordinateJoin`, `Partition/Basic`), and the majority
+  bound for arbitrary coordinate partitions
+  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
+- Representative maps with an explicit displaced set, the one-way bridges to the
+  almost-refinement charge, the free-part equitable construction
+  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/RepresentativeMap.lean)),
+  and displaced-coordinate transport with the composition `exists_equitable_isIndivisibleFor`
+  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/DisplacedTransport.lean)).
+- Five compiled consumers under `examples/`, including
+  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/GlobalApproximationCounting.lean):
+  homomorphism-count transfer from the global approximation with constants displayed, and the
+  induced-count boundary (diagonal agreement is required and rounding does not supply it).
+- The environment-based public inventory (`lake exe public_inventory`).
 
 ## Main theorems and entry points
 
@@ -387,6 +393,12 @@ graphs, re-exported with the conversions between this library's counts and Mathl
    general hypergraph removal, are outside the current API. Counting from a supplied cellwise
    approximation exists at every arity and for every fixed pattern (above). Deferred
    statements are recorded as prose, never as `Prop` placeholders.
+6. The global approximation (majority rounding, then transport along an equitable
+   representative map) supplies **homomorphism-count transfer** for simple patterns. The
+   uniform **induced-count** corollary additionally requires diagonal agreement, which rounding
+   does not guarantee: the compiled six-vertex counterexample in
+   `examples/GlobalApproximationCounting.lean` meets every other hypothesis at the actual edit
+   rate and violates the induced bound.
 
 **Non-implications, stated once.** Each pair below names two things that sound alike and are
 different theorems here; the contracts keep them apart, and no result of the first kind
@@ -410,6 +422,9 @@ should be read as the second.
   rounds a homogeneous partition to an indivisible model, but for general models it does not
   construct a homogeneous partition with host-independent size and tolerance guarantees (the
   discrete partition is trivially indivisible, and says nothing).
+- A global approximation with small edit mass is not diagonal agreement: majority rounding can
+  change loops and repeated-entry tuples, so the induced-count corollary is invoked only with
+  its diagonal-agreement premise, never inferred from simplicity of the pattern.
 - An embedding example that fails a stronger constraint (a tree embedding with the root moved
   or depth changed) shows what the structure allows; it is not a proof that no monochromatic
   embedding satisfies the stronger constraint, which would need a colouring counterexample.
@@ -429,7 +444,10 @@ importable, and direct imports of a module are as advertised as the facade.
   polynomial bounded-subset estimates.
 - `RegularityLemmata.RelationalApproximation`: homogeneous cells, finite relational models,
   indivisibility, cellwise edit bounds with the majority-rounding theorems, the edit calculus
-  with count transfer, and the approximation-to-counting aggregation bridge.
+  with count transfer, the approximation-to-counting aggregation bridge, and (since v0.13.0)
+  the global-approximation stack: majority-rounding cost from summed coordinate defects, the
+  partition defect with its refinement variance identity and the join bound, representative
+  maps with displaced-coordinate transport, and the equitable composition.
 - `RegularityLemmata.FiniteRamsey`: multicolour Ramsey for ordered-pair colourings, finite full
   binary trees as words, arbitrary-root subtree embeddings and their proper extensions, and the
   additive subtree theorems (two colours at host height `a + b + 1`, `m` colours at

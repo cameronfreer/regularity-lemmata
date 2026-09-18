@@ -3,6 +3,55 @@
 Release notes aggregated from the GitHub Releases, newest first. Each tag is annotated and the
 GitHub Release names the full commit SHA it was cut from; pin a tag when depending on the library.
 
+## v0.13.0 (2026-09-18)
+
+Release commit and validation runs are recorded on the GitHub Release.
+Lean `v4.34.0-rc1` and Mathlib `77cbcbc65f9e26f6ede0a01b24c2cb909e11cc0d`
+are unchanged. This minor release adds the global-approximation stack for finite
+relational models and its compiled consumers; it does not change existing theorem
+statements. Everything merged since v0.12.0 is included (#201, #206, #207, #209, #210).
+
+- **Majority-rounding cost from summed coordinate defects** (#202 via #206): the section
+  resampling defect and inclusive-decency bound (`Finite/SectionDefect`), the heterogeneous
+  product hybrid with the prefix-swap identity and the division-free minority bound
+  (`Finite/ProductHybrid`), and `editDistance_majorityRound_le`: for a symbol of arity
+  `n + 1`, `edit ≤ (n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)` under ambient decency with an
+  exceptional set, plus the labelled-fibre adapter `labelPartition` with unused labels
+  (`Relational/MajorityAssembly`).
+- **Representative maps and displaced-coordinate transport** (#203 via #207): the
+  owner/displacement contract `RepresentativeMap P Q`, kept distinct from the almost-refinement
+  charge with one-way bridges each way; the free-part construction with
+  `|D| ≤ (#P.parts − 1)·⌊|s|/t⌋`; transport `transportAlong` (the pullback along the
+  representative map) with `edit ≤ (n+1)·|D|·|s|^n`; and `exists_equitable_isIndivisibleFor`:
+  one equitable partition and one model for all symbols (`Partition/RepresentativeMap`,
+  `Relational/DisplacedTransport`).
+- **Partition defect, refinement variance identity, join rounding** (#208 via #209):
+  `partitionDefect`, the exact identity `defect P = defect Q + 2·variance` for `Q ≤ P` with
+  refinement monotonicity, the labelled form over all labels, `coordinateJoin` with its
+  cardinality bound, and the majority bound for arbitrary coordinate partitions, each
+  coordinate charged in its own partition (`Partition/PartitionDefect`,
+  `Relational/CoordinatePartitionRounding`, `Partition/Basic`).
+- **Compiled consumers** under `examples/`: `TernaryMajorityRounding`, `SharedEquitableModel`,
+  `DirectedJoinRounding`, `SymmetricRounding`, and `GlobalApproximationCounting` (#205 via #210),
+  the recipe composing the global approximation with the released counting transfers, with
+  constants displayed and the diagonal boundary made explicit.
+- **Documentation** (#201): the README by audience, the theorem table in the guide, build
+  steps in CONTRIBUTING. **Tooling**: `lake exe public_inventory`, the environment-based public
+  inventory used for the delta below.
+
+**The boundary, stated plainly.** The global approximation supplies **homomorphism-count
+transfer** for simple patterns (injective counts, and all homomorphisms with the collision
+term `C(k,2)·|s|^(k−1)` retained). The uniform **induced-count** corollary additionally
+requires diagonal agreement between the model and its approximation, which majority rounding
+does **not** guarantee: rounding can change loops and repeated-entry tuples, and the compiled
+six-vertex counterexample in `GlobalApproximationCounting` satisfies every other hypothesis at
+the actual edit rate yet violates the induced bound. Issue #204 (generic finite adaptive
+experiments) is deferred and is not part of this release. Existing non-implications stand.
+
+**Public inventory delta** (`lake exe public_inventory`, the same executable run at v0.12.0
+and at the release commit): `+124 / −0` (v0.12.0: 2469 public constants in 139 modules; release: 2593 public constants in 146 modules). The additions are the declarations of the modules listed above plus the generated names of the `RepresentativeMap` structure and four `congr_simp` lemmas; nothing was removed. The version marker
+`RegularityLemmata.version` changes value, not name, and is not an added declaration.
+
 ## v0.12.0 (2026-09-15)
 
 Release commit and validation runs are recorded on the GitHub Release.

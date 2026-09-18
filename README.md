@@ -30,6 +30,13 @@ tag.
   error term explicit, and counting from a cellwise approximation at any arity with the
   collision term computed.
   [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
+- **Global approximation of a relational model**: majority rounding at any partition with its
+  edit cost bounded by summed coordinate defects (the partition defect, with the exact
+  refinement variance identity), transport along an equitable representative map with an
+  explicit displaced set, and the composition giving one equitable partition and one model for
+  all symbols; homomorphism-count transfer follows, induced-count transfer needs diagonal
+  agreement that rounding does not supply.
+  [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
 - **Sampling and completion**: exact equal-size blocks on which every member of a supplied
   family keeps its density (balanced slicing), average-preserving slicing, and completion of
   block families into equipartitions.
@@ -62,13 +69,13 @@ Add the library to your `lakefile.toml`, pinned to a tag:
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "v0.12.0"
+rev = "v0.13.0"
 ```
 
 Your project's toolchain must match the pinned release's: see its
-[`lean-toolchain`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/lean-toolchain)
+[`lean-toolchain`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/lean-toolchain)
 and the mathlib revision in its
-[`lake-manifest.json`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/lake-manifest.json).
+[`lake-manifest.json`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/lake-manifest.json).
 Then import the public root, a facade, or a module:
 
 ```lean
@@ -83,7 +90,7 @@ describes each, and every module remains directly importable.
 <summary><b>Example: approximating a matrix</b> (a complete, compiled file)</summary>
 
 The file below is [`examples/ReadmeSnippet.lean`](examples/ReadmeSnippet.lean) verbatim, built
-by the gate on every commit (the v0.12.0 release included) and checked against v0.11.0 as well: a matrix with entries in `[-1, 1]` is
+by the gate on every commit (the v0.13.0 release included) and checked against v0.11.0 as well: a matrix with entries in `[-1, 1]` is
 a sum of at most `⌈1/ε²⌉₊` weighted submatrix indicators with coefficients at most `1/ε`, up to a
 residual of cut norm at most `ε·m·n`.
 

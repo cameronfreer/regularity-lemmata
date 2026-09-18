@@ -32,6 +32,18 @@ units fit together. The two certificates below certify different things and are 
 | --- | --- | --- |
 | [`CompositionCertificates.lean`](CompositionCertificates.lean) | `RegularityLemmata.Relational.BinaryStrong`, `RegularityLemmata.Relational.DiagonalGate` | `compatibility`: from the strong-witness existence theorem to the three-vertex counting theorem with the trivial cell ceiling `m = |s|`, an uninformative diagonal charge, type compatibility only. `prescribed_error`: the same chain seeded by an equipartition so that, under the host-size condition `24/ε₀ ≤ |s|`, the induced count of any three-vertex pattern is within `ε₀·|s|³` of the coarse estimate, with the parameter order written out; the witness's part-count bound is not retained. |
 
+## Global approximation of a relational model (v0.13.0)
+
+Consumers of the global-approximation stack through the `RelationalApproximation` facade.
+
+| File | Import | What it shows |
+| --- | --- | --- |
+| [`TernaryMajorityRounding.lean`](TernaryMajorityRounding.lean) | `RegularityLemmata.Relational.MajorityAssembly` | The majority-rounding cost at a ternary symbol, `3·|s|³·(2θ + γ/2 + λ/2)`, with the box-level minority identity, the nullary copy, and one model that is indivisible for the partition and within the bound. |
+| [`SharedEquitableModel.lean`](SharedEquitableModel.lean) | `RegularityLemmata.RelationalApproximation` | One equitable partition and one model from the composition, bounding a binary and a ternary symbol with the same pair, displacement term `(#P.parts − 1)·⌊|s|/t⌋`. |
+| [`DirectedJoinRounding.lean`](DirectedJoinRounding.lean) | `RegularityLemmata.RelationalApproximation` | A directed binary relation rounded at the join of a row and a column partition: edit at most the row defects at the first plus the column defects at the second; part count at most the product. |
+| [`SymmetricRounding.lean`](SymmetricRounding.lean) | `RegularityLemmata.RelationalApproximation` | A symmetric relation rounded at one partition: edit at most twice the row defects, and the rounded relation is symmetric. |
+| [`GlobalApproximationCounting.lean`](GlobalApproximationCounting.lean) | `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Relational.UniformPatternCounts`, the gates-only `Relational.DiagonalLoopRegression` | The recipe: a uniform edit rate from the composition, homomorphism-count transfer (injective, and all homomorphisms with the collision term) at binary and ternary instances with constants displayed, the induced corollary only under an explicit diagonal-agreement premise, the reused loop regression, and the six-vertex counterexample pinned to the rounding operation. |
+
 ## Not here
 
 The external consumer fixture, a separate Lake package depending on this repository by Git at a
