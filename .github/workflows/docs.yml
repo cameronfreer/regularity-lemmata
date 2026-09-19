@@ -66,9 +66,13 @@ jobs:
           [[ "$DOCS_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release version: $DOCS_VERSION" >&2; exit 1; }
           test "$(git -C src cat-file -t "refs/tags/$DOCS_VERSION")" = tag
           test "$(git -C src rev-parse "refs/tags/$DOCS_VERSION^{commit}")" = "$(git -C src rev-parse HEAD)"
-          gh release view "$DOCS_VERSION" --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName | grep -qx "$DOCS_VERSION"
+          # Existence is not publication: an authenticated lookup also finds drafts, and a
+          # prerelease must not become the stable `latest` pointer.
+          state=$(gh release view "$DOCS_VERSION" --repo "$GITHUB_REPOSITORY" --json tagName,isDraft,isPrerelease \
+            --jq '[.tagName, (.isDraft|tostring), (.isPrerelease|tostring)] | join(" ")')
+          test "$state" = "$DOCS_VERSION false false" || { echo "release not published as stable: '$state'" >&2; exit 1; }
           echo "DOCS_RELEASE_TAG_OK=1" >> "$GITHUB_ENV"
-          echo "release tag $DOCS_VERSION verified (annotated, at the documented revision, published)"
+          echo "release tag $DOCS_VERSION verified (annotated, at the documented revision, published, not a draft or prerelease)"
 
       - name: Install elan
         # elan v4.2.3 installer, pinned to an immutable revision

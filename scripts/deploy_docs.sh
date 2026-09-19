@@ -139,4 +139,4 @@ fi
 #    must resolve too, contain no link into the library, and carry no broken dependency-body
 #    link beyond those already broken in the untouched doc-gen4 output.
 python3 "$(dirname "$0")/docs_layout.py" check-links "$ver"
-python3 "$(dirname "$0")/docs_layout.py" check-links --shared "$deps" --source "$DOCS_SRC"
+python3 "$(dirname "$0")/docs_layout.py" check-links --shared "$deps" --source "$DOCS_SRC" --allowances "$deps/upstream-defects.json"

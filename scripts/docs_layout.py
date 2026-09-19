@@ -204,21 +204,32 @@ def parse_module_list(text: str) -> tuple[int, int, dict]:
     return i + len(open_tag), end, root
 
 
+def _sect_with_page(name: str, href: str, children: dict) -> dict:
+    """A section that also carries the module's own page, in doc-gen4's form."""
+    return {"kind": "sect", "path": href, "summary": f'{name} (<a href="{href}">file</a>)',
+            "children": children}
+
+
 def merge_trees(old: dict, new: dict) -> dict:
-    """Union of two navigation trees. A section beats a link of the same name; sections merge
-    their children; a published section keeps its own summary and path."""
+    """Union of two navigation trees, symmetric in what it keeps: sections merge their
+    children; a module link met by a directory-only section of the same name becomes a
+    section that carries the page link; of two sections, the one with a page link supplies
+    the path and summary (the published one when both have it)."""
     out: dict = {}
     for name in sorted(set(old) | set(new)):
         a, b = old.get(name), new.get(name)
         if a is None or b is None:
             out[name] = a or b
         elif a["kind"] == "sect" and b["kind"] == "sect":
-            out[name] = {"kind": "sect", "path": a["path"] or b["path"], "summary": a["summary"],
+            with_page = a if a["path"] else (b if b["path"] else a)
+            out[name] = {"kind": "sect", "path": with_page["path"], "summary": with_page["summary"],
                          "children": merge_trees(a["children"], b["children"])}
-        elif a["kind"] == "sect":
-            out[name] = a
-        elif b["kind"] == "sect":
-            out[name] = b
+        elif a["kind"] == "sect" or b["kind"] == "sect":
+            sect, link = (a, b) if a["kind"] == "sect" else (b, a)
+            if sect["path"]:
+                out[name] = sect
+            else:
+                out[name] = _sect_with_page(name, link["href"], sect["children"])
         else:
             out[name] = a
     return out
@@ -349,10 +360,20 @@ def body_broken_pairs(source: pathlib.Path) -> set[tuple[str, str]]:
 
 def check_links(argv: list[str]) -> int:
     shared = "--shared" in argv
-    positional = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] != "--source")]
+    valued = ("--source", "--allowances")
+    positional = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] not in valued)]
     ver = pathlib.Path(positional[0]).resolve()
     source = pathlib.Path(argv[argv.index("--source") + 1]).resolve() if "--source" in argv else None
+    allowances = pathlib.Path(argv[argv.index("--allowances") + 1]) if "--allowances" in argv else None
     baseline = body_broken_pairs(source) if (shared and source is not None) else None
+    if baseline is not None and allowances is not None and allowances.exists():
+        # Previously validated exact pairs, kept only for retained pages that this build does
+        # not cover (their content is unchanged: pages are never overwritten). A page the build
+        # does cover is judged against the build alone, so a newly introduced defect fails.
+        covered = {str(p.relative_to(source)) for p in source.rglob("*.html")}
+        for page, link in json.loads(allowances.read_text()):
+            if page not in covered:
+                baseline.add((page, link))
     broken: list[str] = []
     upstream: list[str] = []
     checked = 0
@@ -401,6 +422,10 @@ def check_links(argv: list[str]) -> int:
     if upstream:
         print(f"docs_layout: {len(upstream)} broken links inside dependency page bodies, each also broken in the doc-gen4 output (tolerated), e.g. {upstream[0]}")
     print(f"docs_layout: checked {checked} links and search targets, {len(broken)} broken")
+    if not broken and allowances is not None and baseline is not None:
+        pairs = sorted({tuple(x.split(" -> ", 1)) for x in upstream})
+        allowances.write_text(json.dumps(pairs))
+        print(f"docs_layout: recorded {len(pairs)} validated upstream-defect allowance(s) in {allowances.name}")
     return 1 if broken else 0
 
 
@@ -516,6 +541,21 @@ def self_test(argv: list[str]) -> int:
     _, _, tree = parse_module_list(merged)
     if serialize_tree(tree) != serialize_tree(merge_trees(tree, {})):
         problems.append("merge-deps navbar serialization is not stable")
+    # a module link on one side, a directory-only section on the other: both survive, either order
+    link_side = {"Foo": {"kind": "link", "href": "./Mathlib/Foo.html", "label": "Foo"}}
+    dir_side = {"Foo": {"kind": "sect", "path": None, "summary": "Foo",
+                        "children": {"Bar": {"kind": "link", "href": "./Mathlib/Foo/Bar.html", "label": "Bar"}}}}
+    for x, y in ((link_side, dir_side), (dir_side, link_side)):
+        t = merge_trees(x, y)
+        html_out = serialize_tree(t)
+        if 'data-path="./Mathlib/Foo.html"' not in html_out or "Mathlib/Foo/Bar.html" not in html_out \
+                or 'href="./Mathlib/Foo.html">file' not in html_out:
+            problems.append("merge-deps lost the module link or the children when a link met a directory section")
+    paged = {"Foo": _sect_with_page("Foo", "./Mathlib/Foo.html", {"Baz": {"kind": "link", "href": "./Mathlib/Foo/Baz.html", "label": "Baz"}})}
+    for x, y in ((paged, dir_side), (dir_side, paged)):
+        html_out = serialize_tree(merge_trees(x, y))
+        if 'data-path="./Mathlib/Foo.html"' not in html_out or "Foo/Bar.html" not in html_out or "Foo/Baz.html" not in html_out:
+            problems.append("merge-deps lost the page link or a child when only one section had a page link")
     idx = merge_index(
         {"declarations": {"a": {"docLink": "./Mathlib/A.html#a"}}, "modules": {"Mathlib.A": {"url": "./Mathlib/A.html", "importedBy": ["X"]}},
          "instances": {"I": ["a"]}, "instancesFor": {}},
@@ -532,7 +572,7 @@ def self_test(argv: list[str]) -> int:
     return 1 if problems else 0
 
 
-def _fixture(root: pathlib.Path, modules: list[str]) -> None:
+def _fixture(root: pathlib.Path, modules: list[str], defects: dict[str, str] | None = None) -> None:
     """A synthetic doc-gen4 output: one library page linking to every dependency module page,
     the dependency pages, a navbar, a search index, `find/` redirects, and assets."""
     import shutil
@@ -551,7 +591,8 @@ def _fixture(root: pathlib.Path, modules: list[str]) -> None:
     (root / LIB / "Finite" / "A.html").write_text(
         "".join(f'<a href="../.././Mathlib/{m}.html#Mathlib.{m}.thm">{m}</a>' for m in modules))
     for m in modules:
-        (root / "Mathlib" / f"{m}.html").write_text('<a href=".././style.css">s</a>')
+        extra = f'<a href="{defects[m]}">upstream</a>' if defects and m in defects else ""
+        (root / "Mathlib" / f"{m}.html").write_text('<a href=".././style.css">s</a>' + extra)
     links = "".join(f'<div class="nav_link"><a href="./Mathlib/{m}.html">{m}</a></div>' for m in modules)
     (root / "navbar.html").write_text(
         '<html><body><nav><div class="module_list">'
@@ -580,8 +621,9 @@ def deploy_test(argv: list[str]) -> int:
         src, pages = tmp / "src", tmp / "pages"
         pages.mkdir()
 
-        def run(version: str, modules: list[str], **extra: str) -> tuple[int, str]:
-            _fixture(src, modules)
+        def run(version: str, modules: list[str], defects: dict[str, str] | None = None,
+                **extra: str) -> tuple[int, str]:
+            _fixture(src, modules, defects)
             env = {**os.environ, "DOCS_SRC": str(src), "DOCS_VERSION": version, "DEPS_KEY": "k1",
                    "PAGES_DIR": str(pages), "SIZE_LIMIT_BYTES": "900000000"}
             env.pop("DOCS_UPDATE_LATEST", None)
@@ -603,18 +645,33 @@ def deploy_test(argv: list[str]) -> int:
             problems.append("first publication failed:\n" + out)
         if "latest -> v0.0.1" not in out:
             problems.append("first release did not set latest")
-        # 1. a larger closure: the new page, its search entry, and its navigation entry appear
-        rc, out = run("v0.0.2", ["A", "B", "C"], DOCS_UPDATE_LATEST="1", DOCS_RELEASE_TAG_OK="1")
+        # 1. a larger closure: the new page, its search entry, and its navigation entry appear;
+        #    the new page C carries an upstream defect (also broken in the doc-gen4 output)
+        upstream = {"C": ".././Mathlib/Absent.html"}
+        rc, out = run("v0.0.2", ["A", "B", "C"], upstream, DOCS_UPDATE_LATEST="1", DOCS_RELEASE_TAG_OK="1")
         if rc != 0:
             problems.append("growing closure failed:\n" + out)
         if shared_has("C") != (True, True, True):
             problems.append(f"growing closure did not add page/navigation/search for C: {shared_has('C')}")
         if "1 dependency page(s)/redirect(s) added" not in out:
             problems.append("growing closure did not report exactly one added page")
-        # 2. an older, smaller closure rebuilt afterwards: nothing is lost
+        if "1 broken links inside dependency page bodies" not in out:
+            problems.append("growing closure did not tolerate the upstream defect of the new page")
+        if not (deps / "upstream-defects.json").exists() or "Mathlib/C.html" not in (deps / "upstream-defects.json").read_text():
+            problems.append("the validated upstream-defect allowance was not recorded")
+        # 2. an older, smaller closure rebuilt afterwards: nothing is lost, and the retained page's
+        #    validated upstream defect (no longer covered by the build) stays tolerated
         rc, out = run("v0.0.1", ["A"])
         if rc != 0:
             problems.append("smaller closure rebuild failed:\n" + out)
+        if "1 broken links inside dependency page bodies" not in out:
+            problems.append("smaller closure rebuild did not carry the retained page's allowance forward")
+        # a defect that was never validated is still rejected on a retained page
+        (deps / "Mathlib" / "B.html").write_text('<a href=".././style.css">s</a><a href=".././Mathlib/Never.html">new</a>')
+        rc, out = run("v0.0.1", ["A"])
+        if rc == 0 or "Never.html" not in out:
+            problems.append("a newly introduced defect on a retained page was tolerated")
+        (deps / "Mathlib" / "B.html").write_text('<a href=".././style.css">s</a>')
         for m in ("B", "C"):
             if shared_has(m) != (True, True, True):
                 problems.append(f"smaller closure rebuild lost page/navigation/search for {m}: {shared_has(m)}")
