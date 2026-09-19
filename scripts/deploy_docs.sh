@@ -26,10 +26,13 @@
 # Environment:
 #   DOCS_SRC          doc-gen4 output directory (docbuild/.lake/build/doc)
 #   DOCS_VERSION      version name, e.g. v0.11.0 (validated: [A-Za-z0-9._-], not latest/deps)
+#                     (an existing deps tree is merged with this build: pages only added)
 #   DEPS_KEY          dependency-pin key, e.g. the Mathlib revision's first 12 characters
 #   PAGES_DIR         checkout of the gh-pages branch
 #   SIZE_LIMIT_BYTES  optional, default 900000000
-#   DOCS_UPDATE_LATEST optional; `1` allows `latest` to move to this version
+#   DOCS_UPDATE_LATEST optional; `1` allows `latest` to move to this version, which then must be
+#                     a tag-shaped release version with DOCS_RELEASE_TAG_OK=1 (verified tag)
+#   DOCS_RELEASE_TAG_OK optional; `1` asserts the caller verified the annotated release tag
 set -euo pipefail
 
 : "${DOCS_SRC:?}" "${DOCS_VERSION:?}" "${DEPS_KEY:?}" "${PAGES_DIR:?}"
@@ -40,6 +43,14 @@ case "$DOCS_VERSION" in
   latest|deps|.*|*/*|*..*) echo "deploy_docs: refusing version name '$DOCS_VERSION'" >&2; exit 1 ;;
 esac
 [[ "$DOCS_VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "deploy_docs: invalid version name" >&2; exit 1; }
+if [ "${DOCS_UPDATE_LATEST:-0}" = "1" ]; then
+  # Only a verified release may move `latest`: the version must be tag-shaped, and the caller
+  # must have verified the annotated release tag (DOCS_RELEASE_TAG_OK=1, set by the workflow
+  # for published releases and for manual runs whose tag and GitHub Release were checked).
+  # Checked before anything is laid out, so a refusal leaves the checkout untouched.
+  [[ "$DOCS_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "deploy_docs: refusing to update latest: '$DOCS_VERSION' is not a release version" >&2; exit 1; }
+  [ "${DOCS_RELEASE_TAG_OK:-0}" = "1" ] || { echo "deploy_docs: refusing to update latest: release tag not verified (DOCS_RELEASE_TAG_OK)" >&2; exit 1; }
+fi
 [[ "$DEPS_KEY" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "deploy_docs: invalid deps key" >&2; exit 1; }
 [ -d "$DOCS_SRC/RegularityLemmata" ] || { echo "deploy_docs: no library pages under $DOCS_SRC" >&2; exit 1; }
 
@@ -67,7 +78,14 @@ if [ ! -d "$deps" ]; then
   python3 "$(dirname "$0")/docs_layout.py" strip-library "$deps"
   echo "deploy_docs: published dependency pages under deps/$DEPS_KEY"
 else
-  echo "deploy_docs: dependency pages deps/$DEPS_KEY already published; reused"
+  # Reuse. The tree is keyed by the dependency pin, but its contents follow the library's import
+  # closure, which can grow (a newly imported Mathlib module has no page yet) and can shrink (an
+  # older release rebuilt, an import removed). `merge-deps` only ever adds pages and redirects,
+  # unions the shared index and the navigation tree with this build's, and refreshes the assets;
+  # the library is then stripped from the merged navbar and index again.
+  python3 "$(dirname "$0")/docs_layout.py" merge-deps "$deps" "$DOCS_SRC" "${dep_names[@]}"
+  python3 "$(dirname "$0")/docs_layout.py" strip-library "$deps"
+  echo "deploy_docs: dependency pages deps/$DEPS_KEY already published; merged with this build"
 fi
 
 # 2. The version directory, replaced whole.
