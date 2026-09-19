@@ -35,15 +35,40 @@ jobs:
     env:
       DOCS_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.ref }}
     steps:
+      # Two checkouts. The deployment tooling (this workflow's scripts) comes from the revision
+      # the workflow itself runs at, so a fix to the tooling applies when an older release is
+      # re-documented; the documented source is checked out separately under `src/`.
       # actions/checkout v7.0.0, pinned to an immutable revision
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check out the tooling (the workflow's own revision)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ env.DOCS_VERSION }}
           persist-credentials: false
 
-      - name: Validate the version name
+      - name: Check out the documented source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.DOCS_VERSION }}
+          path: src
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate the version name and record both revisions
         run: |
           [[ "$DOCS_VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid version name" >&2; exit 1; }
+          echo "tooling_revision=$(git rev-parse HEAD)"
+          echo "documented_revision=$(git -C src rev-parse HEAD)"
+
+      - name: Verify the release tag before allowing latest to move
+        if: ${{ github.event_name == 'release' || inputs.update_latest == true }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [[ "$DOCS_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release version: $DOCS_VERSION" >&2; exit 1; }
+          test "$(git -C src cat-file -t "refs/tags/$DOCS_VERSION")" = tag
+          test "$(git -C src rev-parse "refs/tags/$DOCS_VERSION^{commit}")" = "$(git -C src rev-parse HEAD)"
+          gh release view "$DOCS_VERSION" --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName | grep -qx "$DOCS_VERSION"
+          echo "DOCS_RELEASE_TAG_OK=1" >> "$GITHUB_ENV"
+          echo "release tag $DOCS_VERSION verified (annotated, at the documented revision, published)"
 
       - name: Install elan
         # elan v4.2.3 installer, pinned to an immutable revision
@@ -59,11 +84,11 @@ jobs:
         # the library's doc data had changed (stale pages with old links).
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
-          path: docbuild/.lake/packages
-          key: docs-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lakefile.toml') }}
+          path: src/docbuild/.lake/packages
+          key: docs-packages-${{ hashFiles('src/lean-toolchain', 'src/lake-manifest.json', 'src/docbuild/lakefile.toml') }}
 
       - name: Build the documentation
-        working-directory: docbuild
+        working-directory: src/docbuild
         run: |
           rm -rf .lake/build
           lake update
@@ -82,14 +107,15 @@ jobs:
             git -C pages remote add origin "$url"
           fi
 
-      - name: Lay out the version
+      - name: Lay out the version (tooling from this revision, source from src/)
         env:
-          DOCS_SRC: docbuild/.lake/build/doc
+          DOCS_SRC: src/docbuild/.lake/build/doc
           PAGES_DIR: pages
           DOCS_UPDATE_LATEST: ${{ (github.event_name == 'release' || inputs.update_latest == true) && '1' || '0' }}
         run: |
-          DEPS_KEY=$(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0][:12])")
+          DEPS_KEY=$(python3 -c "import json;print([p['rev'] for p in json.load(open('src/lake-manifest.json'))['packages'] if p['name']=='mathlib'][0][:12])")
           export DEPS_KEY
+          python3 scripts/docs_layout.py deploy-test
           bash scripts/deploy_docs.sh
 
       - name: Publish
@@ -98,5 +124,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit --quiet -m "docs: $DOCS_VERSION" || { echo "nothing to publish"; exit 0; }
+          git commit --quiet -m "docs: $DOCS_VERSION (tooling $GITHUB_SHA)" || { echo "nothing to publish"; exit 0; }
           git push --quiet origin gh-pages
