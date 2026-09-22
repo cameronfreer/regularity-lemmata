@@ -13,8 +13,14 @@ A relation is **indivisible** for a partition `P` of a finite ground set `s` whe
 value on a tuple over `s` depends only on the tuple of cells the entries lie in; a model is
 indivisible when every one of its relation symbols is. This is the hypothesis under which a
 model is the *blow-up* of the induced structure on its cells — the notion Malliaris and
-Shelah extract from stable regularity (arXiv:1102.3904) and the one Ackerman, Freer, and
-Patel use for invariant measures on blow-ups (arXiv:1712.09305).
+Shelah extract from stable regularity (arXiv:1102.3904). The exact correspondence is
+Ackerman, Freer, and Patel's Definition 1.4 (a blow-up is a structure with a surjective full
+homomorphism onto another; equitable when the fibres differ in size by at most one) and
+Lemma 1.5 (a partition is indivisible if and only if the structure is a blow-up whose witness
+fibres are the parts), arXiv:1712.09305, §1.3. For a partition `P` of `s` and a model
+indivisible for `P`, the model restricted to `s` is a blow-up of `FiniteRelModel.quotient`
+below, with the vertex-to-cell map `x ↦ P.part x` on `s` as the witness; the ambient carrier
+outside `s` is not described by the correspondence. Both are recorded in `PROVENANCE.md`.
 
 Everything here is **arbitrary-arity**: `IsIndivisible` is stated for a relation on
 `Fin n → V` for an arbitrary `n`, and `FiniteRelModel.IsIndivisibleFor` quantifies over every

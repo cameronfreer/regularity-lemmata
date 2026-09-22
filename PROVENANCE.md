@@ -100,6 +100,63 @@ homogeneity perturbation lemmas) were transplanted, with renames and convention 
 the author's private `stable-hypergraph-regularity` repository (Apache-2.0, sole-author), where
 they were developed as stability-neutral infrastructure. No third-party source text is involved.
 
+### Module families added in v0.12.0 and v0.13.0
+
+Provenance reconciliation for the families not covered above: what each implementation
+uses from this repository and from mathlib, what its introducing pull request records about
+external sources, and where a standard fact is being proved. The pull requests introducing
+#206, #207, #209, and #210 each record that no source from the author's private
+`stable-hypergraph-regularity` repository was read while writing them; that statement is
+scoped to that repository and does not by itself establish that no external source informed
+the mathematics. The pull requests introducing #192 and #198 record no statement about
+sources.
+
+- `Finite/PatternExtensions.lean` (#192, v0.12.0) — a tuple-counting estimate (pinning every
+  coordinate touched by an assignment saves one factor of the host size per distinct image
+  vertex; `card_filter_comp_mem_le_image` and its injective, compatible, and existential
+  forms). The implementation uses the following in-repository results: `Fintype.piFinset`
+  boxes and `Finite/Tuple.lean`. No external proof source is recorded in the introducing pull
+  request; adaptation history remains unconfirmed.
+- `Relational/UniformPatternCounts.lean` (#198, v0.12.0) — the atom-cover union bound over
+  pattern atoms (`abs_filter_card_sub_le_of_atom_cover`) and the simple-pattern and
+  diagonal-agreement transfers built on it. The implementation uses the following
+  in-repository results: the extension counts of `Finite/PatternExtensions.lean`, the collision
+  term of `Finite/Injective.lean`, and the edit sets of `Finite/Edit.lean`; the hypotheses are
+  named in `docs/uniform-pattern-counts.md`. No external proof source is recorded in the
+  introducing pull request; adaptation history remains unconfirmed.
+- `Finite/SectionDefect.lean`, `Finite/ProductHybrid.lean`, `Relational/MajorityAssembly.lean`
+  (#206, v0.13.0) — proofs written for this repository of standard facts: the resampling
+  defect of a Boolean section is `2·d·(1 − d)`; the coordinate-wise hybrid argument
+  (telescoping through one-coordinate changes, the prefix-swap fibre count); the
+  majority-rounding bound assembled over cell boxes. They use `majorityRound` and its
+  real-valued box identity (`Relational/CellwiseEdit.lean`), the box-cell substrate
+  (`Partition/BoxPartition.lean`), and mathlib's `Fin.insertNth`; the labelled-fibre adapter is
+  a specialization of mathlib's `Finpartition.ofSetSetoid`. The pull request records that no
+  source from the private repository was read; no other external proof source is recorded.
+- `Partition/RepresentativeMap.lean`, `Relational/DisplacedTransport.lean` (#207, v0.13.0) —
+  a contract and bridges written for this repository; the equitable construction is a specialization
+  of mathlib's `Finpartition.equitabilise` through its per-parent remainder
+  (`Finpartition.card_parts_equitabilise_subset_le`, re-exported in `Partition/Equitable.lean`)
+  and this repository's almost-refinement bridge; the transport is the existing `pullback`
+  (`Relational/Transport.lean`).
+- `Partition/PartitionDefect.lean`, `Relational/CoordinatePartitionRounding.lean` (#209,
+  v0.13.0) — the one-dimensional Boolean law of total variance (a standard identity), proved
+  for this repository in the proof-free style of `refinementVarianceNum` (`Graph/Strong.lean`)
+  and `rectRefinementVarianceNum` (`Partition/RectKernelEnergy.lean`); join cardinality reuses
+  `card_parts_inf'_le` (`Partition/Basic.lean`); the majority bound at the join specializes
+  #206's bound by refinement monotonicity.
+- The compiled consumers under `examples/` (#206, #207, #209, #210) are compositions of the
+  above; the six-vertex counterexample of `examples/GlobalApproximationCounting.lean`
+  enlarges this repository's own `Relational/DiagonalLoopRegression.lean`.
+
+**Traceability of the transplanted sampling stack.** The paragraph above records the
+transplant collectively (PRs #97–#99, recorded in #101). The original module and declaration
+names and the source revision were not found in the reviewed repository records (the bodies of
+those pull requests and the commit history); they remain to be supplied by the author from
+the private antecedent repository. That formal-source attribution is a separate matter from
+the mathematical references of the stack; those currently recorded are listed under
+Publications (Conant–Terry).
+
 ## Publications
 
 - N. Littlestone, M. K. Warmuth, *The weighted majority algorithm*, Inf. Comput. 108
@@ -295,6 +352,23 @@ they were developed as stability-neutral infrastructure. No third-party source t
   paper's Hoeffding-with-permutation-encoding argument; the control is two-sided where the
   paper's is one-sided. The stable-regularity theorems themselves are upstream
   (stability-flavored) material, not part of this library.
+- M. Malliaris, S. Shelah, *Regularity lemmas for stable graphs*,
+  [arXiv:1102.3904](https://arxiv.org/abs/1102.3904). The stable regularity lemma whose
+  conclusion — a partition on which the relation is constant between almost all pairs of parts —
+  is the viewpoint behind indivisibility (`Relational/Indivisible.lean`). None of their proofs is
+  formalized here; the stable-regularity theorems themselves are upstream material.
+- N. Ackerman, C. Freer, R. Patel, *Stable regularity for relational structures*,
+  [arXiv:1712.09305](https://arxiv.org/abs/1712.09305), §1.3: **Definition 1.4** (a blow-up of
+  an `L`-structure is an `L`-structure with a surjective full homomorphism onto it, the witness;
+  equitable when the witness fibres differ in size by at most one) and **Lemma 1.5** (a
+  partition of a structure is indivisible if and only if the structure is a blow-up whose
+  witness fibres are the parts, with the equitable version). This is the exact correspondence
+  behind `IsIndivisible`, `FiniteRelModel.IsIndivisibleFor`, and the packaged quotient
+  `FiniteRelModel.quotient` (`Relational/Indivisible.lean`): for a partition `P` of a finite
+  set `s` and a model indivisible for `P`, the model restricted to `s` is a blow-up of the
+  quotient, with the vertex-to-cell map `x ↦ P.part x` on `s` as the witness (the ambient
+  carrier outside `s` is not described by the correspondence). The formalization is this
+  repository's own (finite, computable, arbitrary arity, with the nullary layer explicit).
 - N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
   (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
   (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
