@@ -102,37 +102,46 @@ they were developed as stability-neutral infrastructure. No third-party source t
 
 ### Module families added in v0.12.0 and v0.13.0
 
-Provenance reconciliation for the families not covered above, each classified as an
-adaptation of a formal source, a specialization of an existing formal result, or an
-independently supplied proof of a standard fact. None adapts material from the author's
-private antecedent repositories; the pull requests introducing #206, #207, #209, and #210
-record that no such source was read, and the classifications of #192 and #198 (whose pull
-requests record no source) are by reading the proofs.
+Provenance reconciliation for the families not covered above: what each implementation
+uses from this repository and from mathlib, what its introducing pull request records about
+external sources, and where a standard fact is being proved. The pull requests introducing
+#206, #207, #209, and #210 each record that no source from the author's private
+`stable-hypergraph-regularity` repository was read while writing them; that statement is
+scoped to that repository and does not by itself establish that no external source informed
+the mathematics. The pull requests introducing #192 and #198 record no statement about
+sources.
 
-- `Finite/PatternExtensions.lean` (#192, v0.12.0) — independently supplied proof of a standard
-  tuple-counting estimate: pinning every coordinate touched by an assignment saves one factor
-  of the host size per distinct image vertex (`card_filter_comp_mem_le_image` and its
-  injective, compatible, and existential forms). No adaptation.
-- `Relational/UniformPatternCounts.lean` (#198, v0.12.0) — independently supplied: the
-  atom-cover union bound over pattern atoms (`abs_filter_card_sub_le_of_atom_cover`), the
-  simple-pattern and diagonal-agreement transfers built on it, and the collision term taken
-  from `Finite/Injective.lean`. The hypotheses are this repository's
-  (`docs/uniform-pattern-counts.md`). No adaptation.
+- `Finite/PatternExtensions.lean` (#192, v0.12.0) — a tuple-counting estimate (pinning every
+  coordinate touched by an assignment saves one factor of the host size per distinct image
+  vertex; `card_filter_comp_mem_le_image` and its injective, compatible, and existential
+  forms). The implementation uses the following in-repository results: `Fintype.piFinset`
+  boxes and `Finite/Tuple.lean`. No external proof source is recorded in the introducing pull
+  request; adaptation history remains unconfirmed.
+- `Relational/UniformPatternCounts.lean` (#198, v0.12.0) — the atom-cover union bound over
+  pattern atoms (`abs_filter_card_sub_le_of_atom_cover`) and the simple-pattern and
+  diagonal-agreement transfers built on it. The implementation uses the following
+  in-repository results: the extension counts of `Finite/PatternExtensions.lean`, the collision
+  term of `Finite/Injective.lean`, and the edit sets of `Finite/Edit.lean`; the hypotheses are
+  named in `docs/uniform-pattern-counts.md`. No external proof source is recorded in the
+  introducing pull request; adaptation history remains unconfirmed.
 - `Finite/SectionDefect.lean`, `Finite/ProductHybrid.lean`, `Relational/MajorityAssembly.lean`
-  (#206, v0.13.0) — independently supplied proofs of standard facts: the resampling defect of
-  a Boolean section is `2·d·(1 − d)`; the coordinate-wise hybrid argument (telescoping through
-  one-coordinate changes, the prefix-swap fibre count); the majority-rounding bound assembled
-  over cell boxes. The labelled-fibre adapter is a specialization of mathlib's
-  `Finpartition.ofSetSetoid`. No external formal source was consulted.
+  (#206, v0.13.0) — proofs written for this repository of standard facts: the resampling
+  defect of a Boolean section is `2·d·(1 − d)`; the coordinate-wise hybrid argument
+  (telescoping through one-coordinate changes, the prefix-swap fibre count); the
+  majority-rounding bound assembled over cell boxes. They use `majorityRound` and its
+  real-valued box identity (`Relational/CellwiseEdit.lean`), the box-cell substrate
+  (`Partition/BoxPartition.lean`), and mathlib's `Fin.insertNth`; the labelled-fibre adapter is
+  a specialization of mathlib's `Finpartition.ofSetSetoid`. The pull request records that no
+  source from the private repository was read; no other external proof source is recorded.
 - `Partition/RepresentativeMap.lean`, `Relational/DisplacedTransport.lean` (#207, v0.13.0) —
-  independently supplied contract and bridges; the equitable construction is a specialization
+  a contract and bridges written for this repository; the equitable construction is a specialization
   of mathlib's `Finpartition.equitabilise` through its per-parent remainder
   (`Finpartition.card_parts_equitabilise_subset_le`, re-exported in `Partition/Equitable.lean`)
   and this repository's almost-refinement bridge; the transport is the existing `pullback`
   (`Relational/Transport.lean`).
 - `Partition/PartitionDefect.lean`, `Relational/CoordinatePartitionRounding.lean` (#209,
-  v0.13.0) — the one-dimensional Boolean law of total variance (a standard identity),
-  independently proved in the proof-free style of `refinementVarianceNum` (`Graph/Strong.lean`)
+  v0.13.0) — the one-dimensional Boolean law of total variance (a standard identity), proved
+  for this repository in the proof-free style of `refinementVarianceNum` (`Graph/Strong.lean`)
   and `rectRefinementVarianceNum` (`Partition/RectKernelEnergy.lean`); join cardinality reuses
   `card_parts_inf'_le` (`Partition/Basic.lean`); the majority bound at the join specializes
   #206's bound by refinement monotonicity.
@@ -142,10 +151,11 @@ requests record no source) are by reading the proofs.
 
 **Traceability of the transplanted sampling stack.** The paragraph above records the
 transplant collectively (PRs #97–#99, recorded in #101). The original module and declaration
-names and the source revision are not recorded anywhere in this repository and cannot be
-recovered from it; they remain to be supplied by the author from the private antecedent
-repository. That formal-source attribution is a separate matter from the mathematical
-citations of the stack (Conant–Terry, under Publications), which are complete.
+names and the source revision were not found in the reviewed repository records (the bodies of
+those pull requests and the commit history); they remain to be supplied by the author from
+the private antecedent repository. That formal-source attribution is a separate matter from
+the mathematical references of the stack; those currently recorded are listed under
+Publications (Conant–Terry).
 
 ## Publications
 
@@ -354,9 +364,11 @@ citations of the stack (Conant–Terry, under Publications), which are complete.
   partition of a structure is indivisible if and only if the structure is a blow-up whose
   witness fibres are the parts, with the equitable version). This is the exact correspondence
   behind `IsIndivisible`, `FiniteRelModel.IsIndivisibleFor`, and the packaged quotient
-  `FiniteRelModel.quotient` (`Relational/Indivisible.lean`): the quotient is the lemma's target
-  structure and the tuple-of-cells map its witness. The formalization is this repository's own
-  (finite, computable, arbitrary arity, with the nullary layer explicit).
+  `FiniteRelModel.quotient` (`Relational/Indivisible.lean`): for a partition `P` of a finite
+  set `s` and a model indivisible for `P`, the model restricted to `s` is a blow-up of the
+  quotient, with the vertex-to-cell map `x ↦ P.part x` on `s` as the witness (the ambient
+  carrier outside `s` is not described by the correspondence). The formalization is this
+  repository's own (finite, computable, arbitrary arity, with the nullary layer explicit).
 - N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
   (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
   (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
