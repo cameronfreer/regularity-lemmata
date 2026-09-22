@@ -100,6 +100,53 @@ homogeneity perturbation lemmas) were transplanted, with renames and convention 
 the author's private `stable-hypergraph-regularity` repository (Apache-2.0, sole-author), where
 they were developed as stability-neutral infrastructure. No third-party source text is involved.
 
+### Module families added in v0.12.0 and v0.13.0
+
+Provenance reconciliation for the families not covered above, each classified as an
+adaptation of a formal source, a specialization of an existing formal result, or an
+independently supplied proof of a standard fact. None adapts material from the author's
+private antecedent repositories; the pull requests introducing #206, #207, #209, and #210
+record that no such source was read, and the classifications of #192 and #198 (whose pull
+requests record no source) are by reading the proofs.
+
+- `Finite/PatternExtensions.lean` (#192, v0.12.0) — independently supplied proof of a standard
+  tuple-counting estimate: pinning every coordinate touched by an assignment saves one factor
+  of the host size per distinct image vertex (`card_filter_comp_mem_le_image` and its
+  injective, compatible, and existential forms). No adaptation.
+- `Relational/UniformPatternCounts.lean` (#198, v0.12.0) — independently supplied: the
+  atom-cover union bound over pattern atoms (`abs_filter_card_sub_le_of_atom_cover`), the
+  simple-pattern and diagonal-agreement transfers built on it, and the collision term taken
+  from `Finite/Injective.lean`. The hypotheses are this repository's
+  (`docs/uniform-pattern-counts.md`). No adaptation.
+- `Finite/SectionDefect.lean`, `Finite/ProductHybrid.lean`, `Relational/MajorityAssembly.lean`
+  (#206, v0.13.0) — independently supplied proofs of standard facts: the resampling defect of
+  a Boolean section is `2·d·(1 − d)`; the coordinate-wise hybrid argument (telescoping through
+  one-coordinate changes, the prefix-swap fibre count); the majority-rounding bound assembled
+  over cell boxes. The labelled-fibre adapter is a specialization of mathlib's
+  `Finpartition.ofSetSetoid`. No external formal source was consulted.
+- `Partition/RepresentativeMap.lean`, `Relational/DisplacedTransport.lean` (#207, v0.13.0) —
+  independently supplied contract and bridges; the equitable construction is a specialization
+  of mathlib's `Finpartition.equitabilise` through its per-parent remainder
+  (`Finpartition.card_parts_equitabilise_subset_le`, re-exported in `Partition/Equitable.lean`)
+  and this repository's almost-refinement bridge; the transport is the existing `pullback`
+  (`Relational/Transport.lean`).
+- `Partition/PartitionDefect.lean`, `Relational/CoordinatePartitionRounding.lean` (#209,
+  v0.13.0) — the one-dimensional Boolean law of total variance (a standard identity),
+  independently proved in the proof-free style of `refinementVarianceNum` (`Graph/Strong.lean`)
+  and `rectRefinementVarianceNum` (`Partition/RectKernelEnergy.lean`); join cardinality reuses
+  `card_parts_inf'_le` (`Partition/Basic.lean`); the majority bound at the join specializes
+  #206's bound by refinement monotonicity.
+- The compiled consumers under `examples/` (#206, #207, #209, #210) are compositions of the
+  above; the six-vertex counterexample of `examples/GlobalApproximationCounting.lean`
+  enlarges this repository's own `Relational/DiagonalLoopRegression.lean`.
+
+**Traceability of the transplanted sampling stack.** The paragraph above records the
+transplant collectively (PRs #97–#99, recorded in #101). The original module and declaration
+names and the source revision are not recorded anywhere in this repository and cannot be
+recovered from it; they remain to be supplied by the author from the private antecedent
+repository. That formal-source attribution is a separate matter from the mathematical
+citations of the stack (Conant–Terry, under Publications), which are complete.
+
 ## Publications
 
 - N. Littlestone, M. K. Warmuth, *The weighted majority algorithm*, Inf. Comput. 108
@@ -295,6 +342,21 @@ they were developed as stability-neutral infrastructure. No third-party source t
   paper's Hoeffding-with-permutation-encoding argument; the control is two-sided where the
   paper's is one-sided. The stable-regularity theorems themselves are upstream
   (stability-flavored) material, not part of this library.
+- M. Malliaris, S. Shelah, *Regularity lemmas for stable graphs*,
+  [arXiv:1102.3904](https://arxiv.org/abs/1102.3904). The stable regularity lemma whose
+  conclusion — a partition on which the relation is constant between almost all pairs of parts —
+  is the viewpoint behind indivisibility (`Relational/Indivisible.lean`). None of their proofs is
+  formalized here; the stable-regularity theorems themselves are upstream material.
+- N. Ackerman, C. Freer, R. Patel, *Stable regularity for relational structures*,
+  [arXiv:1712.09305](https://arxiv.org/abs/1712.09305), §1.3: **Definition 1.4** (a blow-up of
+  an `L`-structure is an `L`-structure with a surjective full homomorphism onto it, the witness;
+  equitable when the witness fibres differ in size by at most one) and **Lemma 1.5** (a
+  partition of a structure is indivisible if and only if the structure is a blow-up whose
+  witness fibres are the parts, with the equitable version). This is the exact correspondence
+  behind `IsIndivisible`, `FiniteRelModel.IsIndivisibleFor`, and the packaged quotient
+  `FiniteRelModel.quotient` (`Relational/Indivisible.lean`): the quotient is the lemma's target
+  structure and the tuple-of-cells map its witness. The formalization is this repository's own
+  (finite, computable, arbitrary arity, with the nullary layer explicit).
 - N. Chavarria, G. Conant, and A. Pillay, *Continuous stable regularity*, J. Lond. Math. Soc.
   (2) 109 (2024), no. 1, Paper No. e12822. The origin of the `(δ, ε)`-homogeneous pair
   (Conant–Terry's Definition A.1, their [11]); consumed here only through Conant–Terry's
