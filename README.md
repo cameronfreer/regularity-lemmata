@@ -34,8 +34,8 @@ tag.
   edit cost bounded by summed coordinate defects (the partition defect, with the exact
   refinement variance identity), transport along an equitable representative map with an
   explicit displaced set, and the composition giving one equitable partition and one model for
-  all symbols; homomorphism-count transfer follows, induced-count transfer needs diagonal
-  agreement that rounding does not supply.
+  all symbols. Homomorphism-count transfer for simple patterns follows; the uniform induced-count
+  corollary additionally requires diagonal agreement, which rounding does not guarantee.
   [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
 - **Sampling and completion**: exact equal-size blocks on which every member of a supplied
   family keeps its density (balanced slicing), average-preserving slicing, and completion of
@@ -50,8 +50,8 @@ tag.
 
 The limits, stated plainly: the relational substrate supports arbitrary finite relational
 languages and exact finite-model counts, but the regularity and regularity-based counting
-layers assume **arity at most two**, and the quantitative induced-counting theorem treats
-patterns on **`Fin 3`**. There is exactly **one removal theorem**, mathlib's triangle removal for
+layers assume **arity at most two**, and the regularity-based induced-counting theorem treats
+patterns on **`Fin 3`** (the transfer theorems above are not so restricted). There is exactly **one removal theorem**, mathlib's triangle removal for
 simple graphs, re-exported; there is **no general relational induced-removal theorem**. The
 triadic approximation is a **precursor**, not the full Rödl–Schacht theorem. Regularity-based
 counting for general fixed patterns, higher arities, and general hypergraph removal are
