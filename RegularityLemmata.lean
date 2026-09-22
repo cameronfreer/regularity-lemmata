@@ -144,9 +144,11 @@ often wants whole: `RegularityLemmata.Kernel` (rectangular weighted kernels, the
 partition-free cut norm, stepping, energy, cut discrepancy, and the Frieze–Kannan summit),
 `RegularityLemmata.FiniteSetSystems` (relation fibers, traces, and VC bounds),
 `RegularityLemmata.RelationalApproximation` (homogeneous cells, indivisibility, cellwise
-edit bounds, edit transfer, and the aggregation bridge), `RegularityLemmata.FiniteRamsey`
-(multicolour pair Ramsey, binary-tree subtree
-embeddings, and the additive two-colour subtree theorem), and
+edit bounds, edit transfer, the aggregation bridge, and the global-approximation stack:
+majority-rounding cost from summed coordinate defects, the partition defect, representative
+maps with displaced-coordinate transport, and the equitable composition),
+`RegularityLemmata.FiniteRamsey` (multicolour pair Ramsey, binary-tree subtree embeddings, and
+the additive subtree theorems for two colours, for `m` colours, and at equal heights), and
 `RegularityLemmata.ProductSpaces` (raw weights, heterogeneous weighted boxes, predicate mass and
 density, coordinate partitions, unions with a symmetric-difference error, and the coordinate-split
 adapter). The Ramsey and product-space modules are imported here **through their facades**

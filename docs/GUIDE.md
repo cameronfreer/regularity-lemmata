@@ -12,8 +12,9 @@ every module live at <https://cameronfreer.github.io/regularity-lemmata/docs/>: 
 published documentation snapshot of `main` (the workflow runs on releases and on manual
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
-`search.html`. Links in this guide point at the **v0.11.0** pages for released material; the
-sections "Additions released in v0.13.0" and "Additions released in v0.12.0" use source links for newer material. Where a curated
+`search.html`. Links in this guide point at the **v0.13.0** pages for current material (every
+anchor verified against the published pages); the sections "Additions released in v0.13.0" and
+"Additions released in v0.12.0" use source links pinned to their release tags. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
@@ -35,20 +36,35 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 ## Start here, by task
 
 - **I have a directed relation or a finite family of them and want a regular partition.**
-  [`exists_regular_refinement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/Regularity.html#RegularityLemmata.exists_regular_refinement)
-  for one relation; [`exists_familyRegular_equipartition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/EquitableFamilyRegularity.html#RegularityLemmata.exists_familyRegular_equipartition)
-  for a family with an equitable output; [`exists_familyStrongWitness`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Graph/FamilyStrong.html#RegularityLemmata.exists_familyStrongWitness)
+  [`exists_regular_refinement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/Regularity.html#RegularityLemmata.exists_regular_refinement)
+  for one relation; [`exists_familyRegular_equipartition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/EquitableFamilyRegularity.html#RegularityLemmata.exists_familyRegular_equipartition)
+  for a family with an equitable output; [`exists_familyStrongWitness`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/FamilyStrong.html#RegularityLemmata.exists_familyStrongWitness)
   for a strong (energy-gap) witness. Part IV.
 - **I have a weighted matrix or kernel and want a low-complexity approximation.**
-  [`rect_frieze_kannan_cutDiscrepancy`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Partition/RectKernelFriezeKannan.html#RegularityLemmata.rect_frieze_kannan_cutDiscrepancy)
-  for a step partition, [`kernel_frieze_kannan_cutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Finite/RectKernelCutDecomposition.html#RegularityLemmata.kernel_frieze_kannan_cutDecomposition)
+  [`rect_frieze_kannan_cutDiscrepancy`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/RectKernelFriezeKannan.html#RegularityLemmata.rect_frieze_kannan_cutDiscrepancy)
+  for a step partition, [`kernel_frieze_kannan_cutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Finite/RectKernelCutDecomposition.html#RegularityLemmata.kernel_frieze_kannan_cutDecomposition)
   for a sum of few rectangles; import `RegularityLemmata.Kernel`. Part III.
 - **I want to count induced copies of a small pattern in a finite relational model.**
   Exact characterizations on two and three vertices, the three-vertex estimate against a strong
   witness, and counting from a cellwise approximation at any arity. Part IV.
+- **I want to move pattern counts across a small edit of the model.**
+  [`abs_homCountOn_sub_le_of_simple`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/UniformPatternCounts.html#RegularityLemmata.abs_homCountOn_sub_le_of_simple) and
+  [`abs_injectiveHomCountOn_sub_le_of_simple`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/UniformPatternCounts.html#RegularityLemmata.abs_injectiveHomCountOn_sub_le_of_simple) for homomorphism
+  counts of a simple pattern (nullary agreement only; the all-homomorphism form keeps the
+  collision term), [`abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/UniformPatternCounts.html#RegularityLemmata.abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement)
+  for induced counts of any pattern, which additionally needs diagonal agreement. Part IV.
+- **I want to approximate a finite relational model by an indivisible one with a bounded part count.**
+  [`exists_equitable_isIndivisibleFor`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.html#RegularityLemmata.exists_equitable_isIndivisibleFor): one equipartition with a
+  requested number of parts and one model for all symbols, its edit cost the majority-rounding
+  cost at the old partition ([`editDistance_majorityRound_le`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.html#RegularityLemmata.editDistance_majorityRound_le))
+  plus a displacement term; for arbitrary coordinate partitions,
+  [`editDistance_majorityRound_coordinateJoin_le`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.html#RegularityLemmata.editDistance_majorityRound_coordinateJoin_le)
+  charges each coordinate in its own partition through the partition defect
+  ([`partitionDefect_eq_add_refinementVariance`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/PartitionDefect.html#RegularityLemmata.partitionDefect_eq_add_refinementVariance)). Part IV; import
+  `RegularityLemmata.RelationalApproximation`.
 - **I want equal-size blocks on which given sets keep their density.**
-  [`exists_balanced_slicing`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.11.0/RegularityLemmata/Partition/BalancedSlicing.html#RegularityLemmata.exists_balanced_slicing)
-  and, on `main` only, its named-parameter wrapper. Part II.
+  [`exists_balanced_slicing`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/BalancedSlicing.html#RegularityLemmata.exists_balanced_slicing) and, since v0.12.0, its
+  named-parameter wrapper [`exists_balanced_slicing_of_threshold`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/SlicingThreshold.html#RegularityLemmata.exists_balanced_slicing_of_threshold). Part II.
 - **I want to move between an ordinary graph or hypergraph and this library's objects.**
   The adapters `Relational/GraphAdapter`, `Relational/HypergraphAdapters`, `Relational/GraphCounting`,
   and `Graph/RemovalBridge` (the one removal theorem, mathlib's). Part IV.
@@ -111,44 +127,40 @@ tag, because `main` moves between tags.
 
 ## Additions released in v0.13.0
 
-These additions were merged after v0.12.0 and are included in v0.13.0.
-Source links below use `main`; pin v0.13.0 for reproducibility. Older generated
-documentation links above still identify their published documentation version.
+These additions were merged after v0.12.0 and are included in v0.13.0. Source links below
+are pinned to the `v0.13.0` tag.
 
 - Majority rounding at any partition, costed by summed coordinate defects:
-  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/MajorityAssembly.lean)
+  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.lean)
   (`editDistance_majorityRound_le`, the labelled-fibre adapter `labelPartition`), on the
   substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
   prefix-swap identity and the minority bound over heterogeneous coordinate types).
 - The partition defect and the exact refinement variance identity
-  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/PartitionDefect.lean)),
+  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/PartitionDefect.lean)),
   the join of coordinate partitions (`coordinateJoin`, `Partition/Basic`), and the majority
   bound for arbitrary coordinate partitions
-  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
+  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
 - Representative maps with an explicit displaced set, the one-way bridges to the
   almost-refinement charge, the free-part equitable construction
-  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/RepresentativeMap.lean)),
+  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/RepresentativeMap.lean)),
   and displaced-coordinate transport with the composition `exists_equitable_isIndivisibleFor`
-  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/DisplacedTransport.lean)).
+  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.lean)).
 - Five compiled consumers under `examples/`, including
-  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/GlobalApproximationCounting.lean):
+  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/examples/GlobalApproximationCounting.lean):
   homomorphism-count transfer from the global approximation with constants displayed, and the
   induced-count boundary (diagonal agreement is required and rounding does not supply it).
 - The environment-based public inventory (`lake exe public_inventory`).
 
 ## Additions released in v0.12.0
 
-These additions were merged after v0.11.0 and are included in v0.12.0.
-Source links below use `main`; pin v0.12.0 for reproducibility. Older generated
-documentation links above still identify their published documentation version.
+These additions were merged after v0.11.0 and are included in v0.12.0. Source links below
+are pinned to the `v0.12.0` tag.
 
-- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/SlicingThreshold.lean)
-  and `exists_balanced_slicing_of_threshold_self` (source link; the published `main/`
-  documentation snapshot predates them, so their generated anchors are not yet verified):
-  balanced slicing
+- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/RegularityLemmata/Partition/SlicingThreshold.lean)
+  and `exists_balanced_slicing_of_threshold_self`: balanced slicing
   at the named parameters with every side condition discharged; the zero-block case documented,
   the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
-- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/CompositionCertificates.lean):
+- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/examples/CompositionCertificates.lean):
   the compatibility check and the prescribed-error endpoint chaining strong-witness existence
   with three-vertex counting.
 - Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
@@ -161,9 +173,11 @@ documentation links above still identify their published documentation version.
 ## Main theorems and entry points
 
 The declarations to reach for, and the module each lives in. Every bound is visible in the
-statement. The final two rows are entry points rather than regularity theorems: balanced
-slicing is a sampling theorem, and the indivisible-approximation theorem takes its partition as
-an input.
+statement. The last rows are entry points rather than regularity theorems: balanced slicing is
+a sampling theorem; `exists_isIndivisibleFor_of_isHomogeneousCell` takes its partition as an
+input; the equitable composition `exists_equitable_isIndivisibleFor` takes an old partition as
+input and **constructs** a new equipartition (with a requested part count) as output; and the
+transfer theorems take the edit bound as an input.
 
 | Theorem | Declaration | Module |
 | --- | --- | --- |
@@ -180,6 +194,13 @@ an input.
 | Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | `kernel_frieze_kannan_cutDecomposition` | `Finite.RectKernelCutDecomposition` |
 | Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
 | Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
+| Majority-rounding cost from summed coordinate defects, `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)` | `editDistance_majorityRound_le` | `Relational.MajorityAssembly` |
+| Exact refinement variance identity of the partition defect, with monotonicity | `partitionDefect_eq_add_refinementVariance` | `Partition.PartitionDefect` |
+| Majority rounding at the join of arbitrary coordinate partitions, each coordinate charged in its own partition | `editDistance_majorityRound_coordinateJoin_le` | `Relational.CoordinatePartitionRounding` |
+| Equitable representative map with displacement at most `(#P.parts − 1)·⌊|s|/t⌋` | `exists_equitable_representativeMap` | `Partition.RepresentativeMap` |
+| One equitable partition and one indivisible model for all symbols, with the combined edit bound | `exists_equitable_isIndivisibleFor` | `Relational.DisplacedTransport` |
+| Homomorphism-count transfer for a simple pattern across an edit (nullary agreement; collision term retained) | `abs_homCountOn_sub_le_of_simple` | `Relational.UniformPatternCounts` |
+| Induced-count transfer for any pattern across an edit, under diagonal and nullary agreement | `abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement` | `Relational.UniformPatternCounts` |
 
 ## Part I. Counts, densities, edits, diagonals
 
