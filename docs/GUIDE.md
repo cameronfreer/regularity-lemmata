@@ -14,7 +14,7 @@ dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.13.0** pages for current material (every
 anchor verified against the published pages); the sections "Additions released in v0.13.0" and
-"Additions released in v0.12.0" keep source links as their release-time record. Where a curated
+"Additions released in v0.12.0" use source links pinned to their release tags. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
@@ -127,44 +127,40 @@ tag, because `main` moves between tags.
 
 ## Additions released in v0.13.0
 
-These additions were merged after v0.12.0 and are included in v0.13.0.
-Source links below use `main`; pin v0.13.0 for reproducibility. Older generated
-documentation links above still identify their published documentation version.
+These additions were merged after v0.12.0 and are included in v0.13.0. Source links below
+are pinned to the `v0.13.0` tag.
 
 - Majority rounding at any partition, costed by summed coordinate defects:
-  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/MajorityAssembly.lean)
+  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.lean)
   (`editDistance_majorityRound_le`, the labelled-fibre adapter `labelPartition`), on the
   substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
   prefix-swap identity and the minority bound over heterogeneous coordinate types).
 - The partition defect and the exact refinement variance identity
-  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/PartitionDefect.lean)),
+  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/PartitionDefect.lean)),
   the join of coordinate partitions (`coordinateJoin`, `Partition/Basic`), and the majority
   bound for arbitrary coordinate partitions
-  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
+  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
 - Representative maps with an explicit displaced set, the one-way bridges to the
   almost-refinement charge, the free-part equitable construction
-  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/RepresentativeMap.lean)),
+  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/RepresentativeMap.lean)),
   and displaced-coordinate transport with the composition `exists_equitable_isIndivisibleFor`
-  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Relational/DisplacedTransport.lean)).
+  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.lean)).
 - Five compiled consumers under `examples/`, including
-  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/GlobalApproximationCounting.lean):
+  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/examples/GlobalApproximationCounting.lean):
   homomorphism-count transfer from the global approximation with constants displayed, and the
   induced-count boundary (diagonal agreement is required and rounding does not supply it).
 - The environment-based public inventory (`lake exe public_inventory`).
 
 ## Additions released in v0.12.0
 
-These additions were merged after v0.11.0 and are included in v0.12.0.
-Source links below use `main`; pin v0.12.0 for reproducibility. Older generated
-documentation links above still identify their published documentation version.
+These additions were merged after v0.11.0 and are included in v0.12.0. Source links below
+are pinned to the `v0.12.0` tag.
 
-- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/main/RegularityLemmata/Partition/SlicingThreshold.lean)
-  and `exists_balanced_slicing_of_threshold_self` (source link; the published `main/`
-  documentation snapshot predates them, so their generated anchors are not yet verified):
-  balanced slicing
+- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/RegularityLemmata/Partition/SlicingThreshold.lean)
+  and `exists_balanced_slicing_of_threshold_self`: balanced slicing
   at the named parameters with every side condition discharged; the zero-block case documented,
   the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
-- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/main/examples/CompositionCertificates.lean):
+- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/examples/CompositionCertificates.lean):
   the compatibility check and the prescribed-error endpoint chaining strong-witness existence
   with three-vertex counting.
 - Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
@@ -178,8 +174,10 @@ documentation links above still identify their published documentation version.
 
 The declarations to reach for, and the module each lives in. Every bound is visible in the
 statement. The last rows are entry points rather than regularity theorems: balanced slicing is
-a sampling theorem, the indivisible-approximation theorems take their partition as an input,
-and the transfer theorems take the edit bound as an input.
+a sampling theorem; `exists_isIndivisibleFor_of_isHomogeneousCell` takes its partition as an
+input; the equitable composition `exists_equitable_isIndivisibleFor` takes an old partition as
+input and **constructs** a new equipartition (with a requested part count) as output; and the
+transfer theorems take the edit bound as an input.
 
 | Theorem | Declaration | Module |
 | --- | --- | --- |
