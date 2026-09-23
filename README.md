@@ -44,7 +44,7 @@ tag.
 - **Hypergraph precursors**: polyad regularity with an arity-generic energy increment and the
   deletion-only triadic approximation.
   [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
-- **Independent tools**: finite multicolour Ramsey and binary-tree subtree Ramsey theorems, the
+- **Independent tools**: finite multicolor Ramsey and binary-tree subtree Ramsey theorems, the
   Hedge forecaster's regret bound, density buckets, weighted selection.
   [Guide, Independent tools](docs/GUIDE.md#independent-tools).
 

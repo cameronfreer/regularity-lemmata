@@ -20,7 +20,7 @@ translated (unit weights, matrix entries, a graph's edge indicator).
 | --- | --- | --- |
 | [`OrdinaryMatrix.lean`](OrdinaryMatrix.lean) | `RegularityLemmata.Kernel` | The cut-matrix decomposition of a real matrix with entries in `[-1, 1]` at unit weights: at most `⌈1/ε²⌉₊` weighted submatrix indicators, coefficients at most `1/ε`, and every submatrix sum of the residual at most `ε·m·n`, stated as finite sums. |
 | [`WeightedBipartiteGraph.lean`](WeightedBipartiteGraph.lean) | `RegularityLemmata.Kernel` | The decomposition of a bipartite graph's edge indicator under nonnegative vertex weights, and its unit-weight form with the classical `ε·|A|·|B|` bound. |
-| [`SignedResidual.lean`](SignedResidual.lean) | `RegularityLemmata.Kernel` | Rescaling a signed residual: the centred residual `f − rectAverage f A B` of a unit-bounded kernel takes values in `[-2, 2]`; rescaling by `1/2` and decomposing gives coefficients at most `2/ε` and a residual cut norm at most `2ε · mass`, for every such kernel. |
+| [`SignedResidual.lean`](SignedResidual.lean) | `RegularityLemmata.Kernel` | Rescaling a signed residual: the centered residual `f − rectAverage f A B` of a unit-bounded kernel takes values in `[-2, 2]`; rescaling by `1/2` and decomposing gives coefficients at most `2/ε` and a residual cut norm at most `2ε · mass`, for every such kernel. |
 | [`ReadmeSnippet.lean`](ReadmeSnippet.lean) | `RegularityLemmata.Kernel` | The README's compiled use, verbatim: the cut-matrix decomposition of a `[-1, 1]`-matrix at unit weights, stated with the library's own cut norm. |
 
 ## Composition certificates

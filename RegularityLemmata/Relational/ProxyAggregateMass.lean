@@ -13,12 +13,12 @@ ordered distinct proxy pairs FIRST and bounds the aggregate once per palette; th
 cardinality envelope multiplies nothing. This file proves the two reindexings that make
 that possible, and stops there: no channel routing, no constants, no summit.
 
-* `sum_proxyPair_nonuniform_le` — the nonuniform fine-fibre mass, summed over every ordered
+* `sum_proxyPair_nonuniform_le` — the nonuniform fine-fiber mass, summed over every ordered
   distinct proxy pair, is bounded ONCE by the diagonal-inclusive bad mass of the fine
   partition. The point is disjointness: a fine cell lies in AT MOST one proxy, so distinct
   proxy pairs contribute disjoint sets of fine-cell pairs and the double sum collapses to a
   single sum over a subset of all fine pairs. No factor of the proxy-pair count appears.
-* `sum_proxyPair_deviant_le` — the `η`-deviant fine-fibre mass, summed over every ordered
+* `sum_proxyPair_deviant_le` — the `η`-deviant fine-fiber mass, summed over every ordered
   distinct proxy pair, is bounded ONCE per palette by the witness's `deviant_mass_le`,
   because the proxy pairs are a subset of all coarse pairs.
 
@@ -37,13 +37,13 @@ open FirstOrder
 
 variable {V : Type*} [DecidableEq V] {s : Finset V}
 
-/-! ### Disjointness of the proxy fibres -/
+/-! ### Disjointness of the proxy fibers -/
 
 /-- Distinct proxy pairs contribute DISJOINT sets of fine-cell pairs: a fine cell sits in
-at most one proxy, so it cannot be a fibre member of two. This is what makes the aggregate
+at most one proxy, so it cannot be a fiber member of two. This is what makes the aggregate
 a single sum rather than a per-pair bound multiplied by the pair count.
 
-No refinement hypothesis is needed: the fibre filter `(· ⊆ pd.1)` already forces the
+No refinement hypothesis is needed: the fiber filter `(· ⊆ pd.1)` already forces the
 containment that the argument uses. -/
 theorem proxyFibre_pairwiseDisjoint {F Q : Finpartition s}
     (f : Finset V × Finset V → Prop) [DecidablePred f] :
@@ -65,7 +65,7 @@ theorem proxyFibre_pairwiseDisjoint {F Q : Finpartition s}
 
 open Classical in
 /-- **Aggregate nonuniform-mass reindexing.** Summed over EVERY ordered distinct proxy
-pair, the nonuniform fine-fibre-pair mass is bounded ONCE by the diagonal-inclusive bad
+pair, the nonuniform fine-fiber-pair mass is bounded ONCE by the diagonal-inclusive bad
 mass of the fine partition — no factor of the proxy-pair count. -/
 theorem sum_proxyPair_nonuniform_le (R : V → V → Prop) [DecidableRel R] {ε : ℝ}
     (F : Finpartition s) (Q : Finpartition s) :
@@ -93,7 +93,7 @@ variable {L : FirstOrder.Language} [FiniteRelational L] {M : FiniteRelModel L V}
 
 open Classical in
 /-- **Aggregate deviant-mass reindexing.** Summed over EVERY ordered distinct proxy pair,
-the `η`-deviant fine-fibre-pair mass is bounded ONCE per palette by the witness's total
+the `η`-deviant fine-fiber-pair mass is bounded ONCE per palette by the witness's total
 deviant mass — the proxy pairs being a subset of all coarse pairs. Again no factor of the
 proxy-pair count. -/
 theorem BinaryPaletteStrongDiagWitness.sum_proxyPair_deviant_le

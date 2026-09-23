@@ -52,7 +52,7 @@ curated stack and defines nothing; each listed module remains directly importabl
   box-level identity `editDistance_majorityRound_eq_minorityCount`, the ambient
   part-resampling defect `partResampleDefect` and its reassembly across cell boxes, the global
   bound `editDistance_majorityRound_le_sum_partResampleDefect`, the inclusive-decency form
-  `editDistance_majorityRound_le` at `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)`, the labelled-fibre
+  `editDistance_majorityRound_le` at `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)`, the labeled-fiber
   adapter `labelPartition` (unused labels allowed) with its reassembly over label tuples, and
   the exact nullary copy.
 * `Partition.RepresentativeMap`, `Relational.DisplacedTransport` — the **owner/displacement
@@ -72,7 +72,7 @@ curated stack and defines nothing; each listed module remains directly importabl
   defect** `partitionDefect P p = ∑_l sectionDisagreement l p / |l|` of a section and of a
   finite section family (`familyDefect`), the exact **refinement variance identity**
   `partitionDefect P p = partitionDefect Q p + 2 · sectionRefinementVariance Q P p` for `Q ≤ P`
-  with its monotonicity corollary, the labelled form over all labels
+  with its monotonicity corollary, the labeled form over all labels
   (`partitionDefect_labelPartition`, unused labels contribute `0`), the join of coordinate
   partitions `coordinateJoin` with its cardinality bound, and the **majority bound for
   arbitrary coordinate partitions** `editDistance_majorityRound_coordinateJoin_le`: rounding at

@@ -127,10 +127,10 @@ sources.
 - `Finite/SectionDefect.lean`, `Finite/ProductHybrid.lean`, `Relational/MajorityAssembly.lean`
   (#206, v0.13.0) — proofs written for this repository of standard facts: the resampling
   defect of a Boolean section is `2·d·(1 − d)`; the coordinate-wise hybrid argument
-  (telescoping through one-coordinate changes, the prefix-swap fibre count); the
+  (telescoping through one-coordinate changes, the prefix-swap fiber count); the
   majority-rounding bound assembled over cell boxes. They use `majorityRound` and its
   real-valued box identity (`Relational/CellwiseEdit.lean`), the box-cell substrate
-  (`Partition/BoxPartition.lean`), and mathlib's `Fin.insertNth`; the labelled-fibre adapter is
+  (`Partition/BoxPartition.lean`), and mathlib's `Fin.insertNth`; the labeled-fiber adapter is
   a specialization of mathlib's `Finpartition.ofSetSetoid`. The pull request records that no
   source from the private repository was read; no other external proof source is recorded.
 - `Partition/RepresentativeMap.lean`, `Relational/DisplacedTransport.lean` (#207, v0.13.0) —
@@ -277,7 +277,7 @@ Publications (Conant–Terry).
 - N. Alon, R. Livni, M. Malliaris, S. Moran, *Private PAC learning implies finite
   Littlestone dimension*.
   [arXiv:1806.00949](https://arxiv.org/abs/1806.00949) — **Lemma 16** is the source of the
-  additive two-colour subtree theorem `binaryTreeRamsey_two` of
+  additive two-color subtree theorem `binaryTreeRamsey_two` of
   `Finite/BinaryTreeRamsey.lean`. Their statement uses positive integers `p, q` and host height
   `p + q - 1`; substituting `p = a + 1` and `q = b + 1` gives the `a + b + 1` used here.
 
@@ -287,16 +287,16 @@ Publications (Conant–Terry).
   direction is preserved.
 
   What is formalized is a **precise upper theorem, with no optimality claim**: the statement
-  gives the explicit height `a + b + 1`, and no matching lower-bound colouring is formalized
+  gives the explicit height `a + b + 1`, and no matching lower-bound coloring is formalized
   here, so nothing asserts that this height is least.
 
-  `binaryTreeRamsey_two` formalizes the two-colour subtree theorem recorded from
-  Alon–Livni–Malliaris–Moran, Lemma 16. It is also the two-colour specialization of
+  `binaryTreeRamsey_two` formalizes the two-color subtree theorem recorded from
+  Alon–Livni–Malliaris–Moran, Lemma 16. It is also the two-color specialization of
   G. Conant and C. Terry, *Encoding orders and trees in real-valued functions*
   ([arXiv:2607.21761](https://arxiv.org/abs/2607.21761)), **Lemma 2.6**, the tree-Ramsey
-  ingredient used in their proof of Theorem 1.11. Their Lemma 2.6 is the multicolour
+  ingredient used in their proof of Theorem 1.11. Their Lemma 2.6 is the multicolor
   generalization, formalized as `binaryTreeRamsey` — a **reformulated variant**: the
-  colouring form of their cover statement, with heights in successor form (subtrees `t i + 1`,
+  coloring form of their cover statement, with heights in successor form (subtrees `t i + 1`,
   host `(∑ i, t i) + 1`, their `t = t₁ + … + t_m − m + 1`); the cover equivalence is not
   formalized, so the label is not "exact". Theorem 1.11 is a downstream application rather
   than a Ramsey statement.
@@ -360,9 +360,9 @@ Publications (Conant–Terry).
 - N. Ackerman, C. Freer, R. Patel, *Stable regularity for relational structures*,
   [arXiv:1712.09305](https://arxiv.org/abs/1712.09305), §1.3: **Definition 1.4** (a blow-up of
   an `L`-structure is an `L`-structure with a surjective full homomorphism onto it, the witness;
-  equitable when the witness fibres differ in size by at most one) and **Lemma 1.5** (a
+  equitable when the witness fibers differ in size by at most one) and **Lemma 1.5** (a
   partition of a structure is indivisible if and only if the structure is a blow-up whose
-  witness fibres are the parts, with the equitable version). This is the exact correspondence
+  witness fibers are the parts, with the equitable version). This is the exact correspondence
   behind `IsIndivisible`, `FiniteRelModel.IsIndivisibleFor`, and the packaged quotient
   `FiniteRelModel.quotient` (`Relational/Indivisible.lean`): for a partition `P` of a finite
   set `s` and a model indivisible for `P`, the model restricted to `s` is a blow-up of the

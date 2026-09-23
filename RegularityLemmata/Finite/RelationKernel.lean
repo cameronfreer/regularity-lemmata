@@ -288,7 +288,7 @@ example : rectAverageCount (relationKernel (fun (a : Fin 2) (b : Fin 3) => a.val
   norm_num
 
 -- **Complement indicators on an empty rectangle**: both sums are `0`, matching the
--- guard-free count behaviour rather than summing to the rectangle mass.
+-- guard-free count behavior rather than summing to the rectangle mass.
 example (B : Finset (Fin 3)) :
     rectSumCount (relationKernel (fun (a : Fin 2) (b : Fin 3) => a.val ≤ b.val)) ∅ B = 0 ∧
       rectSumCount (relationKernel (fun (a : Fin 2) (b : Fin 3) => ¬ (a.val ≤ b.val)))

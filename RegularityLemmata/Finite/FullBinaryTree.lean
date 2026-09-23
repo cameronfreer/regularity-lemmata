@@ -26,7 +26,7 @@ a node's address — so it does not support these relations and is not used here
 
 The three node types are subtypes of `List Bool`, so the carrier never varies and only the
 proof field does; `Subtype.ext` discharges it. Raw words with a length hypothesis were the
-alternative, and would have pushed that hypothesis through every colouring, every embedding
+alternative, and would have pushed that hypothesis through every coloring, every embedding
 law, every composition theorem, and every enumeration.
 
 ## Height conventions
@@ -44,7 +44,7 @@ namespace RegularityLemmata
 abbrev TreeNode (h : ℕ) : Type := {w : List Bool // w.length ≤ h}
 
 /-- An internal node of the full binary tree of height `h`: a word of length `< h`. These are
-the nodes a colouring is defined on. -/
+the nodes a coloring is defined on. -/
 abbrev InternalNode (h : ℕ) : Type := {w : List Bool // w.length < h}
 
 /-- A leaf of the full binary tree of height `h`: a word of length exactly `h`.

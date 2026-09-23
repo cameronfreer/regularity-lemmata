@@ -217,7 +217,7 @@ theorem exists_refinement_energy_increment_of_cut_witness {P : Finpartition s}
           = d * (((A ∩ C).card : ℝ) * ((B ∩ D).card : ℝ)) from by ring, hmass,
         Finset.mul_sum, ← Finset.sum_sub_distrib]
       exact Finset.sum_congr rfl fun p _ => by ring
-    -- selected sums as ite-sums over the full fibre product
+    -- selected sums as ite-sums over the full fiber product
     have hsel : selL ×ˢ selR = (fib C ×ˢ fib D).filter
         (fun p => p.1 ⊆ A ∧ p.2 ⊆ B) := by
       rw [hselL, hselR, hfib]
@@ -411,7 +411,7 @@ rectangle, with a part bound multiplicative in the seed's.
 This is the form `fk_iterate` actually proves: the iteration starts anywhere, each round refines,
 and the budget (`one_sub_rounds_mul_sq_le_energy`) is seed-independent. `frieze_kannan` is the
 `⊤` specialization. The refinement conclusion is what downstream layers need when the seed carries
-structure to be preserved — a vertex partition, a colour class family, or a lower level of a
+structure to be preserved — a vertex partition, a color class family, or a lower level of a
 complex. -/
 theorem frieze_kannan_refining (P₀ : Finpartition s) (hε : 0 < ε) :
     ∃ P : Finpartition s, P ≤ P₀ ∧

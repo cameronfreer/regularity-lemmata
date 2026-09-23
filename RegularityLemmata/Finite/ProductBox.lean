@@ -317,7 +317,7 @@ theorem sum_tuples_reindex {ι' : Type*} [Fintype ι] [DecidableEq ι] [Fintype 
     have h := hy (e.symm i)
     rw [FiniteBox.reindex_apply] at h
     -- Rewrite the *index* first. `Equiv.piCongrLeft_apply_apply` is a `simp` lemma, so
-    -- normalising here would undo the step rather than complete it.
+    -- normalizing here would undo the step rather than complete it.
     rw [← Equiv.apply_symm_apply e i, Equiv.piCongrLeft_apply_apply]
     exact h
   · rw [FiniteBox.mem_tuples] at hx ⊢

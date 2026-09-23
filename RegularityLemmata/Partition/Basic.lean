@@ -276,7 +276,7 @@ theorem parts_biUnion_filter_subset {P Q : Finpartition s} (hQ : Q ≤ P) :
     exact ⟨C, hCmem, hQ'mem, hsub⟩
 
 /-- **Reindexing an arbitrary sub-family of fine parts by parents.** Any collection `I` of
-`Q`-parts splits over the `P`-part fibres, because each `Q`-part lies in a unique `P`-part.
+`Q`-parts splits over the `P`-part fibers, because each `Q`-part lies in a unique `P`-part.
 
 Stated for a sub-family rather than all of `Q.parts` because energy arguments select the fine
 cells meeting a witness rectangle and still need to group them under their coarse parents;
@@ -451,7 +451,7 @@ empty or full cut costs nothing at all, and a cut respecting existing cell bound
 less than `2`.
 
 Named `cutRefinePartition` rather than `cutRefine` because the latter already denotes the
-unrelated polyad-witness colour refinement of `RegularityLemmata/Hypergraph/PolyadWitness.lean`. -/
+unrelated polyad-witness color refinement of `RegularityLemmata/Hypergraph/PolyadWitness.lean`. -/
 
 /-- Refine `P` by cutting every cell along the test set `S`. -/
 def cutRefinePartition (P : Finpartition s) (S : Finset α) : Finpartition s :=

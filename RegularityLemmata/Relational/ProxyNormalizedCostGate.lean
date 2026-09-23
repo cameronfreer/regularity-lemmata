@@ -16,7 +16,7 @@ G-H2a, G-H2b): no a priori count bound is available for `w.coarse`. This file te
 
 ## The change
 
-Step 3 charged **one unit** per (proxy pair, colour) incidence at which the selected
+Step 3 charged **one unit** per (proxy pair, color) incidence at which the selected
 representatives deviate. Its budget was `K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2`, and the common
 weight floor `w₀ = m / 2` turned `#s ^ 2 / m ^ 2` into a factor `4 * P ^ 2`.
 
@@ -68,7 +68,7 @@ theorem proxyPairMassWeight_nonneg (s : Finset V) (pd : Finset V × Finset V) :
   rw [proxyPairMassWeight]; positivity
 
 open Classical in
-/-- **The normalized cost of a selection**: each (proxy pair, colour) incidence at which the
+/-- **The normalized cost of a selection**: each (proxy pair, color) incidence at which the
 two chosen representatives deviate is charged its proxy pair's normalized mass. -/
 noncomputable def proxyNormalizedDeviationCost (M : FiniteRelModel L V) (η : ℝ)
     (F : Finpartition s) (Q : Finpartition s) (g : ProxyIndex Q → Finset V) : ℝ :=

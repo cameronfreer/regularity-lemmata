@@ -7,25 +7,25 @@ import Mathlib.Data.Fin.VecNotation
 import Mathlib.Algebra.BigOperators.Fin
 
 /-!
-# The additive two-colour subtree theorem, and its multicolour form
+# The additive two-color subtree theorem, and its multicolor form
 
-Two-colour the internal nodes of a full binary tree of height `a + b + 1`. Then it contains
-either a colour-`0` subtree of height `a + 1` or a colour-`1` subtree of height `b + 1`, where
+Two-color the internal nodes of a full binary tree of height `a + b + 1`. Then it contains
+either a color-`0` subtree of height `a + 1` or a color-`1` subtree of height `b + 1`, where
 "subtree" means the image of an `InternalEmbedding`: arbitrary root, branch direction preserved,
 depth unconstrained.
 
 ## A precise upper theorem, without an optimality claim
 
-The theorem states the explicit height `a + b + 1`. No matching lower-bound colouring is
+The theorem states the explicit height `a + b + 1`. No matching lower-bound coloring is
 formalized, so no optimality claim is made; upgrading this to a Ramsey-number equality would be
 separate work.
 
 ## The induction
 
-On `a + b`. At a chosen root of colour `0`, apply the `(a - 1, b)` case inside each of the two
-branches. If either branch returns the colour-`1` alternative, that alternative already answers
-the whole tree. Otherwise both branches return colour-`0` subtrees of height `a`, and `fork`
-attaches them under the root to give height `a + 1`. A root of colour `1` is symmetric.
+On `a + b`. At a chosen root of color `0`, apply the `(a - 1, b)` case inside each of the two
+branches. If either branch returns the color-`1` alternative, that alternative already answers
+the whole tree. Otherwise both branches return color-`0` subtrees of height `a`, and `fork`
+attaches them under the root to give height `a + 1`. A root of color `1` is symmetric.
 
 This is where the embedding conventions earn their keep. The two subtrees are found at unknown
 depth inside the branches and are then attached under a shallower node, so the assembled
@@ -39,18 +39,18 @@ The heights appear as `a + 1`, `b + 1`, and `a + b + 1`, never as truncated subt
 recursion is carried by an auxiliary indexed by the host height, so that the arithmetic relating
 `a`, `b`, and the height lives in ordinary hypotheses rather than in types.
 
-## The multicolour theorem
+## The multicolor theorem
 
-`binaryTreeRamsey` is the `m`-colour form: subtree heights `t i + 1` for `t : Fin m → ℕ`, host
+`binaryTreeRamsey` is the `m`-color form: subtree heights `t i + 1` for `t : Fin m → ℕ`, host
 height `(∑ i, t i) + 1` (the successor of the sum — the parenthesization is load-bearing, and at
 `m = 2`, `t = ![a, b]` it is `a + b + 1`). The recursion `ramsey_aux_multi` generalizes
-`ramsey_aux`: at a root of colour `c` with `t c = 0` the root alone answers; otherwise the entry
+`ramsey_aux`: at a root of color `c` with `t c = 0` the root alone answers; otherwise the entry
 `t c` is shrunk by one with `Function.update` and both branches are recursed into — a branch
-answering with a colour other than `c` already answers at that colour's full height, and two
+answering with a color other than `c` already answers at that color's full height, and two
 branches answering with `c` are joined under the root by `fork`. The returned height travels as
 an equation `k = t i + 1`, so the arithmetic of `Function.update` never enters a type. The
 whole-tree form `binaryTreeRamsey_proper` and the equal-height form
-`binaryTreeRamsey_proper_const` (host `m * t + 1`) follow. The two-colour statements are
+`binaryTreeRamsey_proper_const` (host `m * t + 1`) follow. The two-color statements are
 unchanged and recovered as a test.
 
 ## Provenance
@@ -61,12 +61,12 @@ uses positive integers `p, q` and host height `p + q - 1`; substituting `p = a +
 `q = b + 1` gives the `a + b + 1` here. The mathematics is theirs; the word-indexed formulation
 and Lean proof are this repository's own.
 
-`binaryTreeRamsey_two` is also the two-colour specialization of G. Conant and C. Terry,
+`binaryTreeRamsey_two` is also the two-color specialization of G. Conant and C. Terry,
 *Encoding orders and trees in real-valued functions*,
 [arXiv:2607.21761](https://arxiv.org/abs/2607.21761), **Lemma 2.6**, the tree-Ramsey ingredient
 used in their proof of Theorem 1.11. `binaryTreeRamsey` is a **reformulated variant** of their
-Lemma 2.6: the colouring form of their cover statement (a cover `C₁ ∪ … ∪ C_m` of the internal
-nodes becomes a colouring, so a cover with overlaps is handled by choosing one colour per node),
+Lemma 2.6: the coloring form of their cover statement (a cover `C₁ ∪ … ∪ C_m` of the internal
+nodes becomes a coloring, so a cover with overlaps is handled by choosing one color per node),
 with heights in successor form (`t i + 1`, host `(∑ i, t i) + 1`, their
 `t = t₁ + … + t_m − m + 1`). The cover equivalence is not formalized, so the label stays
 "reformulated variant". Theorem 1.11 is a downstream application, not a Ramsey statement.
@@ -78,7 +78,7 @@ namespace RegularityLemmata
 
 open InternalEmbedding
 
-/-- A two-colouring of the internal nodes of a tree of height `h`. -/
+/-- A two-coloring of the internal nodes of a tree of height `h`. -/
 abbrev BinaryTreeTwoColouring (h : ℕ) : Type := InternalNode h → Fin 2
 
 private theorem fin_two_cases (c : Fin 2) : c = 0 ∨ c = 1 := by revert c; decide
@@ -108,7 +108,7 @@ private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : Binar
       · exact Or.inr ⟨InternalEmbedding.id 1, fun x => by rw [id_apply, hroot x]; exact hc⟩
   | succ m ih =>
       intro a b hab colour
-      -- Assembling two branch embeddings under the root keeps a colour that the root and both
+      -- Assembling two branch embeddings under the root keeps a color that the root and both
       -- pieces already have.
       have hfork : ∀ (k : ℕ) (c : Fin 2) (F G : InternalEmbedding k (m + 1 + 1))
           (hf : ∀ y, BranchBelow false (root (m + 1)).1 (F y).1)
@@ -123,7 +123,7 @@ private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : Binar
           · simpa using hG y
       rcases a with _ | a' <;> rcases b with _ | b'
       · omega
-      · -- `a = 0`: one colour-`0` node suffices, and otherwise the whole tree is colour `1`.
+      · -- `a = 0`: one color-`0` node suffices, and otherwise the whole tree is color `1`.
         obtain rfl : b' = m := by omega
         by_cases hex : ∃ x, colour x = 0
         · obtain ⟨x, hx⟩ := hex
@@ -147,7 +147,7 @@ private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : Binar
           · exact absurd hc (hex x)
       · -- Both heights positive: recurse into the two branches below the root.
         rcases fin_two_cases (colour (root (m + 1))) with hr | hr
-        · -- Root colour `0`: shrink `a`.
+        · -- Root color `0`: shrink `a`.
           have hstep : ∀ d : Bool,
               (∃ e : InternalEmbedding (a' + 1) (m + 1),
                 ∀ x, colour (consInternal d (e x)) = 0) ∨
@@ -163,7 +163,7 @@ private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : Binar
               exact hfork _ 0 _ _ _ _ hr hef heg
             · exact Or.inr ⟨comp (branchLift (m + 1) true) e, he⟩
           · exact Or.inr ⟨comp (branchLift (m + 1) false) e, he⟩
-        · -- Root colour `1`: shrink `b`.
+        · -- Root color `1`: shrink `b`.
           have hstep : ∀ d : Bool,
               (∃ e : InternalEmbedding (a' + 1 + 1) (m + 1),
                 ∀ x, colour (consInternal d (e x)) = 0) ∨
@@ -180,10 +180,10 @@ private theorem ramsey_aux : ∀ (n a b : ℕ), a + b = n → ∀ colour : Binar
                 (fun y => branchBelow_root_branchLift (m + 1) true (eg y)), ?_⟩
               exact hfork _ 1 _ _ _ _ hr hef heg
 
-/-- **The additive two-colour subtree theorem.**
+/-- **The additive two-color subtree theorem.**
 
-Every two-colouring of the internal nodes of a tree of height `a + b + 1` admits either a
-colour-`0` subtree of height `a + 1` or a colour-`1` subtree of height `b + 1`.
+Every two-coloring of the internal nodes of a tree of height `a + b + 1` admits either a
+color-`0` subtree of height `a + 1` or a color-`1` subtree of height `b + 1`.
 
 The subtrees are `InternalEmbedding` images: their roots may sit at any host node and their
 edges may span many host levels, but branch direction is preserved. Both freedoms are used by
@@ -196,7 +196,7 @@ theorem binaryTreeRamsey_two (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b
 /-- **The whole-tree form.** The monochromatic subtree can be taken with its leaves placed, so
 what is exhibited is a copy of the full tree of the stated height and not only of its interior.
 
-The colouring constrains only internal nodes, so the leaf placement is unconstrained; it is
+The coloring constrains only internal nodes, so the leaf placement is unconstrained; it is
 supplied by `InternalEmbedding.extendProper`, whose restriction to the interior is the embedding
 the previous theorem produces. -/
 theorem binaryTreeRamsey_two_proper (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
@@ -206,9 +206,9 @@ theorem binaryTreeRamsey_two_proper (a b : ℕ) (colour : BinaryTreeTwoColouring
   · exact Or.inl ⟨extendProper e, he⟩
   · exact Or.inr ⟨extendProper e, he⟩
 
-/-! ### The multicolour theorem (companion Lemma 2.6, colouring form) -/
+/-! ### The multicolor theorem (companion Lemma 2.6, coloring form) -/
 
-/-- The multicolour recursion, indexed by the **host height**, generalizing `ramsey_aux`. The
+/-- The multicolor recursion, indexed by the **host height**, generalizing `ramsey_aux`. The
 subtree height is returned as a variable `k` with the equation `k = t i + 1` kept as a
 hypothesis, so that the arithmetic never enters a type: the induction shrinks one entry of `t`
 by `Function.update`, and the returned height is reconciled with `t i + 1` by rewriting the
@@ -226,7 +226,7 @@ private theorem ramsey_aux_multi : ∀ (n : ℕ) {m : ℕ} (t : Fin m → ℕ), 
         rcases internalNode_cases x with h | ⟨_, y, _⟩
         · exact h
         · exact absurd y.2 (by omega)
-      -- The root's colour picks the expert; every `t i` is `0`, so its height is `1`.
+      -- The root's color picks the expert; every `t i` is `0`, so its height is `1`.
       have htc : t (colour (root 0)) = 0 :=
         (Finset.sum_eq_zero_iff.mp hsum) _ (Finset.mem_univ _)
       exact ⟨colour (root 0), 1, by omega, InternalEmbedding.id 1,
@@ -246,9 +246,9 @@ private theorem ramsey_aux_multi : ∀ (n : ℕ) {m : ℕ} (t : Fin m → ℕ), 
           · simpa using hG y
       set c := colour (root (n + 1)) with hc
       rcases Nat.eq_zero_or_pos (t c) with h0 | hpos
-      · -- The root's colour asks for height one: the root alone.
+      · -- The root's color asks for height one: the root alone.
         exact ⟨c, 1, by omega, singleton (root (n + 1)), fun y => by rw [singleton_apply]⟩
-      · -- Shrink the root colour's height by one and recurse into both branches.
+      · -- Shrink the root color's height by one and recurse into both branches.
         obtain ⟨t', ht'⟩ : ∃ t', t c = t' + 1 := ⟨t c - 1, by omega⟩
         set t'' := Function.update t c t' with ht''
         have hsum' : ∑ i, t'' i = n := by
@@ -264,7 +264,7 @@ private theorem ramsey_aux_multi : ∀ (n : ℕ) {m : ℕ} (t : Fin m → ℕ), 
         obtain ⟨i₁, k₁, hk₁, e₁, he₁⟩ := hstep true
         by_cases h₀ : i₀ = c
         · by_cases h₁ : i₁ = c
-          · -- Both branches answer with the root's colour: fork under the root.
+          · -- Both branches answer with the root's color: fork under the root.
             have hk : k₀ = t' + 1 := by rw [hk₀, h₀, ht'', Function.update_self]
             have hk' : k₁ = t' + 1 := by rw [hk₁, h₁, ht'', Function.update_self]
             subst hk hk'
@@ -273,15 +273,15 @@ private theorem ramsey_aux_multi : ∀ (n : ℕ) {m : ℕ} (t : Fin m → ℕ), 
               (fun y => branchBelow_root_branchLift (n + 1) false (e₀ y))
               (fun y => branchBelow_root_branchLift (n + 1) true (e₁ y)),
               hfork _ c _ _ _ _ hc.symm (fun y => (he₀ y).trans h₀) (fun y => (he₁ y).trans h₁)⟩
-          · -- The true branch answers with another colour, at that colour's full height.
+          · -- The true branch answers with another color, at that color's full height.
             exact ⟨i₁, k₁, by rw [hk₁, ht'', Function.update_of_ne h₁],
               comp (branchLift (n + 1) true) e₁, he₁⟩
         · exact ⟨i₀, k₀, by rw [hk₀, ht'', Function.update_of_ne h₀],
             comp (branchLift (n + 1) false) e₀, he₀⟩
 
-/-- **The multicolour subtree theorem** — companion Lemma 2.6 in colouring form. An `m`-colouring
-of the internal nodes of a tree of height `(∑ i, t i) + 1` admits, for some colour `i`, a
-colour-`i` subtree of height `t i + 1`. The parenthesization of the host height is load-bearing:
+/-- **The multicolor subtree theorem** — companion Lemma 2.6 in coloring form. An `m`-coloring
+of the internal nodes of a tree of height `(∑ i, t i) + 1` admits, for some color `i`, a
+color-`i` subtree of height `t i + 1`. The parenthesization of the host height is load-bearing:
 it is the successor of the sum, matching `a + b + 1` at `m = 2`. -/
 theorem binaryTreeRamsey (m : ℕ) (t : Fin m → ℕ)
     (colour : InternalNode ((∑ i, t i) + 1) → Fin m) :
@@ -291,7 +291,7 @@ theorem binaryTreeRamsey (m : ℕ) (t : Fin m → ℕ)
   subst hk
   exact ⟨i, e, he⟩
 
-/-- **The multicolour whole-tree form**: the monochromatic subtree with its leaves placed, via
+/-- **The multicolor whole-tree form**: the monochromatic subtree with its leaves placed, via
 `InternalEmbedding.extendProper` as in `binaryTreeRamsey_two_proper`. -/
 theorem binaryTreeRamsey_proper (m : ℕ) (t : Fin m → ℕ)
     (colour : InternalNode ((∑ i, t i) + 1) → Fin m) :
@@ -300,9 +300,9 @@ theorem binaryTreeRamsey_proper (m : ℕ) (t : Fin m → ℕ)
   obtain ⟨i, e, he⟩ := binaryTreeRamsey m t colour
   exact ⟨i, extendProper e, he⟩
 
-/-- **Equal heights**: `m` colours, every subtree of height `t + 1`, host height `m * t + 1`.
+/-- **Equal heights**: `m` colors, every subtree of height `t + 1`, host height `m * t + 1`.
 Stated at the host height `m * t + 1` directly (the recursion is entered with `∑ i : Fin m, t =
-m * t` as a hypothesis, so no colouring is transported along that identity). -/
+m * t` as a hypothesis, so no coloring is transported along that identity). -/
 theorem binaryTreeRamsey_proper_const (m t : ℕ) (colour : InternalNode (m * t + 1) → Fin m) :
     ∃ (c : Fin m) (e : ProperEmbedding (t + 1) (m * t + 1)), ∀ x, colour (e.internal x) = c := by
   obtain ⟨c, k, hk, e, he⟩ := ramsey_aux_multi (m * t) (fun _ : Fin m => t)
@@ -314,14 +314,14 @@ theorem binaryTreeRamsey_proper_const (m t : ℕ) (colour : InternalNode (m * t 
 
 section Tests
 
--- **`a = b = 0`.** Host height one: the single root is one colour or the other, and the answer
--- is a height-one subtree of that colour.
+-- **`a = b = 0`.** Host height one: the single root is one color or the other, and the answer
+-- is a height-one subtree of that color.
 example (colour : BinaryTreeTwoColouring 1) :
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 0) ∨
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 1) :=
   binaryTreeRamsey_two 0 0 colour
 
--- **`a = 0`.** Either some node is colour `0`, or the whole tree of height `b + 1` is colour
+-- **`a = 0`.** Either some node is color `0`, or the whole tree of height `b + 1` is color
 -- `1`.
 --
 -- Stated the way a consumer would hold it, at height `b + 1`. Instantiating the theorem at
@@ -329,9 +329,9 @@ example (colour : BinaryTreeTwoColouring 1) :
 -- addition recurses on its second argument. So the conversion is a real step.
 --
 -- It is **not** a `simp [Nat.zero_add]` step. The height occurs in the type of the bound
--- colouring, which the body then depends on, so rewriting it would require transporting that
+-- coloring, which the body then depends on, so rewriting it would require transporting that
 -- body — a cast `simp` will not build, and it reports no progress. What a consumer must do
--- instead is what is written out here: restrict the colouring along the height inequality on
+-- instead is what is written out here: restrict the coloring along the height inequality on
 -- the way in, and rebuild the embedding on the way out. Both directions are `omega` on lengths
 -- plus proof irrelevance, and nothing about the branch law changes.
 example (b : ℕ) (colour : BinaryTreeTwoColouring (b + 1)) :
@@ -355,9 +355,9 @@ example (colour : BinaryTreeTwoColouring 1) :
     (∃ e : InternalEmbedding 1 1, ∀ x, colour (e x) = 1) :=
   binaryTreeRamsey_two 0 0 colour
 
--- **A concrete colouring at host height two.** The root is colour `0` and both nodes below it
--- are colour `1`. Host height two is `a + b + 1` with `a = 0`, `b = 1`; the colouring is not
--- constant, so the statement is not answered by a trivial whole-tree embedding at either colour.
+-- **A concrete coloring at host height two.** The root is color `0` and both nodes below it
+-- are color `1`. Host height two is `a + b + 1` with `a = 0`, `b = 1`; the coloring is not
+-- constant, so the statement is not answered by a trivial whole-tree embedding at either color.
 private def sampleColour : BinaryTreeTwoColouring 2 := fun x => if x.1 = [] then 0 else 1
 
 example : sampleColour (root 1) = 0 := by decide
@@ -368,11 +368,11 @@ example :
     (∃ e : InternalEmbedding 2 2, ∀ x, sampleColour (e x) = 1) :=
   binaryTreeRamsey_two 0 1 sampleColour
 
-/-- The constant colourings, used to exercise both root colours. -/
+/-- The constant colorings, used to exercise both root colors. -/
 private def constColour (h : ℕ) (c : Fin 2) : BinaryTreeTwoColouring h := fun _ => c
 
--- **Both root colours are covered**, at the smallest host height where the root has a choice:
--- the constantly-`0` and constantly-`1` colourings of a height-two tree both resolve.
+-- **Both root colors are covered**, at the smallest host height where the root has a choice:
+-- the constantly-`0` and constantly-`1` colorings of a height-two tree both resolve.
 example :
     (∃ e : InternalEmbedding 2 2, ∀ x, constColour 2 0 (e x) = 0) ∨
     (∃ e : InternalEmbedding 1 2, ∀ x, constColour 2 0 (e x) = 1) :=
@@ -393,11 +393,11 @@ example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
 example (a b : ℕ) (e : InternalEmbedding a b) : (extendProper e).toInternal = e :=
   extendProper_toInternal e
 
-/-! #### The multicolour theorem -/
+/-! #### The multicolor theorem -/
 
--- **`m = 2` recovers the two-colour theorem through the public API.** With `t = ![a, b]` the
+-- **`m = 2` recovers the two-color theorem through the public API.** With `t = ![a, b]` the
 -- host height is `(∑ i, ![a, b] i) + 1`, which is `a + b + 1` after `Fin.sum_univ_two` but not
--- definitionally so; the colouring is restricted along the height identity on the way in and
+-- definitionally so; the coloring is restricted along the height identity on the way in and
 -- the embedding rebuilt on the way out (`omega` on lengths plus proof irrelevance), exactly as
 -- the `a = 0` example above does. The source heights `![a, b] 0 + 1` and `![a, b] 1 + 1` are
 -- `a + 1` and `b + 1` definitionally.
@@ -430,7 +430,7 @@ example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
   · exact Or.inr ⟨⟨fun x => ⟨(e.internal x).1, hnode _⟩, fun l => ⟨(e.leaf l).1, hleaf _⟩,
       fun d x y h => e.branch_internal d x y h, fun d x l h => e.branch_leaf d x l h⟩, he⟩
 
--- The private recursion agrees with the two-colour theorem's disjunction directly, without any
+-- The private recursion agrees with the two-color theorem's disjunction directly, without any
 -- height transport: entered at `n = a + b`, the returned height rewrites to `a + 1` or `b + 1`.
 example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     (∃ e : InternalEmbedding (a + 1) (a + b + 1), ∀ x, colour (e x) = 0) ∨
@@ -444,36 +444,36 @@ example (a b : ℕ) (colour : BinaryTreeTwoColouring (a + b + 1)) :
     subst hk
     exact Or.inr ⟨e, he⟩
 
--- **Three colours, host height `3 · 1 + 1 = 4`**: some colour carries a proper subtree of
+-- **Three colors, host height `3 · 1 + 1 = 4`**: some color carries a proper subtree of
 -- height `2`.
 example (colour : InternalNode (3 * 1 + 1) → Fin 3) :
     ∃ (c : Fin 3) (e : ProperEmbedding 2 (3 * 1 + 1)), ∀ x, colour (e.internal x) = c :=
   binaryTreeRamsey_proper_const 3 1 colour
 
--- **`t = 0` in the constant form**: host height `m * 0 + 1`, the root alone, of some colour.
+-- **`t = 0` in the constant form**: host height `m * 0 + 1`, the root alone, of some color.
 example (m : ℕ) (colour : InternalNode (m * 0 + 1) → Fin m) :
     ∃ (c : Fin m) (e : ProperEmbedding 1 (m * 0 + 1)), ∀ x, colour (e.internal x) = c :=
   binaryTreeRamsey_proper_const m 0 colour
 
--- **`m = 0` is vacuous**: the host root exists, so there is no colouring into `Fin 0` at all.
+-- **`m = 0` is vacuous**: the host root exists, so there is no coloring into `Fin 0` at all.
 example (t : Fin 0 → ℕ) (colour : InternalNode ((∑ i, t i) + 1) → Fin 0) : False :=
   (colour (root _)).elim0
 
--- **`m = 1`: existence at equal heights.** One colour, so the subtree height `t + 1` equals
+-- **`m = 1`: existence at equal heights.** One color, so the subtree height `t + 1` equals
 -- the host height; the theorem asserts existence of some embedding of that height.
 example (t : ℕ) (colour : InternalNode ((∑ i : Fin 1, ![t] i) + 1) → Fin 1) :
     ∃ (i : Fin 1) (e : InternalEmbedding (![t] i + 1) ((∑ i : Fin 1, ![t] i) + 1)),
       ∀ x, colour (e x) = i :=
   binaryTreeRamsey 1 ![t] colour
 
--- **`m = 1`: the identity embedding is a witness**, exhibited separately: with one colour every
--- node has it, so `InternalEmbedding.id` is monochromatic at the only colour.
+-- **`m = 1`: the identity embedding is a witness**, exhibited separately: with one color every
+-- node has it, so `InternalEmbedding.id` is monochromatic at the only color.
 example (h : ℕ) (colour : InternalNode h → Fin 1) :
     ∀ x, colour (InternalEmbedding.id h x) = 0 :=
   fun _ => Subsingleton.elim _ _
 
--- **A concrete three-colouring** of the height-`4` tree by depth modulo `3`: not constant, so
--- the theorem is not answered by a whole-tree embedding at any colour.
+-- **A concrete three-coloring** of the height-`4` tree by depth modulo `3`: not constant, so
+-- the theorem is not answered by a whole-tree embedding at any color.
 private def depthColour : InternalNode (3 * 1 + 1) → Fin 3 := fun x => ⟨x.1.length % 3, by omega⟩
 
 example : depthColour (root 3) = 0 := by decide

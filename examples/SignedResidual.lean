@@ -25,7 +25,7 @@ open RegularityLemmata
 variable {X Y : Type*} [DecidableEq X] [DecidableEq Y] {A : Finset X} {B : Finset Y}
 
 omit [DecidableEq X] [DecidableEq Y] in
-/-- The centred residual of a unit-bounded kernel is `2`-bounded on the rectangle, under
+/-- The centered residual of a unit-bounded kernel is `2`-bounded on the rectangle, under
 nonnegative weights. -/
 theorem residual_absBounded (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
     (hwX : ∀ x ∈ A, 0 ≤ wX x) (hwY : ∀ y ∈ B, 0 ≤ wY y)
@@ -38,7 +38,7 @@ theorem residual_absBounded (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → �
     _ ≤ 1 + 1 := add_le_add h1 h2
     _ = 2 := by norm_num
 
-/-- **Decomposing a signed residual.** The centred residual of a unit-bounded kernel is a
+/-- **Decomposing a signed residual.** The centered residual of a unit-bounded kernel is a
 combination of at most `⌈1/ε²⌉₊` weighted rectangles with coefficients at most `2/ε`, plus a
 residual of cut norm at most `2ε · M`. -/
 theorem signedResidual_cutDecomposition (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)

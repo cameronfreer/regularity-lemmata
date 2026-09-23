@@ -15,7 +15,7 @@ The library's finite Ramsey results behind one import.
 
 ## What is here
 
-* `RegularityLemmata/Finite/MulticolorRamsey.lean` — multicolour Ramsey for a colouring of **ordered
+* `RegularityLemmata/Finite/MulticolorRamsey.lean` — multicolor Ramsey for a coloring of **ordered
 pairs**, by
   greedy pigeonhole, with an explicit single-exponential bound. No symmetry is assumed.
 * `RegularityLemmata/Finite/FullBinaryTree.lean` — the full binary tree of height `h` as the words
@@ -27,20 +27,20 @@ arbitrary root,
 * `RegularityLemmata/Finite/BinaryTreeProperEmbedding.lean` — the same with source leaves mapped
   to host leaves (the leaf map need not be surjective), and the extension of an arbitrary internal
   embedding through the leaf level.
-* `RegularityLemmata/Finite/BinaryTreeRamsey.lean` — the additive two-colour subtree theorem: a
-colouring of the
-  internal nodes of a height-`a + b + 1` tree admits a colour-`0` subtree of height `a + 1` or a
-  colour-`1` subtree of height `b + 1`; and its multicolour form `binaryTreeRamsey` (companion
-  Lemma 2.6 in colouring form): an `m`-colouring of a height-`(∑ i, t i) + 1` tree admits a
-  colour-`i` subtree of height `t i + 1` for some `i`, with the whole-tree and equal-height
+* `RegularityLemmata/Finite/BinaryTreeRamsey.lean` — the additive two-color subtree theorem: a
+coloring of the
+  internal nodes of a height-`a + b + 1` tree admits a color-`0` subtree of height `a + 1` or a
+  color-`1` subtree of height `b + 1`; and its multicolor form `binaryTreeRamsey` (companion
+  Lemma 2.6 in coloring form): an `m`-coloring of a height-`(∑ i, t i) + 1` tree admits a
+  color-`i` subtree of height `t i + 1` for some `i`, with the whole-tree and equal-height
   (`m * t + 1`) forms.
 
 ## What they share, and what they do not
 
 This facade collects the library's independent finite Ramsey APIs. Both halves are
-colour-avoidance statements about a finite structure with an explicit witness, and **neither is
-built from the other**: the pair colouring lives on an unstructured vertex set, the tree
-colouring on the interior of a binary tree.
+color-avoidance statements about a finite structure with an explicit witness, and **neither is
+built from the other**: the pair coloring lives on an unstructured vertex set, the tree
+coloring on the interior of a binary tree.
 
 Neither half carries any stability, VC, ladder, or rank vocabulary. The tree theorem's antecedent
 comes from that literature (see `PROVENANCE.md`), but what is formalized here is finite

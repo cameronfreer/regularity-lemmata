@@ -15,9 +15,9 @@ indivisible when every one of its relation symbols is. This is the hypothesis un
 model is the *blow-up* of the induced structure on its cells — the notion Malliaris and
 Shelah extract from stable regularity (arXiv:1102.3904). The exact correspondence is
 Ackerman, Freer, and Patel's Definition 1.4 (a blow-up is a structure with a surjective full
-homomorphism onto another; equitable when the fibres differ in size by at most one) and
+homomorphism onto another; equitable when the fibers differ in size by at most one) and
 Lemma 1.5 (a partition is indivisible if and only if the structure is a blow-up whose witness
-fibres are the parts), arXiv:1712.09305, §1.3. For a partition `P` of `s` and a model
+fibers are the parts), arXiv:1712.09305, §1.3. For a partition `P` of `s` and a model
 indivisible for `P`, the model restricted to `s` is a blow-up of `FiniteRelModel.quotient`
 below, with the vertex-to-cell map `x ↦ P.part x` on `s` as the witness; the ambient carrier
 outside `s` is not described by the correspondence. Both are recorded in `PROVENANCE.md`.

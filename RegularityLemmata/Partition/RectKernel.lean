@@ -21,7 +21,7 @@ With nonnegative weights, zero mass forces every weight in the cell to vanish, h
 sum. Every average-level decomposition here therefore carries nonnegativity hypotheses, while
 the sum-level ones do not.
 
-**No cell mass is cancelled without splitting the zero-mass case.** The denominator-free
+**No cell mass is canceled without splitting the zero-mass case.** The denominator-free
 form `rectAverage_mul_mass_decomposition` is the primitive; the familiar weighted-average
 identity is derived from it under positive mass.
 
