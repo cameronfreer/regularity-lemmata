@@ -160,10 +160,10 @@ example : ¬ PreservesAndReflects tournament3 probeReversed ![3, 4, 5] := by dec
 -- It induces the OPPOSITE tournament instead — the palette, not just the labeling, has
 -- changed, which is exactly why a symmetric palette would have hidden the issue. Stated on
 -- the FIXED tuple `(3,4,5)`, so the claim is about the model induced there and not about a
--- relabelling.
+-- relabeling.
 example : PreservesAndReflects tournament3Opp probeReversed ![3, 4, 5] := by decide
 
--- Equivalently, by relabelling: the reversed configuration realizes the original
+-- Equivalently, by relabeling: the reversed configuration realizes the original
 -- tournament only in the reversed order.
 example : PreservesAndReflects tournament3 probeReversed ![5, 4, 3] := by decide
 

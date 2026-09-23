@@ -146,7 +146,7 @@ theorem IsAlmostConstantPair.mono_eps {f : RectKernel X Y} {A : Finset X} {B : F
 /-! ### Singleton bridges
 
 A rectangle with a singleton side is the one-variable predicate on the other side. These are
-the specializations a fibrewise argument needs: they turn control of `φ` along one fiber into
+the specializations a fiberwise argument needs: they turn control of `φ` along one fiber into
 control of the pair form, with no stability content whatsoever. -/
 
 /-- A singleton **left** side: almost-constancy of the fiber `f a` transfers to the pair. -/
