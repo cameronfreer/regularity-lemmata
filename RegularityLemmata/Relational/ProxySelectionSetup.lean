@@ -43,7 +43,7 @@ generic
   factorization: a uniform floor `w₀ ≤ W j` turns the whole `hbad` left-hand side into
   `(aggregate mass) / w₀ ^ 2 * ∏_j W j`. **The event count does not appear** — each event
   contributes its own mass, never a copy of the total.
-* `sum_candidateMass_le_fibreMass` — the candidate rectangle inside the fine-part fibers,
+* `sum_candidateMass_le_fiberMass` — the candidate rectangle inside the fine-part fibers,
   as a weighted-mass inequality. Both channels need it, and later sparse, deviant and edit
   charges will need it too.
 * `sum_proxyEvent_nonuniform_mass_le` — that factorization instantiated on proxies for a
@@ -128,7 +128,7 @@ Reused unchanged — the proxy rebuild changes the INDEX, not the candidates. -/
 def proxyCandidates (F : Finpartition s) (q : ℕ) (C : ProxyIndex Q) : Finset (Finset V) :=
   repCandidates F q C.1
 
-theorem proxyCandidates_subset_fibre (F : Finpartition s) (q : ℕ) (C : ProxyIndex Q) :
+theorem proxyCandidates_subset_fiber (F : Finpartition s) (q : ℕ) (C : ProxyIndex Q) :
     proxyCandidates (Q := Q) F q C ⊆ F.parts.filter (· ⊆ C.1) :=
   Finset.filter_subset _ _
 
@@ -155,7 +155,7 @@ theorem proxyTotalCandidateWeight_nonneg (F : Finpartition s) (q : ℕ) :
 /-- **The candidate rectangle lies inside the fine-part fibers.** Stated as a weighted-mass
 inequality, since that is the form both channels use — and the form later sparse, deviant
 and edit charges will use. -/
-theorem sum_candidateMass_le_fibreMass (F : Finpartition s) (q : ℕ)
+theorem sum_candidateMass_le_fiberMass (F : Finpartition s) (q : ℕ)
     (pred : Finset V × Finset V → Prop) [DecidablePred pred] (C D : ProxyIndex Q) :
     ∑ p ∈ ((F.parts ×ˢ F.parts).filter pred) ∩
         (proxyCandidates (Q := Q) F q C ×ˢ proxyCandidates (Q := Q) F q D),
@@ -166,8 +166,8 @@ theorem sum_candidateMass_le_fibreMass (F : Finpartition s) (q : ℕ)
   refine Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_) (fun p _ _ => by positivity)
   rw [Finset.mem_inter, Finset.mem_product, Finset.mem_filter] at hp
   rw [Finset.mem_filter, Finset.mem_product]
-  exact ⟨⟨proxyCandidates_subset_fibre F q C hp.2.1,
-    proxyCandidates_subset_fibre F q D hp.2.2⟩, hp.1.2⟩
+  exact ⟨⟨proxyCandidates_subset_fiber F q C hp.2.1,
+    proxyCandidates_subset_fiber F q D hp.2.2⟩, hp.1.2⟩
 
 theorem proxyCandidates_nonempty {F : Finpartition s} (hFQ : F ≤ Q) {q : ℕ}
     (hq : F.parts.card ≤ q) (C : ProxyIndex Q) (hCpos : 0 < C.1.card) :
@@ -245,7 +245,7 @@ theorem sum_proxyEvent_nonuniform_mass_le (R : V → V → Prop) [DecidableRel R
             (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card) := by
     intro e
     rw [nonuniformFinePairs]
-    exact sum_candidateMass_le_fibreMass F q _ (proxyEventFst e) (proxyEventSnd e)
+    exact sum_candidateMass_le_fiberMass F q _ (proxyEventFst e) (proxyEventSnd e)
   calc ∑ e : ProxyEvent Q,
         ∑ p ∈ nonuniformFinePairs R ε F ∩ (proxyCandidates (Q := Q) F q (proxyEventFst e) ×ˢ
           proxyCandidates (Q := Q) F q (proxyEventSnd e)), ((p.1.card : ℝ) * p.2.card)
@@ -439,7 +439,7 @@ example (F : Finpartition s) (q : ℕ) (C D : ProxyIndex Q) :
         ((p.1.card : ℝ) * p.2.card)
       ≤ ∑ p ∈ ((F.parts.filter (· ⊆ C.1)) ×ˢ (F.parts.filter (· ⊆ D.1))).filter
             (fun p => p.1 = p.2), ((p.1.card : ℝ) * p.2.card) :=
-  sum_candidateMass_le_fibreMass F q _ C D
+  sum_candidateMass_le_fiberMass F q _ C D
 
 -- The candidates are the unchanged `repCandidates`: the rebuild changes the index, not the
 -- candidate notion.

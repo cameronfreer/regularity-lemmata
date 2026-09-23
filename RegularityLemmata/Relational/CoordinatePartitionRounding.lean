@@ -68,20 +68,20 @@ variable {Λ : Type*} [DecidableEq Λ] (lab : V → Λ) (s : Finset V)
 unused label has an empty fiber and contributes `0`. -/
 theorem partitionDefect_labelPartition [Fintype Λ] (p : V → Prop) [DecidablePred p] :
     partitionDefect (labelPartition lab s) p
-      = ∑ a : Λ, (sectionDisagreement (labelFibre lab s a) p : ℝ) / (labelFibre lab s a).card := by
+      = ∑ a : Λ, (sectionDisagreement (labelFiber lab s a) p : ℝ) / (labelFiber lab s a).card := by
   classical
   unfold partitionDefect
   rw [labelPartition_parts, Finset.sum_image]
   · refine (Finset.sum_subset (Finset.subset_univ _) fun a _ ha ↦ ?_)
-    have : labelFibre lab s a = ∅ := by
-      rw [labelFibre_eq_empty_iff]
+    have : labelFiber lab s a = ∅ := by
+      rw [labelFiber_eq_empty_iff]
       intro v hv hva
       exact ha (Finset.mem_image.mpr ⟨v, hv, hva⟩)
     rw [this]; simp
   · intro a ha b hb hab
     obtain ⟨v, hv, rfl⟩ := Finset.mem_image.mp ha
-    have hva : v ∈ labelFibre lab s (lab v) := Finset.mem_filter.mpr ⟨hv, rfl⟩
-    rw [hab, labelFibre, Finset.mem_filter] at hva
+    have hva : v ∈ labelFiber lab s (lab v) := Finset.mem_filter.mpr ⟨hv, rfl⟩
+    rw [hab, labelFiber, Finset.mem_filter] at hva
     exact hva.2
 
 end Labels
@@ -126,9 +126,9 @@ section Tests
 private def lab₃ : Fin 3 → Fin 3 := ![0, 0, 2]
 example : partitionDefect (labelPartition lab₃ Finset.univ) (fun a ↦ a = 0) = 1 := by
   rw [partitionDefect_labelPartition, Fin.sum_univ_three]
-  rw [show labelFibre lab₃ Finset.univ 0 = {0, 1} by decide,
-    show labelFibre lab₃ Finset.univ 1 = ∅ by decide,
-    show labelFibre lab₃ Finset.univ 2 = {2} by decide,
+  rw [show labelFiber lab₃ Finset.univ 0 = {0, 1} by decide,
+    show labelFiber lab₃ Finset.univ 1 = ∅ by decide,
+    show labelFiber lab₃ Finset.univ 2 = {2} by decide,
     show sectionDisagreement ({0, 1} : Finset (Fin 3)) (fun a ↦ a = 0) = 2 by decide,
     show sectionDisagreement ({2} : Finset (Fin 3)) (fun a ↦ a = 0) = 0 by decide]
   simp

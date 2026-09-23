@@ -180,7 +180,7 @@ theorem sum_proxyEvent_nonuniformMass_le {ε : ℝ} (F : Finpartition s) (q : �
             (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card) := by
         refine Finset.sum_le_sum fun e _ => ?_
         rw [nonuniformFinePairs]
-        exact sum_candidateMass_le_fibreMass F q _ (proxyEventFst e) (proxyEventSnd e)
+        exact sum_candidateMass_le_fiberMass F q _ (proxyEventFst e) (proxyEventSnd e)
     _ = ∑ pd ∈ proxyPairEvents Q,
           ∑ p ∈ ((F.parts.filter (· ⊆ pd.1)) ×ˢ (F.parts.filter (· ⊆ pd.2))).filter
             (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card) :=

@@ -45,7 +45,7 @@ a single sum rather than a per-pair bound multiplied by the pair count.
 
 No refinement hypothesis is needed: the fiber filter `(· ⊆ pd.1)` already forces the
 containment that the argument uses. -/
-theorem proxyFibre_pairwiseDisjoint {F Q : Finpartition s}
+theorem proxyFiber_pairwiseDisjoint {F Q : Finpartition s}
     (f : Finset V × Finset V → Prop) [DecidablePred f] :
     (↑(proxyPairEvents Q) : Set (Finset V × Finset V)).PairwiseDisjoint
       (fun pd => ((F.parts.filter (· ⊆ pd.1)) ×ˢ
@@ -74,7 +74,7 @@ theorem sum_proxyPair_nonuniform_le (R : V → V → Prop) [DecidableRel R] {ε 
           (fun p => ¬ IsUniformPair R p.1 p.2 ε), ((p.1.card : ℝ) * p.2.card)
       ≤ badMassDiagNum R ε F := by
   classical
-  rw [← Finset.sum_biUnion (proxyFibre_pairwiseDisjoint (F := F) (Q := Q)
+  rw [← Finset.sum_biUnion (proxyFiber_pairwiseDisjoint (F := F) (Q := Q)
     (fun p => ¬ IsUniformPair R p.1 p.2 ε)), badMassDiagNum]
   refine Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_)
     (fun p _ _ => by positivity)

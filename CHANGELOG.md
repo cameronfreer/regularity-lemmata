@@ -3,6 +3,34 @@
 Release notes aggregated from the GitHub Releases, newest first. Each tag is annotated and the
 GitHub Release names the full commit SHA it was cut from; pin a tag when depending on the library.
 
+## Unreleased
+
+**Breaking, one time: US-English identifiers.** Before wider adoption, the British-spelled
+identifiers are renamed once, without deprecated aliases (this is an exception, not a policy of
+renaming for style). Public declarations:
+
+| Old | New | Module |
+| --- | --- | --- |
+| `BinaryTreeTwoColouring` | `BinaryTreeTwoColoring` | `Finite/BinaryTreeRamsey` |
+| `labelFibre` | `labelFiber` | `Relational/MajorityAssembly` |
+| `labelFibre_eq_empty_iff` | `labelFiber_eq_empty_iff` | `Relational/MajorityAssembly` |
+| `exists_fibre_labelling` | `exists_fiber_labeling` | `Partition/Grouping` |
+
+Gates-only declarations: `proxyFibre_pairwiseDisjoint` → `proxyFiber_pairwiseDisjoint`
+(`Relational/ProxyAggregateMass`), `proxyCandidates_subset_fibre` →
+`proxyCandidates_subset_fiber` and `sum_candidateMass_le_fibreMass` →
+`sum_candidateMass_le_fiberMass` (`Relational/ProxySelectionSetup`). Private test helpers of
+`Finite/BinaryTreeRamsey` (`sampleColour`, `constColour`, `depthColour`) become `sampleColor`,
+`constColor`, `depthColor`.
+
+**Named arguments.** The binder `colour` of `binaryTreeRamsey_two`, `binaryTreeRamsey`,
+`binaryTreeRamsey_proper`, `binaryTreeRamsey_two_proper`, `binaryTreeRamsey_proper_const` (and of
+the private recursions `ramsey_aux`, `ramsey_aux_multi`) is renamed to `color`; a downstream call using the named
+form `(colour := …)` must become `(color := …)`. No call of that form exists in this repository,
+which does not establish that none exists downstream.
+
+No statement, proof, module path, or toolchain changes.
+
 ## v0.13.0 (2026-09-18)
 
 Release commit and validation runs are recorded on the GitHub Release.
