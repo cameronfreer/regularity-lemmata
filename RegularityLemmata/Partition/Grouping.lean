@@ -23,7 +23,7 @@ arbitrary `Finpartition`:
 * `card_groupUnion_bounds` — from an equipartition with cells of size `m` or `m + 1` and a
   fiber of exactly `d` cells: `d·m ≤ |owner| ≤ d·m + d`. At `d = 3` this is the frozen
   `3m ≤ |owner| ≤ 3m + 3`, and the intermediate values are ordinary mixed triples.
-* `exists_fibre_labelling` — the construction: any finset of cardinality `d·k` admits a
+* `exists_fiber_labeling` — the construction: any finset of cardinality `d·k` admits a
   labeling by `Fin k`-many labels whose every fiber has EXACTLY `d` elements. With
   `d = 3` and `3 ∣ #Q.parts` — which `RegularityLemmata/Graph/TripleSeed.lean` arranges — this
   produces the owner labeling.
@@ -40,7 +40,7 @@ variable {α : Type*} [DecidableEq α] {s : Finset α}
 /-- **The grouping construction.** A finset of cardinality `d · k` admits a labeling whose
 every fiber below `k` has exactly `d` elements. Applied to `Q.parts` with `d = 3`, this is
 the owner labeling: each owner is a fiber of three cells. -/
-theorem exists_fibre_labelling {β : Type*} [DecidableEq β] (d : ℕ) :
+theorem exists_fiber_labeling {β : Type*} [DecidableEq β] (d : ℕ) :
     ∀ (k : ℕ) (S : Finset β), S.card = d * k →
       ∃ g : β → ℕ, (∀ x ∈ S, g x < k) ∧
         ∀ j < k, (S.filter fun x => g x = j).card = d := by
@@ -195,7 +195,7 @@ theorem exists_triple_grouping (h : 3 ∣ Q.parts.card) :
       (∀ C ∈ Q.parts, g C < k) ∧
       ∀ j < k, (Q.parts.filter fun C => g C = j).card = 3 := by
   obtain ⟨k, hk⟩ := h
-  obtain ⟨g, hglt, hgfib⟩ := exists_fibre_labelling 3 k Q.parts hk
+  obtain ⟨g, hglt, hgfib⟩ := exists_fiber_labeling 3 k Q.parts hk
   exact ⟨k, g, hk, hglt, hgfib⟩
 
 /-! ### Tests and adversarial examples -/
@@ -205,12 +205,12 @@ section Tests
 -- A labeling with fibers of size three exists on any six-element finset.
 example : ∃ g : Fin 6 → ℕ, (∀ x ∈ (Finset.univ : Finset (Fin 6)), g x < 2) ∧
     ∀ j < 2, ((Finset.univ : Finset (Fin 6)).filter fun x => g x = j).card = 3 :=
-  exists_fibre_labelling 3 2 Finset.univ (by decide)
+  exists_fiber_labeling 3 2 Finset.univ (by decide)
 
 -- The empty endpoint: zero owners on an empty cell set.
 example : ∃ g : Fin 6 → ℕ, (∀ x ∈ (∅ : Finset (Fin 6)), g x < 0) ∧
     ∀ j < 0, ((∅ : Finset (Fin 6)).filter fun x => g x = j).card = 3 :=
-  exists_fibre_labelling 3 0 ∅ (by decide)
+  exists_fiber_labeling 3 0 ∅ (by decide)
 
 -- The size range is TIGHT at both ends and takes the intermediate values: three cells of
 -- sizes `m, m, m` give `3m`; `m+1, m+1, m+1` give `3m+3`; and a mixed fiber gives `3m+1`.

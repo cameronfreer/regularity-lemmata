@@ -26,7 +26,7 @@ cell boxes by the tuple-to-part map.
   claim about any individual box.
 * Global majority bound (`editDistance_majorityRound_le_sum_partResampleDefect`): the edit
   distance of the rounding on `s^(n+1)` is at most `∑ⱼ ∑_{w ∈ s^(n+1)} partResampleDefect j w`.
-* Labeled fibers (`labelPartition`, `labelFibre`): a labeling `lab : V → Λ` of the host
+* Labeled fibers (`labelPartition`, `labelFiber`): a labeling `lab : V → Λ` of the host
   induces the finpartition of `s` into its nonempty fibers (mathlib's
   `Finpartition.ofSetSetoid` on the kernel setoid, so no parallel partition structure). Labels
   with an empty fiber are simply unused; the reassembly over **label tuples**
@@ -278,7 +278,7 @@ instance instDecidableRelKer : DecidableRel (Setoid.ker lab).r :=
   fun a b ↦ inferInstanceAs (Decidable (lab a = lab b))
 
 /-- The fiber of a label: the elements of `s` carrying it (empty for an unused label). -/
-def labelFibre (a : Λ) : Finset V := s.filter fun v ↦ lab v = a
+def labelFiber (a : Λ) : Finset V := s.filter fun v ↦ lab v = a
 
 /-- The partition of `s` into the nonempty fibers of a labeling: mathlib's
 `Finpartition.ofSetSetoid` on the kernel setoid of `lab`. Unused labels contribute no part. -/
@@ -286,37 +286,37 @@ def labelPartition : Finpartition s := Finpartition.ofSetSetoid (Setoid.ker lab)
 
 /-- The parts of the label partition are the fibers of the labels used. -/
 theorem labelPartition_parts :
-    (labelPartition lab s).parts = (s.image lab).image (labelFibre lab s) := by
+    (labelPartition lab s).parts = (s.image lab).image (labelFiber lab s) := by
   rw [labelPartition, Finpartition.ofSetSetoid_parts, Finset.image_image]
   refine Finset.image_congr fun v _ ↦ ?_
-  simp only [Function.comp, labelFibre]
+  simp only [Function.comp, labelFiber]
   exact Finset.filter_congr fun b _ ↦ ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
 
 omit [DecidableEq V] in
-theorem labelFibre_eq_empty_iff (a : Λ) : labelFibre lab s a = ∅ ↔ ∀ v ∈ s, lab v ≠ a := by
-  simp [labelFibre, Finset.filter_eq_empty_iff]
+theorem labelFiber_eq_empty_iff (a : Λ) : labelFiber lab s a = ∅ ↔ ∀ v ∈ s, lab v ≠ a := by
+  simp [labelFiber, Finset.filter_eq_empty_iff]
 
 /-- The part of an element of `s` is the fiber of its label. -/
 theorem labelPartition_part_eq {b : V} (hb : b ∈ s) :
-    (labelPartition lab s).part b = labelFibre lab s (lab b) := by
+    (labelPartition lab s).part b = labelFiber lab s (lab b) := by
   ext v
   rw [labelPartition, Finpartition.mem_part_ofSetSetoid_iff_rel]
-  simp only [labelFibre, Finset.mem_filter, hb, true_and]
+  simp only [labelFiber, Finset.mem_filter, hb, true_and]
   exact ⟨fun h ↦ ⟨h.1, h.2.symm⟩, fun h ↦ ⟨h.1, h.2.symm⟩⟩
 
 omit [DecidableEq V] in
 /-- **Reassembly over label tuples.** A sum over `s^m` is the sum over all label tuples `c` of
-the sum over the box `∏ᵢ labelFibre (c i)`; boxes with an unused label are empty. -/
+the sum over the box `∏ᵢ labelFiber (c i)`; boxes with an unused label are empty. -/
 theorem sum_piFinset_const_eq_sum_labelBoxes [Fintype Λ] {m : ℕ} {M : Type*} [AddCommMonoid M]
     (f : (Fin m → V) → M) :
     ∑ w ∈ Fintype.piFinset (fun _ : Fin m ↦ s), f w
-      = ∑ c : Fin m → Λ, ∑ w ∈ Fintype.piFinset (fun i ↦ labelFibre lab s (c i)), f w := by
+      = ∑ c : Fin m → Λ, ∑ w ∈ Fintype.piFinset (fun i ↦ labelFiber lab s (c i)), f w := by
   classical
   rw [← Finset.sum_fiberwise_of_maps_to (g := fun w ↦ lab ∘ w) (t := Finset.univ)
     (fun w _ ↦ Finset.mem_univ _)]
   refine Finset.sum_congr rfl fun c _ ↦ Finset.sum_congr ?_ fun _ _ ↦ rfl
   ext w
-  simp only [Finset.mem_filter, Fintype.mem_piFinset, labelFibre, funext_iff, Function.comp]
+  simp only [Finset.mem_filter, Fintype.mem_piFinset, labelFiber, funext_iff, Function.comp]
   exact ⟨fun ⟨h1, h2⟩ i ↦ ⟨h1 i, h2 i⟩, fun h ↦ ⟨fun i ↦ (h i).1, fun i ↦ (h i).2⟩⟩
 
 /-- For the label partition, the part-resampling defect resamples inside the fiber of the
@@ -324,9 +324,9 @@ label of `w j`. -/
 theorem partResampleDefect_labelPartition {n : ℕ} (R : (Fin (n + 1) → V) → Prop)
     [DecidablePred R] (j : Fin (n + 1)) {w : Fin (n + 1) → V} (hw : w j ∈ s) :
     partResampleDefect R (labelPartition lab s) j w
-      = (((labelFibre lab s (lab (w j))).filter
+      = (((labelFiber lab s (lab (w j))).filter
             fun a ↦ ¬ (R w ↔ R (Function.update w j a))).card : ℝ)
-          / (labelFibre lab s (lab (w j))).card := by
+          / (labelFiber lab s (lab (w j))).card := by
   unfold partResampleDefect
   rw [labelPartition_part_eq lab s hw]
 
@@ -338,16 +338,16 @@ theorem editDistance_majorityRound_labelPartition_le [Fintype Λ] {L : FirstOrde
     (editDistance (M.Holds S) ((M.majorityRound (labelPartition lab s)).Holds S)
         (fun _ : Fin (n + 1) ↦ s) : ℝ)
       ≤ ∑ j : Fin (n + 1), ∑ c : Fin (n + 1) → Λ,
-          ∑ w ∈ Fintype.piFinset (fun i ↦ labelFibre lab s (c i)),
-            (((labelFibre lab s (c j)).filter
+          ∑ w ∈ Fintype.piFinset (fun i ↦ labelFiber lab s (c i)),
+            (((labelFiber lab s (c j)).filter
                 fun a ↦ ¬ (M.Holds S w ↔ M.Holds S (Function.update w j a))).card : ℝ)
-              / (labelFibre lab s (c j)).card := by
+              / (labelFiber lab s (c j)).card := by
   refine (editDistance_majorityRound_le_sum_partResampleDefect M (labelPartition lab s) S).trans
     (le_of_eq (Finset.sum_congr rfl fun j _ ↦ ?_))
   rw [sum_piFinset_const_eq_sum_labelBoxes lab s]
   refine Finset.sum_congr rfl fun c _ ↦ Finset.sum_congr rfl fun w hw ↦ ?_
   have hw' := Fintype.mem_piFinset.mp hw j
-  rw [labelFibre, Finset.mem_filter] at hw'
+  rw [labelFiber, Finset.mem_filter] at hw'
   rw [partResampleDefect_labelPartition lab s _ j hw'.1, hw'.2]
 
 end Labels
@@ -404,16 +404,16 @@ example (R : (Fin 3 → V) → Prop) [DecidablePred R] (P : Finpartition (∅ : 
 -- the partition has the two parts `{0, 1}` and `{2}`, and the reassembly over the nine label
 -- pairs still recovers `|s|² = 9` (every box with a `1` is empty).
 private def lab₃ : Fin 3 → Fin 3 := ![0, 0, 2]
-example : labelFibre lab₃ Finset.univ 1 = ∅ := by decide
+example : labelFiber lab₃ Finset.univ 1 = ∅ := by decide
 example : (labelPartition lab₃ Finset.univ).parts = {{0, 1}, {2}} := by decide
 example : ∑ c : Fin 2 → Fin 3,
-    (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card = 9 := by decide
+    (Fintype.piFinset fun i ↦ labelFiber lab₃ Finset.univ (c i)).card = 9 := by decide
 example : ∑ c : Fin 2 → Fin 3,
-      (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card
+      (Fintype.piFinset fun i ↦ labelFiber lab₃ Finset.univ (c i)).card
     = (Fintype.piFinset fun _ : Fin 2 ↦ (Finset.univ : Finset (Fin 3))).card := by
   have h := sum_piFinset_const_eq_sum_labelBoxes lab₃ Finset.univ (m := 2) (fun _ ↦ (1 : ℕ))
-  calc ∑ c : Fin 2 → Fin 3, (Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i)).card
-      = ∑ c : Fin 2 → Fin 3, ∑ _w ∈ Fintype.piFinset fun i ↦ labelFibre lab₃ Finset.univ (c i),
+  calc ∑ c : Fin 2 → Fin 3, (Fintype.piFinset fun i ↦ labelFiber lab₃ Finset.univ (c i)).card
+      = ∑ c : Fin 2 → Fin 3, ∑ _w ∈ Fintype.piFinset fun i ↦ labelFiber lab₃ Finset.univ (c i),
           (1 : ℕ) := Finset.sum_congr rfl fun c _ ↦ Finset.card_eq_sum_ones _
     _ = ∑ _w ∈ Fintype.piFinset fun _ : Fin 2 ↦ (Finset.univ : Finset (Fin 3)), (1 : ℕ) := h.symm
     _ = _ := (Finset.card_eq_sum_ones _).symm

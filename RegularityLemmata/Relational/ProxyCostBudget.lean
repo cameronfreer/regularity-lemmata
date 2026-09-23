@@ -151,7 +151,7 @@ theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P
           ((p.1.card : ℝ) * p.2.card) := by
     intro e
     rw [proxyDeviantFinePairs]
-    exact sum_candidateMass_le_fibreMass w.fine q _ (proxyDevFst e) (proxyDevSnd e)
+    exact sum_candidateMass_le_fiberMass w.fine q _ (proxyDevFst e) (proxyDevSnd e)
   calc ∑ e : ProxyDevEvent w.coarse L,
         ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩ _, _
       ≤ ∑ e : ProxyDevEvent w.coarse L,
