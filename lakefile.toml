@@ -21,7 +21,7 @@ name = "RegularityLemmataGates"
 [[lean_lib]]
 name = "RegularityLemmataExamples"
 srcDir = "examples"
-roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual", "CompositionCertificates", "ReadmeSnippet", "TernaryMajorityRounding", "SharedEquitableModel", "DirectedJoinRounding", "SymmetricRounding", "GlobalApproximationCounting"]
+roots = ["OrdinaryMatrix", "WeightedBipartiteGraph", "SignedResidual", "CompositionCertificates", "ReadmeSnippet", "TernaryMajorityRounding", "SharedEquitableModel", "DirectedJoinRounding", "SymmetricRounding", "GlobalApproximationCounting", "MigrationV014"]
 
 [[lean_exe]]
 name = "axiom_audit"

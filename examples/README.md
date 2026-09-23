@@ -44,6 +44,12 @@ Consumers of the global-approximation stack through the `RelationalApproximation
 | [`SymmetricRounding.lean`](SymmetricRounding.lean) | `RegularityLemmata.RelationalApproximation` | A symmetric relation rounded at one partition: edit at most twice the row defects, and the rounded relation is symmetric. |
 | [`GlobalApproximationCounting.lean`](GlobalApproximationCounting.lean) | `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Relational.UniformPatternCounts`, the gates-only `Relational.DiagonalLoopRegression` | **Two roles in one file.** *Positive consumer* (copy these): `exists_equitable_model_uniformEdit`, `exists_hom_transfer`, `recipe_binary`, `recipe_ternary`, and `exists_induced_transfer_of_diagonalAgreement`, which need only the facade and `UniformPatternCounts`. *Regression* (do not copy into a downstream project): the reused loop regression and the six-vertex counterexample, which are why the gates-only module is imported. The recipe: a uniform edit rate from the composition, homomorphism-count transfer (injective, and all homomorphisms with the collision term) at binary and ternary instances with constants displayed, the induced corollary only under an explicit diagonal-agreement premise, the reused loop regression, and the six-vertex counterexample pinned to the rounding operation. |
 
+## Migration consumer
+
+| File | Import | What it shows |
+| --- | --- | --- |
+| [`MigrationV014.lean`](MigrationV014.lean) | `RegularityLemmata.FiniteRamsey`, `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Partition.Grouping` | Exactly the public surface renamed for the next release (see the `Unreleased` changelog section): the four renamed public declarations `BinaryTreeTwoColoring`, `labelFiber`, `labelFiber_eq_empty_iff`, `exists_fiber_labeling`, and one explicit named-argument application `binaryTreeRamsey_two a b (color := c)`. Copy these uses when migrating from v0.13.0. |
+
 ## Not here
 
 The external consumer fixture, a separate Lake package depending on this repository by Git at a
