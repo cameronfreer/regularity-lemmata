@@ -61,10 +61,10 @@ declarations to reach for.
 
 ## Quick start
 
-**Version note:** the installation below uses v0.13.0. The development branch contains breaking
-identifier renames scheduled for the next release; see the
-[Unreleased migration notes](CHANGELOG.md#unreleased). Use the API documentation matching your
-dependency tag.
+**Documentation versions:** use the API reference matching your dependency tag. `latest`
+follows the newest published release; `main` is a separately published development snapshot.
+v0.14.0 renames four public identifiers and one named argument; the
+[changelog](CHANGELOG.md#v0140-2026-09-23) carries the migration table.
 
 Add the library to your `lakefile.toml`, pinned to a tag:
 
@@ -72,13 +72,13 @@ Add the library to your `lakefile.toml`, pinned to a tag:
 [[require]]
 name = "RegularityLemmata"
 git = "https://github.com/cameronfreer/regularity-lemmata"
-rev = "v0.13.0"
+rev = "v0.14.0"
 ```
 
 Your project's toolchain must match the pinned release's: see its
-[`lean-toolchain`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/lean-toolchain)
+[`lean-toolchain`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.14.0/lean-toolchain)
 and the mathlib revision in its
-[`lake-manifest.json`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/lake-manifest.json).
+[`lake-manifest.json`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.14.0/lake-manifest.json).
 Then import the public root, a facade, or a module:
 
 ```lean

@@ -3,7 +3,20 @@
 Release notes aggregated from the GitHub Releases, newest first. Each tag is annotated and the
 GitHub Release names the full commit SHA it was cut from; pin a tag when depending on the library.
 
-## Unreleased
+## v0.14.0 (2026-09-23)
+
+Release commit and validation runs are recorded on the GitHub Release.
+Lean `v4.34.0-rc1` and Mathlib `77cbcbc65f9e26f6ede0a01b24c2cb909e11cc0d`
+are unchanged. A small cleanup release before wider adoption: the US-English identifier
+renames (breaking, without aliases), the documentation and provenance pass, and the
+development-tooling changes. No mathematics is added; v0.13.0 retains the old identifiers.
+Everything merged since v0.13.0 is included (#212, #213, #214, #215, #216, #217, #218, #219).
+
+**Public inventory delta** (`lake exe public_inventory`, the same executable run at v0.13.0
+and at the release commit): `+4 / −4` (2593 public constants in 146 modules at both revisions) — exactly the four renames below; nothing
+else was added or removed. The version marker `RegularityLemmata.version` changes value, not
+name.
+
 
 ### Breaking changes
 
@@ -26,7 +39,7 @@ are unchanged.
 -- v0.13.0
 binaryTreeRamsey_two a b (colour := c)
 
--- next release
+-- v0.14.0
 binaryTreeRamsey_two a b (color := c)
 ```
 
