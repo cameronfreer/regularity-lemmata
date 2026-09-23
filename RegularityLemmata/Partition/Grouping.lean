@@ -12,8 +12,8 @@ obtained by GROUPING the cells of an already-regular equipartition into owners, 
 splitting a regular cell. This file supplies the grouping itself, at the level of an
 arbitrary `Finpartition`:
 
-* `groupUnion Q g j` — the union of the cells labelled `j` by `g`. An owner is such a
-  union; its proxies are the cells in the fibre.
+* `groupUnion Q g j` — the union of the cells labeled `j` by `g`. An owner is such a
+  union; its proxies are the cells in the fiber.
 * `groupUnion_disjoint`, `biUnion_groupUnion` — owners with distinct labels are disjoint,
   and the owners of all labels used cover the ground set exactly. Together these say the
   owners partition `s` (`groupUnion_isPartUnion` records that each is a part union, which
@@ -21,25 +21,25 @@ arbitrary `Finpartition`:
 * `card_groupUnion` — an owner's cardinality is the SUM of its proxies' cardinalities,
   since distinct cells are disjoint.
 * `card_groupUnion_bounds` — from an equipartition with cells of size `m` or `m + 1` and a
-  fibre of exactly `d` cells: `d·m ≤ |owner| ≤ d·m + d`. At `d = 3` this is the frozen
+  fiber of exactly `d` cells: `d·m ≤ |owner| ≤ d·m + d`. At `d = 3` this is the frozen
   `3m ≤ |owner| ≤ 3m + 3`, and the intermediate values are ordinary mixed triples.
 * `exists_fibre_labelling` — the construction: any finset of cardinality `d·k` admits a
-  labelling by `Fin k`-many labels whose every fibre has EXACTLY `d` elements. With
+  labeling by `Fin k`-many labels whose every fiber has EXACTLY `d` elements. With
   `d = 3` and `3 ∣ #Q.parts` — which `RegularityLemmata/Graph/TripleSeed.lean` arranges — this
-  produces the owner labelling.
+  produces the owner labeling.
 
-Everything is stated for a general fibre size `d`; the route fixes `d = 3`.
+Everything is stated for a general fiber size `d`; the route fixes `d = 3`.
 -/
 
 namespace RegularityLemmata
 
 variable {α : Type*} [DecidableEq α] {s : Finset α}
 
-/-! ### A labelling with fibres of a fixed size -/
+/-! ### A labeling with fibers of a fixed size -/
 
-/-- **The grouping construction.** A finset of cardinality `d · k` admits a labelling whose
-every fibre below `k` has exactly `d` elements. Applied to `Q.parts` with `d = 3`, this is
-the owner labelling: each owner is a fibre of three cells. -/
+/-- **The grouping construction.** A finset of cardinality `d · k` admits a labeling whose
+every fiber below `k` has exactly `d` elements. Applied to `Q.parts` with `d = 3`, this is
+the owner labeling: each owner is a fiber of three cells. -/
 theorem exists_fibre_labelling {β : Type*} [DecidableEq β] (d : ℕ) :
     ∀ (k : ℕ) (S : Finset β), S.card = d * k →
       ∃ g : β → ℕ, (∀ x ∈ S, g x < k) ∧
@@ -96,8 +96,8 @@ theorem exists_fibre_labelling {β : Type*} [DecidableEq β] (d : ℕ) :
 
 /-! ### Owners as unions of their proxies -/
 
-/-- The union of the cells labelled `j`: an OWNER, whose proxies are the cells in the
-fibre. -/
+/-- The union of the cells labeled `j`: an OWNER, whose proxies are the cells in the
+fiber. -/
 def groupUnion (Q : Finpartition s) (g : Finset α → ℕ) (j : ℕ) : Finset α :=
   (Q.parts.filter fun C => g C = j).biUnion id
 
@@ -159,8 +159,8 @@ theorem card_groupUnion :
       (Finset.mem_coe.mpr (Finset.mem_filter.mp hD).1) hCD
 
 /-- **The frozen owner-size range.** From an equipartition whose cells have `m` or `m + 1`
-elements and a fibre of exactly `d` cells: `d·m ≤ |owner| ≤ d·m + d`. At `d = 3` this is
-`3m ≤ |owner| ≤ 3m + 3`; the intermediate values arise from mixed fibres and are ordinary,
+elements and a fiber of exactly `d` cells: `d·m ≤ |owner| ≤ d·m + d`. At `d = 3` this is
+`3m ≤ |owner| ≤ 3m + 3`; the intermediate values arise from mixed fibers and are ordinary,
 so a size floor must be stated against the RANGE. (Only the cell-size sandwich is used, so
 the equipartition hypothesis is not restated here — `card_part_bounds` supplies it.) -/
 theorem card_groupUnion_bounds {m d : ℕ}
@@ -185,11 +185,11 @@ theorem card_groupUnion_triple_bounds {m : ℕ}
     3 * m ≤ (groupUnion Q g j).card ∧ (groupUnion Q g j).card ≤ 3 * m + 3 :=
   card_groupUnion_bounds hm hfib
 
-/-- **The bridge from divisibility to the owner labelling.** `3 ∣ #Q.parts` — which
+/-- **The bridge from divisibility to the owner labeling.** `3 ∣ #Q.parts` — which
 `RegularityLemmata/Graph/TripleSeed.lean`'s seeded summit delivers — directly produces the owner
-count `k` and a labelling whose every fibre is exactly a triple of cells. Downstream selection
+count `k` and a labeling whose every fiber is exactly a triple of cells. Downstream selection
 consumes
-this, rather than recomposing the divisibility and the labelling itself. -/
+this, rather than recomposing the divisibility and the labeling itself. -/
 theorem exists_triple_grouping (h : 3 ∣ Q.parts.card) :
     ∃ k, ∃ g : Finset α → ℕ, Q.parts.card = 3 * k ∧
       (∀ C ∈ Q.parts, g C < k) ∧
@@ -202,7 +202,7 @@ theorem exists_triple_grouping (h : 3 ∣ Q.parts.card) :
 
 section Tests
 
--- A labelling with fibres of size three exists on any six-element finset.
+-- A labeling with fibers of size three exists on any six-element finset.
 example : ∃ g : Fin 6 → ℕ, (∀ x ∈ (Finset.univ : Finset (Fin 6)), g x < 2) ∧
     ∀ j < 2, ((Finset.univ : Finset (Fin 6)).filter fun x => g x = j).card = 3 :=
   exists_fibre_labelling 3 2 Finset.univ (by decide)
@@ -213,7 +213,7 @@ example : ∃ g : Fin 6 → ℕ, (∀ x ∈ (∅ : Finset (Fin 6)), g x < 0) ∧
   exists_fibre_labelling 3 0 ∅ (by decide)
 
 -- The size range is TIGHT at both ends and takes the intermediate values: three cells of
--- sizes `m, m, m` give `3m`; `m+1, m+1, m+1` give `3m+3`; and a mixed fibre gives `3m+1`.
+-- sizes `m, m, m` give `3m`; `m+1, m+1, m+1` give `3m+3`; and a mixed fiber gives `3m+1`.
 example (m : ℕ) : m + m + m = 3 * m := by omega
 
 example (m : ℕ) : (m + 1) + (m + 1) + (m + 1) = 3 * m + 3 := by omega
@@ -222,7 +222,7 @@ example (m : ℕ) : m + m + (m + 1) = 3 * m + 1 := by omega
 
 -- **An unused label really does give an empty owner**, and disjointness still holds there
 -- — the degenerate case the cover statement has to tolerate. Shown with a CONSTANT
--- labelling, so the emptiness is proved rather than assumed.
+-- labeling, so the emptiness is proved rather than assumed.
 example (Q : Finpartition (Finset.univ : Finset (Fin 4))) :
     groupUnion Q (fun _ => 0) 1 = ∅ := by
   have hfil : (Q.parts.filter fun C => (fun _ : Finset (Fin 4) => (0 : ℕ)) C = 1) = ∅ := by

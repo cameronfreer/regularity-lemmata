@@ -537,7 +537,7 @@ section Tests
 
 private def cF : Fin 2 → ℝ := ![1, 1]
 
-/-- Masses with a **genuine zero**, so the guard-free behaviour is actually exercised. -/
+/-- Masses with a **genuine zero**, so the guard-free behavior is actually exercised. -/
 private def cF0 : Fin 2 → ℝ := ![1, 0]
 
 /-- Right-hand weights on a carrier of a **different** size. -/

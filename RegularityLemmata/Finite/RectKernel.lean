@@ -34,7 +34,7 @@ masses in partition formulas come out as cardinalities.
 * Absolute estimates need **nonnegative** carrier weights; with signed weights the triangle
   inequality goes the wrong way.
 * `pullback` evaluation and composition are unconditional, but transporting a *sum* along an
-  arbitrary map needs injectivity or explicit fibre multiplicities. No such transport is
+  arbitrary map needs injectivity or explicit fiber multiplicities. No such transport is
   claimed here.
 * `restrict` restricts the kernel **and the weights** by subtype inclusion, with **no
   renormalization**.
@@ -194,7 +194,7 @@ theorem rectAverage_op (f : RectKernel X Y) (wX : X → ℝ) (wY : Y → ℝ)
 
 /-- Pullback along maps of both carriers. Evaluation and composition are unconditional;
 transporting a **sum** along `u`, `v` is not, and is deliberately not stated — it would need
-injectivity or explicit fibre multiplicities. -/
+injectivity or explicit fiber multiplicities. -/
 def RectKernel.pullback (f : RectKernel X Y) (u : X' → X) (v : Y' → Y) : RectKernel X' Y' :=
   fun x y => f (u x) (v y)
 

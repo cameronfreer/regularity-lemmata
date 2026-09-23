@@ -71,7 +71,7 @@ Those are API-stability and compositionality arguments, not capability arguments
 * **No refinement monotonicity at fixed `ε`.** Where `IsIndivisible.mono_of_le` passes exact
   indivisibility down to any finer `Q ≤ P`, the approximate clause fails: a refined cell is
   smaller, so the budget `ε * ∏ |cell|` shrinks while the edits can concentrate. A
-  `decide`-checked witness is in the test section, labelled as an intentional non-lemma. No such
+  `decide`-checked witness is in the test section, labeled as an intentional non-lemma. No such
   lemma may be added.
 * **No congruence API.** Congruence in the model collapses to `FiniteRelModel.ext_holds` (two
   models with the same `Holds` are equal) and congruence in the partition to `rfl`, so neither

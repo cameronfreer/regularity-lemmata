@@ -17,7 +17,7 @@ question this file answers is what that weakening costs the three-vertex count.
 ## The chain
 
 1. `selectedPaletteNonuniformPairs` — the proxy pairs whose two selected representatives fail
-   uniformity for some colour. A `Finset (Finset V × Finset V)` inside `Q.parts ×ˢ Q.parts`,
+   uniformity for some color. A `Finset (Finset V × Finset V)` inside `Q.parts ×ˢ Q.parts`,
    so the existing pair-to-triple lifting applies to it unchanged.
 2. `sum_selectedPaletteNonuniformPairs_mass` — its RAW pair mass is exactly
    `#s ^ 2 * proxyNormalizedPaletteCost`. The normalized charge and the raw mass are the same
@@ -66,7 +66,7 @@ variable {V : Type*} [DecidableEq V] {s : Finset V} {Q : Finpartition s}
 /-! ### The selected palette-nonuniform proxy pairs -/
 
 open Classical in
-/-- The proxy pairs whose two SELECTED representatives fail uniformity for some colour. -/
+/-- The proxy pairs whose two SELECTED representatives fail uniformity for some color. -/
 noncomputable def selectedPaletteNonuniformPairs (ε : ℝ) (F : Finpartition s)
     (Q : Finpartition s) (g : ProxyIndex Q → Finset V) : Finset (Finset V × Finset V) :=
   ((Finset.univ : Finset (ProxyEvent Q)).filter fun e =>

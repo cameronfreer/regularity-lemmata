@@ -12,8 +12,8 @@ import RegularityLemmata.Relational.MajorityAssembly
   coordinate `j` (`partResampleDefect`, `RegularityLemmata/Relational/MajorityAssembly.lean`)
   is the family defect of the sections `a ↦ R (insertNth j a rest)`, `rest` over the ambient
   off-tuples (`sum_partResampleDefect_eq_familyDefect`).
-* **Labelled partitions.** For `labelPartition lab s` the defect is the sum over *all* labels of
-  the fibre defects, an unused (empty) fibre contributing `0`
+* **Labeled partitions.** For `labelPartition lab s` the defect is the sum over *all* labels of
+  the fiber defects, an unused (empty) fiber contributing `0`
   (`partitionDefect_labelPartition`).
 * **The join.** `coordinateJoin P` (`RegularityLemmata/Partition/Basic.lean`) is the common
   refinement of the coordinate partitions `P : Fin (n+1) → Finpartition s`, below every `P j`,
@@ -58,14 +58,14 @@ theorem sum_partResampleDefect_eq_familyDefect {n : ℕ} (R : (Fin (n + 1) → V
   rw [hparts]
   exact Finset.sum_congr rfl fun l hl ↦ sum_partResampleDefect_row R P j rest hl
 
-/-! ### Labelled partitions -/
+/-! ### Labeled partitions -/
 
 section Labels
 
 variable {Λ : Type*} [DecidableEq Λ] (lab : V → Λ) (s : Finset V)
 
-/-- The defect of a labelled partition is the sum over all labels of the fibre defects; an
-unused label has an empty fibre and contributes `0`. -/
+/-- The defect of a labeled partition is the sum over all labels of the fiber defects; an
+unused label has an empty fiber and contributes `0`. -/
 theorem partitionDefect_labelPartition [Fintype Λ] (p : V → Prop) [DecidablePred p] :
     partitionDefect (labelPartition lab s) p
       = ∑ a : Λ, (sectionDisagreement (labelFibre lab s a) p : ℝ) / (labelFibre lab s a).card := by
@@ -121,8 +121,8 @@ theorem exists_isIndivisibleFor_coordinateJoin (M : FiniteRelModel L V) {n : ℕ
 
 section Tests
 
--- The labelled defect on `![0, 0, 2] : Fin 3 → Fin 3` (label `1` unused) for the section
--- `(· = 0)`: fibre `{0, 1}` contributes `2·1·1/2 = 1`, the empty fibre `0`, fibre `{2}` `0`.
+-- The labeled defect on `![0, 0, 2] : Fin 3 → Fin 3` (label `1` unused) for the section
+-- `(· = 0)`: fiber `{0, 1}` contributes `2·1·1/2 = 1`, the empty fiber `0`, fiber `{2}` `0`.
 private def lab₃ : Fin 3 → Fin 3 := ![0, 0, 2]
 example : partitionDefect (labelPartition lab₃ Finset.univ) (fun a ↦ a = 0) = 1 := by
   rw [partitionDefect_labelPartition, Fin.sum_univ_three]

@@ -109,6 +109,9 @@ Per-module detail belongs in module docstrings, which are the record for their o
 
 ## Conventions
 
+Use US English in repository-authored prose; preserve identifiers, published titles, and verbatim
+quotations.
+
 See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the frozen design conventions (type and
 denominator policies, injectivity policy, partition conventions, statement discipline,
 and code organization). Changes to frozen conventions require an explicit owner

@@ -59,7 +59,7 @@ and palette non-symmetry via `binaryPairPalette` against `swapBinaryPairPalette`
 
 The general lemma — for an arbitrary palette, arbitrary cells, and the actual rounding — is
 not proved here. Nor does it touch the exactly-two-in-one-cell stratum, which remains a
-separate gate (clone/proxy cells). A positive probe is evidence to continue, not a licence
+separate gate (clone/proxy cells). A positive probe is evidence to continue, not a license
 to build.
 -/
 
@@ -157,13 +157,13 @@ example : PreservesAndReflects tournament3 probeReversed ![0, 1, 2] := by decide
 -- internal vertex order breaks the match. Orientation alignment is load-bearing.
 example : ¬ PreservesAndReflects tournament3 probeReversed ![3, 4, 5] := by decide
 
--- It induces the OPPOSITE tournament instead — the palette, not just the labelling, has
+-- It induces the OPPOSITE tournament instead — the palette, not just the labeling, has
 -- changed, which is exactly why a symmetric palette would have hidden the issue. Stated on
 -- the FIXED tuple `(3,4,5)`, so the claim is about the model induced there and not about a
--- relabelling.
+-- relabeling.
 example : PreservesAndReflects tournament3Opp probeReversed ![3, 4, 5] := by decide
 
--- Equivalently, by relabelling: the reversed configuration realizes the original
+-- Equivalently, by relabeling: the reversed configuration realizes the original
 -- tournament only in the reversed order.
 example : PreservesAndReflects tournament3 probeReversed ![5, 4, 3] := by decide
 

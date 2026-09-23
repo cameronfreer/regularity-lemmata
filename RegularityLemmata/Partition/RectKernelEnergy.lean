@@ -19,7 +19,7 @@ mass, guard-free.
 ## The zero-mass principle
 
 Every proof here follows the same rule, and it is the reason nonnegativity of the carrier
-weights is a hypothesis throughout: **no parent or child mass is cancelled before the
+weights is a hypothesis throughout: **no parent or child mass is canceled before the
 zero-mass case is split off**. Under nonnegative weights a vanishing parent mass forces
 every child mass to vanish too, so both sides of each identity collapse to `0`; with signed
 weights that implication fails and so do the identities.

@@ -14,7 +14,7 @@ tree, not just its interior.
 
 ## Why the two levels are separate
 
-A colouring lives on internal nodes, so recursive constructions produce internal embeddings.
+A coloring lives on internal nodes, so recursive constructions produce internal embeddings.
 But a *tree of height `h`* is only exhibited once its leaves are placed too. `extendProper` is
 the bridge: every internal embedding extends, and the extension restricts back to the embedding
 it came from.

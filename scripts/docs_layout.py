@@ -189,7 +189,7 @@ def parse_module_list(text: str) -> tuple[int, int, dict]:
         elif m.group().startswith("<details"):
             ms = _SECT.match(inner, m.start())
             if not ms:
-                raise ValueError("unrecognised navigation section")
+                raise ValueError("unrecognized navigation section")
             name = _summary_name(ms.group(2))
             node = {"kind": "sect", "path": ms.group(1), "summary": ms.group(2), "children": {}}
             stack[-1][name] = node
@@ -198,7 +198,7 @@ def parse_module_list(text: str) -> tuple[int, int, dict]:
         else:
             ml = _LINK.match(inner, m.start())
             if not ml:
-                raise ValueError("unrecognised navigation link")
+                raise ValueError("unrecognized navigation link")
             stack[-1][ml.group(2)] = {"kind": "link", "href": ml.group(1), "label": ml.group(2)}
             pos = ml.end()
     return i + len(open_tag), end, root

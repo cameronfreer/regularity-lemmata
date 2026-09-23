@@ -26,11 +26,11 @@ cell boxes by the tuple-to-part map.
   claim about any individual box.
 * Global majority bound (`editDistance_majorityRound_le_sum_partResampleDefect`): the edit
   distance of the rounding on `s^(n+1)` is at most `∑ⱼ ∑_{w ∈ s^(n+1)} partResampleDefect j w`.
-* Labelled fibres (`labelPartition`, `labelFibre`): a labelling `lab : V → Λ` of the host
-  induces the finpartition of `s` into its nonempty fibres (mathlib's
+* Labeled fibers (`labelPartition`, `labelFibre`): a labeling `lab : V → Λ` of the host
+  induces the finpartition of `s` into its nonempty fibers (mathlib's
   `Finpartition.ofSetSetoid` on the kernel setoid, so no parallel partition structure). Labels
-  with an empty fibre are simply unused; the reassembly over **label tuples**
-  (`sum_piFinset_const_eq_sum_labelBoxes`) and the labelled form of the global bound
+  with an empty fiber are simply unused; the reassembly over **label tuples**
+  (`sum_piFinset_const_eq_sum_labelBoxes`) and the labeled form of the global bound
   (`editDistance_majorityRound_labelPartition_le`) range over all label tuples, boxes with an
   unused label being empty.
 * Decency (`sum_partResampleDefect_le`, `editDistance_majorityRound_le`): if a set `E` of
@@ -268,7 +268,7 @@ theorem sum_partResampleDefect_le (j : Fin (n + 1)) {θ γ lam : ℝ} (hθ : 0 �
 
 end Decency
 
-/-! ### Labelled fibres: unused labels allowed -/
+/-! ### Labeled fibers: unused labels allowed -/
 
 section Labels
 
@@ -277,14 +277,14 @@ variable {Λ : Type*} [DecidableEq Λ] (lab : V → Λ) (s : Finset V)
 instance instDecidableRelKer : DecidableRel (Setoid.ker lab).r :=
   fun a b ↦ inferInstanceAs (Decidable (lab a = lab b))
 
-/-- The fibre of a label: the elements of `s` carrying it (empty for an unused label). -/
+/-- The fiber of a label: the elements of `s` carrying it (empty for an unused label). -/
 def labelFibre (a : Λ) : Finset V := s.filter fun v ↦ lab v = a
 
-/-- The partition of `s` into the nonempty fibres of a labelling: mathlib's
+/-- The partition of `s` into the nonempty fibers of a labeling: mathlib's
 `Finpartition.ofSetSetoid` on the kernel setoid of `lab`. Unused labels contribute no part. -/
 def labelPartition : Finpartition s := Finpartition.ofSetSetoid (Setoid.ker lab) s
 
-/-- The parts of the label partition are the fibres of the labels used. -/
+/-- The parts of the label partition are the fibers of the labels used. -/
 theorem labelPartition_parts :
     (labelPartition lab s).parts = (s.image lab).image (labelFibre lab s) := by
   rw [labelPartition, Finpartition.ofSetSetoid_parts, Finset.image_image]
@@ -296,7 +296,7 @@ omit [DecidableEq V] in
 theorem labelFibre_eq_empty_iff (a : Λ) : labelFibre lab s a = ∅ ↔ ∀ v ∈ s, lab v ≠ a := by
   simp [labelFibre, Finset.filter_eq_empty_iff]
 
-/-- The part of an element of `s` is the fibre of its label. -/
+/-- The part of an element of `s` is the fiber of its label. -/
 theorem labelPartition_part_eq {b : V} (hb : b ∈ s) :
     (labelPartition lab s).part b = labelFibre lab s (lab b) := by
   ext v
@@ -319,7 +319,7 @@ theorem sum_piFinset_const_eq_sum_labelBoxes [Fintype Λ] {m : ℕ} {M : Type*} 
   simp only [Finset.mem_filter, Fintype.mem_piFinset, labelFibre, funext_iff, Function.comp]
   exact ⟨fun ⟨h1, h2⟩ i ↦ ⟨h1 i, h2 i⟩, fun h ↦ ⟨fun i ↦ (h i).1, fun i ↦ (h i).2⟩⟩
 
-/-- For the label partition, the part-resampling defect resamples inside the fibre of the
+/-- For the label partition, the part-resampling defect resamples inside the fiber of the
 label of `w j`. -/
 theorem partResampleDefect_labelPartition {n : ℕ} (R : (Fin (n + 1) → V) → Prop)
     [DecidablePred R] (j : Fin (n + 1)) {w : Fin (n + 1) → V} (hw : w j ∈ s) :
@@ -330,9 +330,9 @@ theorem partResampleDefect_labelPartition {n : ℕ} (R : (Fin (n + 1) → V) →
   unfold partResampleDefect
   rw [labelPartition_part_eq lab s hw]
 
-/-- **The labelled global bound.** For the label partition, the edit distance of the majority
+/-- **The labeled global bound.** For the label partition, the edit distance of the majority
 rounding is at most the sum over coordinates, label tuples `c`, and tuples of the label box of
-the resampling defect inside the fibre of `c j`; boxes with an unused label are empty. -/
+the resampling defect inside the fiber of `c j`; boxes with an unused label are empty. -/
 theorem editDistance_majorityRound_labelPartition_le [Fintype Λ] {L : FirstOrder.Language}
     [FiniteRelational L] (M : FiniteRelModel L V) {n : ℕ} (S : L.Relations (n + 1)) :
     (editDistance (M.Holds S) ((M.majorityRound (labelPartition lab s)).Holds S)
@@ -400,7 +400,7 @@ example (R : (Fin 3 → V) → Prop) [DecidablePred R] (P : Finpartition (∅ : 
     ∑ w ∈ Fintype.piFinset (fun _ : Fin 3 ↦ (∅ : Finset V)), partResampleDefect R P j w = 0 := by
   rw [Fintype.piFinset_empty, Finset.sum_empty]
 
--- **An unused label.** `lab₃ = ![0, 0, 2]` on `Fin 3` never uses label `1`: its fibre is empty,
+-- **An unused label.** `lab₃ = ![0, 0, 2]` on `Fin 3` never uses label `1`: its fiber is empty,
 -- the partition has the two parts `{0, 1}` and `{2}`, and the reassembly over the nine label
 -- pairs still recovers `|s|² = 9` (every box with a `1` is empty).
 private def lab₃ : Fin 3 → Fin 3 := ![0, 0, 2]

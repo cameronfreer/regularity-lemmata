@@ -95,7 +95,7 @@ theorem rectCutDiscrepancy_nonneg [DecidableEq X] [DecidableEq Y] (P : Finpartit
 /-! ### Reindexing a weighted point sum by cells
 
 The weighted corollary of `sum_over_parts`. It is **purely algebraic**: no nonnegativity of
-the weights and no positive-mass hypothesis. Those enter only where an average is cancelled
+the weights and no positive-mass hypothesis. Those enter only where an average is canceled
 or an inequality is proved, never here. -/
 
 /-- A weighted sum whose coefficient depends on the containing cell reindexes to a sum over
@@ -123,7 +123,7 @@ ignores points outside the carriers entirely.
 
 **Where hypotheses begin.** The residual-to-error bridge is pure algebra — it needs neither
 nonnegative weights nor positive masses, only `S ⊆ A` and `T ⊆ B`. Conditional-expectation
-behaviour, in particular the tower identity, is where nonnegativity genuinely enters: with
+behavior, in particular the tower identity, is where nonnegativity genuinely enters: with
 signed weights a cell can have zero total mass while a trace inside it has nonzero mass, and
 the zero-cell argument breaks. -/
 
@@ -232,7 +232,7 @@ zero total mass with a nonzero-mass trace inside it. -/
 
 /-- Trace masses add over the fine cells inside a coarse cell.
 
-Purely algebraic — no nonnegativity — since it is just `sum_over_parts` for the fibre
+Purely algebraic — no nonnegativity — since it is just `sum_over_parts` for the fiber
 partition of `C`, applied to the trace `S ∩ C`. -/
 private theorem sum_trace_mass_filter_subset [DecidableEq X] {P P' : Finpartition A}
     (hP : P' ≤ P) {C : Finset X} (hC : C ∈ P.parts) (w : X → ℝ) (S : Finset X) :
@@ -407,7 +407,7 @@ positive-mass hypothesis. -/
 
 /-- **The stepped prediction as a bilinear form in the relative cell masses.**
 
-Guard-free, and the zero-mass case is split rather than cancelled: when a cell has zero
+Guard-free, and the zero-mass case is split rather than canceled: when a cell has zero
 mass, its relative mass is `0 / 0 = 0` on one side, and the trace of the test set inside it
 has zero mass on the other, so both sides drop the cell. -/
 theorem steppedRectSum_eq_relMass_bilinear [DecidableEq X] [DecidableEq Y]

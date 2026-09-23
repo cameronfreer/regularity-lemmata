@@ -16,8 +16,8 @@ combinatorial bounds come in — into those hypotheses.
 
 * `sum_le_sum_of_exists_mem` — the union bound: a set every element of which lies in at
   least one of finitely many sets has mass at most the summed masses. This is where a
-  colour multiplicity comes from when one condition must hold simultaneously for every
-  colour of a finite palette.
+  color multiplicity comes from when one condition must hold simultaneously for every
+  color of a finite palette.
 * `sum_event_mass_le_of_weight_floor` — a uniform floor `w₀` on the coordinate weights turns
   the per-event masses of the `hbad` hypothesis into the AGGREGATE event mass scaled by
   `w₀⁻²` and the total weight. The number of events multiplies nothing: each event
@@ -35,8 +35,8 @@ variable {ι β : Type*} [Fintype ι] [DecidableEq ι] [DecidableEq β]
 
 /-- **The union bound.** A set every element of which lies in at least one of finitely many
 sets has mass at most the summed masses. This is where a palette factor comes from when one
-forbidden condition must hold for EVERY colour simultaneously: the forbidden set is the
-union of the per-colour ones, not a product of the event index with the colours. -/
+forbidden condition must hold for EVERY color simultaneously: the forbidden set is the
+union of the per-color ones, not a product of the event index with the colors. -/
 theorem sum_le_sum_of_exists_mem {γ κ : Type*} [DecidableEq γ] [Fintype κ]
     (S : Finset γ) (T : κ → Finset γ) (f : γ → ℝ) (hf : ∀ x, 0 ≤ f x)
     (hcov : ∀ x ∈ S, ∃ k, x ∈ T k) :

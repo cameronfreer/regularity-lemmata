@@ -52,7 +52,7 @@ budget, via the same coordinatewise cancellation (`massWeight_mul_mass_le_of_can
   a single relation `R`, from the aggregate `sum_proxyPair_nonuniform_le`.
 * `expected_proxyNormalizedPaletteCost_le` : `μ = 4 * K * ε` — **the relational branch-B
   gate**, which is what the forbidden condition actually is: SIMULTANEOUS palette regularity.
-  The forbidden family is `paletteNonuniformFinePairs`, the union over colours, and the
+  The forbidden family is `paletteNonuniformFinePairs`, the union over colors, and the
   factor `K = Fintype.card (BinaryPairPalette L)` is the union-bound multiplicity, as in the
   step-2 budget. Still no proxy count and no size floor.
 
@@ -248,7 +248,7 @@ variable {L : FirstOrder.Language} [FiniteRelational L] (M : FiniteRelModel L V)
 
 open Classical in
 /-- The normalized SIMULTANEOUS-uniformity cost: a proxy pair is charged its normalized mass
-as soon as its two selected representatives fail uniformity for SOME palette colour. -/
+as soon as its two selected representatives fail uniformity for SOME palette color. -/
 noncomputable def proxyNormalizedPaletteCost (ε : ℝ) (F : Finpartition s) (Q : Finpartition s)
     (g : ProxyIndex Q → Finset V) : ℝ :=
   ∑ e : ProxyEvent Q,
@@ -265,8 +265,8 @@ theorem proxyNormalizedPaletteCost_nonneg (ε : ℝ) (F : Finpartition s) (Q : F
   · exact le_refl 0
 
 open Classical in
-/-- The aggregate palette-nonuniform candidate mass: the union over colours is charged once
-per colour, so the bound is `K` times a single colour's bad mass — the union-bound
+/-- The aggregate palette-nonuniform candidate mass: the union over colors is charged once
+per color, so the bound is `K` times a single color's bad mass — the union-bound
 multiplicity, not an event count. -/
 theorem sum_proxyEvent_paletteNonuniformMass_le {ε B : ℝ} (F : Finpartition s) (q : ℕ)
     (Q : Finpartition s)
@@ -314,7 +314,7 @@ theorem sum_proxyEvent_paletteNonuniformMass_le {ε B : ℝ} (F : Finpartition s
 open Classical in
 /-- **The relational branch-B gate.** For SIMULTANEOUS palette uniformity — the forbidden
 condition the summit actually needs — the normalized charge has budget `4 * K * ε`. No proxy
-count and no size floor; `K` is the union-bound multiplicity over colours. -/
+count and no size floor; `K` is the union-bound multiplicity over colors. -/
 theorem expected_proxyNormalizedPaletteCost_le {ε : ℝ} {F : Finpartition s} (hFQ : F ≤ Q)
     {q : ℕ} (hq : F.parts.card ≤ q) (hε : 0 ≤ ε)
     (hB : ∀ c : BinaryPairPalette L,

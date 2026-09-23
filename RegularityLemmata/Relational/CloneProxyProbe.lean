@@ -12,7 +12,7 @@ fails for repeated-cell triples, and the clone/proxy idea is that splitting each
 cell into PROXY cells turns those triples into transversal ones. This file tests that idea
 on a concrete configuration.
 
-**Modelling only.** No partition is constructed, no rounding, no representatives, no edits,
+**Modeling only.** No partition is constructed, no rounding, no representatives, no edits,
 no cleaning. `IsTransversalizable` remains unachieved and `11B` remains closed.
 
 ## The configuration

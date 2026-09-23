@@ -11,17 +11,17 @@ import RegularityLemmata.Relational.ProxySelectionSetup
 of `exists_piFinset_forall_not_mem_bad_cost_le`, built from `sum_proxyPair_deviant_le` once
 per palette. The constants and `σ < 1` are step 4; the summit is step 5.
 
-## The cost, and why its index may carry a colour
+## The cost, and why its index may carry a color
 
 `cost` is a function of the SELECTION alone, so the index used to build it is free — it is
 not the forbidden-event type `E` of `hbad`. The cost therefore charges once per ordered
-distinct proxy pair AND per palette colour:
+distinct proxy pair AND per palette color:
 
 * `ProxyDevEvent Q L` — a `ProxyEvent Q` together with a `BinaryPairPalette L`, with
   coordinates `proxyDevFst`, `proxyDevSnd` inherited from the proxy pair and still distinct.
 * `proxyDeviantFinePairs M c η F pd` — the fine pairs whose palette-`c` density differs from
   the proxy pair `pd`'s by more than `η`.
-* `proxyDeviationCost M η F Q g` — the number of (proxy pair, colour) incidences at which the
+* `proxyDeviationCost M η F Q g` — the number of (proxy pair, color) incidences at which the
   selection's two representatives deviate. Nonnegative by construction
   (`proxyDeviationCost_nonneg`, the `hcost` input).
 
@@ -31,7 +31,7 @@ distinct proxy pair AND per palette colour:
 (`RegularityLemmata/Finite/WeightedChoiceBudget.lean`) takes an aggregate event-mass bound straight
 to `hexp`: it composes the expected-cost identity with the weight-floor factorization used by the
 forbidden channel. `sum_proxyDevEvent_mass_le` supplies that aggregate by applying
-`sum_proxyPair_deviant_le` once per colour. The result is
+`sum_proxyPair_deviant_le` once per color. The result is
 
 `expected_proxyDeviationCost_le` :  `μ = K * (δ / η ^ 2 * #s ^ 2) / w₀ ^ 2`
 
@@ -55,8 +55,8 @@ variable {V : Type*} [DecidableEq V] {s : Finset V} {Q : Finpartition s}
 
 /-! ### The cost events -/
 
-/-- The cost events: an ordered distinct proxy pair together with a palette colour. Unlike
-the FORBIDDEN events these do carry a colour — `cost` is a function of the selection alone,
+/-- The cost events: an ordered distinct proxy pair together with a palette color. Unlike
+the FORBIDDEN events these do carry a color — `cost` is a function of the selection alone,
 so the index used to build it is free and need not be `hbad`'s event type. -/
 abbrev ProxyDevEvent (Q : Finpartition s) (L : FirstOrder.Language) [FiniteRelational L] :
     Type _ :=
@@ -65,7 +65,7 @@ abbrev ProxyDevEvent (Q : Finpartition s) (L : FirstOrder.Language) [FiniteRelat
 /-- The ordered proxy PAIR a cost event charges against. -/
 def proxyDevPair (e : ProxyDevEvent Q L) : Finset V × Finset V := proxyEventPair e.1
 
-/-- The COLOUR a cost event charges for. -/
+/-- The COLOR a cost event charges for. -/
 def proxyDevColor (e : ProxyDevEvent Q L) : BinaryPairPalette L := e.2
 
 /-- The first coordinate of a cost event — a proxy CELL, inherited from its proxy pair. -/
@@ -86,7 +86,7 @@ def proxyDevSnd (e : ProxyDevEvent Q L) : ProxyIndex Q := proxyEventSnd e.1
 @[simp] theorem proxyDevColor_mk (e₁ : ProxyEvent Q) (c : BinaryPairPalette L) :
     proxyDevColor (Q := Q) (e₁, c) = c := rfl
 
-/-- The two coordinates of a cost event are distinct, the colour playing no part. -/
+/-- The two coordinates of a cost event are distinct, the color playing no part. -/
 theorem proxyDev_fst_ne_snd (e : ProxyDevEvent Q L) : proxyDevFst e ≠ proxyDevSnd e :=
   proxyEvent_fst_ne_snd e.1
 
@@ -103,7 +103,7 @@ noncomputable def proxyDeviantFinePairs (M : FiniteRelModel L V) (c : BinaryPair
       - pairDensity (HasBinaryPairPalette M c) pd.1 pd.2|
 
 open Classical in
-/-- **The cost of a selection**: the number of (proxy pair, colour) incidences at which the
+/-- **The cost of a selection**: the number of (proxy pair, color) incidences at which the
 two chosen representatives deviate by more than `η` from their proxy pair. -/
 noncomputable def proxyDeviationCost (M : FiniteRelModel L V) (η : ℝ) (F : Finpartition s)
     (Q : Finpartition s) (g : ProxyIndex Q → Finset V) : ℝ :=
@@ -124,9 +124,9 @@ theorem proxyDeviationCost_nonneg (M : FiniteRelModel L V) (η : ℝ) (F : Finpa
 
 open Classical in
 /-- **Aggregate deviant mass over ALL cost events.** Summed over every ordered distinct
-proxy pair and every colour, the deviant candidate-pair mass is at most `K` times the
-witness's total deviant mass: `sum_proxyPair_deviant_le` is applied once per colour, and
-each colour's proxy-pair sum is bounded once. Only the palette multiplicity is paid; the
+proxy pair and every color, the deviant candidate-pair mass is at most `K` times the
+witness's total deviant mass: `sum_proxyPair_deviant_le` is applied once per color, and
+each color's proxy-pair sum is bounded once. Only the palette multiplicity is paid; the
 number of proxy pairs multiplies nothing. -/
 theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P₀) (q : ℕ)
     {η : ℝ} (hη : 0 < η) :
@@ -137,7 +137,7 @@ theorem sum_proxyDevEvent_mass_le (w : BinaryPaletteStrongDiagWitness M sch δ P
           ((p.1.card : ℝ) * p.2.card)
       ≤ (Fintype.card (BinaryPairPalette L) : ℝ) * (δ / η ^ 2 * (s.card : ℝ) ^ 2) := by
   classical
-  -- Each cost event's mass sits inside its own proxy pair's deviant fine-fibre mass.
+  -- Each cost event's mass sits inside its own proxy pair's deviant fine-fiber mass.
   have hsub : ∀ e : ProxyDevEvent w.coarse L,
       ∑ p ∈ proxyDeviantFinePairs M (proxyDevColor e) η w.fine (proxyDevPair e) ∩
           (proxyCandidates (Q := w.coarse) w.fine q (proxyDevFst e) ×ˢ
@@ -218,24 +218,24 @@ example (M : FiniteRelModel L V) (η : ℝ) (F Q : Finpartition s) (g : ProxyInd
     0 ≤ proxyDeviationCost M η F Q g :=
   proxyDeviationCost_nonneg M η F Q g
 
--- A cost event's two coordinates are distinct: the colour is a passenger, not a coordinate.
+-- A cost event's two coordinates are distinct: the color is a passenger, not a coordinate.
 example (e : ProxyDevEvent Q L) : proxyDevFst e ≠ proxyDevSnd e := proxyDev_fst_ne_snd e
 
--- Two cost events on the same proxy pair with different colours share both coordinates —
--- the colour multiplies the CHARGES, not the coordinates.
+-- Two cost events on the same proxy pair with different colors share both coordinates —
+-- the color multiplies the CHARGES, not the coordinates.
 example (e₁ : ProxyEvent Q) (c c' : BinaryPairPalette L) :
     proxyDevFst (Q := Q) (e₁, c) = proxyDevFst (Q := Q) (e₁, c')
       ∧ proxyDevSnd (Q := Q) (e₁, c) = proxyDevSnd (Q := Q) (e₁, c') :=
   ⟨rfl, rfl⟩
 
--- The cost-event projections separate the proxy pair from the colour, so `e.1.1` never has
+-- The cost-event projections separate the proxy pair from the color, so `e.1.1` never has
 -- to be read as a pair and `e.2` never as a cell.
 example (e₁ : ProxyEvent Q) (c : BinaryPairPalette L) :
     proxyDevPair (Q := Q) (e₁, c) = proxyEventPair e₁ ∧ proxyDevColor (Q := Q) (e₁, c) = c := by
   simp
 
 -- A selection whose representatives never deviate costs nothing, however many proxy pairs
--- and colours there are: the cost counts incidences, not events.
+-- and colors there are: the cost counts incidences, not events.
 example (M : FiniteRelModel L V) (η : ℝ) (F Q : Finpartition s) (g : ProxyIndex Q → Finset V)
     (hg : ∀ e : ProxyDevEvent Q L,
       (g (proxyDevFst e), g (proxyDevSnd e)) ∉

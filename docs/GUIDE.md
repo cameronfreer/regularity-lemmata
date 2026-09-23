@@ -82,7 +82,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
   statement passes a review-and-falsification gate before its API freezes.
 - **Gates umbrella.** The second library root, `RegularityLemmataGates`: probe, obstruction, and
   feasibility modules of in-progress campaigns. Same namespace, same proof and axiom gates, but
-  the public root does not import them. What separates the two roots is role, not rigour.
+  the public root does not import them. What separates the two roots is role, not rigor.
 - **Facade.** A module that imports a curated stack and documents it, defining nothing. There
   are five: `Kernel`, `FiniteSetSystems`, `RelationalApproximation`, `FiniteRamsey`,
   `ProductSpaces`.
@@ -95,7 +95,7 @@ facade bundles a stack, the facade is named, because importing it is the adverti
   race and a linear-count race.
 - **Guard-free.** Densities and averages are `0` on an empty denominator through real division
   `x / 0 = 0`, and definitions carry no `if`-guards. Positivity or nonemptiness is assumed only
-  where it is genuinely needed (complement identities, cancelling a mass), never categorically.
+  where it is genuinely needed (complement identities, canceling a mass), never categorically.
   A recurring consequence: a nonempty set can have zero mass, so positive-mass hypotheses are
   stated as `0 < finsetMass w A`, not as nonemptiness.
 - **Diagonal separation.** Ordered counts over all tuples (diagonals included) and counts of
@@ -112,11 +112,11 @@ facade bundles a stack, the facade is named, because importing it is the adverti
 | v0.2.0 | Rectangular weighted-kernel stack (`Kernel` facade): stepping over independent partitions, energy with the parallel-axis identity, cut discrepancy with contraction constant 1. Balanced slicing `exists_balanced_slicing` with leftover and chunk absorption. Heterogeneous homogeneity `IsHomogeneousPair`, `IsHomogeneousCell`. Relational approximation (`RelationalApproximation` facade): indivisibility, `CellwiseEditBound`, majority rounding. Equitable family regularity with a multiple-of-three seed; piece supplier. |
 | v0.3.0 | Rectangular Frieze–Kannan step-partition summit `rect_frieze_kannan_cutDiscrepancy` with separate left and right part bounds; guard-free averages and almost-constancy; slicing thresholds and races, average slicing, common blocks. |
 | v0.4.0 | Complete heterogeneous homogeneity API including `AreHomogeneousPartitions`; the binary finite-model adapter; the `FiniteSetSystems` facade (relation fibers, trace families over Mathlib's VC dimension, support-sensitive Sauer–Shelah). |
-| v0.5.0 | Binary-tree Ramsey layer (`FiniteRamsey` facade): the additive two-colour subtree theorem. Heterogeneous weighted product boxes. |
+| v0.5.0 | Binary-tree Ramsey layer (`FiniteRamsey` facade): the additive two-color subtree theorem. Heterogeneous weighted product boxes. |
 | v0.6.0 | The heterogeneous weighted-box stack complete (`ProductSpaces` facade): coordinate splits, box unions with symmetric-difference error, box partitions. |
 | v0.7.0 | Approximation-to-counting complete: the arity-generic diagonal gate, quotient counting, count transfer across an edit, the aggregation bridge, and the composite theorem from a cellwise approximation to an induced count. Analytic homogeneity. |
 | v0.8.0 | The Hedge forecaster and its regret bound `hedge_regret`. |
-| v0.9.0 | Multicolour tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
+| v0.9.0 | Multicolor tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
 | v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
 | v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
 | v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
@@ -132,7 +132,7 @@ are pinned to the `v0.13.0` tag.
 
 - Majority rounding at any partition, costed by summed coordinate defects:
   [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.lean)
-  (`editDistance_majorityRound_le`, the labelled-fibre adapter `labelPartition`), on the
+  (`editDistance_majorityRound_le`, the labeled-fiber adapter `labelPartition`), on the
   substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
   prefix-swap identity and the minority bound over heterogeneous coordinate types).
 - The partition defect and the exact refinement variance identity
@@ -314,7 +314,7 @@ The `Kernel` facade is the import for this part. A **rectangular kernel** is a f
 `rectSum f wX wY A B` is the primitive, and averages, restriction, and transpose (`op`) are
 defined from it (`Finite/RectKernel`). Weights are never normalized: a probability is a ratio
 formed at the point of use, guard-free. Nonnegativity of the weights is a hypothesis, stated
-exactly where a mass is cancelled (`rectAverage · mass = rectSum` fails for signed weights,
+exactly where a mass is canceled (`rectAverage · mass = rectSum` fails for signed weights,
 `Partition/RectKernel`).
 
 **The step-partition theorem.** Stepping `f` over a pair of *independent* partitions predicts
@@ -346,7 +346,7 @@ Which to use: the step-partition theorem when the downstream argument needs a *p
 count within cells, to refine further, to seed another iteration); the decomposition when it
 needs *few terms* and a residual measured against nothing. Three compiled specializations under
 `examples/` show the decomposition on an ordinary matrix, a weighted bipartite graph, and a
-signed centred residual, importing only the `Kernel` facade.
+signed centered residual, importing only the `Kernel` facade.
 
 **The unweighted graph versions** remain available: `frieze_kannan` and its seeded form on a
 single vertex set with at most `4^(⌈1/ε²⌉+1)` parts (`Graph/FriezeKannan`), and the cut
@@ -376,18 +376,18 @@ transport (pullback, restriction, relabeling) is built before any counting
 canonical first-order counts; injective counts are a separate API normalized by the falling
 factorial (`Relational/Counts`). Edits are per-symbol primitives aggregated with unit weight per
 symbol-tuple incidence (`Relational/Edit`). Regularity for a language of arity at most two
-proceeds through the binary palette, which colours every ordered pair by every binary symbol
+proceeds through the binary palette, which colors every ordered pair by every binary symbol
 in both directions and every vertex by its unary and loop profile
 (`Relational/BinaryPalette`); the summit `exists_binaryPalette_regular_refinement` is
-simultaneously regular for every colour, with fuel independent of the palette size because
+simultaneously regular for every color, with fuel independent of the palette size because
 palette densities on a block form a probability vector (`binaryPaletteEnergy_le_one`). It
 asserts nothing about symbols of arity greater than two.
 
 **Counting theorems that exist.**
 
 - *Exact two-vertex and three-vertex characterizations.* An induced embedding of a pattern on
-  `Fin 2` or `Fin 3` is exactly a palette-colour pair or a directed triangle in three forward
-  colour relations (`preservesAndReflects_iff_profiles_palettes`,
+  `Fin 2` or `Fin 3` is exactly a palette-color pair or a directed triangle in three forward
+  color relations (`preservesAndReflects_iff_profiles_palettes`,
   `preservesAndReflects_three_iff`; `Relational/BinaryPattern`, `TwoVertexCounting`,
   `ThreeVertexCounting`).
 - *Directed paths and triangles under uniformity.* Two-step path density within `6ε` of the
@@ -431,7 +431,7 @@ graphs, re-exported with the conversions between this library's counts and Mathl
    counting theorem treats patterns on `Fin 3`.
 3. There is no general relational induced-removal theorem. The design record is
    `docs/design/induced-removal.md`; the gates that constrain it (deletion alone cannot
-   remove induced copies; recolouring creates copies) are under the gates umbrella.
+   remove induced copies; recoloring creates copies) are under the gates umbrella.
 4. The triadic approximation is a precursor, not the Rödl–Schacht theorem.
 5. Regularity-based counting for general fixed patterns and for arities above two, and
    general hypergraph removal, are outside the current API. Counting from a supplied cellwise
@@ -471,7 +471,7 @@ should be read as the second.
   its diagonal-agreement premise, never inferred from simplicity of the pattern.
 - An embedding example that fails a stronger constraint (a tree embedding with the root moved
   or depth changed) shows what the structure allows; it is not a proof that no monochromatic
-  embedding satisfies the stronger constraint, which would need a colouring counterexample.
+  embedding satisfies the stronger constraint, which would need a coloring counterexample.
 
 ## The five facades
 
@@ -492,9 +492,9 @@ importable, and direct imports of a module are as advertised as the facade.
   the global-approximation stack: majority-rounding cost from summed coordinate defects, the
   partition defect with its refinement variance identity and the join bound, representative
   maps with displaced-coordinate transport, and the equitable composition.
-- `RegularityLemmata.FiniteRamsey`: multicolour Ramsey for ordered-pair colourings, finite full
+- `RegularityLemmata.FiniteRamsey`: multicolor Ramsey for ordered-pair colorings, finite full
   binary trees as words, arbitrary-root subtree embeddings and their proper extensions, and the
-  additive subtree theorems (two colours at host height `a + b + 1`, `m` colours at
+  additive subtree theorems (two colors at host height `a + b + 1`, `m` colors at
   `(∑ tᵢ) + 1`, the equal-height form at `m·t + 1`).
 - `RegularityLemmata.ProductSpaces`: raw weights and masses, boxes and their tuples, predicate
   mass and guard-free density, independent coordinate partitions with exact cell decompositions,
@@ -518,9 +518,9 @@ and weighted energy; `Relational.Language` for the finite relational layer.
 
 ## Independent tools
 
-- **Finite Ramsey** (`FiniteRamsey` facade): multicolour Ramsey for ordered pairs by greedy
-  pigeonhole with bound `(r+1)^(r·s+1)`, and the binary-tree subtree theorems: two colours at
-  height `a + b + 1`, `m` colours in the additive form, embeddings with arbitrary root and
+- **Finite Ramsey** (`FiniteRamsey` facade): multicolor Ramsey for ordered pairs by greedy
+  pigeonhole with bound `(r+1)^(r·s+1)`, and the binary-tree subtree theorems: two colors at
+  height `a + b + 1`, `m` colors in the additive form, embeddings with arbitrary root and
   preserved branch direction, proper embeddings mapping source leaves to target leaves. No lower bound is
   formalized, so no optimality is claimed.
 - **Density buckets** (`Finite/DensityBuckets`): half-open buckets with a Ramsey extraction of

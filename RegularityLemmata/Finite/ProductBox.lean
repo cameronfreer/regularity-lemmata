@@ -67,7 +67,7 @@ def FiniteBox.tuples [Fintype ι] [DecidableEq ι] (A : FiniteBox V) : Finset (�
   Fintype.mem_piFinset
 
 /-- **Reindexing a box along an equivalence of index types.** A canonical operation, named
-rather than left as a raw lambda, so that consumers and laws about relabelling can speak about
+rather than left as a raw lambda, so that consumers and laws about relabeling can speak about
 it. Needs no instances. -/
 def FiniteBox.reindex {ι' : Type*} (e : ι' ≃ ι) (A : FiniteBox V) :
     FiniteBox (fun j => V (e j)) := fun j => A (e j)
@@ -146,7 +146,7 @@ empty one, and its weight is the empty product `1`. -/
 
 /-! ### Reindexing along an equivalence
 
-The index type is an arbitrary `Fintype`, so relabelling coordinates is an equivalence of
+The index type is an arbitrary `Fintype`, so relabeling coordinates is an equivalence of
 index types rather than a permutation of `Fin n`. Both the carrier family and the weights
 transport with it. -/
 
@@ -317,7 +317,7 @@ theorem sum_tuples_reindex {ι' : Type*} [Fintype ι] [DecidableEq ι] [Fintype 
     have h := hy (e.symm i)
     rw [FiniteBox.reindex_apply] at h
     -- Rewrite the *index* first. `Equiv.piCongrLeft_apply_apply` is a `simp` lemma, so
-    -- normalising here would undo the step rather than complete it.
+    -- normalizing here would undo the step rather than complete it.
     rw [← Equiv.apply_symm_apply e i, Equiv.piCongrLeft_apply_apply]
     exact h
   · rw [FiniteBox.mem_tuples] at hx ⊢

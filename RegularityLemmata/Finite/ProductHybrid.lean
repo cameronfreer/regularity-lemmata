@@ -22,7 +22,7 @@ with `w` in the box and `a ∈ A j` on which `R` changes when coordinate `j` of 
 to `a`. The **prefix-swap identity** (`hybridEdgeDisagreement_eq`) says that the number of
 ordered pairs `(x, y)` of the box whose `j`-th hybrid edge disagrees is exactly
 `coordDisagreement R A j · ∏_{i ≠ j} |A i|`: the map `(x, y) ↦ (z_j, y j)` is onto
-`box × A j` with every fibre of size `∏_{i ≠ j} |A i|` (the prefix of `x` and the suffix of `y`
+`box × A j` with every fiber of size `∏_{i ≠ j} |A i|` (the prefix of `x` and the suffix of `y`
 are free, everything else is determined).
 
 **The resampling bound** (`minorityCount_mul_card_le`). A pair with `R x ≠ R y` has a
@@ -141,7 +141,7 @@ private theorem card_prefixBox_mul_card_suffixBox (w : ∀ i, V i) (j : Fin k) (
     (by simp)]
   exact Finset.prod_congr rfl (fun i hi => by simp [Finset.ne_of_mem_erase hi])
 
-/-- The fibre of `(x, y) ↦ (z_j, y j)` over `(w, a)`: the prefix of `x` and the suffix of `y` are
+/-- The fiber of `(x, y) ↦ (z_j, y j)` over `(w, a)`: the prefix of `x` and the suffix of `y` are
 free, everything else is determined. -/
 private theorem fiber_eq (w : ∀ i, V i) (j : Fin k) (a : V j) (hw : w ∈ Fintype.piFinset A)
     (ha : a ∈ A j) :

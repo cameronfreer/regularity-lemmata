@@ -50,7 +50,7 @@ is why that matters.
   i.e. the pairs `(owner, rank)` are pairwise distinct.
 * `exists_proxyDistinct_preservesAndReflects_iff` — the two combined, which is the generic
   form of the probe's five cases. No case analysis on the placement strata survives: the
-  strata are just the fibres of `owner ∘ f`, and the predecessor count handles them
+  strata are just the fibers of `owner ∘ f`, and the predecessor count handles them
   uniformly.
 -/
 
@@ -272,7 +272,7 @@ theorem exists_proxyDistinct_move (owner : V → ι) (localOrder : LinearOrder V
 
 /-- **The generic form of the probe's five cases.** Every injective triple has a
 proxy-distinct triple realizing exactly the same patterns. No case analysis on the
-placement strata appears: they are the fibres of `owner ∘ f`, and the predecessor count
+placement strata appears: they are the fibers of `owner ∘ f`, and the predecessor count
 treats them uniformly. -/
 theorem exists_proxyDistinct_preservesAndReflects_iff
     (h : IsOrderDeterminedProxyPalette M owner localOrder rank d)
