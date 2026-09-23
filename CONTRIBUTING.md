@@ -89,11 +89,22 @@ update; both statuses are required, and a body edit neither launches nor cancels
 
 ## Documentation
 
-Four surfaces, four triggers. Keeping them separate is what stops any of them from staling:
+Each surface has one owner and one trigger. Keeping them separate is what stops any of them
+from staling:
 
-- **`README.md`** — update only when the **user-facing capability boundary** changes: a new
-  public capability, or a change to what the library does not yet claim. Not for individual
-  theorems, and never a development chronology.
+- **`README.md`** — update when advertised capabilities, limitations, installation
+  instructions, supported usage, or primary navigation change. Do not use it as a development
+  chronology.
+- **`docs/GUIDE.md`** — owns mathematical exposition and theorem selection: the task chooser,
+  the main-theorem table, the conventions, and Parts I–IV. Release chronology does not
+  accumulate here; the release-indexed capability table at its end is the only chronological
+  element, and new release sections are not added.
+- **`examples/`** and its index — own compiled usage: worked compositions and consumers; each
+  file states what it certifies and which of its parts a downstream project should copy.
+- **`CHANGELOG.md`** — owns release chronology and migration instructions (the `Unreleased`
+  section carries the next release's breaking changes, documentation, and tooling notes).
+- **Versioned API navigation** (the generated documentation and the guide's current-use links)
+  — updated together at a release, with historical pins preserved.
 - **`ARCHITECTURE.md`** — update when a **design invariant** changes: a policy, a frozen
   constant, a module dependency direction, or the supported theorem boundary.
 - **`PROVENANCE.md`** — update when an **intellectual dependency or adaptation claim**

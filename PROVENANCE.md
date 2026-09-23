@@ -7,8 +7,10 @@ contributions after that release are recorded in the Git history and are license
 under Apache-2.0 per `CONTRIBUTING.md`). The entries below record the formal
 developments and publications whose results, interfaces, or proof architectures
 materially inform it; mathlib and other dependencies are consumed through Lake as
-ordinary imports. Every public mathematical antecedent materially informing a
-definition or proof is cited publicly, in the relevant file docstring and here.
+ordinary imports. This document records known mathematical and formal antecedents and the
+scope of each adaptation; the policy is that every public mathematical antecedent materially
+informing a definition or proof is cited in the relevant file docstring and here. Unresolved
+source-history questions are identified explicitly below rather than asserted resolved.
 
 ## Formal developments
 

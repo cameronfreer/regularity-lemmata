@@ -13,25 +13,26 @@ published documentation snapshot of `main` (the workflow runs on releases and on
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.13.0** pages for current material (every
-anchor verified against the published pages); the sections "Additions released in v0.13.0" and
-"Additions released in v0.12.0" use source links pinned to their release tags. Where a curated
+anchor verified against the published pages); the release-addition sections at the end use
+source links pinned to their release tags. Release chronology and migration instructions live
+in `CHANGELOG.md`; this guide selects and explains theorems. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
 
 ## Contents
 
 - [Start here, by task](#start-here-by-task)
-- [House vocabulary](#house-vocabulary)
-- [What can I reuse, by release?](#what-can-i-reuse-by-release)
-- [Additions released in v0.13.0](#additions-released-in-v0130)
-- [Additions released in v0.12.0](#additions-released-in-v0120)
 - [Main theorems and entry points](#main-theorems-and-entry-points)
+- [Mathematical conventions](#mathematical-conventions)
 - [Part I. Counts, densities, edits, diagonals](#part-i-counts-densities-edits-diagonals)
 - [Part II. Partitions, sampling, completion](#part-ii-partitions-sampling-completion)
 - [Part III. Weighted kernels: two different outputs](#part-iii-weighted-kernels-two-different-outputs)
 - [Part IV. Which counting and removal theorems exist](#part-iv-which-counting-and-removal-theorems-exist)
 - [The five facades](#the-five-facades)
+- [Areas at a glance](#areas-at-a-glance)
 - [Independent tools](#independent-tools)
 - [Open campaigns (not reusable yet)](#open-campaigns-not-reusable-yet)
+- [Repository organization and development status](#repository-organization-and-development-status)
+  (development vocabulary, what can be reused by release, additions released in v0.13.0 and v0.12.0)
 
 ## Start here, by task
 
@@ -70,29 +71,50 @@ facade bundles a stack, the facade is named, because importing it is the adverti
   and `Graph/RemovalBridge` (the one removal theorem, mathlib's). Part IV.
 - **I only need a finite Ramsey theorem, a forecaster, or density buckets.** Independent tools.
 
-## House vocabulary
+## Main theorems and entry points
 
-- **Summit.** A major theorem whose constants are visible in its statement, so it can be
-  instantiated and its bounds inspected. The main-theorem table below lists them; two of its
-  rows (balanced slicing, indivisible approximation) are *entry points* rather than regularity
-  theorems, because the first is a sampling theorem and the second takes its partition as input.
-- **Gate.** A module that keeps counterexamples, impossibility results, and feasibility probes
-  machine-checked, so that a rejected interface cannot be reopened silently. Gates carry
-  identifiers (`G1`, `G-S1`, `G-H2a`, …). The word is also used for the review process: a
-  statement passes a review-and-falsification gate before its API freezes.
-- **Gates umbrella.** The second library root, `RegularityLemmataGates`: probe, obstruction, and
-  feasibility modules of in-progress campaigns. Same namespace, same proof and axiom gates, but
-  the public root does not import them. What separates the two roots is role, not rigor.
-- **Facade.** A module that imports a curated stack and documents it, defining nothing. There
-  are five: `Kernel`, `FiniteSetSystems`, `RelationalApproximation`, `FiniteRamsey`,
-  `ProductSpaces`.
-- **Seam.** A deliberate interface boundary where a quantity is *derived* on one side and
-  *consumed* as a hypothesis on the other, so neither side needs the other's machinery. The
-  aggregate-to-per-event conversion in `Finite/WeightedChoiceBudget` and the separate left and
-  right part counts of the rectangular Frieze–Kannan iteration are the two named seams.
-- **Race.** An inequality between a polynomial event count and a geometric per-event failure
-  fraction, discharged beyond an explicit host threshold; the sampling layer runs a constant-count
-  race and a linear-count race.
+The declarations to reach for, and the module each lives in. Every bound is visible in the
+statement. Declaration names link to the v0.13.0 API pages. The last rows are entry points rather than regularity theorems: balanced slicing is
+a sampling theorem; `exists_isIndivisibleFor_of_isHomogeneousCell` takes its partition as an
+input; the equitable composition `exists_equitable_isIndivisibleFor` takes an old partition as
+input and **constructs** a new equipartition (with a requested part count) as output; and the
+transfer theorems take the edit bound as an input.
+
+| Theorem | Declaration | Module |
+| --- | --- | --- |
+| Regular refinement of a directed relation | [`exists_regular_refinement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/Regularity.html#RegularityLemmata.exists_regular_refinement) | `Graph.Regularity` |
+| Equitable regularity for a finite family (the ordinary entry point) | [`exists_familyRegular_equipartition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/EquitableFamilyRegularity.html#RegularityLemmata.exists_familyRegular_equipartition) | `Graph.EquitableFamilyRegularity` |
+| Equitable regularity for a finite family, with a multiple-of-three part count (specialized variant) | [`exists_familyRegular_equipartition_triple`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/TripleSeed.html#RegularityLemmata.exists_familyRegular_equipartition_triple) | `Graph.TripleSeed` |
+| Large equal-size regular pieces | [`exists_pieceFamily`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/PieceSchedule.html#RegularityLemmata.exists_pieceFamily) | `Graph.PieceSchedule` |
+| Strong (energy-gap) regularity for a finite family, simultaneously in every relation | [`exists_familyStrongWitness`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Graph/FamilyStrong.html#RegularityLemmata.exists_familyStrongWitness) | `Graph.FamilyStrong` |
+| Boundedly-colored coloring of `j`-sets with small bad mass, any observable | [`exists_goodPolyadColoring`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Hypergraph/PolyadIncrement.html#RegularityLemmata.exists_goodPolyadColoring) | `Hypergraph.PolyadIncrement` |
+| Boundedly-colored pair coloring with small bad mass | [`exists_goodColoring`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Hypergraph/TriadIncrement.html#RegularityLemmata.exists_goodColoring) | `Hypergraph.TriadIncrement` |
+| Deletion-only triadic approximation, locally disc-regular | [`exists_triadic_regular_approximation`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Hypergraph/TriadCleanup.html#RegularityLemmata.exists_triadic_regular_approximation) | `Hypergraph.TriadCleanup` |
+| Simultaneous palette regularity, host-independent bound | [`exists_binaryPalette_regular_refinement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/BinaryRegularity.html#RegularityLemmata.exists_binaryPalette_regular_refinement) | `Relational.BinaryRegularity` |
+| Three-vertex induced counting against a strong palette witness | [`BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/BinaryStrongCounting.html#RegularityLemmata.BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le) | `Relational.BinaryStrongCounting` |
+| Rectangular Frieze–Kannan step partition: separate left and right part bounds, uniform cut discrepancy | [`rect_frieze_kannan_cutDiscrepancy`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/RectKernelFriezeKannan.html#RegularityLemmata.rect_frieze_kannan_cutDiscrepancy) | `Partition.RectKernelFriezeKannan` |
+| Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | [`kernel_frieze_kannan_cutDecomposition`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Finite/RectKernelCutDecomposition.html#RegularityLemmata.kernel_frieze_kannan_cutDecomposition) | `Finite.RectKernelCutDecomposition` |
+| Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | [`exists_balanced_slicing`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/BalancedSlicing.html#RegularityLemmata.exists_balanced_slicing) | `Partition.BalancedSlicing` |
+| Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | [`exists_isIndivisibleFor_of_isHomogeneousCell`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/CellwiseEdit.html#RegularityLemmata.exists_isIndivisibleFor_of_isHomogeneousCell) | `Relational.CellwiseEdit` |
+| Majority-rounding cost from summed coordinate defects, `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)` | [`editDistance_majorityRound_le`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.html#RegularityLemmata.editDistance_majorityRound_le) | `Relational.MajorityAssembly` |
+| Exact refinement variance identity of the partition defect, with monotonicity | [`partitionDefect_eq_add_refinementVariance`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/PartitionDefect.html#RegularityLemmata.partitionDefect_eq_add_refinementVariance) | `Partition.PartitionDefect` |
+| Majority rounding at the join of arbitrary coordinate partitions, each coordinate charged in its own partition | [`editDistance_majorityRound_coordinateJoin_le`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.html#RegularityLemmata.editDistance_majorityRound_coordinateJoin_le) | `Relational.CoordinatePartitionRounding` |
+| Equitable representative map with displacement at most `(#P.parts − 1)·⌊|s|/t⌋` | [`exists_equitable_representativeMap`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Partition/RepresentativeMap.html#RegularityLemmata.exists_equitable_representativeMap) | `Partition.RepresentativeMap` |
+| One equitable partition and one indivisible model for all symbols, with the combined edit bound | [`exists_equitable_isIndivisibleFor`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.html#RegularityLemmata.exists_equitable_isIndivisibleFor) | `Relational.DisplacedTransport` |
+| Homomorphism-count transfer for a simple pattern across an edit (nullary agreement; collision term retained) | [`abs_homCountOn_sub_le_of_simple`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/UniformPatternCounts.html#RegularityLemmata.abs_homCountOn_sub_le_of_simple) | `Relational.UniformPatternCounts` |
+| Induced-count transfer for any pattern across an edit, under diagonal and nullary agreement | [`abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement`](https://cameronfreer.github.io/regularity-lemmata/docs/v0.13.0/RegularityLemmata/Relational/UniformPatternCounts.html#RegularityLemmata.abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement) | `Relational.UniformPatternCounts` |
+
+## Mathematical conventions
+
+The conventions that affect how a theorem is used; the development vocabulary is at the end of
+this guide.
+
+- **Raw counts and normalized densities.** Counts are exact and live in `ℕ`; densities are real,
+  a count divided by a support size, and the empty support has density `0`. Statements are
+  given in raw units wherever a denominator would otherwise need a guard (Part I).
+- **Refinement direction.** In mathlib's order on `Finpartition`, `Q ≤ P` means `Q` is *finer*
+  than `P`; every refinement hypothesis in this library follows that convention
+  (`ARCHITECTURE.md`).
 - **Guard-free.** Densities and averages are `0` on an empty denominator through real division
   `x / 0 = 0`, and definitions carry no `if`-guards. Positivity or nonemptiness is assumed only
   where it is genuinely needed (complement identities, canceling a mass), never categorically.
@@ -103,104 +125,6 @@ facade bundles a stack, the facade is named, because importing it is the adverti
   arguments use the injective count. The conversion between the two is explicit: the collision
   mass is at most `(k choose 2)·|s|^(k−1)`, one ambient power of the host size below the count,
   so the `|s|^k` and falling-factorial normalizations differ by a bounded additive term.
-
-## What can I reuse, by release?
-
-| Release | Reusable output (entry points) |
-|---|---|
-| v0.1.0 | Graph-side regularity engine and the binary-palette relational regularity: `exists_regular_refinement`, `exists_binaryPalette_regular_refinement`, strong (energy-gap) witnesses, the three-vertex induced counting theorem for patterns on `Fin 3`, triadic polyad regularization and deletion-only approximation, the relational substrate with exact finite-model counts. |
-| v0.2.0 | Rectangular weighted-kernel stack (`Kernel` facade): stepping over independent partitions, energy with the parallel-axis identity, cut discrepancy with contraction constant 1. Balanced slicing `exists_balanced_slicing` with leftover and chunk absorption. Heterogeneous homogeneity `IsHomogeneousPair`, `IsHomogeneousCell`. Relational approximation (`RelationalApproximation` facade): indivisibility, `CellwiseEditBound`, majority rounding. Equitable family regularity with a multiple-of-three seed; piece supplier. |
-| v0.3.0 | Rectangular Frieze–Kannan step-partition summit `rect_frieze_kannan_cutDiscrepancy` with separate left and right part bounds; guard-free averages and almost-constancy; slicing thresholds and races, average slicing, common blocks. |
-| v0.4.0 | Complete heterogeneous homogeneity API including `AreHomogeneousPartitions`; the binary finite-model adapter; the `FiniteSetSystems` facade (relation fibers, trace families over Mathlib's VC dimension, support-sensitive Sauer–Shelah). |
-| v0.5.0 | Binary-tree Ramsey layer (`FiniteRamsey` facade): the additive two-color subtree theorem. Heterogeneous weighted product boxes. |
-| v0.6.0 | The heterogeneous weighted-box stack complete (`ProductSpaces` facade): coordinate splits, box unions with symmetric-difference error, box partitions. |
-| v0.7.0 | Approximation-to-counting complete: the arity-generic diagonal gate, quotient counting, count transfer across an edit, the aggregation bridge, and the composite theorem from a cellwise approximation to an induced count. Analytic homogeneity. |
-| v0.8.0 | The Hedge forecaster and its regret bound `hedge_regret`. |
-| v0.9.0 | Multicolor tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
-| v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
-| v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
-| v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
-| v0.13.0 | The global-approximation stack: majority-rounding cost from summed coordinate defects (`editDistance_majorityRound_le`), the partition defect with the exact refinement variance identity and the join bound for arbitrary coordinate partitions, representative maps with displaced-coordinate transport and the equitable composition `exists_equitable_isIndivisibleFor`, five compiled consumers including the counting recipe with its diagonal boundary, and the environment-based public inventory. |
-
-The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
-tag, because `main` moves between tags.
-
-## Additions released in v0.13.0
-
-These additions were merged after v0.12.0 and are included in v0.13.0. Source links below
-are pinned to the `v0.13.0` tag.
-
-- Majority rounding at any partition, costed by summed coordinate defects:
-  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.lean)
-  (`editDistance_majorityRound_le`, the labeled-fiber adapter `labelPartition`), on the
-  substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
-  prefix-swap identity and the minority bound over heterogeneous coordinate types).
-- The partition defect and the exact refinement variance identity
-  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/PartitionDefect.lean)),
-  the join of coordinate partitions (`coordinateJoin`, `Partition/Basic`), and the majority
-  bound for arbitrary coordinate partitions
-  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
-- Representative maps with an explicit displaced set, the one-way bridges to the
-  almost-refinement charge, the free-part equitable construction
-  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/RepresentativeMap.lean)),
-  and displaced-coordinate transport with the composition `exists_equitable_isIndivisibleFor`
-  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.lean)).
-- Five compiled consumers under `examples/`, including
-  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/examples/GlobalApproximationCounting.lean):
-  homomorphism-count transfer from the global approximation with constants displayed, and the
-  induced-count boundary (diagonal agreement is required and rounding does not supply it).
-- The environment-based public inventory (`lake exe public_inventory`).
-
-## Additions released in v0.12.0
-
-These additions were merged after v0.11.0 and are included in v0.12.0. Source links below
-are pinned to the `v0.12.0` tag.
-
-- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/RegularityLemmata/Partition/SlicingThreshold.lean)
-  and `exists_balanced_slicing_of_threshold_self`: balanced slicing
-  at the named parameters with every side condition discharged; the zero-block case documented,
-  the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
-- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/examples/CompositionCertificates.lean):
-  the compatibility check and the prescribed-error endpoint chaining strong-witness existence
-  with three-vertex counting.
-- Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
-  `docs/design/retaining-completion.md`; no declaration exists for either yet.
-- The non-implications list (Part IV) and the wording corrections of the proper-embedding
-  documentation.
-- Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
-- Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).
-
-## Main theorems and entry points
-
-The declarations to reach for, and the module each lives in. Every bound is visible in the
-statement. The last rows are entry points rather than regularity theorems: balanced slicing is
-a sampling theorem; `exists_isIndivisibleFor_of_isHomogeneousCell` takes its partition as an
-input; the equitable composition `exists_equitable_isIndivisibleFor` takes an old partition as
-input and **constructs** a new equipartition (with a requested part count) as output; and the
-transfer theorems take the edit bound as an input.
-
-| Theorem | Declaration | Module |
-| --- | --- | --- |
-| Regular refinement of a directed relation | `exists_regular_refinement` | `Graph.Regularity` |
-| Equitable regularity for a finite family, with a multiple-of-three part count | `exists_familyRegular_equipartition_triple` | `Graph.TripleSeed` |
-| Large equal-size regular pieces | `exists_pieceFamily` | `Graph.PieceSchedule` |
-| Strong (energy-gap) regularity for a finite family, simultaneously in every relation | `exists_familyStrongWitness` | `Graph.FamilyStrong` |
-| Boundedly-colored coloring of `j`-sets with small bad mass, any observable | `exists_goodPolyadColoring` | `Hypergraph.PolyadIncrement` |
-| Boundedly-colored pair coloring with small bad mass | `exists_goodColoring` | `Hypergraph.TriadIncrement` |
-| Deletion-only triadic approximation, locally disc-regular | `exists_triadic_regular_approximation` | `Hypergraph.TriadCleanup` |
-| Simultaneous palette regularity, host-independent bound | `exists_binaryPalette_regular_refinement` | `Relational.BinaryRegularity` |
-| Three-vertex induced counting against a strong palette witness | `BinaryPaletteStrongWitness.abs_transversalInducedCount_sub_coarseInducedEstimate_le` | `Relational.BinaryStrongCounting` |
-| Rectangular Frieze–Kannan step partition: separate left and right part bounds, uniform cut discrepancy | `rect_frieze_kannan_cutDiscrepancy` | `Partition.RectKernelFriezeKannan` |
-| Cut-matrix decomposition: at most `⌈1/ε²⌉₊` weighted rectangles, coefficients at most `1/ε`, residual cut norm at most `ε · mass` | `kernel_frieze_kannan_cutDecomposition` | `Finite.RectKernelCutDecomposition` |
-| Balanced slicing: exact equal-size blocks, simultaneously typical for a trace family | `exists_balanced_slicing` | `Partition.BalancedSlicing` |
-| Indivisible approximation from cellwise homogeneity, with exact nullary compatibility | `exists_isIndivisibleFor_of_isHomogeneousCell` | `Relational.CellwiseEdit` |
-| Majority-rounding cost from summed coordinate defects, `(n+1)·|s|^(n+1)·(2θ + γ/2 + λ/2)` | `editDistance_majorityRound_le` | `Relational.MajorityAssembly` |
-| Exact refinement variance identity of the partition defect, with monotonicity | `partitionDefect_eq_add_refinementVariance` | `Partition.PartitionDefect` |
-| Majority rounding at the join of arbitrary coordinate partitions, each coordinate charged in its own partition | `editDistance_majorityRound_coordinateJoin_le` | `Relational.CoordinatePartitionRounding` |
-| Equitable representative map with displacement at most `(#P.parts − 1)·⌊|s|/t⌋` | `exists_equitable_representativeMap` | `Partition.RepresentativeMap` |
-| One equitable partition and one indivisible model for all symbols, with the combined edit bound | `exists_equitable_isIndivisibleFor` | `Relational.DisplacedTransport` |
-| Homomorphism-count transfer for a simple pattern across an edit (nullary agreement; collision term retained) | `abs_homCountOn_sub_le_of_simple` | `Relational.UniformPatternCounts` |
-| Induced-count transfer for any pattern across an edit, under diagonal and nullary agreement | `abs_inducedEmbeddingCountOn_sub_le_of_diagonalAgreement` | `Relational.UniformPatternCounts` |
 
 ## Part I. Counts, densities, edits, diagonals
 
@@ -538,3 +462,96 @@ transversalization obligation with the proof that no cleaning achieves it, the p
 steps and the hierarchy gates, and the positivity gate for removal. They compile, they are
 audited, and they are not API. Promotion out of the umbrella is a reviewed move of one import
 line.
+
+## Repository organization and development status
+
+### Development vocabulary
+
+- **Summit.** A major theorem whose constants are visible in its statement, so it can be
+  instantiated and its bounds inspected. The main-theorem table below lists them; two of its
+  rows (balanced slicing, indivisible approximation) are *entry points* rather than regularity
+  theorems, because the first is a sampling theorem and the second takes its partition as input
+  (the equitable composition constructs a new equipartition from a supplied old partition).
+- **Gate.** A module that keeps counterexamples, impossibility results, and feasibility probes
+  machine-checked, so that a rejected interface cannot be reopened silently. Gates carry
+  identifiers (`G1`, `G-S1`, `G-H2a`, …). The word is also used for the review process: a
+  statement passes a review-and-falsification gate before its API freezes.
+- **Gates umbrella.** The second library root, `RegularityLemmataGates`: probe, obstruction, and
+  feasibility modules of in-progress campaigns. Same namespace, same proof and axiom gates, but
+  the public root does not import them. What separates the two roots is role, not rigor.
+- **Facade.** A module that imports a curated stack and documents it, defining nothing. There
+  are five: `Kernel`, `FiniteSetSystems`, `RelationalApproximation`, `FiniteRamsey`,
+  `ProductSpaces`.
+- **Seam.** A deliberate interface boundary where a quantity is *derived* on one side and
+  *consumed* as a hypothesis on the other, so neither side needs the other's machinery. The
+  aggregate-to-per-event conversion in `Finite/WeightedChoiceBudget` and the separate left and
+  right part counts of the rectangular Frieze–Kannan iteration are the two named seams.
+- **Race.** An inequality between a polynomial event count and a geometric per-event failure
+  fraction, discharged beyond an explicit host threshold; the sampling layer runs a constant-count
+  race and a linear-count race.
+
+### What can I reuse, by release?
+
+| Release | Reusable output (entry points) |
+|---|---|
+| v0.1.0 | Graph-side regularity engine and the binary-palette relational regularity: `exists_regular_refinement`, `exists_binaryPalette_regular_refinement`, strong (energy-gap) witnesses, the three-vertex induced counting theorem for patterns on `Fin 3`, triadic polyad regularization and deletion-only approximation, the relational substrate with exact finite-model counts. |
+| v0.2.0 | Rectangular weighted-kernel stack (`Kernel` facade): stepping over independent partitions, energy with the parallel-axis identity, cut discrepancy with contraction constant 1. Balanced slicing `exists_balanced_slicing` with leftover and chunk absorption. Heterogeneous homogeneity `IsHomogeneousPair`, `IsHomogeneousCell`. Relational approximation (`RelationalApproximation` facade): indivisibility, `CellwiseEditBound`, majority rounding. Equitable family regularity with a multiple-of-three seed; piece supplier. |
+| v0.3.0 | Rectangular Frieze–Kannan step-partition summit `rect_frieze_kannan_cutDiscrepancy` with separate left and right part bounds; guard-free averages and almost-constancy; slicing thresholds and races, average slicing, common blocks. |
+| v0.4.0 | Complete heterogeneous homogeneity API including `AreHomogeneousPartitions`; the binary finite-model adapter; the `FiniteSetSystems` facade (relation fibers, trace families over Mathlib's VC dimension, support-sensitive Sauer–Shelah). |
+| v0.5.0 | Binary-tree Ramsey layer (`FiniteRamsey` facade): the additive two-color subtree theorem. Heterogeneous weighted product boxes. |
+| v0.6.0 | The heterogeneous weighted-box stack complete (`ProductSpaces` facade): coordinate splits, box unions with symmetric-difference error, box partitions. |
+| v0.7.0 | Approximation-to-counting complete: the arity-generic diagonal gate, quotient counting, count transfer across an edit, the aggregation bridge, and the composite theorem from a cellwise approximation to an induced count. Analytic homogeneity. |
+| v0.8.0 | The Hedge forecaster and its regret bound `hedge_regret`. |
+| v0.9.0 | Multicolor tree Ramsey `binaryTreeRamsey_proper` and its equal-height form. |
+| v0.10.0 | Predecessor-ceiling bucket closeness `le_add_of_ceil_div_pred_eq`. |
+| v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
+| v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
+| v0.13.0 | The global-approximation stack: majority-rounding cost from summed coordinate defects (`editDistance_majorityRound_le`), the partition defect with the exact refinement variance identity and the join bound for arbitrary coordinate partitions, representative maps with displaced-coordinate transport and the equitable composition `exists_equitable_isIndivisibleFor`, five compiled consumers including the counting recipe with its diagonal boundary, and the environment-based public inventory. |
+
+The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
+tag, because `main` moves between tags.
+
+### Additions released in v0.13.0
+
+These additions were merged after v0.12.0 and are included in v0.13.0. Source links below
+are pinned to the `v0.13.0` tag.
+
+- Majority rounding at any partition, costed by summed coordinate defects:
+  [`Relational/MajorityAssembly.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/MajorityAssembly.lean)
+  (`editDistance_majorityRound_le`, the labeled-fiber adapter `labelPartition`), on the
+  substrate `Finite/SectionDefect` (inclusive decency) and `Finite/ProductHybrid` (the
+  prefix-swap identity and the minority bound over heterogeneous coordinate types).
+- The partition defect and the exact refinement variance identity
+  ([`Partition/PartitionDefect.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/PartitionDefect.lean)),
+  the join of coordinate partitions (`coordinateJoin`, `Partition/Basic`), and the majority
+  bound for arbitrary coordinate partitions
+  ([`Relational/CoordinatePartitionRounding.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/CoordinatePartitionRounding.lean)).
+- Representative maps with an explicit displaced set, the one-way bridges to the
+  almost-refinement charge, the free-part equitable construction
+  ([`Partition/RepresentativeMap.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Partition/RepresentativeMap.lean)),
+  and displaced-coordinate transport with the composition `exists_equitable_isIndivisibleFor`
+  ([`Relational/DisplacedTransport.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/RegularityLemmata/Relational/DisplacedTransport.lean)).
+- Five compiled consumers under `examples/`, including
+  [`GlobalApproximationCounting.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.13.0/examples/GlobalApproximationCounting.lean):
+  homomorphism-count transfer from the global approximation with constants displayed, and the
+  induced-count boundary (diagonal agreement is required and rounding does not supply it).
+- The environment-based public inventory (`lake exe public_inventory`).
+
+### Additions released in v0.12.0
+
+These additions were merged after v0.11.0 and are included in v0.12.0. Source links below
+are pinned to the `v0.12.0` tag.
+
+- [`exists_balanced_slicing_of_threshold`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/RegularityLemmata/Partition/SlicingThreshold.lean)
+  and `exists_balanced_slicing_of_threshold_self`: balanced slicing
+  at the named parameters with every side condition discharged; the zero-block case documented,
+  the nonvacuous specialization at `n = |A|`, `μ ≤ 1`.
+- [`examples/CompositionCertificates.lean`](https://github.com/cameronfreer/regularity-lemmata/blob/v0.12.0/examples/CompositionCertificates.lean):
+  the compatibility check and the prescribed-error endpoint chaining strong-witness existence
+  with three-vertex counting.
+- Two approved, unimplemented specifications: `docs/design/repeated-cell-counting.md` and
+  `docs/design/retaining-completion.md`; no declaration exists for either yet.
+- The non-implications list (Part IV) and the wording corrections of the proper-embedding
+  documentation.
+- Uniform counting transfers: see [the exact hypotheses and names](uniform-pattern-counts.md).
+- Tree conventions: see [the one-way bridge](tree-embedding-conventions.md).

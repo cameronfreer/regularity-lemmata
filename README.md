@@ -2,12 +2,13 @@
 
 [![CI](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronfreer/regularity-lemmata/actions/workflows/ci.yml)
 
-A Lean 4 library of reusable finite regularity, counting, approximation, and removal
-infrastructure, built on [mathlib](https://github.com/leanprover-community/mathlib4). When a
-large finite structure is partitioned so that most pairs of parts look random, what can be
-counted, approximated, or removed, and with which explicit constants? The library develops that
-machinery for graphs, hypergraphs, and finite relational structures, with every bound visible
-in the theorem statement.
+A Lean 4 library for finite regularity, counting, and approximation, built on
+[mathlib](https://github.com/leanprover-community/mathlib4). It provides regularity for directed
+relations and finite families, weighted Frieze–Kannan approximations, and tools for partitioning,
+rounding, and counting in finite relational structures, with explicit quantitative bounds.
+
+The components can be used independently: in particular, the sampling, rounding, and
+count-transfer tools do not require going through a regularity lemma.
 
 **Status:** pre-1.0 research library. Committed code carries no placeholders and no custom
 axioms; CI enforces that on every commit. Names and signatures may change between tags, so pin a
@@ -30,12 +31,11 @@ tag.
   error term explicit, and counting from a cellwise approximation at any arity with the
   collision term computed.
   [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
-- **Global approximation of a relational model**: majority rounding at any partition with its
-  edit cost bounded by summed coordinate defects (the partition defect, with the exact
-  refinement variance identity), transport along an equitable representative map with an
-  explicit displaced set, and the composition giving one equitable partition and one model for
-  all symbols. Homomorphism-count transfer for simple patterns follows; the uniform induced-count
-  corollary additionally requires diagonal agreement, which rounding does not guarantee.
+- **Approximate finite relational structures**: round a supplied partition to a
+  cellwise-constant model, bound the edits using coordinate defects, and transfer to an
+  equipartition. Supports arbitrary arity. Homomorphism-count transfer for simple patterns
+  follows; the uniform induced-count corollary additionally requires diagonal agreement, which
+  rounding does not guarantee. See the guide for the hypotheses and counting consequences.
   [Guide, Part IV](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist).
 - **Sampling and completion**: exact equal-size blocks on which every member of a supplied
   family keeps its density (balanced slicing), average-preserving slicing, and completion of
@@ -48,20 +48,23 @@ tag.
   Hedge forecaster's regret bound, density buckets, weighted selection.
   [Guide, Independent tools](docs/GUIDE.md#independent-tools).
 
-The limits, stated plainly: the relational substrate supports arbitrary finite relational
-languages and exact finite-model counts, but the regularity and regularity-based counting
-layers assume **arity at most two**, and the regularity-based induced-counting theorem treats
-patterns on **`Fin 3`** (the transfer theorems above are not so restricted). There is exactly **one removal theorem**, mathlib's triangle removal for
-simple graphs, re-exported; there is **no general relational induced-removal theorem**. The
-triadic approximation is a **precursor**, not the full Rödl–Schacht theorem. Regularity-based
-counting for general fixed patterns, higher arities, and general hypergraph removal are
-**outside the current API**. The guide's
+**Scope:** the relational substrate and the approximation and count-transfer tools support
+arbitrary finite arities. Relational regularity is currently restricted to **arity at most
+two**, and regularity-based induced counting to **three-vertex patterns**. Triangle removal is
+re-exported from mathlib; general relational induced removal and general hypergraph removal
+are **not provided**, and the triadic approximation is a precursor, not the full Rödl–Schacht
+theorem. The guide's
 [boundary section](docs/GUIDE.md#part-iv-which-counting-and-removal-theorems-exist) has the
 longer explanation, and its table of
 [main theorems and entry points](docs/GUIDE.md#main-theorems-and-entry-points) names the
 declarations to reach for.
 
 ## Quick start
+
+**Version note:** the installation below uses v0.13.0. The development branch contains breaking
+identifier renames scheduled for the next release; see the
+[Unreleased migration notes](CHANGELOG.md#unreleased). Use the API documentation matching your
+dependency tag.
 
 Add the library to your `lakefile.toml`, pinned to a tag:
 
@@ -89,8 +92,8 @@ describes each, and every module remains directly importable.
 <details>
 <summary><b>Example: approximating a matrix</b> (a complete, compiled file)</summary>
 
-The file below is [`examples/ReadmeSnippet.lean`](examples/ReadmeSnippet.lean) verbatim, built
-by the gate on every commit (the v0.13.0 release included) and checked against v0.11.0 as well: a matrix with entries in `[-1, 1]` is
+The compiled example below is [`examples/ReadmeSnippet.lean`](examples/ReadmeSnippet.lean)
+with the license header omitted, built by the gate on every commit: a matrix with entries in `[-1, 1]` is
 a sum of at most `⌈1/ε²⌉₊` weighted submatrix indicators with coefficients at most `1/ε`, up to a
 residual of cut norm at most `ε·m·n`.
 

@@ -5,9 +5,12 @@ GitHub Release names the full commit SHA it was cut from; pin a tag when dependi
 
 ## Unreleased
 
-**Breaking, one time: US-English identifiers.** Before wider adoption, the British-spelled
-identifiers are renamed once, without deprecated aliases (this is an exception, not a policy of
-renaming for style). Public declarations:
+### Breaking changes
+
+**US-English identifiers, one time, without deprecated aliases** (an exception before wider
+adoption, not a policy of renaming for style). Mathematical hypotheses and conclusions are
+unchanged. Public names and the listed named arguments change; module paths and the toolchain
+are unchanged.
 
 | Old | New | Module |
 | --- | --- | --- |
@@ -16,20 +19,57 @@ renaming for style). Public declarations:
 | `labelFibre_eq_empty_iff` | `labelFiber_eq_empty_iff` | `Relational/MajorityAssembly` |
 | `exists_fibre_labelling` | `exists_fiber_labeling` | `Partition/Grouping` |
 
-Gates-only declarations: `proxyFibre_pairwiseDisjoint` → `proxyFiber_pairwiseDisjoint`
-(`Relational/ProxyAggregateMass`), `proxyCandidates_subset_fibre` →
-`proxyCandidates_subset_fiber` and `sum_candidateMass_le_fibreMass` →
+**Named argument.** The binder `colour` of the binary-tree Ramsey theorems is renamed to
+`color`:
+
+```lean
+-- v0.13.0
+binaryTreeRamsey_two a b (colour := c)
+
+-- next release
+binaryTreeRamsey_two a b (color := c)
+```
+
+Affected declarations: `binaryTreeRamsey_two`, `binaryTreeRamsey`, `binaryTreeRamsey_proper`,
+`binaryTreeRamsey_two_proper`, `binaryTreeRamsey_proper_const` (and the private recursions
+`ramsey_aux`, `ramsey_aux_multi`). Update named-argument calls and the four renamed
+identifiers where they are used; do not perform a repository-wide textual substitution, since
+identifiers from dependencies, quotations, and historical documentation are different cases.
+
+Gates-only declarations (outside the public inventory): `proxyFibre_pairwiseDisjoint` →
+`proxyFiber_pairwiseDisjoint` (`Relational/ProxyAggregateMass`), `proxyCandidates_subset_fibre`
+→ `proxyCandidates_subset_fiber` and `sum_candidateMass_le_fibreMass` →
 `sum_candidateMass_le_fiberMass` (`Relational/ProxySelectionSetup`). Private test helpers of
 `Finite/BinaryTreeRamsey` (`sampleColour`, `constColour`, `depthColour`) become `sampleColor`,
 `constColor`, `depthColor`.
 
-**Named arguments.** The binder `colour` of `binaryTreeRamsey_two`, `binaryTreeRamsey`,
-`binaryTreeRamsey_proper`, `binaryTreeRamsey_two_proper`, `binaryTreeRamsey_proper_const` (and of
-the private recursions `ramsey_aux`, `ramsey_aux_multi`) is renamed to `color`; a downstream call using the named
-form `(colour := …)` must become `(color := …)`. No call of that form exists in this repository,
-which does not establish that none exists downstream.
+### Documentation
 
-No statement, proof, module path, or toolchain changes.
+- US English throughout repository-authored prose (identifiers, published titles, and verbatim
+  quotations preserved; `CONTRIBUTING.md` records the convention).
+- Guide: current-use links point at verified v0.13.0 API pages; the named-parameter slicing
+  wrapper is recorded as released in v0.12.0; task navigation and the main-theorem table cover
+  the partition-defect, equitable-approximation, and uniform count-transfer results; the
+  mathematical exposition precedes the development vocabulary and release chronology.
+- README: shorter opening, capability descriptions stated as what is supplied and what is
+  received (the approximation entry points take a supplied partition), a scope paragraph, and a
+  version note distinguishing the installed release from the development branch.
+- Provenance: the Malliaris–Shelah and Ackerman–Freer–Patel antecedents recorded, the latter at
+  Definition 1.4 and Lemma 1.5 with the restricted-carrier, vertex-to-cell witness; the module
+  families added in v0.12.0 and v0.13.0 reconciled; unresolved source-history questions
+  identified explicitly rather than asserted complete.
+- Examples index: "Worked compositions"; the global-approximation counting example labels its
+  positive-consumer and regression roles.
+
+### Development tooling
+
+- The pull-request body check (`PR body`, status `pr-body`) is a separate required workflow
+  from the build (`CI`, status `check`): a body edit reruns only the body check and neither
+  launches nor cancels the build; a new commit still requires the full gate.
+- Documentation publication merges a reused dependency tree consistently (pages only added,
+  index and navigation unioned, validated upstream-defect allowances carried forward), separates
+  the deployment tooling revision from the documented source, and moves `latest` only for a
+  verified, published, non-prerelease release tag.
 
 ## v0.13.0 (2026-09-18)
 
