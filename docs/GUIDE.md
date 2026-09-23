@@ -468,10 +468,11 @@ line.
 ### Development vocabulary
 
 - **Summit.** A major theorem whose constants are visible in its statement, so it can be
-  instantiated and its bounds inspected. The main-theorem table below lists them; two of its
-  rows (balanced slicing, indivisible approximation) are *entry points* rather than regularity
-  theorems, because the first is a sampling theorem and the second takes its partition as input
-  (the equitable composition constructs a new equipartition from a supplied old partition).
+  instantiated and its bounds inspected. The
+  [main-theorem table](#main-theorems-and-entry-points) above lists them; its last rows are
+  *entry points* rather than regularity theorems (balanced slicing is a sampling theorem, the
+  indivisible-approximation theorems take a partition as input, and the equitable composition
+  constructs a new equipartition from a supplied old partition).
 - **Gate.** A module that keeps counterexamples, impossibility results, and feasibility probes
   machine-checked, so that a rejected interface cannot be reopened silently. Gates carry
   identifiers (`G1`, `G-S1`, `G-H2a`, …). The word is also used for the review process: a

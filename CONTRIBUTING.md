@@ -97,8 +97,9 @@ from staling:
   chronology.
 - **`docs/GUIDE.md`** — owns mathematical exposition and theorem selection: the task chooser,
   the main-theorem table, the conventions, and Parts I–IV. Release chronology does not
-  accumulate here; the release-indexed capability table at its end is the only chronological
-  element, and new release sections are not added.
+  accumulate here: the release-indexed capability table and the two release-addition sections
+  (v0.13.0 and v0.12.0) at its end are retained historical records, and no new release-additions
+  sections are added.
 - **`examples/`** and its index — own compiled usage: worked compositions and consumers; each
   file states what it certifies and which of its parts a downstream project should copy.
 - **`CHANGELOG.md`** — owns release chronology and migration instructions (the `Unreleased`
