@@ -23,7 +23,7 @@ translated (unit weights, matrix entries, a graph's edge indicator).
 | [`SignedResidual.lean`](SignedResidual.lean) | `RegularityLemmata.Kernel` | Rescaling a signed residual: the centered residual `f − rectAverage f A B` of a unit-bounded kernel takes values in `[-2, 2]`; rescaling by `1/2` and decomposing gives coefficients at most `2/ε` and a residual cut norm at most `2ε · mass`, for every such kernel. |
 | [`ReadmeSnippet.lean`](ReadmeSnippet.lean) | `RegularityLemmata.Kernel` | The README's compiled use, verbatim: the cut-matrix decomposition of a `[-1, 1]`-matrix at unit weights, stated with the library's own cut norm. |
 
-## Composition certificates
+## Worked compositions
 
 Two theorems chained with proved results only, certifying that their hypotheses and error
 units fit together. The two certificates below certify different things and are kept apart.
@@ -42,7 +42,7 @@ Consumers of the global-approximation stack through the `RelationalApproximation
 | [`SharedEquitableModel.lean`](SharedEquitableModel.lean) | `RegularityLemmata.RelationalApproximation` | One equitable partition and one model from the composition, bounding a binary and a ternary symbol with the same pair, displacement term `(#P.parts − 1)·⌊|s|/t⌋`. |
 | [`DirectedJoinRounding.lean`](DirectedJoinRounding.lean) | `RegularityLemmata.RelationalApproximation` | A directed binary relation rounded at the join of a row and a column partition: edit at most the row defects at the first plus the column defects at the second; part count at most the product. |
 | [`SymmetricRounding.lean`](SymmetricRounding.lean) | `RegularityLemmata.RelationalApproximation` | A symmetric relation rounded at one partition: edit at most twice the row defects, and the rounded relation is symmetric. |
-| [`GlobalApproximationCounting.lean`](GlobalApproximationCounting.lean) | `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Relational.UniformPatternCounts`, the gates-only `Relational.DiagonalLoopRegression` | The recipe: a uniform edit rate from the composition, homomorphism-count transfer (injective, and all homomorphisms with the collision term) at binary and ternary instances with constants displayed, the induced corollary only under an explicit diagonal-agreement premise, the reused loop regression, and the six-vertex counterexample pinned to the rounding operation. |
+| [`GlobalApproximationCounting.lean`](GlobalApproximationCounting.lean) | `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Relational.UniformPatternCounts`, the gates-only `Relational.DiagonalLoopRegression` | **Two roles in one file.** *Positive consumer* (copy these): `exists_equitable_model_uniformEdit`, `exists_hom_transfer`, `recipe_binary`, `recipe_ternary`, and `exists_induced_transfer_of_diagonalAgreement`, which need only the facade and `UniformPatternCounts`. *Regression* (do not copy into a downstream project): the reused loop regression and the six-vertex counterexample, which are why the gates-only module is imported. The recipe: a uniform edit rate from the composition, homomorphism-count transfer (injective, and all homomorphisms with the collision term) at binary and ternary instances with constants displayed, the induced corollary only under an explicit diagonal-agreement premise, the reused loop regression, and the six-vertex counterexample pinned to the rounding operation. |
 
 ## Not here
 
