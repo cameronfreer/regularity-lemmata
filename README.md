@@ -97,6 +97,7 @@ with the license header omitted, built by the gate on every commit: a matrix wit
 a sum of at most `⌈1/ε²⌉₊` weighted submatrix indicators with coefficients at most `1/ε`, up to a
 residual of cut norm at most `ε·m·n`.
 
+<!-- readme-snippet -->
 ```lean
 import RegularityLemmata.Kernel
 

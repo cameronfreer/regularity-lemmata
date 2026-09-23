@@ -43,6 +43,8 @@ echo "== Gate 5: the two roots partition the modules; the public root never reac
 python3 scripts/check_roots.py --self-test
 python3 scripts/docs_layout.py self-test
 python3 scripts/docs_layout.py deploy-test
+python3 scripts/check_readme_snippet.py --self-test
+python3 scripts/check_readme_snippet.py
 python3 scripts/check_roots.py
 
 echo "== check.sh: all gates passed =="
