@@ -48,7 +48,8 @@ of the following forms:
 - `Deprecated/removed: ...`
 - `None`
 
-Use `None` explicitly when the change has no public API impact. CI checks that the section
+Use `None` explicitly when the change has no public API impact. The `PR body` workflow (a
+required status separate from the build, rerun on every body edit) checks that the section
 is present, nonblank after removing template comments, and contains one of these forms.
 Reviewers remain responsible for checking that the inventory is complete and that items
 classified as `None` are genuinely internal or documentary.
@@ -81,8 +82,10 @@ per commit. Never rewrite pushed history.
 `scripts/check.sh` enforces: successful build; no `sorry`/`admit`/`axiom` in source; no
 sorry warnings in the build log; an axiom audit of every declaration in the library
 namespace (standard axioms only: `propext`, `Classical.choice`, `Quot.sound`); and the
-self-tests for the pull-request-body validator. On pull requests, CI additionally validates
-the actual `Public API impact` section before building.
+self-tests for the pull-request-body validator. On pull requests, the build workflow (`CI`,
+status `check`) runs on code updates only, and the separate `PR body` workflow (status
+`pr-body`) validates the actual `Public API impact` section on every body edit and code
+update; both statuses are required, and a body edit neither launches nor cancels the build.
 
 ## Documentation
 

@@ -1,0 +1,30 @@
+name: PR body
+
+# Lightweight validation of the pull request body (the required `## Public API impact`
+# section), separate from the build so that a body edit neither launches nor cancels the
+# build, while an invalid body still blocks merging through its own required status. Runs on
+# every body edit and code update, under its own concurrency group.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-body-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-body:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # actions/checkout v7.0.0, pinned to an immutable revision
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate the Public API impact section
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 scripts/check_public_api_impact.py

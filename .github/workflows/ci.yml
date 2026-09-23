@@ -6,7 +6,9 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    # Code updates only. Body edits do not launch or cancel the build; the PR body is validated
+    # by the separate, independently required `PR body` workflow.
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -25,11 +27,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check public API impact
-        if: github.event_name == 'pull_request'
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: python3 scripts/check_public_api_impact.py
 
       - name: Install ripgrep
         # The runner image carries a third-party Chrome apt source whose index intermittently
