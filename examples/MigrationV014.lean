@@ -9,8 +9,8 @@ import RegularityLemmata.Partition.Grouping
 /-!
 # Migration consumer for the US-English identifiers
 
-A compiled check of exactly the public API surface that the next release renames (see the
-`Unreleased` section of `CHANGELOG.md`): the four renamed public declarations and one explicit
+A compiled check of exactly the public API surface that v0.14.0 renames (see the v0.14.0
+entry of `CHANGELOG.md`): the four renamed public declarations and one explicit
 named-argument application `(color := …)`. Nothing here is mathematics; a downstream project
 migrating from v0.13.0 can copy these uses. Keeping this file compiling is what verifies that
 the advertised migration targets exist under their new names.

@@ -13,7 +13,8 @@ published documentation snapshot of `main` (the workflow runs on releases and on
 dispatch, not on every push), and a module `Dir/File` is at
 `docs/<version>/RegularityLemmata/Dir/File.html`, with declaration search on each version's
 `search.html`. Links in this guide point at the **v0.13.0** pages for current material (every
-anchor verified against the published pages); the release-addition sections at the end use
+anchor verified against the published pages; v0.14.0 renames four identifiers and its pages are
+published by the release, after which the links are moved once the new anchors are verified); the release-addition sections at the end use
 source links pinned to their release tags. Release chronology and migration instructions live
 in `CHANGELOG.md`; this guide selects and explains theorems. Where a curated
 facade bundles a stack, the facade is named, because importing it is the advertised way in.
@@ -508,6 +509,7 @@ line.
 | v0.11.0 | The cut-matrix decomposition `kernel_frieze_kannan_cutDecomposition` and the partition-free cut norm; three compiled examples under `examples/`; this guide, the generated documentation, and the consumer fixture. |
 | v0.12.0 | Sharp assignment extension counts, uniform induced and homomorphism transfers with their diagonal/nullary/collision hypotheses, the immediate-child to proper-embedding bridge, named-parameter slicing, and the compiled three-vertex composition. |
 | v0.13.0 | The global-approximation stack: majority-rounding cost from summed coordinate defects (`editDistance_majorityRound_le`), the partition defect with the exact refinement variance identity and the join bound for arbitrary coordinate partitions, representative maps with displaced-coordinate transport and the equitable composition `exists_equitable_isIndivisibleFor`, five compiled consumers including the counting recipe with its diagonal boundary, and the environment-based public inventory. |
+| v0.14.0 | US-English identifiers (`BinaryTreeTwoColoring`, `labelFiber`, `labelFiber_eq_empty_iff`, `exists_fiber_labeling`; binder `color`), the migration consumer `examples/MigrationV014.lean`, the README snippet check, the separate required PR-body check, and the documentation and provenance pass; no new mathematics. |
 
 The version in the root module (`RegularityLemmata.version`) and the Git tag agree; pin a
 tag, because `main` moves between tags.

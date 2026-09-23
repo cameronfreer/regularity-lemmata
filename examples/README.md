@@ -48,7 +48,7 @@ Consumers of the global-approximation stack through the `RelationalApproximation
 
 | File | Import | What it shows |
 | --- | --- | --- |
-| [`MigrationV014.lean`](MigrationV014.lean) | `RegularityLemmata.FiniteRamsey`, `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Partition.Grouping` | Exactly the public surface renamed for the next release (see the `Unreleased` changelog section): the four renamed public declarations `BinaryTreeTwoColoring`, `labelFiber`, `labelFiber_eq_empty_iff`, `exists_fiber_labeling`, and one explicit named-argument application `binaryTreeRamsey_two a b (color := c)`. Copy these uses when migrating from v0.13.0. |
+| [`MigrationV014.lean`](MigrationV014.lean) | `RegularityLemmata.FiniteRamsey`, `RegularityLemmata.RelationalApproximation`, `RegularityLemmata.Partition.Grouping` | Exactly the public surface renamed in v0.14.0 (see the v0.14.0 changelog entry): the four renamed public declarations `BinaryTreeTwoColoring`, `labelFiber`, `labelFiber_eq_empty_iff`, `exists_fiber_labeling`, and one explicit named-argument application `binaryTreeRamsey_two a b (color := c)`. Copy these uses when migrating from v0.13.0. |
 
 ## Not here
 
